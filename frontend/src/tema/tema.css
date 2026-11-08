@@ -1,0 +1,39 @@
+/*
+ * TEMA — única fuente del aspecto visual.
+ * Valores PROVISIONALES y neutros. Cuando lleguen las pantallas de MyInvestor móvil,
+ * sustituir estos tokens (colores, tipografía, radios, sombras) y nada más.
+ */
+:root {
+  /* Marca */
+  --c-primario: #0b2a4a;
+  --c-primario-texto: #ffffff;
+  --c-acento: #12a37f;
+  --c-acento-suave: #e3f6f0;
+
+  /* Superficies y texto */
+  --c-fondo: #f4f6f8;
+  --c-superficie: #ffffff;
+  --c-borde: #e2e6ea;
+  --c-texto: #14202b;
+  --c-texto-suave: #5b6875;
+
+  /* Estados */
+  --c-aviso: #b45309;
+  --c-aviso-suave: #fff4e0;
+  --c-error: #b42318;
+  --c-ok: #12805c;
+
+  /* Tipografía */
+  --f-familia: var(--font-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-base: 17px;          /* base grande por accesibilidad */
+  --f-pequena: 14px;
+  --f-titulo: 26px;
+  --f-subtitulo: 20px;
+
+  /* Forma */
+  --r-tarjeta: 16px;
+  --r-boton: 999px;
+  --sombra: 0 1px 2px rgba(16, 24, 40, 0.06), 0 2px 8px rgba(16, 24, 40, 0.06);
+  --espacio: 16px;
+  --ancho-movil: 430px;
+}

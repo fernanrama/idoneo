@@ -9,7 +9,7 @@ Proyecto para Hack Finance UC3M 2026. **Estado: en desarrollo (v0).** Este READM
 | Ruta | Contenido |
 |---|---|
 | `backend/` | API FastAPI, perfil versionado, cálculos deterministas, agentes y MCP |
-| `frontend/` | App móvil Next.js (pendiente) |
+| `frontend/` | Feature móvil Next.js: onboarding por voz ([cómo arrancar](frontend/README.md)) |
 | `docs/` | [Diseño](docs/DISENO.md), [contratos](docs/CONTRATOS.md) y [reparto](docs/REPARTO.md) |
 | `gestion/` | Organización del hackathon: análisis del reto, coordinación, evaluación, pitch y archivo |
 
@@ -26,6 +26,17 @@ uvicorn app.main:app --reload --port 8000
 Abre http://localhost:8000/docs. Al arrancar se carga a **Carmen**, un perfil con **datos simulados**. Prueba con `GET /api/clients/carmen-68/constraints`.
 
 Tests: `cd backend && python -m pytest -q`
+
+## Arrancar el frontend
+
+```bash
+cd frontend
+npm install
+cp .env.example .env.local
+npm run dev
+```
+
+Abre http://localhost:3000. Prueba la «demo guiada» en `/onboarding/entrevista` y la vista de la entidad en `/entidad/carmen-68`.
 
 ## Configuración
 

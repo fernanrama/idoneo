@@ -8,11 +8,17 @@ from __future__ import annotations
 
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")  # .env en la raíz del repo
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from . import voz
 from .agentes import contexto, extractor, verificador
 from .perfil import calculos, store
 from .perfil.modelos import ActualizacionCampo, Autor, Perfil, Restricciones, Turno
@@ -32,6 +38,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(voz.router)
 
 
 def _404(fn, *args, **kwargs):
