@@ -26,15 +26,17 @@ La capa personal se guarda aparte (personal.py) y se une al perfil al leerlo.
 from __future__ import annotations
 
 import json
+import logging
 import re
 import threading
 import uuid
+from collections import deque
 from collections.abc import Callable, Iterable
-from datetime import timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
-from pydantic import ValidationError
+from pydantic import BaseModel, Field, ValidationError
 
 from . import calculos, validacion
 from .almacenes import Almacen, ConflictoVersion, crear_almacen
@@ -77,7 +79,10 @@ __all__ = [
     "perfil", "perfil_para_consumidor", "versiones", "crear", "comprobar_parche", "aplicar",
     "anadir_alertas", "validar", "crear_sesion", "sesion", "anadir_turno", "cargar_fixture",
     "asegurar_fixture", "guardar_personal", "personal", "borrar_personal", "reiniciar",
+    "Rechazo", "separar_parches", "separar_alertas", "registrar_rechazo", "rechazos",
 ]
+
+log = logging.getLogger("perfil.store")
 
 
 class _SinCambios(Exception):
@@ -458,6 +463,88 @@ def reiniciar() -> None:
     _a().reiniciar()
     with _conf:
         _candados.clear()
+    with _candado_rechazos:
+        _rechazos.clear()
+
+
+# ---------- aceptación parcial de lo que proponen los agentes ----------
+# El extractor y el verificador pueden devolver elementos mal formados. Se valida cada uno por separado:
+# los válidos se guardan y los inválidos se rechazan con su motivo, que queda registrado y visible.
+
+class Rechazo(BaseModel):
+    session_id: str | None = None
+    client_id: str
+    origen: Literal["extractor", "verificador", "backend"]
+    tipo: Literal["parche", "alerta", "error"]  # error: el agente falló o devolvió algo inutilizable
+    path: str | None = None
+    motivo: str
+    created_at: datetime = Field(default_factory=ahora)
+
+
+MAX_RECHAZOS_POR_SESION = 200
+_rechazos: dict[str, deque[Rechazo]] = {}
+_candado_rechazos = threading.Lock()
+
+
+def _motivo_de(e: Exception) -> str:
+    texto = str(e).splitlines()[0] if str(e) else ""
+    return (texto or type(e).__name__)[:300]
+
+
+def separar_parches(elementos: Iterable[Any], autor: str) -> tuple[list[Parche], list[tuple[str | None, str]]]:
+    """Valida cada elemento por separado. Devuelve (parches válidos, [(ruta, motivo)] rechazados).
+    Mismas reglas que `aplicar` (esquema, tipos, autoría, evidencia): solo cambia que no es todo o nada."""
+    validos: list[Parche] = []
+    rechazados: list[tuple[str | None, str]] = []
+    for elemento in elementos:
+        ruta = elemento.get("path") if isinstance(elemento, dict) else getattr(elemento, "path", None)
+        try:
+            parche = elemento if isinstance(elemento, Parche) else Parche.model_validate(elemento)
+            comprobar_parche(parche, autor)
+        except ValidationError as e:
+            rechazados.append((ruta if isinstance(ruta, str) else None,
+                               f"no es un parche válido: {e.errors()[0]['msg']}"))
+        except (DatoInvalido, Conflicto) as e:
+            rechazados.append((ruta, _motivo_de(e)))
+        else:
+            validos.append(parche)
+    return validos, rechazados
+
+
+def separar_alertas(elementos: Iterable[Any]) -> tuple[list[Alerta], list[tuple[str | None, str]]]:
+    """Valida cada alerta por separado. Devuelve (alertas válidas, [(ruta, motivo)] rechazadas)."""
+    validas: list[Alerta] = []
+    rechazadas: list[tuple[str | None, str]] = []
+    for elemento in elementos:
+        ruta = elemento.get("path") if isinstance(elemento, dict) else getattr(elemento, "path", None)
+        try:
+            alerta = elemento if isinstance(elemento, Alerta) else Alerta.model_validate(elemento)
+            validacion.comprobar_alerta(alerta)
+        except ValidationError as e:
+            rechazadas.append((ruta if isinstance(ruta, str) else None,
+                               f"no es una alerta válida: {e.errors()[0]['msg']}"))
+        except DatoInvalido as e:
+            rechazadas.append((ruta, _motivo_de(e)))
+        else:
+            validas.append(alerta)
+    return validas, rechazadas
+
+
+def registrar_rechazo(rechazo: Rechazo) -> Rechazo:
+    """Deja el rechazo en el log, en la sesión (consultable por la API) y en el bus de eventos."""
+    log.warning("Rechazado (%s/%s) %s: %s", rechazo.origen, rechazo.tipo, rechazo.path or "-", rechazo.motivo)
+    if rechazo.session_id:
+        with _candado_rechazos:
+            _rechazos.setdefault(rechazo.session_id, deque(maxlen=MAX_RECHAZOS_POR_SESION)).append(rechazo)
+    bus.publicar(Evento("item.rejected", rechazo.client_id, 0, rechazo.model_dump(mode="json")))
+    return rechazo
+
+
+def rechazos(session_id: str) -> list[Rechazo]:
+    """Rechazos de una sesión, del más antiguo al más reciente. Se guardan en la memoria del proceso
+    (los últimos 200 por sesión); no sobreviven a un reinicio del backend."""
+    with _candado_rechazos:
+        return list(_rechazos.get(session_id, ()))
 
 
 # ---------- eventos para el panel en vivo ----------

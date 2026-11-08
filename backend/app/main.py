@@ -92,30 +92,73 @@ def crear_sesion(body: NuevaSesion):
     return _llamar(store.crear_sesion, body.client_id, body.channel)
 
 
-def _validos(parches: list[Parche], autor: str) -> list[Parche]:
-    """Descarta (y registra) solo los parches inválidos, para no perder el resto del lote."""
-    buenos = []
-    for p in parches:
-        try:
-            store.comprobar_parche(p, autor)
-            buenos.append(p)
-        except (store.DatoInvalido, store.Conflicto) as e:
-            log.warning("Parche descartado (%s): %s", p.path, e)
-    return buenos
+AUTOR_EXTRACTOR, AUTOR_VERIFICADOR = "agent:extractor", "agent:verifier"
+
+
+def _lista_de(resultado, origen: str, rechazar) -> list:
+    """Lo que devuelve un agente debe ser una lista; si no, se rechaza entero de forma visible."""
+    if resultado is None:
+        return []
+    if isinstance(resultado, (list, tuple)):
+        return list(resultado)
+    rechazar(origen, "error", f"devolvió {type(resultado).__name__} en vez de una lista")
+    return []
 
 
 async def _procesar_turno(session_id: str) -> None:
+    """Extractor y verificador sobre el turno nuevo, en segundo plano.
+
+    Aceptación parcial: cada parche y cada alerta se valida por separado (mismas reglas que store:
+    esquema, tipos, autoría y evidencia). Los válidos se guardan; los inválidos y los fallos de un
+    agente quedan registrados con su motivo y visibles en GET /api/sessions/{id} (`rejections`).
+    Si el extractor falla, el verificador se ejecuta igualmente, y al revés.
+    """
     try:
         s = store.sesion(session_id)
-        cid, turnos = s["client_id"], s["turns"]
-        parches = _validos(await extractor.extraer(turnos[-6:], store.perfil(cid), session_id), "agent:extractor")
-        if parches:
-            store.aplicar(cid, parches, f"extractor · {session_id}", "agent:extractor")
-        alertas = await verificador.verificar(store.perfil(cid), turnos)
-        if alertas:
-            store.anadir_alertas(cid, alertas)
-    except Exception:  # una tarea en segundo plano no debe fallar en silencio
-        log.exception("Error procesando el turno de %s", session_id)
+    except store.NoEncontrado:
+        log.error("Turno de una sesión que no existe: %s", session_id)
+        return
+    cid, turnos = s["client_id"], s["turns"]
+
+    def rechazar(origen: str, tipo: str, motivo: str, path: str | None = None) -> None:
+        store.registrar_rechazo(store.Rechazo(session_id=session_id, client_id=cid, origen=origen,
+                                              tipo=tipo, path=path, motivo=motivo))
+
+    # 1. Extractor: datos nuevos del perfil.
+    try:
+        brutos = _lista_de(await extractor.extraer(turnos[-6:], store.perfil(cid), session_id), "extractor", rechazar)
+    except Exception as e:
+        log.exception("Fallo del extractor en %s", session_id)
+        rechazar("extractor", "error", f"el extractor falló: {type(e).__name__}: {str(e)[:300]}")
+        brutos = []
+    parches, malos = store.separar_parches(brutos, AUTOR_EXTRACTOR)
+    for path, motivo in malos:
+        rechazar("extractor", "parche", motivo, path)
+    if parches:
+        try:
+            store.aplicar(cid, parches, f"extractor · {session_id}", AUTOR_EXTRACTOR)
+        except Exception as e:  # p. ej. demasiadas escrituras simultáneas
+            log.exception("No se pudieron guardar los parches de %s", session_id)
+            for p in parches:
+                rechazar("backend", "parche", f"no se pudo guardar: {str(e)[:300]}", p.path)
+
+    # 2. Verificador: alertas sobre el perfil ya actualizado (aunque el extractor haya fallado).
+    try:
+        brutas = _lista_de(await verificador.verificar(store.perfil(cid), turnos), "verificador", rechazar)
+    except Exception as e:
+        log.exception("Fallo del verificador en %s", session_id)
+        rechazar("verificador", "error", f"el verificador falló: {type(e).__name__}: {str(e)[:300]}")
+        brutas = []
+    alertas, malas = store.separar_alertas(brutas)
+    for path, motivo in malas:
+        rechazar("verificador", "alerta", motivo, path)
+    if alertas:
+        try:
+            store.anadir_alertas(cid, alertas, AUTOR_VERIFICADOR)
+        except Exception as e:
+            log.exception("No se pudieron guardar las alertas de %s", session_id)
+            for a in alertas:
+                rechazar("backend", "alerta", f"no se pudo guardar: {str(e)[:300]}", a.path)
 
 
 @app.post("/api/sessions/{session_id}/turns", status_code=202)
@@ -128,7 +171,9 @@ def anadir_turno(session_id: str, turno: Turno, tareas: BackgroundTasks):
 
 @app.get("/api/sessions/{session_id}")
 def ver_sesion(session_id: str):
-    return _llamar(store.sesion, session_id)
+    """Sesión con sus turnos y los rechazos del procesamiento (parches, alertas o fallos de agentes)."""
+    s = _llamar(store.sesion, session_id)
+    return {**s, "rejections": store.rechazos(session_id)}
 
 
 # ---------- perfil ----------

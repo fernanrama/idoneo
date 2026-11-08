@@ -23,7 +23,7 @@ from app.perfil.almacenes.bd import url_de_prueba  # noqa: E402
 
 POSTGRES_TEST = os.getenv("TEST_POSTGRES_URL", "").strip()
 ALMACENES = ["memoria", "bd-sqlite"] + (["bd-postgres"] if POSTGRES_TEST else [])
-MODULOS_CONTRATO = {"test_api", "test_mcp", "test_store_contrato"}
+MODULOS_CONTRATO = {"test_api", "test_mcp", "test_store_contrato", "test_procesamiento_turnos"}
 
 
 def postgres_vacio() -> str:
