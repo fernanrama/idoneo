@@ -1,17 +1,19 @@
-"""Agente extractor (Dev B). Convierte turnos de la entrevista en actualizaciones del perfil.
+"""Agente extractor (B1, Hammad). Convierte turnos de la entrevista en parches del perfil.
 
-Contrato: recibe los últimos turnos y el perfil vigente; devuelve ActualizacionCampo.
-- Solo escribe campos de CAMPOS_MIFID. Nunca escribe campos calculados (los rellena el store).
-- Cada actualización lleva evidencia: cita literal y tiempos del turno del cliente.
-- source=demonstrated solo si el cliente respondió a una pregunta de comprobación.
+Contrato (docs/proyecto/04_CONTRATO_PERFIL.md, implementado en app/perfil/modelos.py):
+- Devuelve `Parche` con `path` de `CAMPOS` (nunca de `CALCULADOS`: el store los rellena).
+- Cada parche lleva evidencia: `turn_id`, `t` [inicio, fin] y cita literal del turno del cliente.
+- `source="demonstrated"` solo si el cliente respondió a una pregunta de comprobación.
+- `confidence` sale de una rúbrica fija (aciertos sobre preguntas de comprobación) e indica
+  `confidence_basis`; nunca es la opinión del modelo. Si no llega al mínimo, añadir `low_confidence`.
 
-v0: stub que no extrae nada, para que el resto del sistema funcione sin API.
+v1: stub que no extrae nada, para que el resto del sistema funcione sin API.
 """
 
 from __future__ import annotations
 
-from ..perfil.modelos import ActualizacionCampo, Perfil, Turno
+from ..perfil.modelos import Parche, Perfil, Turno
 
 
-async def extraer(turnos: list[Turno], perfil: Perfil, session_id: str) -> list[ActualizacionCampo]:
-    return []  # TODO Dev B: llamada a Claude con tool use (modelo: MODEL_EXTRACTOR)
+async def extraer(turnos: list[Turno], perfil: Perfil, session_id: str) -> list[Parche]:
+    return []  # TODO Hammad: Claude con tool use (MODEL_EXTRACTOR)

@@ -2,6 +2,7 @@ fastapi>=0.115
 uvicorn[standard]>=0.30
 pydantic>=2.9
 httpx>=0.27
+mcp>=1.12,<2  # servidor MCP (rol D); la 2.x cambia la API
 python-dotenv>=1.0
 
 # desarrollo

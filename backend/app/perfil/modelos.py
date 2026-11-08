@@ -1,7 +1,11 @@
-"""Modelo de datos del perfil de Idóneo (contrato v0).
+"""Modelo de datos del perfil (contrato v1).
 
-Es la fuente única de verdad del contrato descrito en docs/CONTRATOS.md.
-Cualquier cambio aquí se coordina con el resto del equipo antes de fusionar.
+Especificación: docs/proyecto/04_CONTRATO_PERFIL.md (Alex). Este módulo la implementa;
+las desviaciones están listadas en docs/CONTRATOS.md. Cambios aquí = PR avisada al equipo.
+
+Decisión de implementación: la capa `mifid` es un mapa plano de rutas con punto
+("knowledge.equity_funds", "objectives.o1.horizon_years") a `Fact`. Equivale al JSON anidado
+de la especificación y simplifica los parches (`profile.patch` ya usa `path`).
 """
 
 from __future__ import annotations
@@ -17,52 +21,50 @@ def ahora() -> datetime:
     return datetime.now(timezone.utc)
 
 
+# ---------- dato ----------
+
 class Fuente(str, Enum):
     declared = "declared"          # lo dijo el cliente
-    demonstrated = "demonstrated"  # lo demostró al responder una pregunta de comprobación
-    calculated = "calculated"      # sale de una función determinista (nunca del modelo)
-    advisor = "advisor"            # lo corrigió una persona de la entidad
+    demonstrated = "demonstrated"  # lo demostró en una pregunta de comprobación
+    calculated = "calculated"      # función determinista, nunca el modelo
+    advisor = "advisor"            # lo corrigió alguien de la entidad
 
 
-class Autor(str, Enum):
-    extractor = "extractor"
-    verificador = "verificador"
-    calculo = "calculo"
-    asesor = "asesor"
-    fixture = "fixture"
-
-
-class EstadoPerfil(str, Enum):
-    draft = "draft"                    # borrador: lo están rellenando los agentes
-    validated = "validated"            # revisado por el asesor
-    active = "active"                  # único estado "apto para recomendar"
-    review_pending = "review_pending"  # hay que reevaluar
-
-
-class Nivel(str, Enum):
-    none = "none"
-    basic = "basic"
-    medium = "medium"
-    high = "high"
+class Flag(str, Enum):
+    declared_vs_demonstrated = "declared_vs_demonstrated"
+    inconsistent = "inconsistent"
+    low_confidence = "low_confidence"
+    needs_advisor = "needs_advisor"
 
 
 class Evidencia(BaseModel):
     session_id: str
-    t_start: float = Field(description="Segundos desde el inicio de la sesión")
-    t_end: float
-    quote: str = Field(description="Cita literal de la transcripción")
+    turn_id: str | None = None
+    t: tuple[float, float] = Field(description="Segundos [inicio, fin] en la grabación de la sesión")
+    quote: str = Field(description="Cita literal")
+    audio_url: str | None = None  # clip, cuando exista
 
 
-class Campo(BaseModel):
+class Fact(BaseModel):
     value: Any = None
+    declared: Any = None  # solo si difiere de value
     source: Fuente
-    declared: Any = None  # lo que el cliente dijo, si difiere de value
-    confidence: float | None = Field(default=None, ge=0, le=1)
+    confidence: float | None = Field(default=None, ge=0, le=1)  # de una rúbrica fija, nunca del modelo
+    confidence_basis: str | None = None  # p. ej. "rubric:knowledge.equity_funds:v1"
     evidence: list[Evidencia] = Field(default_factory=list)
-    inputs: list[str] = Field(default_factory=list)  # solo para source=calculated
-    flags: list[str] = Field(default_factory=list)
+    inputs: list[str] = Field(default_factory=list)  # rutas de las que sale un valor calculado
+    flags: list[Flag] = Field(default_factory=list)
     updated_at: datetime = Field(default_factory=ahora)
-    updated_by: Autor
+    updated_by: str  # "agent:extractor", "agent:verifier", "fn:<nombre>", "advisor:<id>", "fixture"
+
+
+# ---------- perfil ----------
+
+class EstadoPerfil(str, Enum):
+    draft = "draft"                            # entrevista en curso o incompleta
+    pending_validation = "pending_validation"  # completo; falta la revisión humana
+    active = "active"                          # validado: único estado usable para recomendar
+    review_due = "review_due"                  # hay que actualizar algo
 
 
 class EstadoAlerta(str, Enum):
@@ -71,19 +73,50 @@ class EstadoAlerta(str, Enum):
 
 
 class Alerta(BaseModel):
+    """Texto legible de un flag, para el front (evento flag.raised) y el asesor."""
+
     id: str
-    type: str  # p. ej. "declared_vs_demonstrated", "incoherencia", "falta_dato"
-    field: str | None = None
+    path: str | None = None
+    flag: Flag
     message: str
     evidence: list[Evidencia] = Field(default_factory=list)
     status: EstadoAlerta = EstadoAlerta.open
     created_at: datetime = Field(default_factory=ahora)
 
 
+class PerfilRiesgo(str, Enum):  # mismos valores que `profile` en search_portfolios de MyInvestor
+    CONSERVADOR = "CONSERVADOR"
+    MODERADO = "MODERADO"
+    DINAMICO = "DINAMICO"
+    AGRESIVO = "AGRESIVO"
+    MUY_AGRESIVO = "MUY_AGRESIVO"
+
+
+class Conveniencia(str, Enum):
+    appropriate = "appropriate"
+    not_appropriate = "not_appropriate"
+    not_assessed = "not_assessed"
+
+
+class Idoneidad(BaseModel):
+    complete: bool = False
+    missing: list[str] = Field(default_factory=list)
+    risk_profile: PerfilRiesgo | None = None
+    max_sri: int | None = Field(default=None, ge=1, le=7)
+    rationale_ids: list[str] = Field(default_factory=list)  # rutas que han determinado el resultado
+    rationale: list[str] = Field(default_factory=list)      # explicación legible (añadido v1)
+
+
+class Resultados(BaseModel):
+    suitability: Idoneidad = Field(default_factory=Idoneidad)
+    appropriateness: dict[str, Conveniencia] = Field(default_factory=dict)
+
+
 class Revision(BaseModel):
     validated_by: str | None = None
     validated_at: datetime | None = None
     next_review: str | None = None  # fecha ISO
+    open_flags: int = 0
 
 
 class Perfil(BaseModel):
@@ -91,83 +124,116 @@ class Perfil(BaseModel):
     version: int = 1
     status: EstadoPerfil = EstadoPerfil.draft
     created_at: datetime = Field(default_factory=ahora)
-    reason: str = "creación"  # motivo de esta versión
-    mifid: dict[str, Campo] = Field(default_factory=dict)
-    personal: dict[str, Any] = Field(default_factory=dict)  # fuera del MVP
+    reason: str = "created"
+    author: str = "system"
+    mifid: dict[str, Fact] = Field(default_factory=dict)
+    assessments: Resultados = Field(default_factory=Resultados)  # siempre calculado, nunca escrito a mano
+    personal: dict[str, Any] = Field(default_factory=dict)       # capa opcional, base legal distinta
     alerts: list[Alerta] = Field(default_factory=list)
     review: Revision = Field(default_factory=Revision)
 
 
-class ActualizacionCampo(BaseModel):
-    """Lo que devuelve el extractor (o el asesor) para escribir en el perfil."""
+# ---------- escritura y sesión ----------
 
-    field: str
+class Parche(BaseModel):
+    """Lo que escriben el extractor, el verificador o el asesor (`changes[]`)."""
+
+    path: str
     value: Any
     source: Fuente
     declared: Any = None
     confidence: float | None = Field(default=None, ge=0, le=1)
+    confidence_basis: str | None = None
     evidence: list[Evidencia] = Field(default_factory=list)
-    flags: list[str] = Field(default_factory=list)
+    flags: list[Flag] = Field(default_factory=list)
 
 
 class Turno(BaseModel):
+    turn_id: str | None = None  # si no viene, lo asigna el backend
     speaker: str = Field(pattern="^(agent|client)$")
     text: str
+    # Tiempos medidos en el navegador (aproximados). El webhook de fin de llamada los sustituirá.
     t_start: float
     t_end: float
 
 
-class Restricciones(BaseModel):
-    """Salida de get_investment_constraints: filtros que cualquier recomendación debe cumplir."""
+# ---------- restricciones para consumidores ----------
 
+class FiltroPosterior(BaseModel):
+    field: str
+    op: str  # "<=", ">=", "in", "not_contains"
+    value: Any
+    why: str
+
+
+class Restricciones(BaseModel):
     client_id: str
     profile_version: int
-    eligible: bool  # apto para recomendar: perfil activo y sin campos obligatorios pendientes
-    missing_fields: list[str]
-    max_risk_indicator: int | None = Field(default=None, ge=1, le=7)  # SRI del KID (PRIIPs)
-    horizon_years: float | None = None
-    loss_capacity_eur: float | None = None  # pérdida máxima asumible, no importe a invertir
-    liquidity_need: str | None = None  # "high" | "medium" | "low"
-    esg_required: bool = False
-    exclusions: list[str] = Field(default_factory=list)
-    rationale: list[str] = Field(default_factory=list)  # por qué sale cada límite
+    status: EstadoPerfil
+    usable: bool  # solo con perfil active
+    funds_query: dict[str, Any] = Field(default_factory=dict)       # parámetros de search_funds
+    portfolios_query: dict[str, Any] = Field(default_factory=dict)  # parámetros de search_portfolios
+    post_filters: list[FiltroPosterior] = Field(default_factory=list)
+    appropriateness: dict[str, Conveniencia] = Field(default_factory=dict)
+    evidence_refs: list[str] = Field(default_factory=list)
+    rationale: list[str] = Field(default_factory=list)
 
 
-# Campos de la capa MiFID del MVP. Ver docs/CONTRATOS.md para tipos y significado.
-CAMPOS_MIFID: dict[str, str] = {
-    "consent.recording": "bool",
-    "consent.ai_notice": "bool",
-    "knowledge.investment_funds": "Nivel",
-    "knowledge.equity_risk": "Nivel",
-    "experience.past_investments": "str",
-    "financial.monthly_income_eur": "float",
-    "financial.monthly_fixed_costs_eur": "float",
+# ---------- catálogo de campos del MVP ----------
+
+FAMILIAS = [
+    "deposits_money_market",
+    "fixed_income_funds",
+    "mixed_funds",
+    "equity_funds",
+    "etfs",
+    "stocks",
+    "complex_products",
+]
+
+NIVELES = ["none", "basic", "medium", "high"]
+
+CAMPOS: dict[str, str] = {
+    "disclosures.ai_notice_ack": "bool",
+    "disclosures.purpose_ack": "bool",
+    **{f"knowledge.{f}": "none|basic|medium|high" for f in FAMILIAS},
+    **{f"experience.{f}.operations_last_3y": "int" for f in FAMILIAS},
+    "experience.education": "str",
+    "experience.profession": "str",
+    "financial.net_monthly_income_eur": "float",
+    "financial.income_stability": "stable|variable",
+    "financial.fixed_monthly_costs_eur": "float",
     "financial.liquid_savings_eur": "float",
+    "financial.other_assets_eur": "float",
     "financial.debts_eur": "float",
-    "financial.emergency_fund_eur": "float (calculado)",
+    "financial.emergency_fund_months": "float (calculado)",
     "financial.loss_capacity_eur": "float (calculado)",
-    "objective.goal": "str",
-    "objective.amount_eur": "float",
-    "objective.horizon_years": "float",
-    "risk.reaction_to_drop": "str",
-    "risk.tolerance": "low|medium|high",
+    "objectives.o1.goal": "str",
+    "objectives.o1.amount_eur": "float",
+    "objectives.o1.horizon_years": "float",
+    "objectives.o1.liquidity_need": "high|medium|low",
+    "risk_tolerance.scenario_score": "int 1-5 (rúbrica de escenarios)",
+    "risk_tolerance.max_drawdown_accepted_pct": "float",
+    "risk_tolerance.past_behaviour": "str",
     "sustainability.preference": "none|some|strong",
+    "sustainability.min_sfdr_article": "6|8|9",
     "sustainability.explained": "bool",
-    "exclusions.sectors": "list[str]",
 }
 
-# Sin estos campos el perfil no puede ser "apto para recomendar".
-CAMPOS_OBLIGATORIOS: list[str] = [
-    "consent.recording",
-    "consent.ai_notice",
-    "knowledge.investment_funds",
-    "knowledge.equity_risk",
-    "financial.monthly_income_eur",
-    "financial.monthly_fixed_costs_eur",
+CALCULADOS = {"financial.emergency_fund_months", "financial.loss_capacity_eur"}
+
+# PROPUESTA (decisión abierta en el contrato): sin estos campos, suitability.complete = false.
+OBLIGATORIOS: list[str] = [
+    "disclosures.ai_notice_ack",
+    "disclosures.purpose_ack",
+    "knowledge.fixed_income_funds",
+    "knowledge.equity_funds",
+    "financial.net_monthly_income_eur",
+    "financial.fixed_monthly_costs_eur",
     "financial.liquid_savings_eur",
     "financial.debts_eur",
-    "objective.goal",
-    "objective.horizon_years",
-    "risk.tolerance",
+    "objectives.o1.goal",
+    "objectives.o1.horizon_years",
+    "risk_tolerance.scenario_score",
     "sustainability.preference",
 ]
