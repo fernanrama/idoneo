@@ -220,7 +220,7 @@ def restricciones(perfil: Perfil) -> Restricciones:
         post.append(FiltroPosterior(field="redemption_lag_days", op="<=", value=REEMBOLSO_MAX_DIAS[liquidez], why="liquidity_need"))
     plazo = valor(perfil, "objectives.o1.horizon_years")
     if plazo is not None and float(plazo) < 3:
-        post.append(FiltroPosterior(field="fixed_income_term", op="in", value=["corto"], why="horizon_years"))
+        post.append(FiltroPosterior(field="fixed_income_term", op="in", value=["Corto plazo"], why="horizon_years"))
     if art is not None and int(art) == 9:
         post.append(FiltroPosterior(field="sustainability_article", op=">=", value=9, why="sustainability"))
     excl = perfil.personal.get("exclusions") or []
@@ -228,7 +228,7 @@ def restricciones(perfil: Perfil) -> Restricciones:
         post.append(FiltroPosterior(field="top_sectors", op="not_contains", value=excl, why="exclusions"))
     importe = valor(perfil, "objectives.o1.amount_eur")
     if importe is not None:
-        post.append(FiltroPosterior(field="min_initial_investment", op="<=", value=importe, why="objectives.o1.amount_eur"))
+        post.append(FiltroPosterior(field="min_initial", op="<=", value=importe, why="objectives.o1.amount_eur"))
 
     no_conv = [f for f, v in conv.items() if v == Conveniencia.not_appropriate]
     refs = list(dict.fromkeys(s.rationale_ids + [f"knowledge.{f}" for f in no_conv]))
