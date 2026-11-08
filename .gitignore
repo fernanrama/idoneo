@@ -22,3 +22,6 @@ hack-finance-bootstrap-documentacion.zip
 # Enunciado oficial: solo local, no se redistribuye (el repo será visible para el jurado)
 gestion/enunciado/
 backend/data/
+
+# Configuración local de Obsidian (cada persona la suya)
+.obsidian/
