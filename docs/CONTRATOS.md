@@ -1,123 +1,78 @@
-# Contratos v0 — Idóneo
+# Contrato v1: cómo lo implementa el código
 
-Lo que comparten los cuatro módulos. **El código manda:** `backend/app/perfil/modelos.py` es la fuente de verdad del esquema; este documento lo explica. Cambiar un contrato = PR pequeña que avisa a los demás antes de fusionar.
+**La especificación es [`docs/proyecto/04_CONTRATO_PERFIL.md`](proyecto/04_CONTRATO_PERFIL.md) (Alex).** Este documento no la repite: dice qué parte está implementada, dónde y en qué se desvía. El código de referencia es `backend/app/perfil/modelos.py` (esquema) y `calculos.py` (resultados). Cambiar el contrato = PR pequeña avisada al equipo.
 
-Estado: v0 del 8/11, probado con `pytest` (5 tests) y arrancando la API en local. Agentes con stub, MCP y front pendientes.
+Estado (8/11, rama `feat/contrato-unificado`): backend v1 con 11 tests en verde; frontend adaptado (tipos, lint y compilación en verde). Pendiente de revisión por **Alex** (especificación) y **Juan** (backend).
 
-## 1. Flujo completo
+## Qué se ha unificado
 
-```
-[móvil: voz/texto]──turnos──▶ POST /api/sessions/{sid}/turns
-                                     │ (en segundo plano)
-                                     ▼
-                         extractor ──▶ store.aplicar()  ──▶ nueva versión del perfil
-                         verificador ─▶ store.anadir_alertas()
-                                     │
-       panel de perfil ◀── GET /api/clients/{cid}/profile (sondeo cada 1–2 s en v0)
-       asesor ──────────▶ POST /api/clients/{cid}/profile/validate  → status=active
-                                     │
-       Claude (conector MCP Idóneo + conector MCP MyInvestor)
-         get_investment_constraints ──▶ filtra el catálogo de MyInvestor
-```
+| Tema | Antes (v0, código) | Ahora (v1) | Origen |
+|---|---|---|---|
+| Alcance | Solo idoneidad | **Idoneidad y conveniencia** (`assessments.suitability` y `assessments.appropriateness`) | Alex (D2) |
+| Dato | `Campo` con `t_start/t_end` | `Fact` con `confidence_basis`, evidencia con `turn_id`, `t: [inicio, fin]` y `audio_url` | Alex |
+| Autor | Enum (`extractor`, `asesor`…) | Texto: `agent:extractor`, `agent:verifier`, `fn:<nombre>`, `advisor:<id>` | Alex |
+| Flags | Libres | `declared_vs_demonstrated`, `inconsistent`, `low_confidence`, `needs_advisor` | Alex |
+| Estados | `draft/validated/active/review_pending` | `draft → pending_validation → active → review_due` (transiciones en `store.py`) | Alex |
+| Campos | Lista propia | Rutas de Alex: `knowledge.<familia>` (7 familias), `financial.*`, `objectives.o1.*`, `risk_tolerance.*`, `sustainability.*`, `disclosures.*` | Alex |
+| Restricciones | SRI máximo propio | Formato de MyInvestor: `funds_query`, `portfolios_query`, `post_filters`, `appropriateness`, `usable` | Alex + hallazgos del MCP |
+| Lectura para consumidores | Último perfil | Último **activo**; si nunca hubo uno, el último con `usable: false` | Alex |
+| Números | Python | Python, igual. Ahora también el perfil de riesgo y la conveniencia | Ambos |
+| Prefijo de rutas | `/api` | Se mantiene `/api` (ver desviaciones) | Código |
 
-## 2. Perfil
+## Desviaciones conscientes (a confirmar)
 
-Cada dato es un **Campo**:
+1. **`mifid` es un mapa plano de rutas** (`"knowledge.equity_funds": Fact`) en lugar del JSON anidado. Es equivalente, facilita los parches (`profile.patch` ya usa `path`) y el extractor solo tiene que devolver `path` + valor.
+2. **Rutas REST con prefijo `/api`** (`/api/clients/{id}/validate`…), para poder servir front y API desde el mismo dominio. Los nombres son los de Alex.
+3. **`GET /api/clients/{id}/profile` devuelve la última versión en cualquier estado**, porque el front la necesita durante la entrevista. El "solo activo" se aplica en `constraints`, `context` y el MCP.
+4. **Se añade `alerts[]` a nivel de perfil** con el texto legible de cada flag (lo que el evento `flag.raised` lleva como `message`). El flag sigue también en el `Fact`.
+5. **Se añade `rationale[]`** (texto) junto a `rationale_ids` en idoneidad y restricciones, para la vista de la entidad y para explicarlo al jurado.
+6. **La URL firmada de ElevenLabs va en `GET /api/voice/signed-url`**, no en la respuesta de `POST /sessions`, para que la sesión funcione también sin voz (modo texto y demo guiada).
+7. **`emergency_fund_months` es calculado**: meses de gastos fijos que cubre el ahorro líquido.
 
-| Atributo | Significado |
+## Decisiones abiertas del contrato: propuesta implementada
+
+Están en el código como **supuestos v1**, marcados con `[ABIERTO]` en `calculos.py`. Se pueden cambiar sin tocar nada más.
+
+| Decisión abierta | Propuesta implementada |
 |---|---|
-| `value` | Valor vigente (si hay contradicción, el **demostrado**) |
-| `source` | `declared` (lo dijo) · `demonstrated` (lo probó al responder) · `calculated` (función Python) · `advisor` (corrección humana) |
-| `declared` | Lo que dijo, si difiere de `value` |
-| `confidence` | 0–1, solo para declared/demonstrated |
-| `evidence[]` | `{session_id, t_start, t_end, quote}`: segundos desde el inicio de la sesión y cita literal |
-| `inputs[]` | Campos de los que sale un valor calculado |
-| `flags[]` | p. ej. `declared_vs_demonstrated` |
-| `updated_by` | `extractor` · `verificador` · `calculo` · `asesor` · `fixture` |
+| Familias de producto | Las 7 de Alex. Las 4 de fondos se traducen a `asset_type` de `search_funds` (Monetario, Renta Fija, Mixto, Renta Variable) |
+| Campos obligatorios | Avisos (2), conocimiento de renta fija y variable, ingresos, gastos fijos, ahorro, deudas, objetivo, plazo, tolerancia por escenarios y preferencia ESG. Un dato con `low_confidence` cuenta como pendiente |
+| Perfil de riesgo | Manda el más restrictivo de tres: tolerancia (escenarios 1–5 → los 5 perfiles), capacidad de pérdida (fracción del ahorro que se puede perder) y plazo (<2, <5, <8, <12 años) |
+| Perfil → SRI | CONSERVADOR 3 · MODERADO 4 · DINAMICO 5 · AGRESIVO 6 · MUY_AGRESIVO 7 |
+| Perfil → `risk_max` de carteras | 1 · 2 · 3 · 4 · 5. **Verificar con `list_facets` de MyInvestor** |
+| Capacidad de pérdida | max(0, ahorro − 6 meses de gastos fijos − deudas) |
+| Conveniencia | Conveniente si el conocimiento es al menos `medium` (`high` en productos complejos) o hay 5 o más operaciones en 3 años; depósitos, conveniente con cualquier conocimiento distinto de `none`; sin dato, `not_assessed` |
+| Divisa | `EUR` por defecto (supuesto: cliente minorista en euros) |
+| Liquidez | `high` → reembolso en 3 días o menos; `medium` → 7 días o menos |
+| Rúbrica de confianza | **Sin implementar**: la define Hammad en el extractor y se indica en `confidence_basis` |
 
-**Perfil:** `client_id`, `version`, `status` (`draft` → `validated` → `active` → `review_pending`), `reason` (motivo de la versión), `mifid{campo: Campo}`, `personal{}` (fuera del MVP), `alerts[]`, `review{validated_by, validated_at, next_review}`.
+Comprobación con Carmen (datos simulados), que cubren los tests:
+- Tolerancia 1/5 → CONSERVADOR, que manda sobre plazo (AGRESIVO) y capacidad (MUY_AGRESIVO) → SRI máximo 3, `risk_max` 1.
+- Renta variable **no conveniente** (declaró alto, demostró nulo); renta fija y monetarios convenientes → `asset_type: [Monetario, Renta Fija]`.
+- Completa y sin `needs_advisor` → `pending_validation`. Al validarla, `active` y las restricciones pasan a `usable: true`.
 
-Reglas: nunca se sobrescribe (cada escritura crea versión); solo `active` es apto para recomendar; un cambio no hecho por el asesor sobre un perfil validado lo pasa a `review_pending`.
+## API REST implementada (`backend/app/main.py`, docs en `/docs`)
 
-### Campos MiFID del MVP (lista cerrada)
-
-| Campo | Tipo | Oblig. | Cómo se obtiene |
-|---|---|:-:|---|
-| `consent.recording` | bool | ✔ | Pregunta inicial |
-| `consent.ai_notice` | bool | ✔ | Aviso de IA al empezar |
-| `knowledge.investment_funds` | none/basic/medium/high | ✔ | Declarado + pregunta de comprobación |
-| `knowledge.equity_risk` | none/basic/medium/high | ✔ | Declarado + "¿qué pasa si cae un 20 %?" |
-| `experience.past_investments` | texto | | Declarado |
-| `financial.monthly_income_eur` | número | ✔ | Declarado |
-| `financial.monthly_fixed_costs_eur` | número | ✔ | Declarado |
-| `financial.liquid_savings_eur` | número | ✔ | Declarado |
-| `financial.debts_eur` | número | ✔ | Declarado |
-| `financial.emergency_fund_eur` | número | | **Calculado**: 6 × gastos fijos |
-| `financial.loss_capacity_eur` | número | | **Calculado**: max(0, ahorro − colchón − deudas) |
-| `objective.goal` | texto | ✔ | Declarado |
-| `objective.amount_eur` | número | | Declarado |
-| `objective.horizon_years` | número | ✔ | Declarado |
-| `risk.reaction_to_drop` | texto | | Escenario |
-| `risk.tolerance` | low/medium/high | ✔ | Demostrado por escenario |
-| `sustainability.preference` | none/some/strong | ✔ | Tras explicarlo con ejemplos |
-| `sustainability.explained` | bool | | |
-| `exclusions.sectors` | lista | | Declarado |
-
-Las fórmulas y topes son **supuestos del equipo v0**, no fórmulas regulatorias: revisarlos con tutoría y decirlo así en el pitch.
-
-## 3. Restricciones (`get_investment_constraints`)
-
-`{client_id, profile_version, eligible, missing_fields[], max_risk_indicator (SRI 1–7), horizon_years, loss_capacity_eur, liquidity_need, esg_required, exclusions[], rationale[]}`
-
-`max_risk_indicator` = mínimo de tres topes (`backend/app/perfil/calculos.py`):
-- tolerancia: low 3 · medium 5 · high 7
-- plazo: <2 años 2 · <5 4 · <8 6 · resto 7
-- conocimiento demostrado más bajo: none 2 · basic 3 · medium 5 · high 7
-
-SRI = indicador de riesgo 1–7 del documento KID de cada producto (normativa PRIIPs). **Pendiente (Dev D):** comprobar qué campo equivalente expone el MCP de MyInvestor.
-
-## 4. API REST (`backend/app/main.py`, docs en `/docs`)
-
-| Método y ruta | Uso | Estado |
-|---|---|---|
-| `GET /api/health` | Comprobación | ✔ |
-| `POST /api/sessions` `{client_id?}` | Empieza entrevista → `{session_id, client_id, started_at}` | ✔ |
-| `POST /api/sessions/{sid}/turns` `{speaker: agent\|client, text, t_start, t_end}` | El front envía cada turno de la transcripción; dispara extractor y verificador | ✔ (agentes stub) |
-| `GET /api/sessions/{sid}` | Sesión y turnos | ✔ |
-| `GET /api/clients/{cid}/profile[?version=n]` | Perfil vigente o una versión | ✔ |
-| `GET /api/clients/{cid}/profile/versions` | Historial | ✔ |
-| `POST /api/clients/{cid}/profile/validate` `{advisor_id, corrections[]}` | El asesor corrige y activa | ✔ |
-| `GET /api/clients/{cid}/constraints` | Restricciones | ✔ |
-| `GET /api/clients/{cid}/evidence/{field}` | Cita y tiempos de un dato | ✔ |
-| `GET /api/clients/{cid}/context` | Resumen para otro agente | ✔ (plantilla) |
-| `POST /api/demo/reset` | Recarga a Carmen (datos simulados) | ✔ |
-| `GET /api/voice/signed-url` | URL firmada de ElevenLabs; la clave no sale del backend. 503 si no está configurada | ✔ (sin probar con cuenta real) |
-| `GET /api/sessions/{sid}/events` (SSE) | Avisos en vivo al front | Pendiente, Dev A; v0 = sondeo |
-| `GET /api/sessions/{sid}/audio` | Audio de la sesión para reproducir evidencias | Pendiente, Dev A + C según prueba de voz |
-| `POST /api/sessions/{sid}/chat` `{text}` | Modo texto sin ElevenLabs | Pendiente, Dev B |
-
-## 5. Agentes (`backend/app/agentes/`, Dev B)
-
-```python
-async def extraer(turnos: list[Turno], perfil: Perfil, session_id: str) -> list[ActualizacionCampo]
-async def verificar(perfil: Perfil, turnos: list[Turno]) -> list[Alerta]
-async def resumen(perfil: Perfil) -> str
-```
-- El extractor **no escribe campos calculados**; el store los recalcula.
-- Toda actualización lleva evidencia del turno del cliente.
-- El prompt del entrevistador (el que usa ElevenLabs) se versiona en `backend/app/agentes/prompts/entrevistador.md`.
-
-## 6. MCP de Idóneo (`backend/app/mcp/`, Dev D)
-
-Servidor remoto HTTP, montado en el mismo backend en `/mcp`. Llama directamente a `store` y `calculos`, no a la API.
-
-| Herramienta | Devuelve |
+| Ruta | Estado |
 |---|---|
-| `get_client_profile(client_id)` | Perfil vigente |
-| `get_investment_constraints(client_id)` | Restricciones (§3) |
-| `get_evidence(client_id, field)` | Cita y tiempos |
-| `get_client_context(client_id)` | Resumen para el modelo |
+| `POST /api/sessions` `{client_id?, channel}` | ✔ |
+| `POST /api/sessions/{id}/turns` `{turn_id?, speaker, text, t_start, t_end}` → `{turn_id}` | ✔ (extractor stub) |
+| `GET /api/sessions/{id}` | ✔ |
+| `GET /api/clients/{id}/profile[?version=]` | ✔ |
+| `GET /api/clients/{id}/versions` | ✔ (con `reason` y `author`) |
+| `POST /api/clients/{id}/validate` `{advisor_id, changes[]}` | ✔ (409 si falta un dato obligatorio o se intenta escribir un campo calculado) |
+| `GET /api/clients/{id}/constraints` | ✔ |
+| `GET /api/clients/{id}/evidence/{path}` | ✔ |
+| `GET /api/clients/{id}/context` | ✔ (plantilla; Pablo lo hará con Claude) |
+| `GET /api/voice/signed-url` | ✔ (sin probar con cuenta real) |
+| `POST /api/demo/reset` | ✔ |
+| `GET /api/sessions/{id}/stream` (SSE) | Pendiente (Juan). El front sondea cada 1,5 s |
+| `POST /api/webhooks/elevenlabs` | Pendiente (Juan y Fernán, según la prueba de voz) |
+| `GET /api/clients/{id}/dossier.pdf`, clips `.mp3` | Pendiente (Juan) |
+| MCP con las 4 herramientas | Pendiente (Alejandro) |
 
-## 7. Variables de entorno
+## Para revisar
 
-Ver `.env.example`. Nunca subir `.env`. Solo nombres en documentos.
+- **Alex:** las 7 desviaciones y las propuestas de la tabla de decisiones abiertas.
+- **Juan:** `store.py` (transiciones de estado) y `calculos.py`, antes de pasar a SQLite.
+- **Hammad y Pablo:** el contrato de sus módulos está en la cabecera de `agentes/extractor.py` y `agentes/verificador.py` (devuelven `Parche` y `Alerta`).

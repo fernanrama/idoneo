@@ -94,11 +94,18 @@ export function BotonMicro({ activo, onClick, etiqueta }: { activo: boolean; onC
   );
 }
 
+const TITULO_FLAG: Record<string, string> = {
+  declared_vs_demonstrated: "Declarado ≠ demostrado",
+  inconsistent: "Datos incoherentes",
+  low_confidence: "Confianza baja: repreguntar",
+  needs_advisor: "Requiere revisión humana",
+};
+
 export function AlertaTarjeta({ alerta, paraCliente = false }: { alerta: Alerta; paraCliente?: boolean }) {
   const cita = alerta.evidence[0]?.quote;
   return (
     <div className={s.alerta} role="status">
-      <strong>{paraCliente ? "Algo que conviene aclarar" : "Declarado ≠ demostrado"}</strong>
+      <strong>{paraCliente ? "Algo que conviene aclarar" : TITULO_FLAG[alerta.flag]}</strong>
       <p style={{ margin: "4px 0 0" }}>{alerta.message}</p>
       {cita && <p className={s.cita}>«{cita}»</p>}
     </div>

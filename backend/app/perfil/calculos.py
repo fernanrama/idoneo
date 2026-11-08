@@ -1,98 +1,244 @@
-"""Cálculos deterministas del perfil. El modelo nunca pone estos números.
+"""Cálculos deterministas del perfil (contrato v1). El modelo nunca pone estos números.
 
-SUPUESTOS v0 (del equipo, no son fórmulas regulatorias; revisar con tutoría antes del pitch):
-- Colchón de emergencia = 6 meses de gastos fijos.
-- Capacidad de soportar pérdidas = ahorro líquido - colchón - deudas, nunca negativa.
-- Riesgo máximo (SRI 1-7 del KID) = el mínimo de tres topes: tolerancia, plazo y conocimientos.
+Todas las tablas son SUPUESTOS v1 del equipo, no fórmulas regulatorias. Revisarlas antes del pitch
+y decirlo así ante el jurado. Las decisiones abiertas del contrato están marcadas con [ABIERTO].
 """
 
 from __future__ import annotations
 
-from .modelos import CAMPOS_OBLIGATORIOS, EstadoPerfil, Perfil, Restricciones
+from .modelos import (
+    CALCULADOS,
+    FAMILIAS,
+    OBLIGATORIOS,
+    Conveniencia,
+    EstadoPerfil,
+    Fact,
+    FiltroPosterior,
+    Flag,
+    Fuente,
+    Idoneidad,
+    Perfil,
+    PerfilRiesgo,
+    Restricciones,
+    Resultados,
+)
 
-MESES_COLCHON = 6
+MESES_COLCHON_OBJETIVO = 6
+ORDEN_PERFILES = list(PerfilRiesgo)  # de más a menos conservador
 
-TOPE_POR_TOLERANCIA = {"low": 3, "medium": 5, "high": 7}
-TOPE_POR_CONOCIMIENTO = {"none": 2, "basic": 3, "medium": 5, "high": 7}
+# [ABIERTO] Perfil de riesgo → SRI máximo de fondos (SRRI 1–7 en search_funds.max_risk).
+MAX_SRI = {
+    PerfilRiesgo.CONSERVADOR: 3,
+    PerfilRiesgo.MODERADO: 4,
+    PerfilRiesgo.DINAMICO: 5,
+    PerfilRiesgo.AGRESIVO: 6,
+    PerfilRiesgo.MUY_AGRESIVO: 7,
+}
+# [ABIERTO] Perfil → risk_max de carteras (escala propia 0–5). Verificar con list_facets en MyInvestor.
+RISK_MAX_CARTERAS = {
+    PerfilRiesgo.CONSERVADOR: 1,
+    PerfilRiesgo.MODERADO: 2,
+    PerfilRiesgo.DINAMICO: 3,
+    PerfilRiesgo.AGRESIVO: 4,
+    PerfilRiesgo.MUY_AGRESIVO: 5,
+}
+# Familia de producto → asset_type de search_funds (solo fondos).
+ASSET_TYPE = {
+    "deposits_money_market": "Monetario",
+    "fixed_income_funds": "Renta Fija",
+    "mixed_funds": "Mixto",
+    "equity_funds": "Renta Variable",
+}
+# [ABIERTO] Operaciones en 3 años que compensan un conocimiento bajo, para la conveniencia.
+OPERACIONES_EXPERIENCIA = 5
+# Plazo de reembolso máximo según la necesidad de liquidez.
+REEMBOLSO_MAX_DIAS = {"high": 3, "medium": 7}
 
 
-def colchon_emergencia(gastos_fijos_mensuales: float) -> float:
-    return round(MESES_COLCHON * gastos_fijos_mensuales, 2)
+# ---------- utilidades ----------
+
+def valor(perfil: Perfil, ruta: str):
+    f = perfil.mifid.get(ruta)
+    return None if f is None else f.value
 
 
-def capacidad_perdida(ahorro_liquido: float, colchon: float, deudas: float) -> float:
-    return round(max(0.0, ahorro_liquido - colchon - deudas), 2)
+def _indice(p: PerfilRiesgo) -> int:
+    return ORDEN_PERFILES.index(p)
 
 
-def tope_por_plazo(horizonte_anios: float) -> int:
-    if horizonte_anios < 2:
-        return 2
-    if horizonte_anios < 5:
-        return 4
-    if horizonte_anios < 8:
-        return 6
-    return 7
+# ---------- campos calculados ----------
+
+def meses_colchon(ahorro_liquido: float, gastos_fijos: float) -> float:
+    """Meses de gastos fijos que cubre el ahorro líquido."""
+    return round(ahorro_liquido / gastos_fijos, 1) if gastos_fijos > 0 else 0.0
 
 
-def _valor(perfil: Perfil, campo: str):
-    c = perfil.mifid.get(campo)
-    return None if c is None else c.value
+def capacidad_perdida(ahorro_liquido: float, gastos_fijos: float, deudas: float) -> float:
+    """Lo que podría perder sin tocar un colchón de 6 meses de gastos ni dejar deudas sin cubrir."""
+    return round(max(0.0, ahorro_liquido - MESES_COLCHON_OBJETIVO * gastos_fijos - deudas), 2)
 
 
-def campos_pendientes(perfil: Perfil) -> list[str]:
-    return [c for c in CAMPOS_OBLIGATORIOS if _valor(perfil, c) is None]
+def recalcular(perfil: Perfil) -> None:
+    """Rellena campos calculados y resultados. Se llama tras cada escritura."""
+    ahorro = valor(perfil, "financial.liquid_savings_eur")
+    gastos = valor(perfil, "financial.fixed_monthly_costs_eur")
+    deudas = valor(perfil, "financial.debts_eur")
+    if ahorro is not None and gastos is not None:
+        perfil.mifid["financial.emergency_fund_months"] = Fact(
+            value=meses_colchon(float(ahorro), float(gastos)), source=Fuente.calculated,
+            updated_by="fn:meses_colchon",
+            inputs=["financial.liquid_savings_eur", "financial.fixed_monthly_costs_eur"],
+        )
+        if deudas is not None:
+            perfil.mifid["financial.loss_capacity_eur"] = Fact(
+                value=capacidad_perdida(float(ahorro), float(gastos), float(deudas)),
+                source=Fuente.calculated, updated_by="fn:capacidad_perdida",
+                inputs=["financial.liquid_savings_eur", "financial.fixed_monthly_costs_eur", "financial.debts_eur"],
+            )
+    perfil.assessments = Resultados(suitability=idoneidad(perfil), appropriateness=conveniencia(perfil))
+    perfil.review.open_flags = sum(1 for a in perfil.alerts if a.status == "open")
 
+
+# ---------- idoneidad ----------
+
+def _por_tolerancia(score: int) -> PerfilRiesgo:
+    # Rúbrica de escenarios 1–5 → perfil
+    return ORDEN_PERFILES[max(1, min(5, int(score))) - 1]
+
+
+def _por_plazo(anios: float) -> PerfilRiesgo:
+    if anios < 2:
+        return PerfilRiesgo.CONSERVADOR
+    if anios < 5:
+        return PerfilRiesgo.MODERADO
+    if anios < 8:
+        return PerfilRiesgo.DINAMICO
+    if anios < 12:
+        return PerfilRiesgo.AGRESIVO
+    return PerfilRiesgo.MUY_AGRESIVO
+
+
+def _por_capacidad(capacidad: float, ahorro: float) -> PerfilRiesgo:
+    # Fracción del ahorro que podría perder sin comprometer el colchón
+    if ahorro <= 0 or capacidad <= 0:
+        return PerfilRiesgo.CONSERVADOR
+    r = capacidad / ahorro
+    if r < 0.25:
+        return PerfilRiesgo.MODERADO
+    if r < 0.5:
+        return PerfilRiesgo.DINAMICO
+    if r < 0.75:
+        return PerfilRiesgo.AGRESIVO
+    return PerfilRiesgo.MUY_AGRESIVO
+
+
+def faltan(perfil: Perfil) -> list[str]:
+    out = []
+    for ruta in OBLIGATORIOS:
+        f = perfil.mifid.get(ruta)
+        if f is None or f.value is None or Flag.low_confidence in f.flags:
+            out.append(ruta)
+    return out
+
+
+def idoneidad(perfil: Perfil) -> Idoneidad:
+    """Manda el más restrictivo de tolerancia, capacidad de pérdida y plazo."""
+    candidatos: list[tuple[PerfilRiesgo, str, str]] = []
+    score = valor(perfil, "risk_tolerance.scenario_score")
+    if score is not None:
+        p = _por_tolerancia(score)
+        candidatos.append((p, "risk_tolerance.scenario_score", f"Tolerancia por escenarios ({score}/5) → {p.value}"))
+    cap, ahorro = valor(perfil, "financial.loss_capacity_eur"), valor(perfil, "financial.liquid_savings_eur")
+    if cap is not None and ahorro is not None:
+        p = _por_capacidad(float(cap), float(ahorro))
+        candidatos.append((p, "financial.loss_capacity_eur", f"Capacidad de pérdida {cap:,.0f} € de {ahorro:,.0f} € → {p.value}"))
+    plazo = valor(perfil, "objectives.o1.horizon_years")
+    if plazo is not None:
+        p = _por_plazo(float(plazo))
+        candidatos.append((p, "objectives.o1.horizon_years", f"Plazo de {plazo} años → {p.value}"))
+
+    pendientes = faltan(perfil)
+    if not candidatos:
+        return Idoneidad(complete=False, missing=pendientes)
+    perfil_final = min(candidatos, key=lambda c: _indice(c[0]))[0]
+    decisivos = [c[1] for c in candidatos if c[0] == perfil_final]
+    return Idoneidad(
+        complete=not pendientes,
+        missing=pendientes,
+        risk_profile=perfil_final,
+        max_sri=MAX_SRI[perfil_final],
+        rationale_ids=decisivos,
+        rationale=[c[2] for c in candidatos] + [f"Manda el más restrictivo: {perfil_final.value} → SRI máximo {MAX_SRI[perfil_final]}"],
+    )
+
+
+# ---------- conveniencia ----------
+
+def conveniencia(perfil: Perfil) -> dict[str, Conveniencia]:
+    """Por familia: conocimiento demostrado suficiente, o experiencia que lo compense."""
+    out: dict[str, Conveniencia] = {}
+    for fam in FAMILIAS:
+        f = perfil.mifid.get(f"knowledge.{fam}")
+        if f is None or f.value is None:
+            out[fam] = Conveniencia.not_assessed
+            continue
+        minimo = "high" if fam == "complex_products" else "medium"
+        suficiente = ["none", "basic", "medium", "high"].index(f.value) >= ["none", "basic", "medium", "high"].index(minimo)
+        ops = valor(perfil, f"experience.{fam}.operations_last_3y") or 0
+        if fam == "deposits_money_market" and f.value != "none":
+            suficiente = True  # producto no complejo y de riesgo mínimo
+        out[fam] = Conveniencia.appropriate if (suficiente or ops >= OPERACIONES_EXPERIENCIA) else Conveniencia.not_appropriate
+    return out
+
+
+# ---------- restricciones para consumidores ----------
 
 def restricciones(perfil: Perfil) -> Restricciones:
-    faltan = campos_pendientes(perfil)
-    motivos: list[str] = []
-    topes: list[int] = []
+    s, conv = perfil.assessments.suitability, perfil.assessments.appropriateness
+    motivos = list(s.rationale)
+    usable = perfil.status == EstadoPerfil.active
+    if not usable:
+        motivos.append(f"Perfil en estado '{perfil.status.value}': no usable hasta que lo active la entidad")
 
-    tolerancia = _valor(perfil, "risk.tolerance")
-    if tolerancia in TOPE_POR_TOLERANCIA:
-        topes.append(TOPE_POR_TOLERANCIA[tolerancia])
-        motivos.append(f"Tolerancia '{tolerancia}' → riesgo máximo {TOPE_POR_TOLERANCIA[tolerancia]}")
+    funds: dict = {"currency": "EUR"}  # supuesto: cliente minorista en euros
+    portfolios: dict = {}
+    if s.risk_profile:
+        funds["max_risk"] = s.max_sri
+        portfolios = {"profile": s.risk_profile.value, "risk_max": RISK_MAX_CARTERAS[s.risk_profile]}
+    tipos = [ASSET_TYPE[f] for f in ASSET_TYPE if conv.get(f) == Conveniencia.appropriate]
+    if tipos:
+        funds["asset_type"] = tipos
 
-    horizonte = _valor(perfil, "objective.horizon_years")
-    if horizonte is not None:
-        t = tope_por_plazo(float(horizonte))
-        topes.append(t)
-        motivos.append(f"Plazo de {horizonte} años → riesgo máximo {t}")
+    pref = valor(perfil, "sustainability.preference")
+    art = valor(perfil, "sustainability.min_sfdr_article")
+    if pref in ("some", "strong") or (art is not None and int(art) >= 8):
+        funds["esg_only"] = True
 
-    # Se usa el conocimiento más bajo; si hay contradicción, manda el demostrado (value).
-    niveles = [_valor(perfil, c) for c in ("knowledge.investment_funds", "knowledge.equity_risk")]
-    niveles = [n for n in niveles if n in TOPE_POR_CONOCIMIENTO]
-    if niveles:
-        t = min(TOPE_POR_CONOCIMIENTO[n] for n in niveles)
-        topes.append(t)
-        motivos.append(f"Conocimientos demostrados ({', '.join(niveles)}) → riesgo máximo {t}")
+    post: list[FiltroPosterior] = []
+    liquidez = valor(perfil, "objectives.o1.liquidity_need")
+    if liquidez in REEMBOLSO_MAX_DIAS:
+        post.append(FiltroPosterior(field="redemption_lag_days", op="<=", value=REEMBOLSO_MAX_DIAS[liquidez], why="liquidity_need"))
+    plazo = valor(perfil, "objectives.o1.horizon_years")
+    if plazo is not None and float(plazo) < 3:
+        post.append(FiltroPosterior(field="fixed_income_term", op="in", value=["Corto plazo"], why="horizon_years"))
+    if art is not None and int(art) == 9:
+        post.append(FiltroPosterior(field="sustainability_article", op=">=", value=9, why="sustainability"))
+    excl = perfil.personal.get("exclusions") or []
+    if excl:
+        post.append(FiltroPosterior(field="top_sectors", op="not_contains", value=excl, why="exclusions"))
+    importe = valor(perfil, "objectives.o1.amount_eur")
+    if importe is not None:
+        post.append(FiltroPosterior(field="min_initial", op="<=", value=importe, why="objectives.o1.amount_eur"))
 
-    capacidad = _valor(perfil, "financial.loss_capacity_eur")
-    if capacidad is not None:
-        motivos.append(f"Capacidad de soportar pérdidas: {capacidad} € (cálculo determinista)")
-
-    if horizonte is None:
-        liquidez = None
-    else:
-        liquidez = "high" if horizonte < 2 else "medium" if horizonte < 5 else "low"
-
-    esg = _valor(perfil, "sustainability.preference") in ("some", "strong")
-    exclusiones = _valor(perfil, "exclusions.sectors") or []
-
-    activo = perfil.status == EstadoPerfil.active
-    if not activo:
-        motivos.append(f"Perfil en estado '{perfil.status.value}': no apto hasta que lo active un asesor")
-
+    no_conv = [f for f, v in conv.items() if v == Conveniencia.not_appropriate]
+    refs = list(dict.fromkeys(s.rationale_ids + [f"knowledge.{f}" for f in no_conv]))
     return Restricciones(
-        client_id=perfil.client_id,
-        profile_version=perfil.version,
-        eligible=activo and not faltan,
-        missing_fields=faltan,
-        max_risk_indicator=min(topes) if topes else None,
-        horizon_years=horizonte,
-        loss_capacity_eur=capacidad,
-        liquidity_need=liquidez,
-        esg_required=esg,
-        exclusions=list(exclusiones),
-        rationale=motivos,
+        client_id=perfil.client_id, profile_version=perfil.version, status=perfil.status, usable=usable,
+        funds_query=funds, portfolios_query=portfolios, post_filters=post,
+        appropriateness={f: v for f, v in conv.items() if v != Conveniencia.not_assessed},
+        evidence_refs=refs, rationale=motivos,
     )
+
+
+def es_calculado(ruta: str) -> bool:
+    return ruta in CALCULADOS

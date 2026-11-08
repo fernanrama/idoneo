@@ -1,31 +1,35 @@
-// Espejo en TypeScript de backend/app/perfil/modelos.py (contrato v0, docs/CONTRATOS.md).
+// Espejo en TypeScript de backend/app/perfil/modelos.py (contrato v1, docs/proyecto/04_CONTRATO_PERFIL.md).
 
 export type Fuente = "declared" | "demonstrated" | "calculated" | "advisor";
-export type EstadoPerfil = "draft" | "validated" | "active" | "review_pending";
+export type EstadoPerfil = "draft" | "pending_validation" | "active" | "review_due";
+export type Flag = "declared_vs_demonstrated" | "inconsistent" | "low_confidence" | "needs_advisor";
+export type Conveniencia = "appropriate" | "not_appropriate" | "not_assessed";
 
 export interface Evidencia {
   session_id: string;
-  t_start: number;
-  t_end: number;
+  turn_id?: string | null;
+  t: [number, number];
   quote: string;
+  audio_url?: string | null;
 }
 
-export interface Campo {
+export interface Fact {
   value: unknown;
   source: Fuente;
   declared?: unknown;
   confidence?: number | null;
+  confidence_basis?: string | null;
   evidence: Evidencia[];
   inputs: string[];
-  flags: string[];
+  flags: Flag[];
   updated_at: string;
   updated_by: string;
 }
 
 export interface Alerta {
   id: string;
-  type: string;
-  field?: string | null;
+  path?: string | null;
+  flag: Flag;
   message: string;
   evidence: Evidencia[];
   status: "open" | "resolved";
@@ -38,27 +42,39 @@ export interface Perfil {
   status: EstadoPerfil;
   created_at: string;
   reason: string;
-  mifid: Record<string, Campo>;
+  author: string;
+  mifid: Record<string, Fact>;
+  assessments: {
+    suitability: {
+      complete: boolean;
+      missing: string[];
+      risk_profile: string | null;
+      max_sri: number | null;
+      rationale_ids: string[];
+      rationale: string[];
+    };
+    appropriateness: Record<string, Conveniencia>;
+  };
   personal: Record<string, unknown>;
   alerts: Alerta[];
-  review: { validated_by?: string | null; validated_at?: string | null; next_review?: string | null };
+  review: { validated_by?: string | null; validated_at?: string | null; next_review?: string | null; open_flags: number };
 }
 
 export interface Restricciones {
   client_id: string;
   profile_version: number;
-  eligible: boolean;
-  missing_fields: string[];
-  max_risk_indicator: number | null;
-  horizon_years: number | null;
-  loss_capacity_eur: number | null;
-  liquidity_need: "high" | "medium" | "low" | null;
-  esg_required: boolean;
-  exclusions: string[];
+  status: EstadoPerfil;
+  usable: boolean;
+  funds_query: Record<string, unknown>;
+  portfolios_query: Record<string, unknown>;
+  post_filters: { field: string; op: string; value: unknown; why: string }[];
+  appropriateness: Record<string, Conveniencia>;
+  evidence_refs: string[];
   rationale: string[];
 }
 
 export interface Turno {
+  turn_id?: string;
   speaker: "agent" | "client";
   text: string;
   t_start: number;
@@ -75,5 +91,6 @@ export interface VersionResumen {
   version: number;
   created_at: string;
   reason: string;
+  author: string;
   status: EstadoPerfil;
 }
