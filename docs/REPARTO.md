@@ -1,15 +1,17 @@
-# Reparto de desarrollo — 4 personas
+# Reparto de desarrollo — 4 roles, 5 personas en código
 
 Versión del 8/11/2026. Hay cuatro módulos con dueño. Cada uno trabaja sobre los contratos de [CONTRATOS.md](CONTRATOS.md) y puede empezar **ya**, porque el backend v0 arranca con un perfil simulado de Carmen.
 
 | Rol | Persona | Módulo | Rutas que escribe |
 |---|---|---|---|
-| **A · Perfil y backend** | Pablo (según el diseño, se confirma en el equipo) | Perfil versionado, evidencias, cálculos, API | `backend/app/perfil/`, `backend/app/main.py`, `backend/fixtures/`, `backend/tests/` |
-| **B · Agentes IA** | por asignar | Entrevistador, extractor, verificador, resumen | `backend/app/agentes/` |
-| **C · Voz y móvil** | por asignar | App Next.js móvil, voz ElevenLabs, panel de perfil y validación | `frontend/` |
-| **D · MCP, MyInvestor, despliegue e integración** | Fernán (propuesta) | MCP de Idóneo, conexión con MyInvestor en Claude, URL pública, unión de todo | `backend/app/mcp/`, despliegue, `README.md` |
+| **A · Perfil y backend** | **Juan** | Perfil versionado, evidencias, cálculos, API | `backend/app/perfil/`, `backend/app/main.py`, `backend/fixtures/`, `backend/tests/` |
+| **B1 · Entrevistador y extractor** | **Hammad** | Guion del entrevistador, extractor, cliente común de Claude, modo texto | `backend/app/agentes/prompts/`, `extractor.py`, `claude.py`, `chat.py` |
+| **B2 · Verificador y medición** | **Pablo** | Verificador, resumen para agentes, medición con perfiles sintéticos | `backend/app/agentes/verificador.py`, `contexto.py`, `backend/eval/` |
+| **C · Voz y móvil** | **Fernán** | App Next.js móvil, voz ElevenLabs, panel de perfil y validación | `frontend/` |
+| **D · MCP, MyInvestor, despliegue e integración** | **Alejandro** | MCP de Idóneo, conexión con MyInvestor en Claude, URL pública, unión de todo, revisión de PR, README y ZIP de entrega | `backend/app/mcp/`, despliegue, `README.md` |
+| **Fuera del código** | **Rodrigo** (propuesta) | Pitch, PowerPoint, PDF de una cara, guion de la demo, revisión financiera y normativa (artículos citados, supuestos de cálculo) | `gestion/comunicacion/`, `gestion/aprendizaje/` |
 
-Si alguien necesita cambiar algo fuera de sus rutas, se lo pide al dueño o abre una PR pequeña y le avisa.
+Si alguien necesita cambiar algo fuera de sus rutas, se lo pide al dueño o abre una PR pequeña y le avisa. Hammad y Pablo comparten `backend/app/agentes/`: el cliente de Claude (`claude.py`) lo crea Hammad primero y Pablo lo reutiliza.
 
 ---
 
@@ -29,18 +31,22 @@ Si alguien necesita cambiar algo fuera de sus rutas, se lo pide al dueño o abre
   - Escribir 8–10 perfiles sintéticos en `fixtures/` para la evaluación.
 - **Terminado cuando:** las versiones no se pierden; un perfil validado y luego modificado pasa a `review_pending`; los tests cubren las reglas y los cálculos.
 
-## B · Agentes IA
+## B · Agentes IA (B1 Hammad · B2 Pablo)
 
 **Objetivo:** el 15 % de "IA frontera". Un entrevistador que **comprueba** en vez de preguntar, y un verificador que detecta lo declarado frente a lo demostrado.
 
 - **Hoy:**
-  - Escribir `prompts/entrevistador.md`: el guion por bloques, las preguntas de comprobación, el aviso de IA y el consentimiento.
-  - Implementar `extractor.extraer` con Claude y uso de herramientas. Que devuelva `ActualizacionCampo` con cita y tiempos.
-  - Probarlo con una transcripción escrita de Carmen.
+  - **Hammad:**
+    - Crear `claude.py`, el cliente común de Claude que lee el modelo de las variables de entorno.
+    - Escribir `prompts/entrevistador.md`: el guion por bloques, las preguntas de comprobación, el aviso de IA y el consentimiento. Pásaselo a Fernán (C), que lo carga en el agente de ElevenLabs.
+    - Implementar `extractor.extraer` con uso de herramientas, devolviendo `ActualizacionCampo` con cita y tiempos.
+  - **Pablo:**
+    - Escribir la transcripción completa de Carmen (`backend/eval/carmen.json`), con turnos y tiempos. Es la prueba común de los dos.
+    - Empezar el verificador con Claude: incoherencias, falta de datos y declarado frente a demostrado.
 - **Lunes:**
-  - Verificador con Claude: incoherencias, falta de datos y declarado frente a demostrado.
-  - `POST /api/sessions/{sid}/chat` para el modo texto (coordinar la ruta con A).
-- **Martes:**
+  - **Hammad:** `POST /api/sessions/{sid}/chat` para el modo texto; coordinar la ruta con Juan (A).
+  - **Pablo:** cerrar el verificador y `contexto.resumen` con Claude.
+- **Martes, sobre todo Pablo:**
   - Medir con los perfiles sintéticos: aciertos por campo, alertas correctas y falsas, latencia y coste por entrevista.
   - Apuntar los resultados en `gestion/evaluacion/PLAN_Y_EVIDENCIAS.md`.
 - **Reglas:**
@@ -92,7 +98,8 @@ Si alguien necesita cambiar algo fuera de sus rutas, se lo pide al dueño o abre
 ## Cómo trabajamos con Git
 
 - `main` siempre arranca. Cada uno trabaja en su rama: `feat/a-sse`, `feat/b-extractor`, `feat/c-entrevista`, `feat/d-mcp`, etc.
-- PR pequeñas y frecuentes, como mínimo una al día por persona. Revisa D (integración) u otra persona del equipo.
+- PR pequeñas y frecuentes, como mínimo una al día por persona. Revisa Alejandro (integración) u otra persona del equipo.
+- Las ramas nuevas salen siempre del `main` actual. La rama `hammad-cobo-agente` se creó desde el `main` anterior a la reorganización: actualizarla con `git rebase origin/main`, o recrearla, antes de trabajar en ella.
 - Antes de abrir la PR, `pytest` pasa en `backend/`, y el front compila si lo has tocado.
 - Nunca subir `.env`, claves ni datos reales de personas. Lo simulado se marca como simulado.
 - Si te bloqueas más de 30 minutos, avisa al grupo y trabaja contra el stub o el fixture.
