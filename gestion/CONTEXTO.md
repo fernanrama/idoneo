@@ -8,7 +8,7 @@ Dejar preparada la gestión integral del hackathon: repositorio, ideas, producto
 - **Repo reorganizado** (D-009): gestión en `gestion/`, producto en `docs/`, código en `backend/` y `frontend/`. Checkout local: `C:\Users\ferna\gcx\hack-finance-uc3m-2026`. La carpeta antigua queda como copia de seguridad.
 - **PDF del enunciado fuera del repo** (D-010): solo en local, en `gestion/enunciado/`, porque el repo será visible para el jurado.
 - **Stack v0** (D-011): FastAPI + Next.js + ElevenLabs + Claude + MCP. Backend v0 probado en local (5 tests y arranque con datos simulados de Carmen). Pendiente de las pruebas de voz, del MCP de MyInvestor y del despliegue.
-- Reparto de 4 desarrolladores en [docs/REPARTO.md](../docs/REPARTO.md). Nombres de B y C por asignar; A (Pablo) y D (Fernán) son propuestas.
+- Reparto confirmado por Fernán en [docs/REPARTO.md](../docs/REPARTO.md): A Juan; B Hammad (entrevistador y extractor) y Pablo (verificador y medición); C Fernán; D Alejandro (incluye integración y entrega). Rodrigo: pitch y revisión financiera (propuesta).
 - Lo que sigue más abajo es el estado previo a esta actualización; donde contradiga lo anterior, prevalece esta sección.
 
 ## Decisiones vigentes
