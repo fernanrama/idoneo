@@ -9,11 +9,12 @@ Dejar preparada la gestión integral del hackathon: repositorio, ideas, producto
 - Foco provisional de Fernán: desarrollo de la aplicación, con tutoría financiera aplicada.
 - No se ha elegido idea, stack, marca, reparto de personas ni presupuesto.
 - Fernán autoriza delegación entre los seis chats y subagentes delimitados, dejando resultados por escrito. No necesita aportar más información durante esta preparación.
-- Repositorio privado creado con autorización de Fernán: https://github.com/fernanrama/hack-finance-uc3m-2026 . La carga inicial y configuración cloud están en curso; no afirmar sincronización hasta comprobarla. No hay Git local inicializado todavía.
+- Repositorio privado creado con autorización de Fernán: https://github.com/fernanrama/hack-finance-uc3m-2026 . GitHub está conectado con acceso al repositorio, según confirmación de Fernán. Este entorno cloud dispone de un checkout Git; esto no acredita el estado del espacio local original.
 - Preferencia de ejecución: nube para tareas autónomas y acceso móvil con PC apagado; local para pruebas interactivas, integración y demo cuando aporte valor. Optimizar por utilidad, no por cantidad de agentes.
 - Los seis chats originales son locales. Su creación no configura un entorno cloud ni garantiza acceso móvil al mismo historial.
-- Bloqueo observado en Codex web: aviso de cuota de Codex y Work agotada al intentar crear entorno. No se ha consumido un reinicio ni cambiado el plan. Entorno cloud no publicado y prueba móvil pendiente.
-- Carga inicial por navegador: documentos raíz y paquete hack-finance-bootstrap-documentacion.zip con las seis carpetas de documentación. En el remoto será necesario extraer ese paquete en la raíz, verificar rutas, guardar los archivos mediante commit y retirar el ZIP; localmente las carpetas ya existen. No confundir el paquete guardado con documentos ya extraídos en GitHub.
+- El aviso previo de cuota agotada queda como antecedente: Fernán confirma que el entorno cloud `hack-finance-uc3m-2026` ya está publicado. Esta sesión accede al checkout cloud. No se infiere ningún reinicio de cuota ni cambio de plan. La prueba desde móvil sigue pendiente.
+- Fernán confirma que los chats 03 (producto) y 06 (operaciones) se reanudaron y completaron sin error. No implica implementación de una app ni pruebas de producto.
+- Carga inicial por navegador: documentos raíz y paquete `hack-finance-bootstrap-documentacion.zip`. Puesta a punto cloud: las 16 entradas se validaron como rutas relativas dentro del repositorio, sin enlaces simbólicos; su contenido coincide íntegramente con los archivos de las seis carpetas del checkout. Se retira el ZIP tras la comprobación y se prepara la entrega documental mediante commit/PR. Integración en la rama principal pendiente de revisión.
 
 ## Próxima entrada decisiva
 Enunciado y rúbrica entregados en la apertura. Recoger además: hora límite exacta, formato/duración de presentación, entregables, datos y APIs, condiciones de IA/código previo y criterios de desempate.

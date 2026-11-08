@@ -4,7 +4,7 @@ Objetivo: preparar y ejecutar todo el hackathon con decisiones claras, una soluc
 
 Repositorio privado: https://github.com/fernanrama/hack-finance-uc3m-2026 . Flujo híbrido: consultar coordinacion/CLOUD_Y_LOCAL.md. Los roles son reutilizables; no es necesario mantener seis chats activos ni duplicar tareas entre local y cloud.
 
-**Estado de la carga inicial:** las carpetas documentales se transportan en `hack-finance-bootstrap-documentacion.zip`. En un checkout remoto, extraer primero el ZIP en la raíz verificando que todas las rutas permanecen dentro del repositorio, guardar las carpetas mediante commit y retirar el paquete. En el espacio local original ya están extraídas. Hasta entonces los enlaces a documentos internos del ZIP no funcionan en GitHub. La configuración de Codex Cloud está pendiente por un aviso de cuota agotada; no hay entorno publicado ni prueba móvil completada.
+**Estado de la puesta a punto (8 noviembre 2026):** las seis carpetas documentales están incorporadas al checkout; se han contrastado las 16 entradas del paquete con los archivos extraídos antes de retirar el ZIP. Fernán confirma que el entorno cloud `hack-finance-uc3m-2026` está publicado, GitHub está conectado con acceso al repositorio y los chats 03 y 06 se reanudaron y completaron sin error. Esta sesión trabaja en el checkout cloud; los cambios se entregan mediante commit/PR para revisión. La prueba desde móvil sigue pendiente. Aún no se ha recibido el enunciado, no hay aplicación ni stack elegido.
 
 ## Retomar en la siguiente sesión
 1. Leer CONTEXTO.md para conocer hechos, decisiones y pendientes.
