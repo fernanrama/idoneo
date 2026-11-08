@@ -7,7 +7,7 @@ Responsable: Estrategia · Actualizado: 8 de noviembre de 2026
 
 | ID | Fuente | Qué respalda / límite |
 |---|---|---|
-| F01 | [AGENTS.md](../AGENTS.md), contexto confirmado por Fernán | Inscripción y fechas declaradas: 8–12 de noviembre. No contiene bases oficiales completas. |
+| F01 | [AGENTS.md](../../AGENTS.md), contexto confirmado por Fernán | Inscripción y fechas declaradas: 8–12 de noviembre. No contiene bases oficiales completas. |
 | F02 | [CONTEXTO.md](../CONTEXTO.md) | Estado vigente; enunciado recibido y análisis compartido, sin producto elegido. |
 | F03 | `Completo hack finance.pdf`, dos páginas, solo en equipo local; [transcripción analítica](ANALISIS_INICIAL.md) | SHA-256 comunicado `2182c34ebb762066c28dbd46af7ddf36d9d12c610bd052fcfb2a928063701341`; p. 1 rúbrica, p. 2 entrega. Lectura de dirección, sin comprobación nueva del PDF en cloud; integridad de bases desconocida. |
 | F04 | Aclaraciones de Fernán, 8/11/2026, comunicadas por dirección | Voz no obligatoria; PowerPoint obligatorio; cierre miércoles 23:59; diez minutos estimados. Zona Madrid supuesta y horario preciso por confirmar; no atribuir confirmación oficial adicional. |
