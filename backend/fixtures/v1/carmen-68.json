@@ -1,0 +1,80 @@
+{
+  "_aviso": "DATOS SIMULADOS para desarrollo y demo. Carmen no es una persona real. Formato: contrato 04 (borrador), rutas planas.",
+  "client_id": "carmen-68",
+  "reason": "fixture carmen-68 (DATOS SIMULADOS)",
+  "mifid": {
+    "disclosures.purpose_ack": {"value": true, "source": "declared",
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-002", "t": [8.0, 10.5], "quote": "Vale, entiendo para qué es."}]},
+    "disclosures.ai_notice_ack": {"value": true, "source": "declared",
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-004", "t": [14.0, 15.2], "quote": "Entendido, es un asistente."}]},
+
+    "knowledge.deposits_money_market": {"value": "medium", "source": "declared", "confidence": 1.0,
+      "confidence_basis": "rubric:knowledge.deposits_money_market:v0 (2/2)",
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-030", "t": [180.0, 184.5], "quote": "Llevo toda la vida con depósitos a plazo."}]},
+    "knowledge.fixed_income_funds": {"value": "basic", "source": "demonstrated", "confidence": 0.67,
+      "confidence_basis": "rubric:knowledge.fixed_income_funds:v0 (2/3)",
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-034", "t": [196.0, 201.3], "quote": "Si suben los tipos, el bono que tengo vale algo menos, ¿no?"}]},
+    "knowledge.mixed_funds": {"value": "basic", "source": "demonstrated", "confidence": 0.67,
+      "confidence_basis": "rubric:knowledge.mixed_funds:v0 (2/3)",
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-036", "t": [203.0, 208.0], "quote": "Un mixto tiene un poco de todo, creo."}]},
+    "knowledge.equity_funds": {"value": "none", "declared": "high", "source": "demonstrated", "confidence": 1.0,
+      "confidence_basis": "rubric:knowledge.equity_funds:v0 (3/3)",
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-038", "t": [212.4, 219.8], "quote": "Eso no puede pasar, el fondo es del banco."}]},
+    "knowledge.etfs": {"value": "none", "source": "declared",
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-040", "t": [225.0, 227.0], "quote": "¿ETF? No sé lo que es."}]},
+    "knowledge.stocks": {"value": "none", "source": "declared",
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-042", "t": [229.0, 231.0], "quote": "Acciones no he tenido nunca."}]},
+    "knowledge.complex_products": {"value": "none", "source": "declared",
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-044", "t": [233.0, 235.0], "quote": "No, nada de eso."}]},
+
+    "experience.by_family.deposits_money_market.years": {"value": 30, "source": "declared",
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-030", "t": [180.0, 184.5], "quote": "Llevo toda la vida con depósitos a plazo."}]},
+    "experience.by_family.equity_funds.operations_last_3y": {"value": 0, "source": "declared",
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-046", "t": [238.0, 240.0], "quote": "Fondos no he comprado nunca."}]},
+    "experience.profession": {"value": "maestra jubilada", "source": "declared",
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-006", "t": [30.0, 33.0], "quote": "Fui maestra, ya estoy jubilada."}]},
+
+    "financial.net_monthly_income_eur": {"value": 1450, "source": "declared", "confidence": 1.0,
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-010", "t": [61.0, 64.0], "quote": "Cobro unos mil cuatrocientos cincuenta de pensión."}]},
+    "financial.income_stability": {"value": "stable", "source": "declared",
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-010", "t": [61.0, 64.0], "quote": "Cobro unos mil cuatrocientos cincuenta de pensión."}]},
+    "financial.fixed_monthly_costs_eur": {"value": 900, "source": "declared", "confidence": 0.75,
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-012", "t": [70.0, 75.0], "quote": "Entre luz, comunidad y la compra, unos novecientos."}]},
+    "financial.liquid_savings_eur": {"value": 80000, "source": "declared", "confidence": 1.0,
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-014", "t": [80.0, 84.0], "quote": "Tengo ochenta mil en depósitos."}]},
+    "financial.debts_eur": {"value": 0, "source": "declared", "confidence": 1.0,
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-016", "t": [86.0, 87.5], "quote": "No debo nada, la casa está pagada."}]},
+
+    "objectives.o1.goal": {"value": "complementar la pensión", "source": "declared",
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-020", "t": [120.0, 124.0], "quote": "Quiero tener un dinerito extra cada mes."}]},
+    "objectives.o1.amount_eur": {"value": 20000, "source": "declared",
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-022", "t": [126.0, 129.5], "quote": "Pondría unos veinte mil; el resto, mejor a mano."}]},
+    "objectives.o1.horizon_years": {"value": 10, "source": "declared", "confidence": 0.75,
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-024", "t": [130.0, 133.0], "quote": "Para los próximos diez años, más o menos."}]},
+    "objectives.o1.priority": {"value": 1, "source": "declared",
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-020", "t": [120.0, 124.0], "quote": "Quiero tener un dinerito extra cada mes."}]},
+
+    "risk_tolerance.scenario_score": {"value": 1, "declared": 3, "source": "demonstrated", "confidence": 1.0,
+      "confidence_basis": "rubric:risk_tolerance.scenario:v0 (2/2)",
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-050", "t": [250.0, 254.0], "quote": "Si baja un veinte por ciento, lo saco todo."}]},
+    "risk_tolerance.max_drawdown_accepted_pct": {"value": 5, "source": "declared",
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-052", "t": [256.0, 259.0], "quote": "Perder más de un poquito, no."}]},
+
+    "sustainability.preference": {"value": "none", "source": "declared",
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-060", "t": [300.0, 303.0], "quote": "Eso me da igual, mientras no pierda."}]},
+    "sustainability.explained": {"value": true, "source": "declared",
+      "evidence": [{"session_id": "s-demo", "turn_id": "t-058", "t": [290.0, 298.0], "quote": "Ah, que no inviertan en cosas que contaminan. Entiendo."}]}
+  },
+  "alerts": [
+    {"id": "a-demo-1", "type": "declared_vs_demonstrated", "field": "knowledge.equity_funds",
+     "message": "Dijo conocer bien los fondos de renta variable, pero cree que un fondo del banco no puede perder valor.",
+     "evidence": [{"session_id": "s-demo", "turn_id": "t-038", "t": [212.4, 219.8], "quote": "Eso no puede pasar, el fondo es del banco."}]}
+  ],
+  "personal": {
+    "consent_given": true,
+    "data": {
+      "exclusions": ["armas", "tabaco"],
+      "communication": {"channel": "whatsapp", "format": "audio", "detail": "low", "language": "es"}
+    }
+  }
+}
