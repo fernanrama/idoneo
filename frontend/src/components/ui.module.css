@@ -1,0 +1,128 @@
+/* Componentes base. Solo usan variables de src/tema/tema.css. */
+
+.marco {
+  max-width: var(--ancho-movil);
+  min-height: 100dvh;
+  margin: 0 auto;
+  background: var(--c-fondo);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
+}
+.marcoAncho { max-width: 1100px; }
+
+.cabecera {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px var(--espacio);
+  background: var(--c-primario);
+  color: var(--c-primario-texto);
+}
+.cabecera h1 { font-size: 18px; margin: 0; flex: 1; }
+.volver {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font-size: 22px;
+  line-height: 1;
+  padding: 4px 8px;
+}
+.contenido { flex: 1; padding: var(--espacio); display: flex; flex-direction: column; gap: 16px; }
+.pie { padding: var(--espacio); display: flex; flex-direction: column; gap: 10px; }
+
+.boton {
+  border: 0;
+  border-radius: var(--r-boton);
+  padding: 15px 22px;
+  font-weight: 600;
+  font-size: var(--f-base);
+  min-height: 52px; /* objetivo táctil amplio */
+  width: 100%;
+}
+.primario { background: var(--c-acento); color: #fff; }
+.secundario { background: var(--c-superficie); color: var(--c-primario); border: 1.5px solid var(--c-borde); }
+.texto { background: transparent; color: var(--c-primario); text-decoration: underline; }
+.boton:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.tarjeta {
+  background: var(--c-superficie);
+  border-radius: var(--r-tarjeta);
+  box-shadow: var(--sombra);
+  padding: var(--espacio);
+}
+.tarjetaDestacada { background: var(--c-primario); color: var(--c-primario-texto); }
+
+.chip {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--c-fondo);
+  color: var(--c-texto-suave);
+  white-space: nowrap;
+}
+.chip_declared { background: #eef2f6; color: #334155; }
+.chip_demonstrated { background: var(--c-acento-suave); color: var(--c-ok); }
+.chip_calculated { background: #eaf0ff; color: #1d4ed8; }
+.chip_advisor { background: #f3e8ff; color: #6b21a8; }
+.chip_aviso { background: var(--c-aviso-suave); color: var(--c-aviso); }
+
+.bloques { display: flex; gap: 6px; }
+.bloque { flex: 1; height: 6px; border-radius: 3px; background: var(--c-borde); }
+.bloque_en_curso { background: var(--c-acento); opacity: 0.45; }
+.bloque_completo { background: var(--c-acento); }
+.bloquesLeyenda { display: flex; justify-content: space-between; font-size: var(--f-pequena); color: var(--c-texto-suave); margin-top: 6px; }
+
+.subtitulos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 42dvh;
+  overflow-y: auto;
+  padding: 4px;
+}
+.burbuja { padding: 12px 14px; border-radius: 16px; max-width: 88%; font-size: 18px; }
+.burbuja_agent { background: var(--c-superficie); box-shadow: var(--sombra); align-self: flex-start; border-bottom-left-radius: 4px; }
+.burbuja_client { background: var(--c-primario); color: var(--c-primario-texto); align-self: flex-end; border-bottom-right-radius: 4px; }
+
+.micro {
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--c-acento);
+  color: #fff;
+  font-size: 40px;
+  align-self: center;
+  box-shadow: 0 6px 20px rgba(18, 163, 127, 0.35);
+}
+.microActivo { animation: pulso 1.6s ease-in-out infinite; }
+@keyframes pulso {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(18, 163, 127, 0.45); }
+  50% { box-shadow: 0 0 0 18px rgba(18, 163, 127, 0); }
+}
+@media (prefers-reduced-motion: reduce) { .microActivo { animation: none; } }
+
+.alerta {
+  border-left: 4px solid var(--c-aviso);
+  background: var(--c-aviso-suave);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.cita { font-style: italic; color: var(--c-texto-suave); margin: 6px 0 0; }
+
+.entradaTexto { display: flex; gap: 8px; }
+.entradaTexto input {
+  flex: 1;
+  border: 1.5px solid var(--c-borde);
+  border-radius: 12px;
+  padding: 12px;
+  font: inherit;
+  background: var(--c-superficie);
+}
+.entradaTexto button { width: auto; min-height: 48px; padding: 0 18px; }

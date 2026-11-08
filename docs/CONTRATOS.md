@@ -91,6 +91,7 @@ SRI = indicador de riesgo 1–7 del documento KID de cada producto (normativa PR
 | `GET /api/clients/{cid}/evidence/{field}` | Cita y tiempos de un dato | ✔ |
 | `GET /api/clients/{cid}/context` | Resumen para otro agente | ✔ (plantilla) |
 | `POST /api/demo/reset` | Recarga a Carmen (datos simulados) | ✔ |
+| `GET /api/voice/signed-url` | URL firmada de ElevenLabs; la clave no sale del backend. 503 si no está configurada | ✔ (sin probar con cuenta real) |
 | `GET /api/sessions/{sid}/events` (SSE) | Avisos en vivo al front | Pendiente, Dev A; v0 = sondeo |
 | `GET /api/sessions/{sid}/audio` | Audio de la sesión para reproducir evidencias | Pendiente, Dev A + C según prueba de voz |
 | `POST /api/sessions/{sid}/chat` `{text}` | Modo texto sin ElevenLabs | Pendiente, Dev B |

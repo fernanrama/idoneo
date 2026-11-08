@@ -52,3 +52,9 @@ def test_sesion_y_turnos():
                json={"speaker": "client", "text": "Hola", "t_start": 0, "t_end": 1})
     assert r.status_code == 202
     assert c.get(f"/api/clients/{s['client_id']}/profile").json()["status"] == "draft"
+
+
+def test_voz_sin_clave_responde_503(monkeypatch):
+    monkeypatch.delenv("ELEVENLABS_API_KEY", raising=False)
+    c = cliente()
+    assert c.get("/api/voice/signed-url").status_code == 503
