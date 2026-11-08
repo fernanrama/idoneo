@@ -7,6 +7,8 @@ Docs interactivas: http://localhost:8000/docs
 
 from __future__ import annotations
 
+import hmac
+import logging
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -15,7 +17,7 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")  # .env en la raíz del repo
 
-from fastapi import BackgroundTasks, FastAPI, HTTPException  # noqa: E402
+from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from pydantic import BaseModel  # noqa: E402
 
@@ -25,14 +27,16 @@ from .mcp.servidor import mcp  # noqa: E402
 from .perfil import calculos, store  # noqa: E402
 from .perfil.modelos import Parche, Perfil, Restricciones, Turno  # noqa: E402
 
+log = logging.getLogger("perfil.api")
 
 mcp_app = mcp.streamable_http_app()  # crea el gestor de sesiones MCP; se monta al final del archivo
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    store.tipo_almacen()  # configura el almacén (PERFIL_ALMACEN) y falla pronto si la base no está lista
     if os.getenv("LOAD_DEMO_FIXTURE", "1") == "1":
-        store.cargar_fixture("carmen-68")
+        store.asegurar_fixture("carmen-68")  # solo si falta: no pisa datos guardados en la base
     async with mcp.session_manager.run():
         yield
 
@@ -54,6 +58,16 @@ def _llamar(fn, *args, **kwargs):
         raise HTTPException(404, f"No encontrado: {e}") from e
     except store.Conflicto as e:
         raise HTTPException(409, str(e)) from e
+    except store.DatoInvalido as e:
+        raise HTTPException(422, str(e)) from e
+
+
+def requiere_admin(x_admin_token: str | None = Header(default=None)) -> None:
+    """Si ADMIN_TOKEN está definido, las escrituras de la entidad y de la demo exigen esa cabecera.
+    Sin ADMIN_TOKEN (desarrollo local) no se pide nada, para no romper el front."""
+    esperado = os.getenv("ADMIN_TOKEN", "")
+    if esperado and not hmac.compare_digest((x_admin_token or "").encode(), esperado.encode()):
+        raise HTTPException(401, "Falta o no es válida la cabecera X-Admin-Token")
 
 
 class NuevaSesion(BaseModel):
@@ -75,18 +89,76 @@ def health():
 
 @app.post("/api/sessions")
 def crear_sesion(body: NuevaSesion):
-    return store.crear_sesion(body.client_id)
+    return _llamar(store.crear_sesion, body.client_id, body.channel)
+
+
+AUTOR_EXTRACTOR, AUTOR_VERIFICADOR = "agent:extractor", "agent:verifier"
+
+
+def _lista_de(resultado, origen: str, rechazar) -> list:
+    """Lo que devuelve un agente debe ser una lista; si no, se rechaza entero de forma visible."""
+    if resultado is None:
+        return []
+    if isinstance(resultado, (list, tuple)):
+        return list(resultado)
+    rechazar(origen, "error", f"devolvió {type(resultado).__name__} en vez de una lista")
+    return []
 
 
 async def _procesar_turno(session_id: str) -> None:
-    s = store.sesion(session_id)
+    """Extractor y verificador sobre el turno nuevo, en segundo plano.
+
+    Aceptación parcial: cada parche y cada alerta se valida por separado (mismas reglas que store:
+    esquema, tipos, autoría y evidencia). Los válidos se guardan; los inválidos y los fallos de un
+    agente quedan registrados con su motivo y visibles en GET /api/sessions/{id} (`rejections`).
+    Si el extractor falla, el verificador se ejecuta igualmente, y al revés.
+    """
+    try:
+        s = store.sesion(session_id)
+    except store.NoEncontrado:
+        log.error("Turno de una sesión que no existe: %s", session_id)
+        return
     cid, turnos = s["client_id"], s["turns"]
-    parches = await extractor.extraer(turnos[-6:], store.perfil(cid), session_id)
+
+    def rechazar(origen: str, tipo: str, motivo: str, path: str | None = None) -> None:
+        store.registrar_rechazo(store.Rechazo(session_id=session_id, client_id=cid, origen=origen,
+                                              tipo=tipo, path=path, motivo=motivo))
+
+    # 1. Extractor: datos nuevos del perfil.
+    try:
+        brutos = _lista_de(await extractor.extraer(turnos[-6:], store.perfil(cid), session_id), "extractor", rechazar)
+    except Exception as e:
+        log.exception("Fallo del extractor en %s", session_id)
+        rechazar("extractor", "error", f"el extractor falló: {type(e).__name__}: {str(e)[:300]}")
+        brutos = []
+    parches, malos = store.separar_parches(brutos, AUTOR_EXTRACTOR)
+    for path, motivo in malos:
+        rechazar("extractor", "parche", motivo, path)
     if parches:
-        store.aplicar(cid, parches, f"extractor · {session_id}", "agent:extractor")
-    alertas = await verificador.verificar(store.perfil(cid), turnos)
+        try:
+            store.aplicar(cid, parches, f"extractor · {session_id}", AUTOR_EXTRACTOR)
+        except Exception as e:  # p. ej. demasiadas escrituras simultáneas
+            log.exception("No se pudieron guardar los parches de %s", session_id)
+            for p in parches:
+                rechazar("backend", "parche", f"no se pudo guardar: {str(e)[:300]}", p.path)
+
+    # 2. Verificador: alertas sobre el perfil ya actualizado (aunque el extractor haya fallado).
+    try:
+        brutas = _lista_de(await verificador.verificar(store.perfil(cid), turnos), "verificador", rechazar)
+    except Exception as e:
+        log.exception("Fallo del verificador en %s", session_id)
+        rechazar("verificador", "error", f"el verificador falló: {type(e).__name__}: {str(e)[:300]}")
+        brutas = []
+    alertas, malas = store.separar_alertas(brutas)
+    for path, motivo in malas:
+        rechazar("verificador", "alerta", motivo, path)
     if alertas:
-        store.anadir_alertas(cid, alertas)
+        try:
+            store.anadir_alertas(cid, alertas, AUTOR_VERIFICADOR)
+        except Exception as e:
+            log.exception("No se pudieron guardar las alertas de %s", session_id)
+            for a in alertas:
+                rechazar("backend", "alerta", f"no se pudo guardar: {str(e)[:300]}", a.path)
 
 
 @app.post("/api/sessions/{session_id}/turns", status_code=202)
@@ -99,7 +171,9 @@ def anadir_turno(session_id: str, turno: Turno, tareas: BackgroundTasks):
 
 @app.get("/api/sessions/{session_id}")
 def ver_sesion(session_id: str):
-    return _llamar(store.sesion, session_id)
+    """Sesión con sus turnos y los rechazos del procesamiento (parches, alertas o fallos de agentes)."""
+    s = _llamar(store.sesion, session_id)
+    return {**s, "rejections": store.rechazos(session_id)}
 
 
 # ---------- perfil ----------
@@ -115,7 +189,7 @@ def ver_versiones(client_id: str):
     return _llamar(store.versiones, client_id)
 
 
-@app.post("/api/clients/{client_id}/validate", response_model=Perfil)
+@app.post("/api/clients/{client_id}/validate", response_model=Perfil, dependencies=[Depends(requiere_admin)])
 def validar(client_id: str, body: Validacion):
     return _llamar(store.validar, client_id, body.advisor_id, body.changes)
 
@@ -141,10 +215,13 @@ async def ver_contexto(client_id: str):
     return {"client_id": client_id, "text": await contexto.resumen(p)}
 
 
-@app.post("/api/demo/reset")
+@app.post("/api/demo/reset", dependencies=[Depends(requiere_admin)])
 def reset_demo():
-    """Vuelve a cargar el perfil simulado de Carmen (útil antes de cada ensayo)."""
-    return store.cargar_fixture("carmen-68")
+    """Vuelve a cargar el perfil simulado de Carmen (útil antes de cada ensayo).
+    Añade una versión nueva: el historial no se borra. Se apaga con DEMO_ENDPOINTS=0."""
+    if os.getenv("DEMO_ENDPOINTS", "1") != "1":
+        raise HTTPException(404, "Endpoint de demo desactivado")
+    return _llamar(store.cargar_fixture, "carmen-68")
 
 
 # ---------- MCP ----------
