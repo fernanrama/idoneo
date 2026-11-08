@@ -21,15 +21,20 @@ from pydantic import BaseModel  # noqa: E402
 
 from . import voz  # noqa: E402
 from .agentes import contexto, extractor, verificador  # noqa: E402
+from .mcp.servidor import mcp  # noqa: E402
 from .perfil import calculos, store  # noqa: E402
 from .perfil.modelos import Parche, Perfil, Restricciones, Turno  # noqa: E402
+
+
+mcp_app = mcp.streamable_http_app()  # crea el gestor de sesiones MCP; se monta al final del archivo
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     if os.getenv("LOAD_DEMO_FIXTURE", "1") == "1":
         store.cargar_fixture("carmen-68")
-    yield
+    async with mcp.session_manager.run():
+        yield
 
 
 app = FastAPI(title="API del perfil", version="1.0.0", lifespan=lifespan)
@@ -140,3 +145,9 @@ async def ver_contexto(client_id: str):
 def reset_demo():
     """Vuelve a cargar el perfil simulado de Carmen (útil antes de cada ensayo)."""
     return store.cargar_fixture("carmen-68")
+
+
+# ---------- MCP ----------
+# Servidor MCP en /mcp (transporte HTTP). Se monta en la raíz y al final para que las rutas de arriba
+# tengan prioridad y la URL sea exactamente /mcp, sin redirección a /mcp/.
+app.mount("/", mcp_app)
