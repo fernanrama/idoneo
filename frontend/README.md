@@ -20,7 +20,7 @@ El backend tiene que estar en marcha (ver README raíz). Para probar en el móvi
 | `/onboarding` | Explicación, aviso de IA y consentimiento de grabación |
 | `/onboarding/entrevista` | Entrevista: micrófono, subtítulos, barra de bloques, alerta, respuesta escrita y **demo guiada** |
 | `/onboarding/perfil` | Resumen para el cliente en lenguaje claro |
-| `/onboarding/productos` | Filtros del perfil; el catálogo de MyInvestor está pendiente (rol D) |
+| `/onboarding/productos` | Filtros del perfil. **No consulta el MCP de MyInvestor por código**: sus términos lo prohíben (ver `docs/proyecto/05_MCP_MYINVESTOR.md`) |
 | `/entidad/[cid]` | Vista de la entidad: datos con fuente, confianza y evidencia, restricciones y validación |
 
 ## Dónde está cada cosa

@@ -8,8 +8,10 @@ const LIQUIDEZ: Record<string, string> = { high: "alta", medium: "media", low: "
 
 /**
  * Productos compatibles con el perfil.
- * PENDIENTE (Alejandro, rol D): listado real del catálogo de MyInvestor filtrado con estas restricciones vía MCP.
- * Hasta entonces se muestran las restricciones que se aplicarán; no se inventan productos.
+ * IMPORTANTE: los términos del MCP público de MyInvestor prohíben llamarlo por programa, cachear o
+ * redistribuir su catálogo (ver docs/proyecto/05_MCP_MYINVESTOR.md). Esta app NO debe consultarlo por código.
+ * El filtrado real se hace con Claude usando el MCP de MyInvestor como conector (rol D).
+ * Mostrar aquí productos reales requiere permiso explícito de MyInvestor; no se inventan productos.
  */
 export default function Productos() {
   const { clientId } = useOnboarding();
@@ -49,7 +51,7 @@ export default function Productos() {
                 <Chip tipo="aviso">Pendiente</Chip>
               </div>
               <p className="suave" style={{ marginTop: 8 }}>
-                Aquí aparecerán los fondos del catálogo de MyInvestor que cumplen tus filtros.
+                Con estos filtros, el asistente de la entidad busca en el catálogo los fondos que encajan contigo.
               </p>
             </Tarjeta>
           </>
