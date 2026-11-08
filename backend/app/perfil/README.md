@@ -1,32 +1,45 @@
-# Perfil (rol A) · núcleo del contrato 04
+# Perfil (rol A) · persistencia, versionado y validación del contrato 04
 
-Estado: **borrador** del contrato [04](../../../docs/proyecto/04_CONTRATO_PERFIL.md). Convive con el v0
-(`modelos.py`, `store.py`, `calculos.py`), que sigue sirviendo la API actual hasta coordinar el cambio
-con front (Fernán) y agentes (Hammad, Pablo).
+`store.py` es la puerta única del perfil. Su API pública es la de la PR #7 y la usan la API
+(`main.py`), los agentes y el MCP. Por debajo, el almacén es intercambiable:
 
 ```
-dominio/        sin E/S: modelos, esquema de rutas, supuestos, cálculos, evaluaciones,
-                restricciones (formato MyInvestor) y máquina de estados
-persistencia/   tablas (SQLAlchemy), motor (Postgres/Supabase o SQLite), repositorio de solo añadir,
-                aplicador de migraciones
-servicios/      perfiles (única puerta de escritura), sesiones y bus de eventos
+PERFIL_ALMACEN=memoria   (por defecto) en memoria, con volcado a JSON en backend/data/
+PERFIL_ALMACEN=bd        base de datos: DATABASE_URL de Supabase (Postgres) o sqlite:///...
+```
+
+```
+store.py          algoritmo de escritura (una vez para ambos almacenes) y estados
+validacion.py     validación estricta de entrada: rutas, tipos, autoría, evidencia, marcas
+personal.py       capa personal separada, con consentimiento propio (RGPD)
+calculos.py       lógica financiera de la PR #7 (sin cambios): idoneidad, conveniencia, restricciones
+modelos.py        modelos del contrato 04 (PR #7) + trazabilidad de alertas (opcional)
+eventos.py        bus de eventos para el SSE del panel en vivo
+almacenes/        memoria.py y bd.py, con la misma interfaz (base.py)
+persistencia/     tablas, motor (Postgres/SQLite) y aplicador de migraciones
 ../../migraciones/  SQL numerado para Postgres/Supabase
 ```
 
-## Reglas que garantiza el código
+## Garantías
 
-- Nada se sobrescribe: cada cambio es una versión nueva con motivo y autor. La base bloquea `UPDATE` y
-  `DELETE` en `profile_versions` y `turns` (también para el rol `postgres`).
-- Los números los calculan funciones deterministas; un agente no puede escribir un dato calculado.
-- Un dato sacado de la conversación (`agent:*`) necesita evidencia.
-- Solo `active` (validado por una persona) es usable para recomendar.
-- La capa personal está aparte y se puede borrar (RGPD) sin tocar el registro MiFID.
-- Todos los supuestos del equipo están en `dominio/supuestos.py`.
+- **Nada se sobrescribe.** Cada cambio es una versión nueva con motivo y autor. En base de datos, la
+  propia base bloquea `UPDATE`, `DELETE` y `TRUNCATE` del registro y de la transcripción. El reinicio de
+  la demo añade una versión (no borra el historial) y el consumidor deja de servir activos anteriores.
+- **Validación estricta.** Rutas de `modelos.CAMPOS` con su tipo (422 si no); nadie escribe datos
+  calculados (409); solo la entidad escribe `source=advisor`; un dato de un agente lleva evidencia.
+- **Estados.** Solo se valida desde `draft` o `pending_validation`; desde `review_due` hay que
+  reentrevistar. Al validar se cierran las alertas abiertas (regla de la PR #7) y queda quién lo hizo.
+- **Capa personal aparte.** Se une al perfil al leerlo; sin consentimiento no se guarda nada; se puede
+  borrar sin tocar el registro MiFID.
+- **Concurrencia optimista**: si otra escritura (de este u otro proceso) se adelanta, se relee y reintenta.
+
+## Seguridad de la API (main.py)
+
+- `ADMIN_TOKEN`: si se define, `POST /validate` y `POST /api/demo/reset` exigen la cabecera
+  `X-Admin-Token`. Sin definir (desarrollo), no se pide, para no romper el front.
+- `DEMO_ENDPOINTS=0` desactiva `/api/demo/reset` (para un despliegue público).
 
 ## Base de datos
-
-- Sin `DATABASE_URL`: SQLite local en `backend/data/` (se crea sola).
-- Con `DATABASE_URL` de Supabase: hay que aplicar antes las migraciones.
 
 ```bash
 cd backend
@@ -40,5 +53,6 @@ python -m app.perfil.persistencia.migrar --aplicar  # aplica (con autorización 
 cd backend && python -m pytest -q
 ```
 
-Para repetirlos también contra un Postgres **local y desechable** (nunca Supabase: se borra entero):
+Los tests de contrato (API, MCP y store) se repiten con cada almacén. Para añadir un Postgres **local y
+desechable** (nunca Supabase; se vacía en cada test y debe llevar `test` en el nombre):
 `TEST_POSTGRES_URL=postgresql://usuario@127.0.0.1:5432/perfil_test python -m pytest -q`

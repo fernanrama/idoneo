@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 
 from app.main import app  # noqa: E402
 from app.perfil import calculos, store  # noqa: E402
-from app.perfil.modelos import Parche  # noqa: E402
+from app.perfil.modelos import Evidencia, Parche  # noqa: E402
 
 C = "/api/clients/carmen-68"
 
@@ -64,7 +64,9 @@ def test_validar_activa_cierra_alertas_y_versiona():
 def test_cambio_de_agente_sobre_activo_pide_revision_y_consumidor_ve_el_activo():
     c = cliente()
     c.post(f"{C}/validate", json={"advisor_id": "asesor-07"})
-    store.aplicar("carmen-68", [Parche(path="objectives.o1.horizon_years", value=1, source="declared")],
+    # Un dato del extractor lleva su evidencia (regla 4 del contrato 04; la exige store desde la integración).
+    ev = [Evidencia(session_id="s-x", turn_id="t-001", t=(1.0, 3.0), quote="Lo necesito el año que viene.")]
+    store.aplicar("carmen-68", [Parche(path="objectives.o1.horizon_years", value=1, source="declared", evidence=ev)],
                   "life_event:herencia", "agent:extractor")
     assert c.get(f"{C}/profile").json()["status"] == "review_due"
     r = c.get(f"{C}/constraints").json()

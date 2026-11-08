@@ -82,6 +82,10 @@ class Alerta(BaseModel):
     evidence: list[Evidencia] = Field(default_factory=list)
     status: EstadoAlerta = EstadoAlerta.open
     created_at: datetime = Field(default_factory=ahora)
+    # Trazabilidad (añadido en la integración de persistencia; opcional, no rompe al front).
+    created_by: str | None = None
+    resolved_by: str | None = None
+    resolved_at: datetime | None = None
 
 
 class PerfilRiesgo(str, Enum):  # mismos valores que `profile` en search_portfolios de MyInvestor

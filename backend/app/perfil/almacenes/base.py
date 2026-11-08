@@ -1,0 +1,54 @@
+"""Interfaz común de los almacenes del perfil.
+
+Los almacenes solo guardan y leen: no validan, no calculan y no deciden estados. Todo eso lo hace
+`store.py` una única vez, así que el almacén en memoria y el de base de datos se comportan igual.
+
+Garantías que debe cumplir cualquier almacén:
+- `insertar` nunca sobrescribe: si la versión ya existe, lanza ConflictoVersion.
+- `insertar_turno` es idempotente por `turn_id` y asigna `t-001`, `t-002`… si no viene.
+- la capa personal se guarda aparte del perfil y se puede borrar sin tocar las versiones.
+"""
+
+from __future__ import annotations
+
+from datetime import datetime
+from typing import Any, Protocol
+
+from ..modelos import Perfil, Turno
+from ..personal import CapaPersonal
+
+
+class ConflictoVersion(Exception):
+    """Otra escritura ya creó esa versión: hay que releer y reintentar."""
+
+
+class Almacen(Protocol):
+    tipo: str
+
+    # perfil (capa MiFID), de solo añadir
+    def ultima(self, client_id: str) -> Perfil | None: ...
+    def version(self, client_id: str, version: int) -> Perfil | None: ...
+    def ultima_activa(self, client_id: str, desde: int) -> Perfil | None: ...
+    def ultima_de_autor(self, client_id: str, autor: str) -> int | None: ...
+    def historial(self, client_id: str) -> list[dict[str, Any]]: ...
+    def crear(self, perfil: Perfil) -> bool: ...
+    def insertar(self, perfil: Perfil) -> None: ...
+
+    # capa personal
+    def ultima_personal(self, client_id: str) -> CapaPersonal | None: ...
+    def insertar_personal(self, capa: CapaPersonal) -> None: ...
+    def borrar_personal(self, client_id: str) -> int: ...
+
+    # sesiones y transcripción
+    def crear_sesion(self, session_id: str, client_id: str, canal: str, momento: datetime) -> None: ...
+    def sesion(self, session_id: str) -> dict[str, Any] | None: ...
+    def insertar_turno(self, session_id: str, turno: Turno, momento: datetime) -> tuple[Turno, bool]: ...
+    def turnos(self, session_id: str) -> list[Turno]: ...
+
+    def reiniciar(self) -> None: ...  # solo tests
+    def cerrar(self) -> None: ...
+
+
+def id_turno(indice: int) -> str:
+    """Mismo formato que la PR #7: t-001, t-002…"""
+    return f"t-{indice + 1:03d}"

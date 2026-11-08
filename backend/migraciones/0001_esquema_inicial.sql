@@ -83,10 +83,23 @@ create trigger turns_solo_anadir
     before update or delete on turns
     for each row execute function perfil_bloquear_cambio();
 
--- En la capa personal se permite DELETE (derecho de supresión), pero no UPDATE.
+-- En la capa personal se permite DELETE (derecho de supresión, cliente a cliente), pero no UPDATE.
 create trigger personal_versions_sin_update
     before update on personal_versions
     for each row execute function perfil_bloquear_cambio();
+
+-- TRUNCATE no dispara los triggers por fila: se bloquea aparte, por sentencia (también con CASCADE).
+create trigger profile_versions_sin_truncate
+    before truncate on profile_versions
+    for each statement execute function perfil_bloquear_cambio();
+
+create trigger turns_sin_truncate
+    before truncate on turns
+    for each statement execute function perfil_bloquear_cambio();
+
+create trigger personal_versions_sin_truncate
+    before truncate on personal_versions
+    for each statement execute function perfil_bloquear_cambio();
 
 -- Row Level Security sin políticas: nadie accede por la Data API de Supabase.
 -- El backend conecta con el rol postgres, que no está sujeto a RLS.

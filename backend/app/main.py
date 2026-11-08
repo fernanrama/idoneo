@@ -7,6 +7,8 @@ Docs interactivas: http://localhost:8000/docs
 
 from __future__ import annotations
 
+import hmac
+import logging
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -15,7 +17,7 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")  # .env en la raíz del repo
 
-from fastapi import BackgroundTasks, FastAPI, HTTPException  # noqa: E402
+from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from pydantic import BaseModel  # noqa: E402
 
@@ -25,14 +27,16 @@ from .mcp.servidor import mcp  # noqa: E402
 from .perfil import calculos, store  # noqa: E402
 from .perfil.modelos import Parche, Perfil, Restricciones, Turno  # noqa: E402
 
+log = logging.getLogger("perfil.api")
 
 mcp_app = mcp.streamable_http_app()  # crea el gestor de sesiones MCP; se monta al final del archivo
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    store.tipo_almacen()  # configura el almacén (PERFIL_ALMACEN) y falla pronto si la base no está lista
     if os.getenv("LOAD_DEMO_FIXTURE", "1") == "1":
-        store.cargar_fixture("carmen-68")
+        store.asegurar_fixture("carmen-68")  # solo si falta: no pisa datos guardados en la base
     async with mcp.session_manager.run():
         yield
 
@@ -54,6 +58,16 @@ def _llamar(fn, *args, **kwargs):
         raise HTTPException(404, f"No encontrado: {e}") from e
     except store.Conflicto as e:
         raise HTTPException(409, str(e)) from e
+    except store.DatoInvalido as e:
+        raise HTTPException(422, str(e)) from e
+
+
+def requiere_admin(x_admin_token: str | None = Header(default=None)) -> None:
+    """Si ADMIN_TOKEN está definido, las escrituras de la entidad y de la demo exigen esa cabecera.
+    Sin ADMIN_TOKEN (desarrollo local) no se pide nada, para no romper el front."""
+    esperado = os.getenv("ADMIN_TOKEN", "")
+    if esperado and not hmac.compare_digest((x_admin_token or "").encode(), esperado.encode()):
+        raise HTTPException(401, "Falta o no es válida la cabecera X-Admin-Token")
 
 
 class NuevaSesion(BaseModel):
@@ -75,18 +89,33 @@ def health():
 
 @app.post("/api/sessions")
 def crear_sesion(body: NuevaSesion):
-    return store.crear_sesion(body.client_id)
+    return _llamar(store.crear_sesion, body.client_id, body.channel)
+
+
+def _validos(parches: list[Parche], autor: str) -> list[Parche]:
+    """Descarta (y registra) solo los parches inválidos, para no perder el resto del lote."""
+    buenos = []
+    for p in parches:
+        try:
+            store.comprobar_parche(p, autor)
+            buenos.append(p)
+        except (store.DatoInvalido, store.Conflicto) as e:
+            log.warning("Parche descartado (%s): %s", p.path, e)
+    return buenos
 
 
 async def _procesar_turno(session_id: str) -> None:
-    s = store.sesion(session_id)
-    cid, turnos = s["client_id"], s["turns"]
-    parches = await extractor.extraer(turnos[-6:], store.perfil(cid), session_id)
-    if parches:
-        store.aplicar(cid, parches, f"extractor · {session_id}", "agent:extractor")
-    alertas = await verificador.verificar(store.perfil(cid), turnos)
-    if alertas:
-        store.anadir_alertas(cid, alertas)
+    try:
+        s = store.sesion(session_id)
+        cid, turnos = s["client_id"], s["turns"]
+        parches = _validos(await extractor.extraer(turnos[-6:], store.perfil(cid), session_id), "agent:extractor")
+        if parches:
+            store.aplicar(cid, parches, f"extractor · {session_id}", "agent:extractor")
+        alertas = await verificador.verificar(store.perfil(cid), turnos)
+        if alertas:
+            store.anadir_alertas(cid, alertas)
+    except Exception:  # una tarea en segundo plano no debe fallar en silencio
+        log.exception("Error procesando el turno de %s", session_id)
 
 
 @app.post("/api/sessions/{session_id}/turns", status_code=202)
@@ -115,7 +144,7 @@ def ver_versiones(client_id: str):
     return _llamar(store.versiones, client_id)
 
 
-@app.post("/api/clients/{client_id}/validate", response_model=Perfil)
+@app.post("/api/clients/{client_id}/validate", response_model=Perfil, dependencies=[Depends(requiere_admin)])
 def validar(client_id: str, body: Validacion):
     return _llamar(store.validar, client_id, body.advisor_id, body.changes)
 
@@ -141,10 +170,13 @@ async def ver_contexto(client_id: str):
     return {"client_id": client_id, "text": await contexto.resumen(p)}
 
 
-@app.post("/api/demo/reset")
+@app.post("/api/demo/reset", dependencies=[Depends(requiere_admin)])
 def reset_demo():
-    """Vuelve a cargar el perfil simulado de Carmen (útil antes de cada ensayo)."""
-    return store.cargar_fixture("carmen-68")
+    """Vuelve a cargar el perfil simulado de Carmen (útil antes de cada ensayo).
+    Añade una versión nueva: el historial no se borra. Se apaga con DEMO_ENDPOINTS=0."""
+    if os.getenv("DEMO_ENDPOINTS", "1") != "1":
+        raise HTTPException(404, "Endpoint de demo desactivado")
+    return _llamar(store.cargar_fixture, "carmen-68")
 
 
 # ---------- MCP ----------
