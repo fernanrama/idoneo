@@ -18,3 +18,7 @@ build/
 # Paquetes de transporte temporales
 bootstrap-documentacion.zip
 hack-finance-bootstrap-documentacion.zip
+
+# Enunciado oficial: solo local, no se redistribuye (el repo será visible para el jurado)
+gestion/enunciado/
+backend/data/

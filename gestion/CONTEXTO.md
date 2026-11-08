@@ -3,6 +3,14 @@
 ## Objetivo actual
 Dejar preparada la gestión integral del hackathon: repositorio, ideas, producto, desarrollo, evaluación, aprendizaje, demo, presentación y entrega. Las seis notas iniciales están creadas. El enunciado ha sido aportado y analizado por dirección; compartir el análisis y contrastar candidatas con el equipo antes de elegir producto y arquitectura. Fuente: [ANALISIS_INICIAL.md](estrategia/ANALISIS_INICIAL.md).
 
+## Actualización 8/11 tarde — desarrollo iniciado
+- **Producto: Idóneo** (D-008), indicado por Fernán: el equipo empieza a desarrollarlo. Diseño de Alejandro en [docs/DISENO.md](../docs/DISENO.md). Demanda, novedad y encaje con los patrocinadores siguen siendo hipótesis por validar.
+- **Repo reorganizado** (D-009): gestión en `gestion/`, producto en `docs/`, código en `backend/` y `frontend/`. Checkout local: `C:\Users\ferna\gcx\hack-finance-uc3m-2026`. La carpeta antigua queda como copia de seguridad.
+- **PDF del enunciado fuera del repo** (D-010): solo en local, en `gestion/enunciado/`, porque el repo será visible para el jurado.
+- **Stack v0** (D-011): FastAPI + Next.js + ElevenLabs + Claude + MCP. Backend v0 probado en local (5 tests y arranque con datos simulados de Carmen). Pendiente de las pruebas de voz, del MCP de MyInvestor y del despliegue.
+- Reparto de 4 desarrolladores en [docs/REPARTO.md](../docs/REPARTO.md). Nombres de B y C por asignar; A (Pablo) y D (Fernán) son propuestas.
+- Lo que sigue más abajo es el estado previo a esta actualización; donde contradiga lo anterior, prevalece esta sección.
+
 ## Decisiones vigentes
 - Navegador integrado para investigación web.
 - Dirección general en el chat original; seis chats de especialidad con notas compartidas.
