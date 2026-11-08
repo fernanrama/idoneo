@@ -21,7 +21,7 @@ export const api = {
     pedir<Sesion>("/api/sessions", { method: "POST", body: JSON.stringify({ client_id }) }),
 
   enviarTurno: (session_id: string, turno: Turno) =>
-    pedir<{ turn_index: number }>(`/api/sessions/${session_id}/turns`, {
+    pedir<{ turn_id: string }>(`/api/sessions/${session_id}/turns`, {
       method: "POST",
       body: JSON.stringify(turno),
     }),
@@ -29,15 +29,15 @@ export const api = {
   perfil: (client_id: string) => pedir<Perfil>(`/api/clients/${client_id}/profile`),
 
   versiones: (client_id: string) =>
-    pedir<VersionResumen[]>(`/api/clients/${client_id}/profile/versions`),
+    pedir<VersionResumen[]>(`/api/clients/${client_id}/versions`),
 
   restricciones: (client_id: string) =>
     pedir<Restricciones>(`/api/clients/${client_id}/constraints`),
 
   validar: (client_id: string, advisor_id: string) =>
-    pedir<Perfil>(`/api/clients/${client_id}/profile/validate`, {
+    pedir<Perfil>(`/api/clients/${client_id}/validate`, {
       method: "POST",
-      body: JSON.stringify({ advisor_id, corrections: [] }),
+      body: JSON.stringify({ advisor_id, changes: [] }),
     }),
 
   reiniciarDemo: () => pedir<Perfil>("/api/demo/reset", { method: "POST" }),

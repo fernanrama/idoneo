@@ -3,41 +3,314 @@
   "version": 1,
   "status": "draft",
   "reason": "DATOS SIMULADOS: perfil de ejemplo para desarrollo y demo de respaldo",
+  "author": "fixture",
   "mifid": {
-    "consent.recording": {"value": true, "source": "declared", "updated_by": "fixture",
-      "evidence": [{"session_id": "s-demo", "t_start": 8.0, "t_end": 10.5, "quote": "Sí, de acuerdo, puede grabar."}]},
-    "consent.ai_notice": {"value": true, "source": "declared", "updated_by": "fixture",
-      "evidence": [{"session_id": "s-demo", "t_start": 14.0, "t_end": 15.2, "quote": "Entendido, es un asistente."}]},
-    "knowledge.investment_funds": {"value": "basic", "declared": "high", "source": "demonstrated", "confidence": 0.8,
-      "updated_by": "fixture", "flags": ["declared_vs_demonstrated"],
-      "evidence": [{"session_id": "s-demo", "t_start": 212.4, "t_end": 219.8, "quote": "Eso no puede pasar, el fondo es del banco."}]},
-    "knowledge.equity_risk": {"value": "none", "declared": "high", "source": "demonstrated", "confidence": 0.86,
-      "updated_by": "fixture", "flags": ["declared_vs_demonstrated"],
-      "evidence": [{"session_id": "s-demo", "t_start": 212.4, "t_end": 219.8, "quote": "Eso no puede pasar, el fondo es del banco."}]},
-    "financial.monthly_income_eur": {"value": 1450, "source": "declared", "confidence": 0.9, "updated_by": "fixture",
-      "evidence": [{"session_id": "s-demo", "t_start": 61.0, "t_end": 64.0, "quote": "Cobro unos mil cuatrocientos cincuenta de pensión."}]},
-    "financial.monthly_fixed_costs_eur": {"value": 900, "source": "declared", "confidence": 0.7, "updated_by": "fixture",
-      "evidence": [{"session_id": "s-demo", "t_start": 70.0, "t_end": 75.0, "quote": "Entre luz, comunidad y la compra, unos novecientos."}]},
-    "financial.liquid_savings_eur": {"value": 80000, "source": "declared", "confidence": 0.9, "updated_by": "fixture",
-      "evidence": [{"session_id": "s-demo", "t_start": 80.0, "t_end": 84.0, "quote": "Tengo ochenta mil en depósitos."}]},
-    "financial.debts_eur": {"value": 0, "source": "declared", "confidence": 0.9, "updated_by": "fixture",
-      "evidence": [{"session_id": "s-demo", "t_start": 86.0, "t_end": 87.5, "quote": "No debo nada, la casa está pagada."}]},
-    "objective.goal": {"value": "complementar la pensión", "source": "declared", "confidence": 0.9, "updated_by": "fixture",
-      "evidence": [{"session_id": "s-demo", "t_start": 120.0, "t_end": 124.0, "quote": "Quiero tener un dinerito extra cada mes."}]},
-    "objective.horizon_years": {"value": 10, "source": "declared", "confidence": 0.7, "updated_by": "fixture",
-      "evidence": [{"session_id": "s-demo", "t_start": 130.0, "t_end": 133.0, "quote": "Para los próximos diez años, más o menos."}]},
-    "risk.reaction_to_drop": {"value": "vendería todo", "source": "demonstrated", "confidence": 0.85, "updated_by": "fixture",
-      "evidence": [{"session_id": "s-demo", "t_start": 250.0, "t_end": 254.0, "quote": "Si baja un veinte por ciento, lo saco todo."}]},
-    "risk.tolerance": {"value": "low", "declared": "medium", "source": "demonstrated", "confidence": 0.8, "updated_by": "fixture",
-      "flags": ["declared_vs_demonstrated"],
-      "evidence": [{"session_id": "s-demo", "t_start": 250.0, "t_end": 254.0, "quote": "Si baja un veinte por ciento, lo saco todo."}]},
-    "sustainability.preference": {"value": "none", "source": "declared", "confidence": 0.8, "updated_by": "fixture",
-      "evidence": [{"session_id": "s-demo", "t_start": 300.0, "t_end": 303.0, "quote": "Eso me da igual, mientras no pierda."}]},
-    "sustainability.explained": {"value": true, "source": "declared", "updated_by": "fixture"}
+    "disclosures.ai_notice_ack": {
+      "value": true,
+      "source": "declared",
+      "updated_by": "fixture",
+      "evidence": [
+        {
+          "session_id": "s-demo",
+          "turn_id": "t-002",
+          "t": [
+            8,
+            10.5
+          ],
+          "quote": "Sí, de acuerdo."
+        }
+      ]
+    },
+    "disclosures.purpose_ack": {
+      "value": true,
+      "source": "declared",
+      "updated_by": "fixture",
+      "evidence": [
+        {
+          "session_id": "s-demo",
+          "turn_id": "t-002",
+          "t": [
+            8,
+            10.5
+          ],
+          "quote": "Sí, de acuerdo."
+        }
+      ]
+    },
+    "knowledge.deposits_money_market": {
+      "value": "medium",
+      "source": "demonstrated",
+      "updated_by": "fixture",
+      "evidence": [
+        {
+          "session_id": "s-demo",
+          "turn_id": "t-009",
+          "t": [
+            42,
+            46
+          ],
+          "quote": "Los depósitos los conozco, me dan un poquito al año."
+        }
+      ],
+      "confidence": 0.9,
+      "confidence_basis": "rubric:knowledge.deposits_money_market:v1"
+    },
+    "knowledge.fixed_income_funds": {
+      "value": "medium",
+      "source": "demonstrated",
+      "updated_by": "fixture",
+      "evidence": [
+        {
+          "session_id": "s-demo",
+          "turn_id": "t-010",
+          "t": [
+            47,
+            51
+          ],
+          "quote": "Si suben los tipos, el bono vale menos, eso me lo explicó mi hijo."
+        }
+      ],
+      "confidence": 0.75,
+      "confidence_basis": "rubric:knowledge.fixed_income_funds:v1"
+    },
+    "knowledge.equity_funds": {
+      "value": "none",
+      "source": "demonstrated",
+      "updated_by": "fixture",
+      "evidence": [
+        {
+          "session_id": "s-demo",
+          "turn_id": "t-012",
+          "t": [
+            57,
+            61
+          ],
+          "quote": "Eso no puede pasar, el fondo es del banco."
+        }
+      ],
+      "declared": "high",
+      "confidence": 0.86,
+      "confidence_basis": "rubric:knowledge.equity_funds:v1",
+      "flags": [
+        "declared_vs_demonstrated"
+      ]
+    },
+    "financial.net_monthly_income_eur": {
+      "value": 1450,
+      "source": "declared",
+      "updated_by": "fixture",
+      "evidence": [
+        {
+          "session_id": "s-demo",
+          "turn_id": "t-008",
+          "t": [
+            34,
+            41
+          ],
+          "quote": "Cobro unos mil cuatrocientos cincuenta de pensión."
+        }
+      ],
+      "confidence": 0.9
+    },
+    "financial.income_stability": {
+      "value": "stable",
+      "source": "declared",
+      "updated_by": "fixture",
+      "evidence": [
+        {
+          "session_id": "s-demo",
+          "turn_id": "t-008",
+          "t": [
+            34,
+            41
+          ],
+          "quote": "Cobro unos mil cuatrocientos cincuenta de pensión."
+        }
+      ],
+      "confidence": 0.9
+    },
+    "financial.fixed_monthly_costs_eur": {
+      "value": 900,
+      "source": "declared",
+      "updated_by": "fixture",
+      "evidence": [
+        {
+          "session_id": "s-demo",
+          "turn_id": "t-008",
+          "t": [
+            34,
+            41
+          ],
+          "quote": "Entre luz, comunidad y la compra, unos novecientos."
+        }
+      ],
+      "confidence": 0.7
+    },
+    "financial.liquid_savings_eur": {
+      "value": 80000,
+      "source": "declared",
+      "updated_by": "fixture",
+      "evidence": [
+        {
+          "session_id": "s-demo",
+          "turn_id": "t-010",
+          "t": [
+            46,
+            51
+          ],
+          "quote": "Tengo ochenta mil en depósitos."
+        }
+      ],
+      "confidence": 0.9
+    },
+    "financial.debts_eur": {
+      "value": 0,
+      "source": "declared",
+      "updated_by": "fixture",
+      "evidence": [
+        {
+          "session_id": "s-demo",
+          "turn_id": "t-010",
+          "t": [
+            46,
+            51
+          ],
+          "quote": "No debo nada, la casa está pagada."
+        }
+      ],
+      "confidence": 0.9
+    },
+    "objectives.o1.goal": {
+      "value": "complementar la pensión",
+      "source": "declared",
+      "updated_by": "fixture",
+      "evidence": [
+        {
+          "session_id": "s-demo",
+          "turn_id": "t-004",
+          "t": [
+            16,
+            20
+          ],
+          "quote": "Quiero tener un dinerito extra cada mes para complementar la pensión."
+        }
+      ],
+      "confidence": 0.9
+    },
+    "objectives.o1.horizon_years": {
+      "value": 10,
+      "source": "declared",
+      "updated_by": "fixture",
+      "evidence": [
+        {
+          "session_id": "s-demo",
+          "turn_id": "t-006",
+          "t": [
+            25,
+            28
+          ],
+          "quote": "Para los próximos diez años, más o menos."
+        }
+      ],
+      "confidence": 0.7
+    },
+    "objectives.o1.liquidity_need": {
+      "value": "low",
+      "source": "declared",
+      "updated_by": "fixture",
+      "evidence": [
+        {
+          "session_id": "s-demo",
+          "turn_id": "t-006",
+          "t": [
+            25,
+            28
+          ],
+          "quote": "Para los próximos diez años, más o menos."
+        }
+      ],
+      "confidence": 0.6
+    },
+    "risk_tolerance.scenario_score": {
+      "value": 1,
+      "source": "demonstrated",
+      "updated_by": "fixture",
+      "evidence": [
+        {
+          "session_id": "s-demo",
+          "turn_id": "t-014",
+          "t": [
+            71,
+            74
+          ],
+          "quote": "Si baja un veinte por ciento, lo saco todo."
+        }
+      ],
+      "declared": 3,
+      "confidence": 0.85,
+      "confidence_basis": "rubric:risk_tolerance.scenarios:v1",
+      "flags": [
+        "declared_vs_demonstrated"
+      ]
+    },
+    "risk_tolerance.past_behaviour": {
+      "value": "vendería todo ante una caída del 20 %",
+      "source": "demonstrated",
+      "updated_by": "fixture",
+      "evidence": [
+        {
+          "session_id": "s-demo",
+          "turn_id": "t-014",
+          "t": [
+            71,
+            74
+          ],
+          "quote": "Si baja un veinte por ciento, lo saco todo."
+        }
+      ],
+      "confidence": 0.85
+    },
+    "sustainability.preference": {
+      "value": "none",
+      "source": "declared",
+      "updated_by": "fixture",
+      "evidence": [
+        {
+          "session_id": "s-demo",
+          "turn_id": "t-016",
+          "t": [
+            82,
+            85
+          ],
+          "quote": "Eso me da igual, mientras no pierda."
+        }
+      ],
+      "confidence": 0.8
+    },
+    "sustainability.explained": {
+      "value": true,
+      "source": "declared",
+      "updated_by": "fixture",
+      "evidence": []
+    }
   },
   "alerts": [
-    {"id": "a-1", "type": "declared_vs_demonstrated", "field": "knowledge.equity_risk",
-      "message": "Declaró conocer bien la renta variable, pero cree que un fondo del banco no puede perder valor.",
-      "evidence": [{"session_id": "s-demo", "t_start": 212.4, "t_end": 219.8, "quote": "Eso no puede pasar, el fondo es del banco."}]}
+    {
+      "id": "a-1",
+      "path": "knowledge.equity_funds",
+      "flag": "declared_vs_demonstrated",
+      "message": "Declaró conocer bien los fondos de renta variable, pero cree que un fondo del banco no puede perder valor.",
+      "evidence": [
+        {
+          "session_id": "s-demo",
+          "turn_id": "t-012",
+          "t": [
+            57,
+            61
+          ],
+          "quote": "Eso no puede pasar, el fondo es del banco."
+        }
+      ]
+    }
   ]
 }

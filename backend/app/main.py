@@ -1,5 +1,6 @@
-"""API REST de Idóneo (contrato v0, ver docs/CONTRATOS.md).
+"""API REST (contrato v1).
 
+Especificación: docs/proyecto/04_CONTRATO_PERFIL.md; implementación y desviaciones: docs/CONTRATOS.md.
 Arranque:  uvicorn app.main:app --reload --port 8000   (desde backend/)
 Docs interactivas: http://localhost:8000/docs
 """
@@ -14,14 +15,14 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")  # .env en la raíz del repo
 
-from fastapi import BackgroundTasks, FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from fastapi import BackgroundTasks, FastAPI, HTTPException  # noqa: E402
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
+from pydantic import BaseModel  # noqa: E402
 
-from . import voz
-from .agentes import contexto, extractor, verificador
-from .perfil import calculos, store
-from .perfil.modelos import ActualizacionCampo, Autor, Perfil, Restricciones, Turno
+from . import voz  # noqa: E402
+from .agentes import contexto, extractor, verificador  # noqa: E402
+from .perfil import calculos, store  # noqa: E402
+from .perfil.modelos import Parche, Perfil, Restricciones, Turno  # noqa: E402
 
 
 @asynccontextmanager
@@ -31,7 +32,7 @@ async def lifespan(_app: FastAPI):
     yield
 
 
-app = FastAPI(title="Idóneo API", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="API del perfil", version="1.0.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=os.getenv("CORS_ORIGINS", "http://localhost:3000").split(","),
@@ -41,20 +42,23 @@ app.add_middleware(
 app.include_router(voz.router)
 
 
-def _404(fn, *args, **kwargs):
+def _llamar(fn, *args, **kwargs):
     try:
         return fn(*args, **kwargs)
     except store.NoEncontrado as e:
         raise HTTPException(404, f"No encontrado: {e}") from e
+    except store.Conflicto as e:
+        raise HTTPException(409, str(e)) from e
 
 
 class NuevaSesion(BaseModel):
     client_id: str | None = None
+    channel: str = "voice"  # "voice" | "text"
 
 
 class Validacion(BaseModel):
     advisor_id: str
-    corrections: list[ActualizacionCampo] = []
+    changes: list[Parche] = []
 
 
 @app.get("/api/health")
@@ -72,9 +76,9 @@ def crear_sesion(body: NuevaSesion):
 async def _procesar_turno(session_id: str) -> None:
     s = store.sesion(session_id)
     cid, turnos = s["client_id"], s["turns"]
-    cambios = await extractor.extraer(turnos[-6:], store.perfil(cid), session_id)
-    if cambios:
-        store.aplicar(cid, cambios, f"extractor · sesión {session_id}", Autor.extractor)
+    parches = await extractor.extraer(turnos[-6:], store.perfil(cid), session_id)
+    if parches:
+        store.aplicar(cid, parches, f"extractor · {session_id}", "agent:extractor")
     alertas = await verificador.verificar(store.perfil(cid), turnos)
     if alertas:
         store.anadir_alertas(cid, alertas)
@@ -82,52 +86,54 @@ async def _procesar_turno(session_id: str) -> None:
 
 @app.post("/api/sessions/{session_id}/turns", status_code=202)
 def anadir_turno(session_id: str, turno: Turno, tareas: BackgroundTasks):
-    idx = _404(store.anadir_turno, session_id, turno)
+    t = _llamar(store.anadir_turno, session_id, turno)
     if turno.speaker == "client":
         tareas.add_task(_procesar_turno, session_id)
-    return {"turn_index": idx}
+    return {"turn_id": t.turn_id}
 
 
 @app.get("/api/sessions/{session_id}")
 def ver_sesion(session_id: str):
-    return _404(store.sesion, session_id)
+    return _llamar(store.sesion, session_id)
 
 
 # ---------- perfil ----------
 
 @app.get("/api/clients/{client_id}/profile", response_model=Perfil)
 def ver_perfil(client_id: str, version: int | None = None):
-    return _404(store.perfil, client_id, version)
+    """Última versión en cualquier estado (el front la necesita durante la entrevista)."""
+    return _llamar(store.perfil, client_id, version)
 
 
-@app.get("/api/clients/{client_id}/profile/versions")
+@app.get("/api/clients/{client_id}/versions")
 def ver_versiones(client_id: str):
-    return _404(store.versiones, client_id)
+    return _llamar(store.versiones, client_id)
 
 
-@app.post("/api/clients/{client_id}/profile/validate", response_model=Perfil)
+@app.post("/api/clients/{client_id}/validate", response_model=Perfil)
 def validar(client_id: str, body: Validacion):
-    _404(store.perfil, client_id)
-    return store.validar(client_id, body.advisor_id, body.corrections)
+    return _llamar(store.validar, client_id, body.advisor_id, body.changes)
 
 
 @app.get("/api/clients/{client_id}/constraints", response_model=Restricciones)
 def ver_restricciones(client_id: str):
-    return calculos.restricciones(_404(store.perfil, client_id))
+    """Para consumidores: perfil activo más reciente; si no hay, el último con usable=false."""
+    return calculos.restricciones(_llamar(store.perfil_para_consumidor, client_id))
 
 
-@app.get("/api/clients/{client_id}/evidence/{field}")
-def ver_evidencia(client_id: str, field: str):
-    p = _404(store.perfil, client_id)
-    if field not in p.mifid:
-        raise HTTPException(404, f"Campo sin datos: {field}")
-    c = p.mifid[field]
-    return {"field": field, "value": c.value, "source": c.source, "evidence": c.evidence}
+@app.get("/api/clients/{client_id}/evidence/{path}")
+def ver_evidencia(client_id: str, path: str):
+    p = _llamar(store.perfil, client_id)
+    if path not in p.mifid:
+        raise HTTPException(404, f"Campo sin datos: {path}")
+    f = p.mifid[path]
+    return {"path": path, "value": f.value, "source": f.source, "evidence": f.evidence}
 
 
 @app.get("/api/clients/{client_id}/context")
 async def ver_contexto(client_id: str):
-    return {"client_id": client_id, "text": await contexto.resumen(_404(store.perfil, client_id))}
+    p = _llamar(store.perfil_para_consumidor, client_id)
+    return {"client_id": client_id, "text": await contexto.resumen(p)}
 
 
 @app.post("/api/demo/reset")
