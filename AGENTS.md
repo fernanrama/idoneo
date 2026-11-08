@@ -7,7 +7,10 @@ Ayudar al equipo a maximizar sus posibilidades de ganar Hack Finance UC3M, const
 - Fernán está inscrito. El evento empieza el domingo 8 por la mañana, cuando entregan el enunciado, y termina el jueves 12.
 - Equipo, segmentación provisional de los nombres recibidos: Juan Fernández; Hammad Bellachhab; Fernán Rama Hombreiro; Rodrigo Manchado Cano; Pablo Cobo; Alejandro Serrano. No inferir identidades de LinkedIn ni competencias a partir de nombres.
 - Fernán prevé centrarse en desarrollo de aplicación y necesita apoyo en finanzas. No hay reparto definitivo de tareas.
-- Enunciado, rúbrica, datos, APIs, reglas de uso de IA y entregables detallados: pendientes. No inventarlos.
+- Fernán ha aportado el PDF del enunciado; dirección lo ha leído y contrastado. Análisis y fuentes: estrategia/ANALISIS_INICIAL.md. El original solo está en el equipo local; la huella comunicada y los límites de comprobación cloud constan allí. No suponer que agota las bases. Datos, APIs y reglas completas de uso de IA siguen por confirmar.
+- Rúbrica comunicada: innovación y viabilidad 30 %, IA frontera 15 %, UX y accesibilidad 15 %, implementación y código 30 %, presentación 10 %. Voz no obligatoria según Fernán; confirmar aplicación del criterio de IA.
+- Entrega: GitHub accesible al jurado, ZIP de GitHub, README reproducible, PDF de una cara y PowerPoint, por formulario BEST; demo de la misma versión. Fernán indica miércoles 23:59: fecha provisional 11/11/2026, zona de Madrid supuesta por confirmar. Presentación de unos diez minutos estimada, no confirmada. No cambiar permisos ni enviar sin autorización aplicable.
+- Recursos comunicados: 400 € en créditos Claude y ElevenLabs Creator; límites, titular, periodo y APIs habilitadas pendientes. No hay idea ni stack elegidos ni demanda validada.
 - Contexto público consultado: agente financiero; BEST UC3M; colaboradores Anthropic/Claude, MyInvestor, ElevenLabs y GPTAdvisor. Fuentes: https://mew.bestuc3m.es/hackathon-2026/ y https://eventos.uc3m.es/agenda/show_event/159783/hack-finance.html . La cabecera de la segunda discrepa en el mes; el usuario confirma noviembre.
 
 ## Coordinación
@@ -26,7 +29,7 @@ Ayudar al equipo a maximizar sus posibilidades de ganar Hack Finance UC3M, const
 - Distinguir cálculos deterministas de resultados del modelo. Medir precisión, coste, latencia y fallos cuando el reto lo requiera; no inventar métricas.
 - Enseñar a Fernán lo necesario para comprender y defender decisiones. Explicaciones cortas, ejemplos y comprobaciones de comprensión; no confundir exposición con dominio.
 - Preparar pitch y pruebas desde el principio. Identificar datos simulados y límites reales del MVP.
-- Antes del enunciado, preparar documentación operativa breve; no elegir producto o stack ni fabricar requisitos. El usuario traerá el enunciado en la siguiente sesión, que denomina mañana. No ejecutar el calendario provisional como si ya se hubiera recibido.
+- La fase previa al enunciado queda como antecedente. Ahora contrastar candidatas y restricciones según estrategia/ANALISIS_INICIAL.md; elegir producto y stack solo con el equipo. No fabricar requisitos, validaciones ni métricas. Esta actualización documental no inicia código ni selecciona idea.
 - Leer coordinacion/FLUJO.md y README.md para el mapa de documentos y protocolo de trabajo. Actualizar evidencia y siguiente acción al cerrar cada sesión significativa.
 - Nunca guardar claves API, tokens, contraseñas o datos personales financieros en Markdown, código, commits o mensajes de coordinación. Registrar solo nombres de variables y estado de acceso.
 - Priorizar Codex Cloud para tareas de repositorio acotadas que puedan ejecutarse sin el PC encendido. Usar local para verificación interactiva o herramientas locales cuando convenga. Consultar coordinacion/CLOUD_Y_LOCAL.md; los seis roles pueden ejecutarse en cualquiera de los entornos con contexto actualizado.
