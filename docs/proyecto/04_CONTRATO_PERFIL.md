@@ -160,10 +160,10 @@ Reglas de versiones:
   "portfolios_query": {"risk_max": 1, "profile": "CONSERVADOR"},
   "post_filters": [
     {"field": "redemption_lag_days", "op": "<=", "value": 3, "why": "liquidity_need"},
-    {"field": "fixed_income_term", "op": "in", "value": ["corto", "medio"], "why": "horizon_years"},
+    {"field": "fixed_income_term", "op": "in", "value": ["Corto plazo"], "why": "horizon_years"},
     {"field": "sustainability_article", "op": ">=", "value": 8, "why": "sustainability"},
     {"field": "top_sectors", "op": "not_contains", "value": ["Defensa", "Tabaco"], "why": "exclusions"},
-    {"field": "min_initial_investment", "op": "<=", "value": 20000, "why": "objectives.o1.amount_eur"}
+    {"field": "min_initial", "op": "<=", "value": 20000, "why": "objectives.o1.amount_eur"}
   ],
   "appropriateness": {"equity_funds": "not_appropriate", "etfs": "not_appropriate", "stocks": "not_appropriate"},
   "evidence_refs": ["knowledge.equity_funds", "financial.loss_capacity_eur"]

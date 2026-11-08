@@ -27,6 +27,10 @@ Abre http://localhost:8000/docs. Al arrancar se carga a **Carmen**, un perfil co
 
 Tests: `cd backend && python -m pytest -q`
 
+## Servidor MCP
+
+La misma API sirve un servidor MCP en **http://localhost:8000/mcp** (transporte HTTP) con 4 herramientas de solo lectura: `get_client_profile`, `get_investment_constraints`, `get_evidence` y `get_client_context`. Para usarlo en Claude junto al conector de MyInvestor hace falta una URL pública: ver [backend/app/mcp/README.md](backend/app/mcp/README.md). El backend nunca llama al MCP de MyInvestor; eso lo hace el agente en la conversación, como permiten sus términos.
+
 ## Arrancar el frontend
 
 ```bash
