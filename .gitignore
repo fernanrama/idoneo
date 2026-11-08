@@ -1,0 +1,20 @@
+# Credenciales y configuración privada
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Archivos locales y temporales
+.DS_Store
+Thumbs.db
+*.log
+.venv/
+__pycache__/
+node_modules/
+dist/
+build/
+
+# Paquetes de transporte temporales
+bootstrap-documentacion.zip
+hack-finance-bootstrap-documentacion.zip
