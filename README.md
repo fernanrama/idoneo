@@ -1,4 +1,4 @@
-# Real Betis
+# Real Betis Balompié 💚
 
 Onboarding por voz, pensado primero para móvil, que convierte el test MiFID en un **perfil de cliente verificado**: cada dato enlaza con el fragmento de la entrevista que lo justifica, y se detecta cuándo el cliente declara saber algo que luego no demuestra. El perfil se sirve por API y MCP a los agentes de la entidad (GPTadvisor, Claude…), que lo usan, por ejemplo, para filtrar el catálogo real de MyInvestor. Idóneo no recomienda productos.
 
