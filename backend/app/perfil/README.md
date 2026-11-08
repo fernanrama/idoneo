@@ -43,9 +43,14 @@ persistencia/     tablas, motor (Postgres/SQLite) y aplicador de migraciones
 
 ```bash
 cd backend
-python -m app.perfil.persistencia.migrar            # plan: no cambia nada
-python -m app.perfil.persistencia.migrar --aplicar  # aplica (con autorización del responsable)
+python -m app.perfil.persistencia.verificar previo    # solo lectura
+python -m app.perfil.persistencia.verificar ensayo    # aplica y deshace (ROLLBACK)
+python -m app.perfil.persistencia.migrar              # plan: no cambia nada
+python -m app.perfil.persistencia.migrar --aplicar    # aplica (con autorización del responsable)
+python -m app.perfil.persistencia.verificar posterior --prueba-escritura
 ```
+
+Procedimiento completo, qué esperar y qué hacer si falla: [backend/migraciones/README.md](../../migraciones/README.md).
 
 ## Tests
 

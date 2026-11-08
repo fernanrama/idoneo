@@ -93,5 +93,5 @@ turns = Table(
 )
 
 # Tablas protegidas contra UPDATE/DELETE (y en personal_versions, solo contra UPDATE).
-SOLO_ANADIR = ("profile_versions", "turns")
+SOLO_ANADIR = ("clients", "profile_versions", "turns")
 SIN_UPDATE = ("personal_versions",)

@@ -69,11 +69,18 @@ create table turns (
 
 -- Nada se sobrescribe: UPDATE y DELETE bloqueados en el registro (también para el rol postgres).
 create function perfil_bloquear_cambio() returns trigger
-language plpgsql as $$
+language plpgsql
+set search_path = ''  -- búsqueda fija (aviso "Function Search Path Mutable" del asesor de Supabase)
+as $$
 begin
     raise exception 'La tabla % es de solo añadir: % no está permitido', tg_table_name, tg_op;
 end
 $$;
+
+-- Un cliente, una vez creado, no se modifica ni se borra (sus versiones dependen de él).
+create trigger clients_solo_anadir
+    before update or delete on clients
+    for each row execute function perfil_bloquear_cambio();
 
 create trigger profile_versions_solo_anadir
     before update or delete on profile_versions
@@ -89,6 +96,10 @@ create trigger personal_versions_sin_update
     for each row execute function perfil_bloquear_cambio();
 
 -- TRUNCATE no dispara los triggers por fila: se bloquea aparte, por sentencia (también con CASCADE).
+create trigger clients_sin_truncate
+    before truncate on clients
+    for each statement execute function perfil_bloquear_cambio();
+
 create trigger profile_versions_sin_truncate
     before truncate on profile_versions
     for each statement execute function perfil_bloquear_cambio();
@@ -102,7 +113,8 @@ create trigger personal_versions_sin_truncate
     for each statement execute function perfil_bloquear_cambio();
 
 -- Row Level Security sin políticas: nadie accede por la Data API de Supabase.
--- El backend conecta con el rol postgres, que no está sujeto a RLS.
+-- El backend conecta con el rol postgres, dueño de las tablas y con BYPASSRLS en Supabase.
+-- (En Supabase, el disparador de eventos ensure_rls también lo activa: repetirlo no falla.)
 alter table clients enable row level security;
 alter table profile_versions enable row level security;
 alter table personal_versions enable row level security;

@@ -108,6 +108,9 @@ def aplicar(motor: Engine, directorio: Path = DIR_MIGRACIONES) -> list[str]:
             _ejecutar_script(c, TABLA_REGISTRO)
     for m in lista:
         with motor.begin() as c:  # si falla, esa migración se deshace entera
+            # Tiempos límite: si algo bloquea las tablas, fallar pronto en vez de quedarse esperando.
+            c.execute(text("set local lock_timeout = '10s'"))
+            c.execute(text("set local statement_timeout = '120s'"))
             _ejecutar_script(c, m.sql)
             c.execute(text("insert into schema_migrations (version, nombre, sha256) values (:v, :n, :s)"),
                       {"v": m.version, "n": m.nombre, "s": m.sha256})

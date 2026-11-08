@@ -26,17 +26,27 @@ ALMACENES = ["memoria", "bd-sqlite"] + (["bd-postgres"] if POSTGRES_TEST else []
 MODULOS_CONTRATO = {"test_api", "test_mcp", "test_store_contrato"}
 
 
-def postgres_recien_migrado() -> str:
-    """Vacía el Postgres local de pruebas y aplica las migraciones reales. Devuelve su URL."""
+def postgres_vacio() -> str:
+    """Deja el Postgres local de pruebas sin ningún objeto en public (sin migrar). Devuelve su URL."""
     from sqlalchemy import text
 
-    from app.perfil.persistencia import db, migrar
+    from app.perfil.persistencia import db
 
     url = url_de_prueba(POSTGRES_TEST)
     motor = db.crear_motor(url)
     with motor.begin() as c:
         c.execute(text("drop schema public cascade"))
         c.execute(text("create schema public"))
+    motor.dispose()
+    return url
+
+
+def postgres_recien_migrado() -> str:
+    """Vacía el Postgres local de pruebas y aplica las migraciones reales. Devuelve su URL."""
+    from app.perfil.persistencia import db, migrar
+
+    url = postgres_vacio()
+    motor = db.crear_motor(url)
     migrar.aplicar(motor)
     motor.dispose()
     return url
