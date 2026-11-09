@@ -11,12 +11,10 @@ y lo entrega por API y **MCP** a los agentes de la entidad.
 ![FastAPI](https://img.shields.io/badge/FastAPI-backend-009688?logo=fastapi&logoColor=white)
 ![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)
 ![MCP](https://img.shields.io/badge/MCP-servidor_propio-6E56CF)
-![Tests](https://img.shields.io/badge/tests-161_en_verde-2E7D32)
-![Datos](https://img.shields.io/badge/datos-simulados-B45309)
 
 [Probarlo en 10 minutos](#probarlo-en-10-minutos) · [Cómo funciona](#cómo-funciona) · [Usarlo desde Claude](#usarlo-desde-claude-con-myinvestor) · [Estado](#estado) · [Configuración](#configuración)
 
-<sub>Hack Finance UC3M 2026 · Nombre provisional, el definitivo está por decidir · Todos los datos de clientes son simulados</sub>
+<sub>Hack Finance UC3M 2026 · Nombre provisional, el definitivo está por decidir</sub>
 
 </div>
 
@@ -243,4 +241,4 @@ TEST_POSTGRES_URL=postgresql://usuario@127.0.0.1:5432/perfil_test python -m pyte
 | [`docs/`](docs/) | Idea y contrato del perfil ([docs/proyecto/](docs/proyecto/README.md)), cómo lo implementa el código ([CONTRATOS.md](docs/CONTRATOS.md)), diseño y reparto |
 | [`gestion/`](gestion/) | Organización del hackathon: análisis del reto, pitch, demo y archivo |
 
-<div align="center"><sub>Prototipo para Hack Finance UC3M 2026 · No es un producto oficial de ninguna entidad · Datos simulados</sub></div>
+<div align="center"><sub>Prototipo para Hack Finance UC3M 2026 · No es un producto oficial de ninguna entidad</sub></div>
