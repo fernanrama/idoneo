@@ -3,7 +3,7 @@
 Responsable documental: área 04 · Actualizado: 8 de noviembre de 2026.
 
 ## Estado y uso
-**Preparado:** plantilla de criterios, ejecuciones, comparación y revisión final. **Pendiente:** enunciado, rúbrica, producto, datos, responsables humanos y umbrales. Primeras ejecuciones del extractor registradas abajo (E-00, E-01). Los criterios siguientes son propuestas; no constituyen requisitos oficiales ni financieros o regulatorios.
+**Preparado:** plantilla de criterios, ejecuciones, comparación y revisión final. **Pendiente:** enunciado, rúbrica, producto, datos, responsables humanos y umbrales. Primeras ejecuciones del extractor registradas abajo (E-00, E-01, E-02). Los criterios siguientes son propuestas; no constituyen requisitos oficiales ni financieros o regulatorios.
 
 Trabajar por hitos desde la recepción del reto: acordar criterios → probar recorrido completo → comparar y corregir → verificar versión de entrega. Dirección ajustará el calendario al tiempo restante.
 
@@ -29,6 +29,15 @@ Registrar cada ejecución con esta ficha:
 - **Mediciones pertinentes:** [muestra, repeticiones, latencia, coste o errores; método de medición].
 
 No registrar secretos ni datos personales financieros. Usar ejemplos sintéticos o referencias seguras. Conservar fallos y repeticiones de salidas variables; no seleccionar solo resultados favorables. Distinguir coste medido de estimado. Una evidencia de otra versión no valida automáticamente la actual.
+
+### Ejecución E-02 · Laboratorio con cliente simulado · 9 nov 2026
+
+- **Ejecución / casos / fecha / ejecutor:** `scripts/laboratorio.py --persona carmen`, Alex en su portátil. Claude interpreta a Carmen (ficha oculta, **simulada**) frente al entrevistador real; extractor y verificador como en producción.
+- **Versión exacta:** commit `7d4c3de` de main.
+- **Esperado y observado:** 10/10 datos esperados en el perfil; aviso de IA al inicio; 0 recomendaciones; 0 preguntas dobles; 5 familias comprobadas; alerta declarado ≠ demostrado en renta variable correcta. Un dato no esperado: `knowledge.stocks = medium` para una clienta que nunca ha invertido, tras una respuesta correcta pero dubitativa («no sé… supongo que pierdes más, ¿no?»). Corregido con la rúbrica v2 (una respuesta correcta no sube por encima de lo declarado) y con el prompt (acertar suponiendo = parcial). Pendiente de verificar en una nueva ejecución.
+- **Evidencia:** `docs/laboratorio/informe.md` y `docs/laboratorio/carmen-jubilada-confiada.txt`.
+- **Mediciones pertinentes:** 23 intervenciones del asistente; mediana por llamada 1,7 s (entrevistador), 2,0 s (extractor, en segundo plano), 1,4 s (cliente simulado); coste estimado de la entrevista ≈ 0,6 $ con precios estándar de Sonnet (estimado a partir de los tokens, no medido en la factura).
+- **Limitaciones:** una persona y una repetición; el cliente lo interpreta Claude.
 
 ### Ejecución E-01 · Extractor (B1) · 9 nov 2026
 

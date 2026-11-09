@@ -98,7 +98,7 @@ def test_carmen_da_los_datos_clave_con_evidencia_y_rubrica():
 
     rv = parches["knowledge.equity_funds"]
     assert (rv.value, rv.declared, rv.source) == ("none", "high", Fuente.demonstrated)
-    assert rv.confidence == 0.85 and rv.confidence_basis == "rubric:knowledge.equity_funds:v1"
+    assert rv.confidence == 0.85 and rv.confidence_basis == "rubric:knowledge.equity_funds:v2"
     assert rv.evidence[0].quote == "Eso no puede pasar, el fondo es del banco."
     assert rv.evidence[0].turn_id == "t-012" and rv.evidence[0].t == (57.0, 61.0)
 
@@ -219,7 +219,10 @@ def test_rubrica_de_conocimiento():
     r = "knowledge.equity_funds"
     assert rubrica.conocimiento(r, "high", "incorrecta")[:3] == ("none", "demonstrated", 0.85)
     assert rubrica.conocimiento(r, None, "parcial")[:3] == ("basic", "demonstrated", 0.7)
-    assert rubrica.conocimiento(r, "basic", "correcta")[:3] == ("medium", "demonstrated", 0.85)
+    assert rubrica.conocimiento(r, "basic", "correcta")[:3] == ("basic", "demonstrated", 0.8)
+    assert rubrica.conocimiento(r, "none", "correcta")[:3] == ("basic", "demonstrated", 0.8)
+    assert rubrica.conocimiento(r, None, "correcta")[:3] == ("medium", "demonstrated", 0.85)
+    assert rubrica.conocimiento(r, "medium", "correcta")[:3] == ("medium", "demonstrated", 0.85)
     assert rubrica.conocimiento(r, "high", "correcta")[:3] == ("high", "demonstrated", 0.75)
     valor, fuente, conf, _ = rubrica.conocimiento(r, "medium", None)
     assert (valor, fuente) == ("medium", "declared") and rubrica.baja(conf)

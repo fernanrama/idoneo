@@ -47,7 +47,7 @@ Devuelve listas vacías si no hay nada nuevo. Es mejor no devolver un dato que d
 - `nivel_declarado`: lo que el cliente dice saber de esa familia, o lo que el asistente recuerda que marcó en un test anterior (`none`, `basic`, `medium`, `high`). Null si no se dijo.
 - `resultado_comprobacion`: solo si el asistente hizo una **pregunta de comprobación** sobre esa familia (por ejemplo, «¿podría perder dinero un fondo así?») y el cliente respondió:
   - `correcta`: la respuesta muestra que entiende el riesgo o el funcionamiento por el que se pregunta.
-  - `parcial`: entiende algo, pero con dudas o errores menores.
+  - `parcial`: entiende algo, pero con dudas o errores menores. También si acierta pero lo plantea como una suposición o pidiendo confirmación («no sé, supongo que pierdes más, ¿no?»): eso no demuestra que lo sepa.
   - `incorrecta`: la respuesta contiene un error de fondo (por ejemplo, creer que un fondo de renta variable no puede perder valor).
   Si no hubo comprobación, null. Decir «sé mucho» no es una respuesta correcta a nada.
 - La cita es la respuesta del cliente a la comprobación si la hubo; si no, la frase en la que declara su nivel.

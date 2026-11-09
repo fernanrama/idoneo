@@ -1,4 +1,4 @@
-"""Rúbrica de confianza v1 (B1). Determinista: el modelo clasifica, este módulo puntúa.
+"""Rúbrica de confianza v2 (B1). Determinista: el modelo clasifica, este módulo puntúa.
 
 Contrato 04: `confidence` sale de una rúbrica fija, nunca de la opinión del modelo, y `confidence_basis`
 dice qué rúbrica la produjo. El modelo solo aporta categorías cerradas y comprobables con la cita:
@@ -7,10 +7,14 @@ dice qué rúbrica la produjo. El modelo solo aporta categorías cerradas y comp
 - para el escenario de caída, qué reacción eligió.
 Con eso, aquí se fijan el valor demostrado, la confianza y el flag `low_confidence`.
 
-SUPUESTOS v1 (revisables con tutoría; cambiar los números exige subir la versión):
+SUPUESTOS v2 (revisables con tutoría; cambiar los números exige subir la versión):
 - Una respuesta incorrecta a una comprobación es evidencia fuerte de falta de conocimiento (0,85).
-- Una sola respuesta correcta demuestra al menos un nivel medio; si el cliente declaró nivel alto, se
-  acepta alto con menos confianza (0,75), porque una pregunta no basta para probar un nivel alto.
+- Una respuesta correcta confirma lo declarado, con un tope: si el cliente declaró nivel alto, se acepta
+  alto con menos confianza (0,75), porque una pregunta no basta para probar un nivel alto; si declaró
+  nivel medio o no dijo nada, medio (0,85); si dijo que sabe poco o nada, básico (0,8). Una sola
+  pregunta fácil no sube a nadie por encima de lo que dice saber.
+  Cambio v1 → v2 (9 nov 2026, laboratorio): con v1, una clienta que nunca había invertido acertó «una
+  sola empresa tiene más riesgo» y quedó con conocimiento medio de acciones; demasiado generoso.
 - Un conocimiento solo declarado, sin comprobar, no llega al mínimo: hay que repreguntar.
 """
 
@@ -18,7 +22,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-VERSION = "v1"
+VERSION = "v2"
 UMBRAL = 0.65  # por debajo, el dato lleva low_confidence y el entrevistador debe repreguntar
 
 Certeza = Literal["explicita", "aproximada", "inferida"]
@@ -60,9 +64,11 @@ def conocimiento(ruta: str, declarado: str | None, resultado: str | None) -> tup
         return "none", "demonstrated", 0.85, base(ruta)
     if resultado == "parcial":
         return "basic", "demonstrated", 0.7, base(ruta)
-    # correcta
+    # correcta: confirma lo declarado, sin subir a nadie por encima de lo que dice saber
     if declarado == "high":
         return "high", "demonstrated", 0.75, base(ruta)
+    if declarado in ("none", "basic"):
+        return "basic", "demonstrated", 0.8, base(ruta)
     return "medium", "demonstrated", 0.85, base(ruta)
 
 
