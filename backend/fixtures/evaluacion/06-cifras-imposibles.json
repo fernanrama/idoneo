@@ -1,0 +1,60 @@
+{
+  "_nota": "DATOS SIMULADOS. Caso de evaluación del extractor: lo usa scripts/evaluar_extractor.py con Claude real.",
+  "nombre": "06-cifras-imposibles",
+  "que_prueba": "Una cifra implausible se guarda, pero marcada para el asesor.",
+  "turns": [
+    {
+      "turn_id": "t-001",
+      "speaker": "agent",
+      "t_start": 0.0,
+      "t_end": 12.7,
+      "text": "Hola. Soy un asistente de inteligencia artificial del banco y una persona revisará su perfil. Le haré unas preguntas para conocer su situación y ver qué productos le encajan. ¿Le parece bien?"
+    },
+    {
+      "turn_id": "t-002",
+      "speaker": "client",
+      "t_start": 13.7,
+      "t_end": 15.7,
+      "text": "Sí."
+    },
+    {
+      "turn_id": "t-003",
+      "speaker": "agent",
+      "t_start": 16.7,
+      "t_end": 18.7,
+      "text": "¿Cuánto cobra al mes?"
+    },
+    {
+      "turn_id": "t-004",
+      "speaker": "client",
+      "t_start": 19.7,
+      "t_end": 22.0,
+      "text": "Cobro quinientos mil euros al mes."
+    },
+    {
+      "turn_id": "t-005",
+      "speaker": "agent",
+      "t_start": 23.0,
+      "t_end": 27.2,
+      "text": "¿Y a cuánto asciende su patrimonio en inmuebles u otros bienes?"
+    },
+    {
+      "turn_id": "t-006",
+      "speaker": "client",
+      "t_start": 28.2,
+      "t_end": 31.1,
+      "text": "Tengo dos pisos, valdrán unos 400.000 euros."
+    }
+  ],
+  "esperado": {
+    "financial.net_monthly_income_eur": {
+      "valor": 500000,
+      "flags": [
+        "needs_advisor"
+      ]
+    },
+    "financial.other_assets_eur": 400000
+  },
+  "prohibido": [],
+  "prohibido_valores": {}
+}

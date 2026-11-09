@@ -46,5 +46,6 @@ Después, `store` vuelve a validar tipos, autoría y evidencia; lo que no pasa q
 
 ## Probarlo
 
-- Tests, sin API: `python -m pytest -q tests/test_extractor.py tests/test_extractor_casos.py tests/test_chat.py`.
+- Tests, sin API: `python -m pytest -q tests/test_extractor.py tests/test_extractor_casos.py tests/test_evaluacion.py tests/test_chat.py`.
+- Evaluación con la API real sobre 7 entrevistas de casos difíciles (correcciones, evasivas, terceros, manipulación, cifras imposibles, sostenibilidad): `python scripts/evaluar_extractor.py [--repeticiones 3] [--informe ../docs/evaluacion-extractor.md]`. Da cobertura, precisión, datos prohibidos escritos, latencia y tokens. Los casos están en `fixtures/evaluacion/` y la puntuación en `evaluacion.py`.
 - Con la API real y la entrevista simulada de Carmen: `python scripts/probar_extractor.py` desde `backend/`. Imprime aciertos por campo frente al fixture, alertas, rechazos, tokens y latencia.

@@ -1,0 +1,105 @@
+{
+  "_nota": "DATOS SIMULADOS. Caso de evaluación del extractor: lo usa scripts/evaluar_extractor.py con Claude real.",
+  "nombre": "01-correcciones-y-rangos",
+  "que_prueba": "Correcciones del cliente, rangos, cifras anuales y formato español.",
+  "turns": [
+    {
+      "turn_id": "t-001",
+      "speaker": "agent",
+      "t_start": 0.0,
+      "t_end": 12.7,
+      "text": "Hola. Soy un asistente de inteligencia artificial del banco y una persona revisará su perfil. Le haré unas preguntas para conocer su situación y ver qué productos le encajan. ¿Le parece bien?"
+    },
+    {
+      "turn_id": "t-002",
+      "speaker": "client",
+      "t_start": 13.7,
+      "t_end": 15.7,
+      "text": "Vale, adelante."
+    },
+    {
+      "turn_id": "t-003",
+      "speaker": "agent",
+      "t_start": 16.7,
+      "t_end": 18.9,
+      "text": "¿Cuánto gana al mes, más o menos?"
+    },
+    {
+      "turn_id": "t-004",
+      "speaker": "client",
+      "t_start": 19.9,
+      "t_end": 22.3,
+      "text": "Gano unos treinta mil al año, netos."
+    },
+    {
+      "turn_id": "t-005",
+      "speaker": "agent",
+      "t_start": 23.3,
+      "t_end": 26.0,
+      "text": "¿Y cuánto gasta en gastos fijos cada mes?"
+    },
+    {
+      "turn_id": "t-006",
+      "speaker": "client",
+      "t_start": 27.0,
+      "t_end": 31.6,
+      "text": "Unos 900 euros. Bueno, perdón, no son 900, son 1.100 con el alquiler."
+    },
+    {
+      "turn_id": "t-007",
+      "speaker": "agent",
+      "t_start": 32.6,
+      "t_end": 35.0,
+      "text": "¿Cuánto tiene ahorrado y disponible?"
+    },
+    {
+      "turn_id": "t-008",
+      "speaker": "client",
+      "t_start": 36.0,
+      "t_end": 38.8,
+      "text": "Tendré entre 20.000 y 30.000 en la cuenta."
+    },
+    {
+      "turn_id": "t-009",
+      "speaker": "agent",
+      "t_start": 39.8,
+      "t_end": 41.8,
+      "text": "¿Tiene alguna deuda?"
+    },
+    {
+      "turn_id": "t-010",
+      "speaker": "client",
+      "t_start": 42.8,
+      "t_end": 45.1,
+      "text": "Me quedan 4.500,50 euros del coche."
+    },
+    {
+      "turn_id": "t-011",
+      "speaker": "agent",
+      "t_start": 46.1,
+      "t_end": 49.3,
+      "text": "¿Su sueldo es estable o cambia de un mes a otro?"
+    },
+    {
+      "turn_id": "t-012",
+      "speaker": "client",
+      "t_start": 50.3,
+      "t_end": 52.3,
+      "text": "Fijo, soy funcionario."
+    }
+  ],
+  "esperado": {
+    "disclosures.ai_notice_ack": true,
+    "disclosures.purpose_ack": true,
+    "financial.net_monthly_income_eur": 2500,
+    "financial.fixed_monthly_costs_eur": 1100,
+    "financial.liquid_savings_eur": 25000,
+    "financial.debts_eur": 4500.5,
+    "financial.income_stability": "stable",
+    "experience.profession": {
+      "presente": true
+    }
+  },
+  "prohibido": [],
+  "prohibido_valores": {}
+}

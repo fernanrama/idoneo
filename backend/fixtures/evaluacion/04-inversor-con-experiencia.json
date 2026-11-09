@@ -1,0 +1,107 @@
+{
+  "_nota": "DATOS SIMULADOS. Caso de evaluación del extractor: lo usa scripts/evaluar_extractor.py con Claude real.",
+  "nombre": "04-inversor-con-experiencia",
+  "que_prueba": "Conocimiento declarado y demostrado correcto, experiencia en operaciones, familia desconocida.",
+  "turns": [
+    {
+      "turn_id": "t-001",
+      "speaker": "agent",
+      "t_start": 0.0,
+      "t_end": 12.7,
+      "text": "Hola. Soy un asistente de inteligencia artificial del banco y una persona revisará su perfil. Le haré unas preguntas para conocer su situación y ver qué productos le encajan. ¿Le parece bien?"
+    },
+    {
+      "turn_id": "t-002",
+      "speaker": "client",
+      "t_start": 13.7,
+      "t_end": 15.7,
+      "text": "Perfecto, sin problema."
+    },
+    {
+      "turn_id": "t-003",
+      "speaker": "agent",
+      "t_start": 16.7,
+      "t_end": 18.7,
+      "text": "¿A qué se dedica?"
+    },
+    {
+      "turn_id": "t-004",
+      "speaker": "client",
+      "t_start": 19.7,
+      "t_end": 22.1,
+      "text": "Soy ingeniera de telecomunicaciones."
+    },
+    {
+      "turn_id": "t-005",
+      "speaker": "agent",
+      "t_start": 23.1,
+      "t_end": 25.8,
+      "text": "¿Cuánto sabe de fondos de renta variable?"
+    },
+    {
+      "turn_id": "t-006",
+      "speaker": "client",
+      "t_start": 26.8,
+      "t_end": 29.6,
+      "text": "Bastante, llevo años invirtiendo en ellos."
+    },
+    {
+      "turn_id": "t-007",
+      "speaker": "agent",
+      "t_start": 30.6,
+      "t_end": 37.8,
+      "text": "Si los tipos de interés no cambian y la bolsa cae un 25 %, ¿qué le pasa a un fondo de renta variable global?"
+    },
+    {
+      "turn_id": "t-008",
+      "speaker": "client",
+      "t_start": 38.8,
+      "t_end": 45.9,
+      "text": "Que su valor liquidativo cae más o menos lo mismo, porque invierte en acciones; si vendo entonces, pierdo."
+    },
+    {
+      "turn_id": "t-009",
+      "speaker": "agent",
+      "t_start": 46.9,
+      "t_end": 51.4,
+      "text": "¿Cuántas operaciones con acciones ha hecho en los últimos tres años?"
+    },
+    {
+      "turn_id": "t-010",
+      "speaker": "client",
+      "t_start": 52.4,
+      "t_end": 54.4,
+      "text": "Unas veinte, más o menos."
+    },
+    {
+      "turn_id": "t-011",
+      "speaker": "agent",
+      "t_start": 55.4,
+      "t_end": 60.0,
+      "text": "¿Y con productos complejos, como derivados o productos estructurados?"
+    },
+    {
+      "turn_id": "t-012",
+      "speaker": "client",
+      "t_start": 61.0,
+      "t_end": 64.1,
+      "text": "Eso no lo he tocado nunca, no sé cómo funciona."
+    }
+  ],
+  "esperado": {
+    "experience.profession": {
+      "presente": true
+    },
+    "knowledge.equity_funds": {
+      "uno_de": [
+        "medium",
+        "high"
+      ],
+      "fuente": "demonstrated"
+    },
+    "experience.stocks.operations_last_3y": 20,
+    "knowledge.complex_products": "none"
+  },
+  "prohibido": [],
+  "prohibido_valores": {}
+}

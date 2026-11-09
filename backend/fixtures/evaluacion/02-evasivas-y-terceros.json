@@ -1,0 +1,102 @@
+{
+  "_nota": "DATOS SIMULADOS. Caso de evaluación del extractor: lo usa scripts/evaluar_extractor.py con Claude real.",
+  "nombre": "02-evasivas-y-terceros",
+  "que_prueba": "Evasivas, datos de terceros e hipótesis: no deben entrar en el perfil.",
+  "turns": [
+    {
+      "turn_id": "t-001",
+      "speaker": "agent",
+      "t_start": 0.0,
+      "t_end": 12.7,
+      "text": "Hola. Soy un asistente de inteligencia artificial del banco y una persona revisará su perfil. Le haré unas preguntas para conocer su situación y ver qué productos le encajan. ¿Le parece bien?"
+    },
+    {
+      "turn_id": "t-002",
+      "speaker": "client",
+      "t_start": 13.7,
+      "t_end": 15.7,
+      "text": "Sí, claro."
+    },
+    {
+      "turn_id": "t-003",
+      "speaker": "agent",
+      "t_start": 16.7,
+      "t_end": 18.7,
+      "text": "¿Cuánto cobra usted al mes?"
+    },
+    {
+      "turn_id": "t-004",
+      "speaker": "client",
+      "t_start": 19.7,
+      "t_end": 23.6,
+      "text": "Mi marido cobra 2.000. Yo ahora mismo nada, estoy en paro."
+    },
+    {
+      "turn_id": "t-005",
+      "speaker": "agent",
+      "t_start": 24.6,
+      "t_end": 26.6,
+      "text": "¿Y cuánto tienen ahorrado?"
+    },
+    {
+      "turn_id": "t-006",
+      "speaker": "client",
+      "t_start": 27.6,
+      "t_end": 29.6,
+      "text": "Eso prefiero no decirlo."
+    },
+    {
+      "turn_id": "t-007",
+      "speaker": "agent",
+      "t_start": 30.6,
+      "t_end": 32.6,
+      "text": "¿Tiene alguna deuda?"
+    },
+    {
+      "turn_id": "t-008",
+      "speaker": "client",
+      "t_start": 33.6,
+      "t_end": 36.2,
+      "text": "Si tuviera deudas no estaría aquí, ¿no?"
+    },
+    {
+      "turn_id": "t-009",
+      "speaker": "agent",
+      "t_start": 37.2,
+      "t_end": 39.2,
+      "text": "¿Para qué quiere invertir?"
+    },
+    {
+      "turn_id": "t-010",
+      "speaker": "client",
+      "t_start": 40.2,
+      "t_end": 42.7,
+      "text": "No sé, depende de lo que me ofrezcan."
+    },
+    {
+      "turn_id": "t-011",
+      "speaker": "agent",
+      "t_start": 43.7,
+      "t_end": 45.7,
+      "text": "¿Sabe lo que es un ETF?"
+    },
+    {
+      "turn_id": "t-012",
+      "speaker": "client",
+      "t_start": 46.7,
+      "t_end": 50.1,
+      "text": "Mi hijo invierte en ETF, pero yo de eso no sé nada."
+    }
+  ],
+  "esperado": {
+    "disclosures.ai_notice_ack": true,
+    "knowledge.etfs": "none",
+    "financial.net_monthly_income_eur": 0
+  },
+  "prohibido": [
+    "financial.liquid_savings_eur",
+    "financial.debts_eur",
+    "objectives.o1.goal"
+  ],
+  "prohibido_valores": {}
+}

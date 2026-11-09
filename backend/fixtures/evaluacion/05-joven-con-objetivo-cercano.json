@@ -1,0 +1,95 @@
+{
+  "_nota": "DATOS SIMULADOS. Caso de evaluación del extractor: lo usa scripts/evaluar_extractor.py con Claude real.",
+  "nombre": "05-joven-con-objetivo-cercano",
+  "que_prueba": "Ingresos variables, objetivo con importe y plazo corto, liquidez alta y escenario de caída.",
+  "turns": [
+    {
+      "turn_id": "t-001",
+      "speaker": "agent",
+      "t_start": 0.0,
+      "t_end": 12.7,
+      "text": "Hola. Soy un asistente de inteligencia artificial del banco y una persona revisará su perfil. Le haré unas preguntas para conocer su situación y ver qué productos le encajan. ¿Le parece bien?"
+    },
+    {
+      "turn_id": "t-002",
+      "speaker": "client",
+      "t_start": 13.7,
+      "t_end": 15.7,
+      "text": "Venga."
+    },
+    {
+      "turn_id": "t-003",
+      "speaker": "agent",
+      "t_start": 16.7,
+      "t_end": 18.7,
+      "text": "¿Para qué quiere invertir?"
+    },
+    {
+      "turn_id": "t-004",
+      "speaker": "client",
+      "t_start": 19.7,
+      "t_end": 23.3,
+      "text": "Quiero juntar 15.000 euros para la entrada de un piso."
+    },
+    {
+      "turn_id": "t-005",
+      "speaker": "agent",
+      "t_start": 24.3,
+      "t_end": 26.3,
+      "text": "¿Para cuándo los necesitaría?"
+    },
+    {
+      "turn_id": "t-006",
+      "speaker": "client",
+      "t_start": 27.3,
+      "t_end": 30.6,
+      "text": "En dos años, y puede que antes si encuentro algo."
+    },
+    {
+      "turn_id": "t-007",
+      "speaker": "agent",
+      "t_start": 31.6,
+      "t_end": 33.6,
+      "text": "¿Sus ingresos son fijos?"
+    },
+    {
+      "turn_id": "t-008",
+      "speaker": "client",
+      "t_start": 34.6,
+      "t_end": 38.2,
+      "text": "No, soy autónomo; hay meses de 3.000 y meses de 1.000."
+    },
+    {
+      "turn_id": "t-009",
+      "speaker": "agent",
+      "t_start": 39.2,
+      "t_end": 43.9,
+      "text": "Imagine que lo que ha invertido baja un 15 % en tres meses. ¿Qué haría?"
+    },
+    {
+      "turn_id": "t-010",
+      "speaker": "client",
+      "t_start": 44.9,
+      "t_end": 48.4,
+      "text": "Vendería una parte para no perder más, pero no todo."
+    }
+  ],
+  "esperado": {
+    "objectives.o1.goal": {
+      "presente": true
+    },
+    "objectives.o1.amount_eur": 15000,
+    "objectives.o1.horizon_years": 2,
+    "objectives.o1.liquidity_need": "high",
+    "financial.income_stability": "variable",
+    "risk_tolerance.scenario_score": {
+      "valor": 2,
+      "fuente": "demonstrated"
+    },
+    "risk_tolerance.past_behaviour": {
+      "presente": true
+    }
+  },
+  "prohibido": [],
+  "prohibido_valores": {}
+}
