@@ -176,7 +176,7 @@ Para que el botón «Validar perfil» del frontend funcione con el backend prote
 | Idoneidad, conveniencia y restricciones calculadas con código | ✅ Hecho · los umbrales son **supuestos del equipo**, pendientes de revisión |
 | Servidor MCP y conexión con Claude + MyInvestor | ✅ Hecho y probado con túnel |
 | Frontend móvil: entrevista, demo guiada, perfil del cliente y vista de la entidad | ✅ Hecho |
-| Extractor (de la conversación al perfil, con Claude) | 🟡 En desarrollo · mientras tanto el perfil de Carmen viene de un fixture simulado |
+| Extractor (de la conversación al perfil, con Claude) y entrevistador en modo texto | ✅ Hecho, con tests (Claude simulado) · prueba con la API real: `python scripts/probar_extractor.py` · arquitectura en [`backend/app/agentes/`](backend/app/agentes/README.md) |
 | Verificador con Claude y resumen para agentes | 🟡 Reglas deterministas hechas · versión con Claude en desarrollo |
 | Voz con ElevenLabs | 🟡 Integrado en código · sin probar con cuenta real |
 | Medición de impacto (aciertos, alertas, latencia, coste) | ⏳ Pendiente |
@@ -197,12 +197,14 @@ Todas están en `.env.example`.
 | `DATA_DIR` | `backend/data` | Carpeta de los volcados JSON (memoria) y de la base SQLite |
 | `DATA_PERSIST` | `1` | `1` vuelca el almacén en memoria a `DATA_DIR`; `0` no escribe nada en disco (lo usan los tests) |
 | `LOAD_DEMO_FIXTURE` | `1` | Carga a Carmen (DATOS SIMULADOS) al arrancar, solo si no existe |
-| `ADMIN_TOKEN` | vacío | Si se define, `POST /validate` y `POST /api/demo/reset` exigen la cabecera `X-Admin-Token`. El front aún no la envía |
+| `ADMIN_TOKEN` | vacío | Si se define, `POST /validate` y `POST /api/demo/reset` exigen la cabecera `X-Admin-Token`. El front la añade desde su servidor con el mismo valor en `frontend/.env.local` |
 | `DEMO_ENDPOINTS` | `1` | `0` desactiva `POST /api/demo/reset` (para un despliegue público) |
 | `CORS_ORIGINS` | `http://localhost:3000` | Orígenes del front permitidos, separados por comas |
 | `MCP_ALLOWED_HOSTS` | vacío | Hosts públicos del MCP (túnel o despliegue) |
 | `ELEVENLABS_API_KEY`, `ELEVENLABS_AGENT_ID` | vacío | Voz: el backend firma la URL; sin ellas, `/api/voice/signed-url` da 503 |
-| `ANTHROPIC_API_KEY`, `MODEL_EXTRACTOR`, `MODEL_VERIFICADOR` | vacío / modelos de Claude | Para los agentes con Claude (extractor y verificador), cuando estén integrados |
+| `ANTHROPIC_API_KEY` | vacío | Activa el extractor y el modo texto. Sin clave el extractor no hace nada y `/chat` responde 503 |
+| `MODEL_EXTRACTOR`, `MODEL_ENTREVISTADOR`, `MODEL_VERIFICADOR` | `claude-sonnet-5-5` | Modelo de Claude de cada agente |
+| `EFFORT_EXTRACTOR`, `EFFORT_ENTREVISTADOR` | `low` | Esfuerzo de razonamiento (`low`…`max`): más alto, más preciso y más lento |
 
 Variables del frontend, en `frontend/.env.local` (plantilla en `frontend/.env.example`): `NEXT_PUBLIC_API_URL` (por defecto `http://localhost:8000`) y `NEXT_PUBLIC_ELEVENLABS_AGENT_ID` (solo si el agente de voz es público).
 

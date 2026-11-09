@@ -179,10 +179,10 @@ def a_parches(extraccion: Extraccion, turnos: list[Turno], perfil: Perfil, sessi
     def turno_citado(turn_id: str, cita: str, ruta: str) -> Turno | None:
         turno = del_cliente.get(turn_id)
         if turno is None:
-            log.info("descartado %s: el turno %s no es del cliente o no está en la ventana", ruta, turn_id)
+            log.debug("descartado %s: el turno %s no es del cliente o no está en la ventana", ruta, turn_id)
             return None
         if not cita_valida(cita, turno.text):
-            log.info("descartado %s: la cita no aparece en %s", ruta, turn_id)
+            log.warning("descartado %s: la cita no aparece literalmente en %s", ruta, turn_id)
             return None
         return turno
 
