@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import tempfile
 import threading
 import uuid
 from datetime import datetime
@@ -16,7 +17,7 @@ from typing import Any
 
 from ..modelos import EstadoPerfil, Perfil, Turno
 from ..personal import CapaPersonal
-from .base import ConflictoVersion, id_turno
+from .base import ConflictoVersion, cliente_del_lote, id_turno
 
 DATA_DIR_POR_DEFECTO = Path(__file__).resolve().parents[3] / "data"
 
@@ -41,12 +42,29 @@ class AlmacenMemoria:
     def _ruta(self, client_id: str, tipo: str = "perfil") -> Path:
         return self.data_dir / f"{tipo}_{client_id}.json"  # client_id ya validado por store
 
-    def _guardar(self, client_id: str) -> None:
+    def _guardar_versiones(self, client_id: str, versiones: list[Perfil]) -> None:
+        """Sustituye el JSON completo; un fallo previo no altera el archivo anterior."""
         if not self._persistir():
             return
         self.data_dir.mkdir(parents=True, exist_ok=True)
-        versiones = [p.model_dump(mode="json") for p in self._versiones.get(client_id, [])]
-        self._ruta(client_id).write_text(json.dumps(versiones, ensure_ascii=False, indent=2), "utf-8")
+        contenido = json.dumps([p.model_dump(mode="json") for p in versiones], ensure_ascii=False, indent=2)
+        temporal = None
+        try:
+            with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=self.data_dir,
+                                             prefix=".perfil-", suffix=".tmp", delete=False) as archivo:
+                temporal = Path(archivo.name)
+                archivo.write(contenido)
+                archivo.flush()
+                os.fsync(archivo.fileno())
+            os.replace(temporal, self._ruta(client_id))
+        finally:
+            if temporal is not None and temporal.exists():
+                temporal.unlink()
+
+    def _guardar(self, client_id: str) -> None:
+        if not self._persistir():
+            return
+        self._guardar_versiones(client_id, self._versiones.get(client_id, []))
         personal = [c.model_dump(mode="json") for c in self._personal.get(client_id, [])]
         ruta_personal = self._ruta(client_id, "personal")
         if personal:
@@ -113,6 +131,18 @@ class AlmacenMemoria:
                 raise ConflictoVersion(f"La versión {perfil.version} de {perfil.client_id} ya existe")
             vs.append(perfil.model_copy(deep=True))
             self._guardar(perfil.client_id)
+
+    def insertar_lote(self, perfiles: list[Perfil]) -> None:
+        cid = cliente_del_lote(perfiles)
+        with self._candado:
+            vs = self._lista(cid)
+            if not vs or perfiles[0].version != vs[-1].version + 1:
+                raise ConflictoVersion(f"La versión de {cid} ha cambiado")
+            nuevas = vs + [p.model_copy(deep=True) for p in perfiles]
+            # Persistir antes de cambiar la referencia: los lectores no ven un lote parcial.
+            # La capa personal no cambia durante validar(), ni se reescribe su fichero.
+            self._guardar_versiones(cid, nuevas)
+            self._versiones[cid] = nuevas
 
     # ---------- capa personal ----------
 

@@ -5,6 +5,7 @@ Los almacenes solo guardan y leen: no validan, no calculan y no deciden estados.
 
 Garantías que debe cumplir cualquier almacén:
 - `insertar` nunca sobrescribe: si la versión ya existe, lanza ConflictoVersion.
+- `insertar_lote` guarda versiones consecutivas de un cliente: todas o ninguna.
 - `insertar_turno` es idempotente por `turn_id` y asigna `t-001`, `t-002`… si no viene.
 - la capa personal se guarda aparte del perfil y se puede borrar sin tocar las versiones.
 """
@@ -33,6 +34,7 @@ class Almacen(Protocol):
     def historial(self, client_id: str) -> list[dict[str, Any]]: ...
     def crear(self, perfil: Perfil) -> bool: ...
     def insertar(self, perfil: Perfil) -> None: ...
+    def insertar_lote(self, perfiles: list[Perfil]) -> None: ...
 
     # capa personal
     def ultima_personal(self, client_id: str) -> CapaPersonal | None: ...
@@ -52,3 +54,13 @@ class Almacen(Protocol):
 def id_turno(indice: int) -> str:
     """Mismo formato que la PR #7: t-001, t-002…"""
     return f"t-{indice + 1:03d}"
+
+
+def cliente_del_lote(perfiles: list[Perfil]) -> str:
+    """Los lotes internos son no vacíos, de un solo cliente y sin huecos."""
+    if not perfiles:
+        raise ValueError("Un lote de versiones no puede estar vacío")
+    cid, inicio = perfiles[0].client_id, perfiles[0].version
+    if any(p.client_id != cid or p.version != inicio + i for i, p in enumerate(perfiles)):
+        raise ValueError("El lote debe contener versiones consecutivas de un solo cliente")
+    return cid
