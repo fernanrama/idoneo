@@ -11,6 +11,7 @@ import {
   Contenido,
   EntradaTexto,
   Marco,
+  Pasos,
   Pie,
   Subtitulos,
 } from "@/components/ui";
@@ -34,6 +35,7 @@ function Entrevista() {
     <Marco>
       <Cabecera titulo="Tu perfil inversor" />
       <Contenido>
+        <Pasos actual={1} />
         <BarraBloques bloques={estadoBloques(e.perfil)} />
 
         {e.estado === "inactiva" && (

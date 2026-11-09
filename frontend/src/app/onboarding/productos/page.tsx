@@ -1,6 +1,6 @@
 "use client";
 
-import { Cabecera, Chip, Contenido, Marco, Tarjeta } from "@/components/ui";
+import { Cabecera, Chip, Contenido, IndicadorRiesgo, Marco, Pasos, Tarjeta } from "@/components/ui";
 import { FAMILIAS } from "@/lib/bloques";
 import { useOnboarding } from "@/lib/onboarding";
 import { usePerfil } from "@/lib/usePerfil";
@@ -24,13 +24,11 @@ export default function Productos() {
         {error && <p role="alert">No se han podido cargar las restricciones.</p>}
         {perfil && s && r && (
           <>
+            <Pasos actual={3} />
             <Tarjeta>
               <h2>Filtros de tu perfil</h2>
               <div className="pila">
-                <div className="fila entre">
-                  <span>Riesgo máximo</span>
-                  <strong>{s.max_sri ?? "—"} / 7</strong>
-                </div>
+                <IndicadorRiesgo nivel={s.max_sri} />
                 <div className="fila entre">
                   <span>Perfil</span>
                   <strong>{s.risk_profile?.toLowerCase().replace("_", " ") ?? "—"}</strong>

@@ -1,34 +1,85 @@
 import Link from "next/link";
-import { Boton, Contenido, Marco, Pie, Tarjeta } from "@/components/ui";
+import {
+  Boton,
+  Hero,
+  ListaCheck,
+  Marca,
+  Marco,
+  Pie,
+  Tarjeta,
+} from "@/components/ui";
+import s from "@/components/ui.module.css";
 
-// Inicio de la app del banco (maqueta provisional hasta tener las pantallas de MyInvestor).
+// Inicio de la app del banco, con el aspecto de la web pública de MyInvestor (sin su logo). Datos simulados.
 export default function Inicio() {
   return (
     <Marco>
-      <header style={{ background: "var(--c-primario)", color: "var(--c-primario-texto)", padding: "28px 16px 20px" }}>
-        <p className="pequena" style={{ opacity: 0.8, margin: 0 }}>Buenos días</p>
-        <h1 style={{ margin: "4px 0 0" }}>Carmen</h1>
+      <header className={s.cabecera}>
+        <Marca />
       </header>
-      <Contenido>
-        <Tarjeta>
-          <p className="suave pequena" style={{ margin: 0 }}>Depósitos</p>
-          <p style={{ fontSize: 30, fontWeight: 700, margin: "4px 0 0" }}>80.000,00 €</p>
-        </Tarjeta>
-
-        <Tarjeta destacada>
-          <p className="pequena" style={{ opacity: 0.85, margin: 0 }}>Nuevo</p>
-          <h2 style={{ marginTop: 4 }}>Tu perfil inversor, hablando</h2>
-          <p style={{ opacity: 0.9 }}>
-            Antes de invertir necesitamos conocerte. En vez de un test de casillas, cuéntanoslo en unos 7 minutos, con
-            tu voz o por escrito.
+      <main>
+        <Hero>
+          <p
+            className="pequena"
+            style={{ margin: 0, fontWeight: 700, color: "var(--c-primario)" }}
+          >
+            Hola, Carmen
           </p>
-          <Link href="/onboarding">
-            <Boton>Empezar</Boton>
-          </Link>
-        </Tarjeta>
-      </Contenido>
+          <h1 style={{ margin: "6px 0 12px" }}>Tu perfil inversor, hablando</h1>
+          <p>
+            Antes de invertir necesitamos conocerte. Sin test de casillas:
+            cuéntanoslo con tu voz o por escrito.
+          </p>
+          <ListaCheck
+            items={[
+              <>
+                <strong>Unos 7 minutos.</strong> Puedes parar y seguir luego.
+              </>,
+              <>
+                <strong>Con tus palabras.</strong> Si algo no lo sabes, dilo.
+              </>,
+              <>
+                <strong>Revisado por una persona</strong> del banco antes de
+                usarse.
+              </>,
+            ]}
+          />
+          <div style={{ marginTop: 22 }}>
+            <Link href="/onboarding">
+              <Boton style={{ width: "auto", paddingInline: 28 }}>
+                Empezar
+              </Boton>
+            </Link>
+          </div>
+        </Hero>
+        <div className={s.contenido}>
+          <Tarjeta>
+            <p className="suave pequena" style={{ margin: 0, fontWeight: 600 }}>
+              Cuenta y depósitos
+            </p>
+            <p
+              style={{
+                fontSize: 30,
+                fontWeight: 800,
+                margin: "4px 0 0",
+                letterSpacing: "-0.02em",
+              }}
+            >
+              80.000,00 €
+            </p>
+          </Tarjeta>
+        </div>
+      </main>
       <Pie>
-        <Link href="/entidad/carmen-68" className="pequena suave" style={{ textAlign: "center" }}>
+        <Link
+          href="/entidad/carmen-68"
+          className="pequena"
+          style={{
+            textAlign: "center",
+            color: "var(--c-primario)",
+            fontWeight: 700,
+          }}
+        >
           Vista de la entidad (demo)
         </Link>
         <p className="pequena suave" style={{ textAlign: "center", margin: 0 }}>
