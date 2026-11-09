@@ -1,0 +1,17 @@
+{
+  "name": "fuente-presentacion",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Genera la presentación del pitch de Idóneo (Hack Finance UC3M 2026)",
+  "scripts": {
+    "trabajo": "node build.js ../Idoneo_presentacion.pptx",
+    "final": "node build.js ../Idoneo_presentacion.pptx --final"
+  },
+  "dependencies": {
+    "pptxgenjs": "^4.0.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-icons": "^5.7.0",
+    "sharp": "^0.35.5"
+  }
+}
