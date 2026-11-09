@@ -80,6 +80,10 @@ def capacidad_perdida(ahorro_liquido: float, gastos_fijos: float, deudas: float)
 
 def recalcular(perfil: Perfil) -> None:
     """Rellena campos calculados y resultados. Se llama tras cada escritura."""
+    # Los derivados heredados no justifican la versión actual: reconstruirlos
+    # solo si siguen presentes todas sus entradas, antes de evaluar idoneidad.
+    for ruta in CALCULADOS:
+        perfil.mifid.pop(ruta, None)
     ahorro = valor(perfil, "financial.liquid_savings_eur")
     gastos = valor(perfil, "financial.fixed_monthly_costs_eur")
     deudas = valor(perfil, "financial.debts_eur")
