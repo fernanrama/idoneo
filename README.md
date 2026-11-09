@@ -48,6 +48,8 @@ Antes de ofrecer un producto de inversión, la entidad tiene que evaluar si es *
 
 **Qué no hacemos: no recomendamos productos.** Damos los límites que cualquier propuesta debe respetar (riesgo máximo, familias convenientes, liquidez). Qué productos ofrecer lo decide el agente de la entidad, y un asesor valida el perfil antes de que se pueda usar.
 
+Visión propuesta: [evolución hacia un perfil continuo](docs/proyecto/06_EVOLUCION_PERFIL_CONTINUO.md), desde la entrevista inicial hasta microentrevistas adaptativas y comprobaciones solicitadas por agentes autorizados. Estas dos últimas fases son hoja de ruta; el documento distingue las piezas implementadas de lo pendiente.
+
 ## Cómo funciona
 
 ```mermaid
@@ -205,8 +207,6 @@ Todas están en `.env.example`.
 | `ANTHROPIC_API_KEY` | vacío | Activa el extractor y el modo texto. Sin clave el extractor no hace nada y `/chat` responde 503 |
 | `MODEL_EXTRACTOR`, `MODEL_ENTREVISTADOR`, `MODEL_VERIFICADOR` | `claude-sonnet-5-5` | Modelo de Claude de cada agente |
 | `EFFORT_EXTRACTOR`, `EFFORT_ENTREVISTADOR` | `low` | Esfuerzo de razonamiento (`low`…`max`): más alto, más preciso y más lento |
-
-Variables del frontend, en `frontend/.env.local` (plantilla en `frontend/.env.example`): `NEXT_PUBLIC_API_URL` (por defecto `http://localhost:8000`) y `NEXT_PUBLIC_ELEVENLABS_AGENT_ID` (solo si el agente de voz es público).
 
 Variables del frontend, en `frontend/.env.local` (plantilla en `frontend/.env.example`): `NEXT_PUBLIC_API_URL` (por defecto `http://localhost:8000`) y `NEXT_PUBLIC_ELEVENLABS_AGENT_ID` (solo si el agente de voz es público).
 </details>

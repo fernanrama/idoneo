@@ -161,7 +161,9 @@ En cada turno del cliente, extractor y verificador se ejecutan por separado (si 
 
 ### Seguridad y límites conocidos
 
-- Sin `ADMIN_TOKEN` (desarrollo) no se pide nada. **El front no envía todavía `X-Admin-Token`**: si se define el token, validar y reiniciar la demo desde el navegador darán 401. El token no puede ir en una variable `NEXT_PUBLIC_*`; hace falta una ruta de servidor de Next que lo añada.
+- Si el backend define `ADMIN_TOKEN`, `POST /api/clients/{id}/validate` y `POST /api/demo/reset` exigen `X-Admin-Token`; sin token configurado (desarrollo), el backend no exige esa cabecera.
+- El frontend envía estas acciones a `POST /api/entidad/[cid]/validar` y `POST /api/entidad/reset` de Next. El servidor añade `X-Admin-Token` leyendo `ADMIN_TOKEN` de `frontend/.env.local`, con el mismo valor que en el `.env` del backend. No debe usarse el prefijo `NEXT_PUBLIC_`: el token permanece en el servidor.
+- Las rutas de Next devuelven 403 si el filtro de host rechaza la petición y 502 si no pueden conectar con el backend; en los demás casos propagan su respuesta, incluido el 401 por token ausente o incorrecto. El filtro se basa en `X-Forwarded-Host` o `Host`; no autentica la identidad del asesor ni sustituye una autorización real.
 - Las lecturas (perfil, versiones, evidencias, sesiones), `/api/voice/signed-url` y el MCP no piden autenticación. Con una URL pública, solo con datos simulados.
 - Pendiente: comparar versiones, marcar un evento vital (`active → review_due`), que `next_review` venza solo, escribir la capa personal por la API y cerrar una sesión (`ended_at` existe, pero nada lo rellena todavía; lo hará el webhook de fin de llamada).
 
