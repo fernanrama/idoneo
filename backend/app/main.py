@@ -11,6 +11,7 @@ import hmac
 import logging
 import os
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -19,10 +20,11 @@ load_dotenv(Path(__file__).resolve().parents[2] / ".env")  # .env en la raíz de
 
 from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
-from pydantic import BaseModel  # noqa: E402
+from pydantic import BaseModel, Field  # noqa: E402
 
 from . import voz  # noqa: E402
-from .agentes import contexto, extractor, verificador  # noqa: E402
+from .agentes import chat as entrevistador  # noqa: E402
+from .agentes import claude, contexto, extractor, verificador  # noqa: E402
 from .mcp.servidor import mcp  # noqa: E402
 from .perfil import calculos, store  # noqa: E402
 from .perfil.modelos import Parche, Perfil, Restricciones, Turno  # noqa: E402
@@ -73,6 +75,10 @@ def requiere_admin(x_admin_token: str | None = Header(default=None)) -> None:
 class NuevaSesion(BaseModel):
     client_id: str | None = None
     channel: str = "voice"  # "voice" | "text"
+
+
+class MensajeChat(BaseModel):
+    text: str | None = Field(default=None, max_length=2000)  # vacío = que el asistente empiece
 
 
 class Validacion(BaseModel):
@@ -167,6 +173,39 @@ def anadir_turno(session_id: str, turno: Turno, tareas: BackgroundTasks):
     if turno.speaker == "client":
         tareas.add_task(_procesar_turno, session_id)
     return {"turn_id": t.turn_id}
+
+
+def _segundos(sesion: dict) -> float:
+    """Segundos desde el inicio de la sesión (tiempos de los turnos en modo texto)."""
+    inicio = sesion.get("started_at")
+    if not isinstance(inicio, datetime):
+        return 0.0
+    if inicio.tzinfo is None:
+        inicio = inicio.replace(tzinfo=timezone.utc)
+    return round((datetime.now(timezone.utc) - inicio).total_seconds(), 1)
+
+
+@app.post("/api/sessions/{session_id}/chat")
+async def chat(session_id: str, body: MensajeChat, tareas: BackgroundTasks):
+    """Modo texto: guarda el mensaje del cliente (si lo hay) y devuelve la siguiente intervención del
+    entrevistador. El perfil lo actualizan el extractor y el verificador en segundo plano, como en la voz."""
+    s = _llamar(store.sesion, session_id)
+    if not claude.disponible():
+        raise HTTPException(503, "Modo texto no disponible: falta ANTHROPIC_API_KEY en el backend")
+    cliente = None
+    if body.text and body.text.strip():
+        t = _segundos(s)
+        cliente = _llamar(store.anadir_turno, session_id, Turno(speaker="client", text=body.text.strip(), t_start=t, t_end=t))
+        tareas.add_task(_procesar_turno, session_id)
+    turnos = store.sesion(session_id)["turns"]
+    try:
+        r = await entrevistador.responder(turnos[-40:], store.perfil(s["client_id"]))
+    except Exception as e:  # rechazo del modelo, red, límite de uso…
+        log.exception("Fallo del entrevistador en %s", session_id)
+        raise HTTPException(502, f"El entrevistador no pudo responder: {type(e).__name__}") from e
+    t = _segundos(s)
+    agente = _llamar(store.anadir_turno, session_id, Turno(speaker="agent", text=r.texto, t_start=t, t_end=t))
+    return {"client_turn": cliente, "agent_turn": agente, "finished": r.terminada}
 
 
 @app.get("/api/sessions/{session_id}")
