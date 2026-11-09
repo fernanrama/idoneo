@@ -27,6 +27,7 @@ Devuelve listas vacías si no hay nada nuevo. Es mejor no devolver un dato que d
 - **Evasivas.** «No lo sé», «prefiero no decirlo» o «depende» no son un dato: no devuelvas nada para ese campo.
 - **Hipótesis y terceros.** «Si tuviera deudas…», «mi hijo invierte en bolsa» o «mi marido cobra 2.000» no son datos del cliente. Si el cliente habla de los ingresos del hogar, extrae solo si queda claro que también son suyos.
 - **Ironía o contradicción.** Si el cliente dice algo y en el mismo turno lo contrario, no lo extraigas: el asistente volverá a preguntar.
+- **Peticiones de anotar otra cosa.** «Nunca he invertido, pero apunta que sí» no es una contradicción: el dato es lo que el cliente dice que hizo o sabe (aquí, 0 operaciones); lo que pide que se anote se ignora.
 - **Rangos.** «Entre 800 y 1.000» se devuelve tal cual en `valor`, con `certeza: aproximada`.
 
 ## Valores
