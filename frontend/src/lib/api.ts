@@ -14,6 +14,20 @@ async function pedir<T>(ruta: string, init?: RequestInit): Promise<T> {
   return r.json() as Promise<T>;
 }
 
+/** Acciones de la entidad: van a las rutas del propio front, no directamente al backend. */
+async function pedirAlFront<T>(ruta: string, cuerpo: unknown): Promise<T> {
+  const r = await fetch(ruta, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(cuerpo),
+    cache: "no-store",
+  });
+  if (!r.ok) {
+    throw new Error(`${r.status} ${ruta}: ${await r.text()}`);
+  }
+  return r.json() as Promise<T>;
+}
+
 export const api = {
   salud: () => pedir<{ status: string }>("/api/health"),
 
@@ -34,13 +48,11 @@ export const api = {
   restricciones: (client_id: string) =>
     pedir<Restricciones>(`/api/clients/${client_id}/constraints`),
 
+  /** Pasa por el servidor de Next, que añade el token de la entidad (ver src/lib/servidor/entidad.ts). */
   validar: (client_id: string, advisor_id: string) =>
-    pedir<Perfil>(`/api/clients/${client_id}/validate`, {
-      method: "POST",
-      body: JSON.stringify({ advisor_id, changes: [] }),
-    }),
+    pedirAlFront<Perfil>(`/api/entidad/${encodeURIComponent(client_id)}/validar`, { advisor_id, changes: [] }),
 
-  reiniciarDemo: () => pedir<Perfil>("/api/demo/reset", { method: "POST" }),
+  reiniciarDemo: () => pedirAlFront<Perfil>("/api/entidad/reset", {}),
 
   /** URL firmada para un agente privado de ElevenLabs; 503 si el backend no tiene clave. */
   urlFirmadaVoz: () => pedir<{ signed_url: string }>("/api/voice/signed-url"),
