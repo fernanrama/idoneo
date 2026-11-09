@@ -1,0 +1,30 @@
+{
+  "_nota": "DATOS SIMULADOS. Persona para el laboratorio (scripts/laboratorio.py): Claude la interpreta frente al entrevistador real.",
+  "nombre": "lucia-autonoma-evasiva",
+  "que_prueba": "Ingresos variables, objetivo cercano con liquidez alta y un dato que al principio no quiere dar.",
+  "ficha": "Lucía, 27 años, diseñadora autónoma. Simpática pero desconfiada con el dinero.\n- Acepta la grabación.\n- Quiere juntar 15.000 euros para la entrada de un piso en unos dos años; puede que los necesite antes si encuentra piso.\n- Sus ingresos varían mucho: hay meses de 1.000 euros y meses de 2.500. Gastos fijos: unos 800 al mes.\n- Ahorro: la primera vez que se lo preguntan dice que prefiere no decirlo. Si el asistente insiste con amabilidad o le explica para qué sirve, dice que tiene unos 12.000 euros.\n- No tiene deudas.\n- Nunca ha invertido. Tiene una cuenta de ahorro. No sabe qué es un fondo de renta fija ni un ETF y lo reconoce.\n- Si su dinero bajara un 15 %, vendería una parte para no perder más.\n- La sostenibilidad le importa mucho: quiere que su dinero no vaya a empresas contaminantes.\n- Su pareja gana bastante más que ella, y si sale el tema lo menciona, pero las finanzas son separadas.",
+  "esperado": {
+    "disclosures.ai_notice_ack": true,
+    "objectives.o1.goal": {
+      "presente": true
+    },
+    "objectives.o1.horizon_years": 2,
+    "objectives.o1.liquidity_need": "high",
+    "financial.income_stability": "variable",
+    "financial.fixed_monthly_costs_eur": 800,
+    "financial.debts_eur": 0,
+    "risk_tolerance.scenario_score": 2,
+    "sustainability.preference": "strong"
+  },
+  "prohibido": [],
+  "prohibido_valores": {
+    "knowledge.etfs": [
+      "medium",
+      "high"
+    ],
+    "knowledge.fixed_income_funds": [
+      "medium",
+      "high"
+    ]
+  }
+}

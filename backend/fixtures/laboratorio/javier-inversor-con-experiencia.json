@@ -1,0 +1,35 @@
+{
+  "_nota": "DATOS SIMULADOS. Persona para el laboratorio (scripts/laboratorio.py): Claude la interpreta frente al entrevistador real.",
+  "nombre": "javier-inversor-con-experiencia",
+  "que_prueba": "Inversor que sí sabe: el sistema no debe infravalorarlo y debe recoger una deuda hipotecaria.",
+  "ficha": "Javier, 34 años, ingeniero de software. Directo y con prisa, pero colabora.\n- Acepta la grabación.\n- Quiere invertir para la jubilación, a 25 años vista. No necesitará ese dinero antes.\n- Cobra 3.200 euros netos al mes, estables. Gastos fijos: unos 1.500 al mes, hipoteca incluida.\n- Ahorro disponible: 40.000 euros. Debe 120.000 euros de hipoteca.\n- Sabe bien cómo funcionan los ETF, las acciones y los fondos de renta variable: entiende que pueden caer mucho, que un ETF cotiza en bolsa y replica un índice, y que una sola acción tiene más riesgo que un fondo diversificado. Ha hecho unas 30 operaciones con ETF y acciones en los últimos tres años.\n- Sabe que si suben los tipos de interés, los bonos y los fondos de renta fija bajan de precio.\n- No ha tocado nunca productos complejos (derivados, estructurados) y lo dice.\n- En 2022 su cartera cayó un 20 % y compró algo más aprovechando la bajada.\n- La sostenibilidad le importa algo, pero no es lo principal.",
+  "esperado": {
+    "disclosures.ai_notice_ack": true,
+    "objectives.o1.horizon_years": 25,
+    "financial.net_monthly_income_eur": 3200,
+    "financial.fixed_monthly_costs_eur": 1500,
+    "financial.liquid_savings_eur": 40000,
+    "financial.debts_eur": 120000,
+    "knowledge.equity_funds": {
+      "uno_de": [
+        "medium",
+        "high"
+      ]
+    },
+    "knowledge.fixed_income_funds": {
+      "uno_de": [
+        "medium",
+        "high"
+      ]
+    },
+    "risk_tolerance.scenario_score": {
+      "uno_de": [
+        4,
+        5
+      ]
+    },
+    "sustainability.preference": "some"
+  },
+  "prohibido": [],
+  "prohibido_valores": {}
+}

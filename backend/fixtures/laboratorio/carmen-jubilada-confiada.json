@@ -1,0 +1,37 @@
+{
+  "_nota": "DATOS SIMULADOS. Persona para el laboratorio (scripts/laboratorio.py): Claude la interpreta frente al entrevistador real.",
+  "nombre": "carmen-jubilada-confiada",
+  "que_prueba": "Exceso de confianza: dice saber de renta variable, pero cree que un fondo del banco no puede perder.",
+  "ficha": "Carmen, 68 años, jubilada, viuda. Educada y algo confiada; responde poco.\n- Acepta la grabación y entiende que la entrevista sirve para conocerla antes de invertir.\n- Quiere un dinero extra cada mes para complementar la pensión, durante unos diez años. No piensa tocar el capital salvo una urgencia.\n- Pensión: unos 1.450 euros netos al mes, fija. Gastos fijos: unos 900 al mes (luz, comunidad, compra).\n- Ahorro: 80.000 euros en depósitos. No tiene deudas; la casa está pagada. No tiene otros bienes aparte de la casa.\n- Depósitos: los conoce bien, sabe que si los cancela antes pierde intereses.\n- En el test del banco marcó que conoce bien los fondos de renta variable, pero en realidad cree que un fondo del banco no puede perder dinero porque «es del banco». Nunca ha invertido en fondos, ETF ni acciones. No sabe qué es un ETF.\n- Si sus ahorros bajaran un 20 %, lo sacaría todo.\n- La sostenibilidad le da igual mientras no pierda dinero.",
+  "esperado": {
+    "disclosures.ai_notice_ack": true,
+    "objectives.o1.goal": {
+      "presente": true
+    },
+    "objectives.o1.horizon_years": 10,
+    "financial.net_monthly_income_eur": 1450,
+    "financial.fixed_monthly_costs_eur": 900,
+    "financial.liquid_savings_eur": 80000,
+    "financial.debts_eur": 0,
+    "knowledge.equity_funds": {
+      "valor": "none",
+      "fuente": "demonstrated"
+    },
+    "risk_tolerance.scenario_score": 1,
+    "sustainability.preference": "none"
+  },
+  "prohibido": [],
+  "prohibido_valores": {
+    "knowledge.etfs": [
+      "medium",
+      "high"
+    ],
+    "knowledge.stocks": [
+      "medium",
+      "high"
+    ]
+  },
+  "alertas": [
+    "knowledge.equity_funds"
+  ]
+}

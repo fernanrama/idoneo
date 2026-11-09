@@ -75,13 +75,15 @@ def casos(carpeta: Path = CARPETA) -> list[Caso]:
     return [cargar(p) for p in sorted(carpeta.glob("*.json"))]
 
 
-def comprobar_caso(caso: Caso) -> list[str]:
-    """Errores de forma del propio caso (rutas, valores, turnos); [] si está bien."""
+def comprobar_caso(caso: Caso, con_turnos: bool = True) -> list[str]:
+    """Errores de forma del propio caso (rutas, valores, turnos); [] si está bien.
+
+    `con_turnos=False` para las personas del laboratorio, que no traen conversación escrita."""
     errores = []
     ids = [t.turn_id for t in caso.turnos]
     if len(ids) != len(set(ids)):
         errores.append("turn_id repetidos")
-    if not any(t.speaker == "client" for t in caso.turnos):
+    if con_turnos and not any(t.speaker == "client" for t in caso.turnos):
         errores.append("sin turnos del cliente")
     rutas = list(caso.esperado) + list(caso.prohibido) + list(caso.prohibido_valores)
     for ruta in rutas:

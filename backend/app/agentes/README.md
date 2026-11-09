@@ -21,6 +21,8 @@ flowchart LR
 | `normalizacion.py` | Cifras como las dice un cliente español («1.450,50», «80 mil», «entre 800 y 1.000», «unos 900 €»), anual→mensual en código (supuesto: 12 pagas) y comparación de citas tolerante a tildes, mayúsculas y puntuación de la transcripción. |
 | `guardas.py` | Comprobaciones deterministas del contexto (¿el asistente avisó de que es una IA, hizo la pregunta de comprobación, planteó la caída, explicó la sostenibilidad?) y límites de plausibilidad (supuestos): lo que supera el límite se guarda marcado para el asesor, nunca se corrige solo. |
 | `chat.py` + `prompts/entrevistador.md` | Entrevistador en modo texto (`POST /api/sessions/{id}/chat`). El mismo prompt sirve para el agente de voz de ElevenLabs. |
+| `evaluacion.py` | Puntuación determinista frente a lo esperado: cobertura, precisión y datos prohibidos escritos. |
+| `laboratorio.py` + `cliente_simulado.py` | Laboratorio: Claude hace de cliente con una ficha oculta y habla por texto con el entrevistador real; mide el sistema entero sin voz ni MyInvestor. Solo para pruebas. |
 | `verificador.py`, `contexto.py` | Rol B2: alertas y resumen para otros agentes. |
 
 ## Qué garantiza el extractor, pase lo que pase con el modelo
@@ -46,6 +48,7 @@ Después, `store` vuelve a validar tipos, autoría y evidencia; lo que no pasa q
 
 ## Probarlo
 
-- Tests, sin API: `python -m pytest -q tests/test_extractor.py tests/test_extractor_casos.py tests/test_evaluacion.py tests/test_chat.py`.
+- Tests, sin API: `python -m pytest -q tests/test_extractor.py tests/test_extractor_casos.py tests/test_evaluacion.py tests/test_laboratorio.py tests/test_chat.py`.
 - Evaluación con la API real sobre 7 entrevistas de casos difíciles (correcciones, evasivas, terceros, manipulación, cifras imposibles, sostenibilidad): `python scripts/evaluar_extractor.py [--repeticiones 3] [--informe ../docs/evaluacion-extractor.md]`. Da cobertura, precisión, datos prohibidos escritos, latencia y tokens. Los casos están en `fixtures/evaluacion/` y la puntuación en `evaluacion.py`.
+- Laboratorio con la API real: `python scripts/laboratorio.py --persona carmen --transcripciones ../docs/laboratorio --informe ../docs/laboratorio/informe.md`. Cuatro personas en `fixtures/laboratorio/` (jubilada confiada, inversor con experiencia, autónoma evasiva, cliente que quiere saltarse el test). Además de la puntuación, mide si el asistente avisa de que es una IA, qué conocimientos comprueba, si cierra, cuántos turnos usa, si recomienda algo (no debe) y qué queda pendiente. El modelo del cliente se elige con `MODEL_CLIENTE_SIMULADO`.
 - Con la API real y la entrevista simulada de Carmen: `python scripts/probar_extractor.py` desde `backend/`. Imprime aciertos por campo frente al fixture, alertas, rechazos, tokens y latencia.

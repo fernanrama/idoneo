@@ -49,6 +49,10 @@ def asistente_previo(turnos: list[Turno], turno: Turno) -> str:
     return sin_tildes(previo).casefold()
 
 
+def menciona_ia(texto: str) -> bool:
+    return bool(_IA.search(sin_tildes(texto).casefold()))
+
+
 def aviso_ia(turnos: list[Turno], turno: Turno) -> bool:
     return bool(_IA.search(asistente_previo(turnos, turno)))
 
