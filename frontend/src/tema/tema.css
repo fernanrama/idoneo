@@ -7,7 +7,7 @@
   /* Marca */
   --c-primario: #0b2a4a;
   --c-primario-texto: #ffffff;
-  --c-acento: #12a37f;
+  --c-acento: #0e7a5f;
   --c-acento-suave: #e3f6f0;
 
   /* Superficies y texto */
@@ -21,7 +21,7 @@
   --c-aviso: #b45309;
   --c-aviso-suave: #fff4e0;
   --c-error: #b42318;
-  --c-ok: #12805c;
+  --c-ok: #0e6b4d;
 
   /* Tipografía */
   --f-familia: var(--font-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
