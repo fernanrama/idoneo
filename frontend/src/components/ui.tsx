@@ -54,7 +54,7 @@ export function BarraBloques({ bloques }: { bloques: { id: string; nombre: strin
   const actual = bloques.find((b) => b.estado === "en_curso");
   return (
     <div>
-      <div className={s.bloques} role="progressbar" aria-valuemin={0} aria-valuemax={bloques.length} aria-valuenow={hechos}>
+      <div className={s.bloques} role="progressbar" aria-label="Progreso de la entrevista" aria-valuemin={0} aria-valuemax={bloques.length} aria-valuenow={hechos}>
         {bloques.map((b) => (
           <div key={b.id} className={`${s.bloque} ${s[`bloque_${b.estado}`] ?? ""}`} title={b.nombre} />
         ))}
@@ -75,7 +75,7 @@ export function Subtitulos({ turnos }: { turnos: Turno[] }) {
     ref.current?.scrollTo({ top: ref.current.scrollHeight, behavior: "smooth" });
   }, [turnos.length]);
   return (
-    <div ref={ref} className={s.subtitulos} aria-live="polite" aria-label="Subtítulos de la conversación">
+    <div ref={ref} className={s.subtitulos} role="log" aria-live="polite" aria-label="Subtítulos de la conversación">
       {turnos.map((t, i) => (
         <p key={i} className={`${s.burbuja} ${s[`burbuja_${t.speaker}`]}`}>
           <span className="oculto-visual">{t.speaker === "agent" ? "Asistente: " : "Tú: "}</span>
