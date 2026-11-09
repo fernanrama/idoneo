@@ -2,7 +2,7 @@
 
 **La especificación es [`docs/proyecto/04_CONTRATO_PERFIL.md`](proyecto/04_CONTRATO_PERFIL.md) (Alex).** Este documento no la repite: dice qué parte está implementada, dónde y en qué se desvía. El código de referencia es `backend/app/perfil/modelos.py` (esquema) y `calculos.py` (resultados). Cambiar el contrato = PR pequeña avisada al equipo.
 
-Estado (8/11, rama `feat/contrato-unificado`): backend v1 con 11 tests en verde; frontend adaptado (tipos, lint y compilación en verde). Pendiente de revisión por **Alex** (especificación) y **Juan** (backend).
+Estado (8/11, `main`): contrato v1 (PR #9), MCP (PR #7) y persistencia, validación y versionado del backend (PR #8) integrados; frontend adaptado. Comportamiento del backend: sección [Backend integrado](#backend-integrado-persistencia-validación-y-versionado). Pendiente de revisión por **Alex** (especificación).
 
 ## Qué se ha unificado
 
@@ -53,26 +53,120 @@ Comprobación con Carmen (datos simulados), que cubren los tests:
 
 ## API REST implementada (`backend/app/main.py`, docs en `/docs`)
 
-| Ruta | Estado |
+| Ruta | Qué hace | Códigos |
+|---|---|---|
+| `GET /api/health` | Comprobación | 200 |
+| `POST /api/sessions` `{client_id?, channel}` | Crea el cliente si no existe y abre una sesión → `{session_id, client_id, started_at, channel}`. `channel`: `voice` (por defecto) o `text`. Si el perfil estaba en `review_due`, vuelve a `draft` (versión `reassessment_started`) | 200 · 422 |
+| `POST /api/sessions/{id}/turns` `{turn_id?, speaker, text, t_start, t_end}` | Guarda el turno → `{turn_id}`. Sin `turn_id` se asigna `t-001`, `t-002`…; reenviar el mismo `turn_id` no lo duplica. Con `speaker: "client"` lanza extractor y verificador en segundo plano (extractor aún stub) | 202 · 404 · 422 |
+| `GET /api/sessions/{id}` | Sesión (`channel`, `started_at`, `ended_at`…), `turns[]` y `rejections[]` ([rechazos](#rechazos-visibles)) | 200 · 404 |
+| `GET /api/clients/{id}/profile[?version=n]` | Última versión en cualquier estado (o la `n`), con la capa personal vigente unida | 200 · 404 |
+| `GET /api/clients/{id}/versions` | `[{version, created_at, reason, author, status}]` | 200 · 404 |
+| `POST /api/clients/{id}/validate` `{advisor_id, changes[]}` | La entidad corrige (opcional) y valida → perfil `active` ([reglas](#estados-y-validación-de-la-entidad)) | 200 · 401 · 404 · 409 · 422 |
+| `GET /api/clients/{id}/constraints` | Restricciones del [perfil para consumidores](#versionado) | 200 · 404 |
+| `GET /api/clients/{id}/evidence/{path}` | `{path, value, source, evidence}` del dato en la última versión | 200 · 404 (cliente, ruta inexistente o dato sin valor) |
+| `GET /api/clients/{id}/context` | Resumen para otro agente, sobre el perfil para consumidores (plantilla; Pablo lo hará con Claude) | 200 · 404 |
+| `GET /api/voice/signed-url` | URL firmada de ElevenLabs; la clave no sale del backend (sin probar con cuenta real) | 200 · 502 · 503 (sin configurar) |
+| `POST /api/demo/reset` | Recarga a Carmen (DATOS SIMULADOS) como versión nueva; no borra el historial | 200 · 401 · 404 (`DEMO_ENDPOINTS=0`) |
+| `/mcp` | MCP con las 4 herramientas de solo lectura (Alejandro), sobre el perfil para consumidores | ✔ |
+| `GET /api/sessions/{id}/stream` (SSE) | Pendiente (Juan). El bus de eventos ya existe; el front sondea cada 1,5 s | — |
+| `POST /api/webhooks/elevenlabs` | Pendiente (Juan y Fernán, según la prueba de voz) | — |
+| `GET /api/clients/{id}/dossier.pdf`, clips `.mp3` | Pendiente (Juan) | — |
+
+## Backend integrado: persistencia, validación y versionado
+
+Rol A (Juan). Código en `backend/app/perfil/`: `store.py` es la única puerta de escritura (la usan la API, los agentes y el MCP); `validacion.py`, `personal.py`, `almacenes/` y `persistencia/` están por debajo. La lógica financiera sigue siendo la de `calculos.py`.
+
+### Almacenes
+
+| `PERFIL_ALMACEN` | Dónde se guarda | Para qué |
+|---|---|---|
+| `memoria` (por defecto) | En memoria. Si `DATA_PERSIST=1` (por defecto), versiones y capa personal se vuelcan a JSON en `DATA_DIR`. Las sesiones, turnos y rechazos no se vuelcan | Desarrollo, tests y demo sin base de datos |
+| `bd` | `DATABASE_URL`: Postgres/Supabase, o vacío = SQLite en `backend/data/perfil.db` | Persistencia real. En Postgres exige las migraciones aplicadas ([procedimiento](../backend/migraciones/README.md)) |
+
+Los dos almacenes se comportan igual (el algoritmo de escritura está una sola vez en `store.py`; `tests/test_paridad.py` lo comprueba). Al arrancar, el backend configura el almacén y falla con un mensaje claro si a la base le faltan las migraciones; con `LOAD_DEMO_FIXTURE=1` carga a Carmen **solo si no existe**, sin pisar datos guardados.
+
+### Escritura y evidencias
+
+Todo lo que se escribe pasa por `validacion.py`, con cualquier almacén:
+
+| Regla | Si no se cumple |
 |---|---|
-| `POST /api/sessions` `{client_id?, channel}` | ✔ |
-| `POST /api/sessions/{id}/turns` `{turn_id?, speaker, text, t_start, t_end}` → `{turn_id}` | ✔ (extractor stub) |
-| `GET /api/sessions/{id}` | ✔ |
-| `GET /api/clients/{id}/profile[?version=]` | ✔ |
-| `GET /api/clients/{id}/versions` | ✔ (con `reason` y `author`) |
-| `POST /api/clients/{id}/validate` `{advisor_id, changes[]}` | ✔ (409 si falta un dato obligatorio o se intenta escribir un campo calculado) |
-| `GET /api/clients/{id}/constraints` | ✔ |
-| `GET /api/clients/{id}/evidence/{path}` | ✔ |
-| `GET /api/clients/{id}/context` | ✔ (plantilla; Pablo lo hará con Claude) |
-| `GET /api/voice/signed-url` | ✔ (sin probar con cuenta real) |
-| `POST /api/demo/reset` | ✔ |
-| `GET /api/sessions/{id}/stream` (SSE) | Pendiente (Juan). El front sondea cada 1,5 s |
-| `POST /api/webhooks/elevenlabs` | Pendiente (Juan y Fernán, según la prueba de voz) |
-| `GET /api/clients/{id}/dossier.pdf`, clips `.mp3` | Pendiente (Juan) |
-| MCP con las 4 herramientas | Pendiente (Alejandro) |
+| La ruta existe en `modelos.CAMPOS` y el valor tiene su tipo (niveles, opciones, números con rango, textos de hasta 1.000 caracteres, artículo SFDR 6/8/9) | 422 |
+| Nadie escribe datos calculados (`financial.emergency_fund_months`, `financial.loss_capacity_eur`) ni `source: "calculated"` | 409 |
+| Solo la entidad (`advisor:<id>`) escribe `source: "advisor"`; lo que corrige el asesor se guarda siempre como `advisor` | 422 |
+| Un dato escrito por un agente (`agent:*`) lleva al menos una evidencia: `{session_id, turn_id?, t: [inicio, fin], quote, audio_url?}` (regla 4 del contrato 04) | 422 |
+| `declared` solo se guarda si difiere de `value`; con `source: "demonstrated"` se marca `declared_vs_demonstrated` automáticamente | — |
+| `low_confidence` lo marca el extractor según su rúbrica (no se deduce de `confidence`) | — |
+| `client_id`: minúsculas, números, `-` y `_` (máx. 64). Autor: `agent:<x>`, `advisor:<id>`, `fn:<x>`, `fixture` o `system` | 422 |
+
+Una escritura con varios parches es **todo o nada**. Excepción: lo que proponen los agentes en cada turno se acepta en parte ([rechazos visibles](#rechazos-visibles)).
+
+### Versionado
+
+- Cada cambio crea una versión nueva con `reason` y `author`; ninguna versión se modifica. Reescribir exactamente lo mismo no crea versión.
+- En base de datos lo garantiza la propia base: `UPDATE`, `DELETE` y `TRUNCATE` bloqueados en `clients`, `profile_versions` y `turns` (también para el rol `postgres` y con `CASCADE`).
+- Concurrencia optimista: si otra escritura (de este u otro proceso) se adelanta, se relee y reintenta; tras 5 intentos, 409.
+- Las alertas no se duplican: se ignora una alerta con el mismo `flag` y `path` que otra abierta, o con un `id` ya existente. Una alerta solo puede apuntar a una ruta de `CAMPOS` (o a ninguna).
+- **Perfil para consumidores** (restricciones, contexto y MCP): el último `active`; si no hay ninguno, la última versión (`usable: false`). `POST /api/demo/reset` abre una época nueva: añade una versión con `reason: "demo_reset: …"` y desde ese momento no se sirven activos anteriores.
+
+### Estados y validación de la entidad
+
+| De | A | Cuándo |
+|---|---|---|
+| `draft` | `pending_validation` | Tras cualquier escritura, si `suitability.complete` y no hay alertas `needs_advisor` abiertas |
+| `pending_validation` | `draft` | Si deja de estar completo o aparece una alerta `needs_advisor` |
+| `draft` o `pending_validation` | `active` | `POST /validate`, si el perfil está completo |
+| `active` | `review_due` | Un agente cambia un dato (las correcciones del asesor no lo cambian de estado) |
+| `review_due` | `draft` | Al abrir una sesión nueva (`POST /api/sessions`) |
+
+`POST /validate` responde **409** si el perfil está en `active` o `review_due` (desde `review_due` hay que reentrevistar), si falta algún dato obligatorio o si un cambio intenta escribir un dato calculado; **422** si `advisor_id` o algún cambio no son válidos. Al validar se cierran **todas** las alertas abiertas (regla del contrato v1) y cada una registra `resolved_by` y `resolved_at`; `review.next_review` queda a un año (todavía no vence solo). Añadir alertas a un perfil `active` no cambia su estado.
+
+### Capa personal
+
+- Se guarda aparte de la capa MiFID (tabla `personal_versions` en base de datos) y con consentimiento propio: sin consentimiento no se admite ningún dato (422).
+- Bloques admitidos: `life_stage`, `retirement`, `held_elsewhere`, `tax`, `exclusions` (lista de textos), `communication` y `concerns`.
+- Hacia fuera se ve en `Perfil.personal` con la forma del contrato 04: `{"consent": {"given": true, "at": "…"}, "exclusions": […], …}`. Sin consentimiento, `{}`. Las exclusiones llegan a `post_filters` (`top_sectors`).
+- Se puede borrar entera (derecho de supresión) sin tocar las versiones MiFID. Las versiones guardadas no la contienen: al leer cualquier versión se une la capa personal **vigente**.
+- Todavía no hay endpoint para escribirla: solo `store.guardar_personal` y los fixtures.
+
+### Rechazos visibles
+
+En cada turno del cliente, extractor y verificador se ejecutan por separado (si uno falla, el otro sigue). Cada parche y cada alerta se valida por separado con las reglas anteriores: los válidos se guardan (los parches, en una sola versión) y los inválidos se rechazan. Cada rechazo se ve en `GET /api/sessions/{id}`:
+
+```json
+"rejections": [
+  {"session_id": "s-…", "client_id": "carmen-68", "origen": "extractor", "tipo": "parche",
+   "path": "financial.debts_eur", "motivo": "financial.debts_eur: un dato sacado de la conversación necesita su evidencia",
+   "created_at": "…"}
+]
+```
+
+- `origen`: `extractor`, `verificador` o `backend` (no se pudo guardar). `tipo`: `parche`, `alerta` o `error` (el agente falló o no devolvió una lista).
+- También se publican en el bus de eventos (`item.rejected`) y en el log del servidor.
+- Se guardan en la memoria del proceso (los últimos 200 por sesión): **no sobreviven a un reinicio** del backend.
+
+### Errores HTTP
+
+| Código | Cuándo |
+|---|---|
+| 401 | `ADMIN_TOKEN` definido y falta o no coincide la cabecera `X-Admin-Token` (`POST /validate` y `POST /api/demo/reset`) |
+| 404 | Cliente, versión, sesión, fixture o dato inexistente; `POST /api/demo/reset` con `DEMO_ENDPOINTS=0` |
+| 409 | Transición no permitida, perfil incompleto al validar, escritura de un dato calculado o demasiadas escrituras simultáneas |
+| 422 | Entrada que no cumple el esquema o las reglas de escritura (ruta, tipo, autoría, evidencia, `client_id`, canal, capa personal) |
+| 502 · 503 | Voz: ElevenLabs respondió con error · el backend no tiene configurada la voz |
+
+### Eventos internos
+
+`store.bus` publica `profile.patch` (`path`, `fact`), `flag.raised` (`path`, `flag`, `message`, `alert_id`), `profile.status` (`status`, `complete`, `missing`) e `item.rejected`. Son la base del SSE pendiente; todavía no hay endpoint que los sirva.
+
+### Seguridad y límites conocidos
+
+- Sin `ADMIN_TOKEN` (desarrollo) no se pide nada. **El front no envía todavía `X-Admin-Token`**: si se define el token, validar y reiniciar la demo desde el navegador darán 401. El token no puede ir en una variable `NEXT_PUBLIC_*`; hace falta una ruta de servidor de Next que lo añada.
+- Las lecturas (perfil, versiones, evidencias, sesiones), `/api/voice/signed-url` y el MCP no piden autenticación. Con una URL pública, solo con datos simulados.
+- Pendiente: comparar versiones, marcar un evento vital (`active → review_due`), que `next_review` venza solo, escribir la capa personal por la API y cerrar una sesión (`ended_at` existe, pero nada lo rellena todavía; lo hará el webhook de fin de llamada).
 
 ## Para revisar
 
 - **Alex:** las 7 desviaciones y las propuestas de la tabla de decisiones abiertas.
-- **Juan:** `store.py` (transiciones de estado) y `calculos.py`, antes de pasar a SQLite.
-- **Hammad y Pablo:** el contrato de sus módulos está en la cabecera de `agentes/extractor.py` y `agentes/verificador.py` (devuelven `Parche` y `Alerta`).
+- **Juan:** endpoint SSE, webhook de ElevenLabs, audio y expediente; persistir los rechazos si hace falta.
+- **Hammad y Pablo:** el contrato de sus módulos está en la cabecera de `agentes/extractor.py` y `agentes/verificador.py` (devuelven `Parche` y `Alerta`). Los parches del extractor necesitan evidencia; los rechazos se ven en `GET /api/sessions/{id}`.

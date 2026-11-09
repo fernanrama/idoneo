@@ -23,5 +23,9 @@ hack-finance-bootstrap-documentacion.zip
 gestion/enunciado/
 backend/data/
 
+# Datos generados por el backend (perfiles en JSON, capa personal y SQLite). Arrancando desde backend/
+# van a backend/data/ (regla anterior); arrancando desde la raíz con DATA_DIR=./data, a /data/.
+/data/
+
 # Configuración local de Obsidian (cada persona la suya)
 .obsidian/
