@@ -6,8 +6,101 @@ import type { EstadoBloque } from "@/lib/bloques";
 import type { Alerta, Turno } from "@/lib/tipos";
 import s from "./ui.module.css";
 
-export function Marco({ children, ancho = false }: { children: React.ReactNode; ancho?: boolean }) {
-  return <div className={`${s.marco} ${ancho ? s.marcoAncho : ""}`}>{children}</div>;
+/** `asesor` cambia a la piel de la entidad (estilo GPTadvisor); por defecto, piel del cliente (estilo MyInvestor). */
+export function Marco({ children, ancho = false, asesor = false }: { children: React.ReactNode; ancho?: boolean; asesor?: boolean }) {
+  return (
+    <div className={`${s.marco} ${ancho ? s.marcoAncho : ""} ${asesor ? `tema-asesor ${s.asesor}` : ""}`}>{children}</div>
+  );
+}
+
+/** Nombre del producto (texto, no logo) y la marca de prototipo. */
+export function Marca() {
+  return (
+    <span className="fila">
+      <span className={s.marca}>
+        idóneo<span>.</span>
+      </span>
+      <span className={s.prototipo}>Prototipo</span>
+    </span>
+  );
+}
+
+export function Hero({ children }: { children: React.ReactNode }) {
+  return <div className={s.hero}>{children}</div>;
+}
+
+export function HeroAsesor({ children }: { children: React.ReactNode }) {
+  return <div className={s.heroAsesor}>{children}</div>;
+}
+
+type ColorEtiqueta = "rosa" | "violeta" | "azul" | "verde";
+export function Etiqueta({ children, color, punto = false }: { children: React.ReactNode; color?: ColorEtiqueta; punto?: boolean }) {
+  return (
+    <span className={`${s.etiqueta} ${color ? s[`etiqueta_${color}`] : ""} ${punto ? s.etiquetaPunto : ""}`}>{children}</span>
+  );
+}
+
+const PASOS = ["Tú", "Entrevista", "Tu perfil", "Productos"];
+/** Pasos del onboarding, con el mismo patrón de círculos del test de MyInvestor. `actual` empieza en 0. */
+export function Pasos({ actual }: { actual: number }) {
+  const iconos = ["👤", "🎙", "◎", "▤"];
+  return (
+    <ol className={s.pasos} aria-label="Pasos">
+      {PASOS.map((p, i) => {
+        const estado = i < actual ? "hecho" : i === actual ? "actual" : "pendiente";
+        return (
+          <li key={p} className={`${s.paso} ${s[`paso_${estado}`] ?? ""}`} aria-current={i === actual ? "step" : undefined}>
+            <span className={s.pasoCirculo} aria-hidden="true">
+              {i < actual ? "✓" : iconos[i]}
+            </span>
+            {p}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+function IconoCheck() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M21 11.1V12a9 9 0 1 1-5.3-8.2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M21 4.5 12 13.5l-3-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function ListaCheck({ items }: { items: React.ReactNode[] }) {
+  return (
+    <ul className={s.checks}>
+      {items.map((it, i) => (
+        <li key={i}>
+          <IconoCheck />
+          <span>{it}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** Recuadro de riesgo con el formato regulatorio que usa la banca española («3/7 · indicativo del riesgo»). */
+export function IndicadorRiesgo({ nivel, maximo = 7 }: { nivel: number | null | undefined; maximo?: number }) {
+  return (
+    <div className={s.riesgo} role="img" aria-label={`Riesgo máximo ${nivel ?? "sin definir"} sobre ${maximo}`}>
+      <strong>
+        {nivel ?? "—"}/{maximo}
+      </strong>
+      <div className={s.riesgoEscala} aria-hidden="true">
+        {Array.from({ length: maximo }, (_, i) => (
+          <span key={i} className={nivel != null && i < nivel ? s.riesgoLleno : ""} />
+        ))}
+      </div>
+      <p>
+        Nivel máximo de riesgo de los productos que te mostraremos, siendo 1/{maximo} el menor riesgo y {maximo}/{maximo} el
+        mayor.
+      </p>
+    </div>
+  );
 }
 
 export function Cabecera({ titulo, volver = true }: { titulo: string; volver?: boolean }) {
@@ -41,8 +134,28 @@ export function Boton({
   return <button className={`${s.boton} ${s[variante]} ${className}`} {...props} />;
 }
 
-export function Tarjeta({ children, destacada = false }: { children: React.ReactNode; destacada?: boolean }) {
-  return <section className={`${s.tarjeta} ${destacada ? s.tarjetaDestacada : ""}`}>{children}</section>;
+/** Con `titulo`, la tarjeta lleva cabecera con línea inferior (patrón de las tarjetas de GPTadvisor). */
+export function Tarjeta({
+  children,
+  destacada = false,
+  titulo,
+  extra,
+}: {
+  children: React.ReactNode;
+  destacada?: boolean;
+  titulo?: React.ReactNode;
+  extra?: React.ReactNode;
+}) {
+  if (titulo == null) return <section className={`${s.tarjeta} ${destacada ? s.tarjetaDestacada : ""}`}>{children}</section>;
+  return (
+    <section className={`${s.tarjeta} ${s.tarjetaConCabecera}`}>
+      <div className={s.tarjetaCabecera}>
+        <h2>{titulo}</h2>
+        {extra}
+      </div>
+      <div className={s.tarjetaCuerpo}>{children}</div>
+    </section>
+  );
 }
 
 export function Chip({ children, tipo }: { children: React.ReactNode; tipo?: string }) {

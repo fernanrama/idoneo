@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Boton, Cabecera, Contenido, Marco, Pie, Tarjeta } from "@/components/ui";
+import { Boton, Cabecera, Contenido, ListaCheck, Marco, Pasos, Pie, Tarjeta } from "@/components/ui";
 
 export default function Presentacion() {
   const [ia, setIa] = useState(false);
@@ -11,17 +11,28 @@ export default function Presentacion() {
     <Marco>
       <Cabecera titulo="Tu perfil inversor" />
       <Contenido>
-        <h1>Hablemos de ti</h1>
+        <Pasos actual={0} />
+        <h1 style={{ textAlign: "center", marginTop: 8 }}>
+          Hablemos <span style={{ fontWeight: 400 }}>de ti</span>
+        </h1>
         <p>
           La ley nos pide conocer tu situación, tus objetivos y lo que sabes de inversión antes de ofrecerte productos.
           Así nos aseguramos de que lo que te propongamos encaje contigo.
         </p>
         <Tarjeta>
-          <ul style={{ margin: 0, paddingLeft: 20 }} className="pila">
-            <li>Unos 7 minutos. Puedes parar y seguir luego.</li>
-            <li>Habla o escribe, como prefieras.</li>
-            <li>No hay respuestas buenas ni malas: si algo no lo sabes, dilo.</li>
-          </ul>
+          <ListaCheck
+            items={[
+              <>
+                <strong>Unos 7 minutos.</strong> Puedes parar y seguir luego.
+              </>,
+              <>
+                <strong>Habla o escribe,</strong> como prefieras.
+              </>,
+              <>
+                <strong>No hay respuestas buenas ni malas:</strong> si algo no lo sabes, dilo.
+              </>,
+            ]}
+          />
         </Tarjeta>
         <Tarjeta>
           <label className="fila" style={{ alignItems: "flex-start" }}>

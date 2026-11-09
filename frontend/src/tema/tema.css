@@ -1,39 +1,80 @@
 /*
  * TEMA — única fuente del aspecto visual.
- * Valores PROVISIONALES y neutros. Cuando lleguen las pantallas de MyInvestor móvil,
- * sustituir estos tokens (colores, tipografía, radios, sombras) y nada más.
+ *
+ * Dos pieles, sacadas de las webs públicas (capturas del 9 nov 2026):
+ * - :root            → app del cliente, estilo MyInvestor (azul #0046de, fondos #ecf5ff, botones píldora).
+ * - .tema-asesor     → vista de la entidad, estilo GPTadvisor (fondo #f6f6fa, tinta #0e1020, degradado
+ *                      rosa-violeta-azul, etiquetas en versalitas con punto de color).
+ * No usamos logos ni imágenes de ninguna de las dos marcas: solo paleta, tipografía y forma.
  */
 :root {
   /* Marca */
-  --c-primario: #0b2a4a;
+  --c-primario: #0046de;
   --c-primario-texto: #ffffff;
-  --c-acento: #0e7a5f;
-  --c-acento-suave: #e3f6f0;
+  --c-acento: #0046de;
+  --c-acento-suave: #ecf5ff;
+  --c-tinta: #282828;
 
   /* Superficies y texto */
-  --c-fondo: #f4f6f8;
+  --c-fondo: #ffffff;
+  --c-fondo-hero: #ecf5ff;
+  --c-fondo-gris: #f7f7f7;
   --c-superficie: #ffffff;
-  --c-borde: #e2e6ea;
-  --c-texto: #14202b;
-  --c-texto-suave: #5b6875;
+  --c-borde: #d8d8d8;
+  --c-texto: #282828;
+  --c-texto-suave: #5c5c5c;
 
   /* Estados */
-  --c-aviso: #b45309;
+  --c-aviso: #a45d00;
   --c-aviso-suave: #fff4e0;
   --c-error: #b42318;
-  --c-ok: #0e6b4d;
+  --c-ok: #0b6b47;
+  --c-ok-suave: #e5f6ee;
 
   /* Tipografía */
   --f-familia: var(--font-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-titulos: var(--font-sans), system-ui, sans-serif;
+  --f-peso-titulo: 800;
   --f-base: 17px;          /* base grande por accesibilidad */
   --f-pequena: 14px;
-  --f-titulo: 26px;
-  --f-subtitulo: 20px;
+  --f-titulo: 30px;
+  --f-subtitulo: 21px;
 
   /* Forma */
-  --r-tarjeta: 16px;
+  --r-tarjeta: 8px;
   --r-boton: 999px;
-  --sombra: 0 1px 2px rgba(16, 24, 40, 0.06), 0 2px 8px rgba(16, 24, 40, 0.06);
+  --sombra: none;
+  --sombra-cabecera: 0 2px 6px rgba(0, 0, 0, 0.08);
   --espacio: 16px;
   --ancho-movil: 430px;
+}
+
+.tema-asesor {
+  --c-primario: #0e1020;
+  --c-primario-texto: #ffffff;
+  --c-acento: #5a3fe0;
+  --c-acento-suave: #f1eefe;
+  --c-tinta: #0e1020;
+
+  --c-fondo: #f6f6fa;
+  --c-fondo-hero: #f6f6fa;
+  --c-superficie: #ffffff;
+  --c-borde: #e6e7ee;
+  --c-texto: #0e1020;
+  --c-texto-suave: #575a6b;
+
+  --c-rosa: #c2316f;
+  --c-violeta: #5a3fe0;
+  --c-azul: #0a7fae;
+  --c-verde: #0e8a57;
+  --degradado: linear-gradient(90deg, #d44285 0%, #8f4be0 45%, #2f6fe0 100%);
+
+  --f-familia: var(--font-asesor), system-ui, sans-serif;
+  --f-titulos: var(--font-asesor), system-ui, sans-serif;
+  --f-peso-titulo: 600;
+  --f-titulo: 34px;
+  --f-subtitulo: 19px;
+
+  --r-tarjeta: 14px;
+  --sombra-cabecera: none;
 }

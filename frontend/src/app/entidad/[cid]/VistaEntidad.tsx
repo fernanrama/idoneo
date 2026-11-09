@@ -1,7 +1,8 @@
 "use client";
 
 import { use, useState } from "react";
-import { AlertaTarjeta, Boton, Cabecera, Chip, Contenido, Marco, Tarjeta } from "@/components/ui";
+import { AlertaTarjeta, Boton, Chip, Contenido, Etiqueta, HeroAsesor, Marca, Marco, Tarjeta } from "@/components/ui";
+import ui from "@/components/ui.module.css";
 import { api } from "@/lib/api";
 import { ESTADOS, ETIQUETAS, FAMILIAS, FUENTES, mostrarValor } from "@/lib/bloques";
 import { usePerfil } from "@/lib/usePerfil";
@@ -30,25 +31,34 @@ export default function VistaEntidad({ params }: { params: Promise<{ cid: string
   const s = perfil?.assessments.suitability;
 
   return (
-    <Marco ancho>
-      <Cabecera titulo={`Perfil de cliente · ${cid}`} />
+    <Marco ancho asesor>
+      <header className={ui.cabecera}>
+        <Marca />
+        <span className="pequena suave" style={{ marginLeft: "auto" }}>
+          Vista de la entidad
+        </span>
+      </header>
       <Contenido>
         {error && <p role="alert">{error}</p>}
         {perfil && s && (
           <>
-            <div className="fila entre" style={{ flexWrap: "wrap" }}>
-              <div className="fila">
-                <Chip tipo={perfil.status === "active" ? "demonstrated" : "aviso"}>{ESTADOS[perfil.status]}</Chip>
-                <span className="pequena suave">
-                  Versión {perfil.version} · {perfil.reason} · {perfil.author}
-                </span>
-              </div>
+            <HeroAsesor>
+              <Etiqueta color={perfil.status === "active" ? "verde" : "rosa"} punto>
+                Perfil de cliente · {ESTADOS[perfil.status]}
+              </Etiqueta>
+              <h1>
+                {cid}, <span className="degradado">{perfil.status === "active" ? "perfil validado" : "perfil por validar"}</span>
+              </h1>
+              <p>
+                Versión {perfil.version} · {perfil.reason} · {perfil.author}. El agente de la entidad lo consulta por MCP; el
+                asesor revisa y aprueba.
+              </p>
               {perfil.status === "pending_validation" && (
                 <Boton style={{ width: "auto" }} onClick={validar} disabled={validando}>
                   {validando ? "Validando…" : "Validar perfil"}
                 </Boton>
               )}
-            </div>
+            </HeroAsesor>
 
             {fallo && (
               <p role="alert" style={{ color: "var(--c-error)" }}>
@@ -66,8 +76,7 @@ export default function VistaEntidad({ params }: { params: Promise<{ cid: string
               ))}
 
             <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))" }}>
-              <Tarjeta>
-                <h2>Idoneidad</h2>
+              <Tarjeta titulo="Idoneidad" extra={<Etiqueta color="violeta">Calculado</Etiqueta>}>
                 <p>
                   Perfil <strong>{s.risk_profile ?? "—"}</strong> · SRI máximo <strong>{s.max_sri ?? "—"}/7</strong>
                 </p>
@@ -77,8 +86,7 @@ export default function VistaEntidad({ params }: { params: Promise<{ cid: string
                   ))}
                 </ul>
               </Tarjeta>
-              <Tarjeta>
-                <h2>Conveniencia</h2>
+              <Tarjeta titulo="Conveniencia" extra={<Etiqueta color="azul">Por familia</Etiqueta>}>
                 <div className="pila">
                   {Object.entries(perfil.assessments.appropriateness)
                     .filter(([, v]) => v !== "not_assessed")
@@ -95,13 +103,14 @@ export default function VistaEntidad({ params }: { params: Promise<{ cid: string
             </div>
 
             {restricciones && (
-              <Tarjeta>
-                <div className="fila entre" style={{ flexWrap: "wrap" }}>
-                  <h2 style={{ margin: 0 }}>Restricciones para el agente de la entidad</h2>
+              <Tarjeta
+                titulo="Restricciones para el agente de la entidad"
+                extra={
                   <Chip tipo={restricciones.usable ? "demonstrated" : "aviso"}>
                     {restricciones.usable ? `Usable · v${restricciones.profile_version}` : "No usable todavía"}
                   </Chip>
-                </div>
+                }
+              >
                 <p className="pequena suave">
                   Parámetros que el agente pasa tal cual al MCP de MyInvestor y filtros posteriores sobre la ficha.
                 </p>
@@ -122,11 +131,10 @@ export default function VistaEntidad({ params }: { params: Promise<{ cid: string
               </Tarjeta>
             )}
 
-            <Tarjeta>
-              <h2>Datos y evidencias</h2>
+            <Tarjeta titulo="Datos y evidencias" extra={<Etiqueta>Con su cita</Etiqueta>}>
               <div className="pila">
-                {Object.entries(perfil.mifid).map(([campo, c]) => (
-                  <div key={campo} style={{ borderTop: "1px solid var(--c-borde)", paddingTop: 10 }}>
+                {Object.entries(perfil.mifid).map(([campo, c], i) => (
+                  <div key={campo} style={i ? { borderTop: "1px solid var(--c-borde)", paddingTop: 10 } : undefined}>
                     <div className="fila entre" style={{ flexWrap: "wrap" }}>
                       <span>{ETIQUETAS[campo] ?? campo}</span>
                       <div className="fila">
@@ -144,7 +152,7 @@ export default function VistaEntidad({ params }: { params: Promise<{ cid: string
                     {c.evidence.length > 0 && (
                       <button
                         className="pequena"
-                        style={{ background: "none", border: 0, padding: "4px 0", color: "var(--c-primario)", textDecoration: "underline" }}
+                        style={{ background: "none", border: 0, padding: "4px 0", color: "var(--c-acento)", textDecoration: "underline" }}
                         onClick={() => setAbierto(abierto === campo ? null : campo)}
                         aria-expanded={abierto === campo}
                       >

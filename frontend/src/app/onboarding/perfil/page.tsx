@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AlertaTarjeta, Boton, Cabecera, Contenido, Marco, Pie, Tarjeta } from "@/components/ui";
+import { AlertaTarjeta, Boton, Cabecera, Contenido, IndicadorRiesgo, Marco, Pasos, Pie, Tarjeta } from "@/components/ui";
 import { FAMILIAS, mostrarValor } from "@/lib/bloques";
 import { useOnboarding } from "@/lib/onboarding";
 import { usePerfil } from "@/lib/usePerfil";
@@ -24,7 +24,10 @@ export default function MiPerfil() {
         {error && <p role="alert">No hemos podido cargar tu perfil. ¿Está el servidor encendido?</p>}
         {perfil && (
           <>
-            <h1>Esto es lo que hemos entendido</h1>
+            <Pasos actual={2} />
+            <h1>
+              Esto es lo que <span style={{ fontWeight: 400 }}>hemos entendido</span>
+            </h1>
             <Tarjeta>
               <div className="pila">
                 <Dato
@@ -49,7 +52,8 @@ export default function MiPerfil() {
 
             <Tarjeta>
               <h2>Qué significa para ti</h2>
-              <p>
+              <IndicadorRiesgo nivel={perfil.assessments.suitability.max_sri} />
+              <p style={{ marginTop: 12 }}>
                 Te mostraremos productos con un nivel de riesgo de{" "}
                 <strong>{perfil.assessments.suitability.max_sri ?? "—"} sobre 7</strong> como máximo.
               </p>
