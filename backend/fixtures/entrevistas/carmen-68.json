@@ -1,0 +1,125 @@
+{
+  "_nota": "DATOS SIMULADOS. Entrevista corta de Carmen (68 años), la misma del modo guion del front (frontend/src/lib/guion.ts). La usan los tests del extractor y scripts/probar_extractor.py.",
+  "client_id": "carmen-68",
+  "turns": [
+    {
+      "turn_id": "t-001",
+      "speaker": "agent",
+      "t_start": 0.0,
+      "t_end": 7.0,
+      "text": "Hola, Carmen. Soy el asistente de perfil inversor. Soy una inteligencia artificial y una persona del banco revisará todo. ¿Le parece bien que grabemos la conversación?"
+    },
+    {
+      "turn_id": "t-002",
+      "speaker": "client",
+      "t_start": 8.0,
+      "t_end": 10.5,
+      "text": "Sí, de acuerdo, puede grabar."
+    },
+    {
+      "turn_id": "t-003",
+      "speaker": "agent",
+      "t_start": 11.0,
+      "t_end": 15.0,
+      "text": "Gracias. ¿Para qué le gustaría invertir su dinero?"
+    },
+    {
+      "turn_id": "t-004",
+      "speaker": "client",
+      "t_start": 16.0,
+      "t_end": 20.0,
+      "text": "Quiero tener un dinerito extra cada mes para complementar la pensión."
+    },
+    {
+      "turn_id": "t-005",
+      "speaker": "agent",
+      "t_start": 21.0,
+      "t_end": 24.0,
+      "text": "¿Durante cuánto tiempo, más o menos?"
+    },
+    {
+      "turn_id": "t-006",
+      "speaker": "client",
+      "t_start": 25.0,
+      "t_end": 28.0,
+      "text": "Para los próximos diez años, más o menos."
+    },
+    {
+      "turn_id": "t-007",
+      "speaker": "agent",
+      "t_start": 29.0,
+      "t_end": 33.0,
+      "text": "¿Cuánto cobra al mes y cuánto gasta en cosas fijas como luz, comunidad o la compra?"
+    },
+    {
+      "turn_id": "t-008",
+      "speaker": "client",
+      "t_start": 34.0,
+      "t_end": 41.0,
+      "text": "Cobro unos mil cuatrocientos cincuenta de pensión. Entre luz, comunidad y la compra, unos novecientos."
+    },
+    {
+      "turn_id": "t-009",
+      "speaker": "agent",
+      "t_start": 42.0,
+      "t_end": 45.0,
+      "text": "¿Y cuánto tiene ahorrado? ¿Tiene alguna deuda?"
+    },
+    {
+      "turn_id": "t-010",
+      "speaker": "client",
+      "t_start": 46.0,
+      "t_end": 51.0,
+      "text": "Tengo ochenta mil en depósitos. No debo nada, la casa está pagada."
+    },
+    {
+      "turn_id": "t-011",
+      "speaker": "agent",
+      "t_start": 52.0,
+      "t_end": 56.0,
+      "text": "En el test de su banco marcó que conoce bien los fondos de renta variable. ¿Podría perder dinero un fondo así?"
+    },
+    {
+      "turn_id": "t-012",
+      "speaker": "client",
+      "t_start": 57.0,
+      "t_end": 61.0,
+      "text": "Eso no puede pasar, el fondo es del banco."
+    },
+    {
+      "turn_id": "t-013",
+      "speaker": "agent",
+      "t_start": 62.0,
+      "t_end": 70.0,
+      "text": "Es una duda muy común. Un fondo de renta variable sí puede bajar, aunque lo venda su banco. Imagine que sus ahorros bajan un veinte por ciento en unos meses. ¿Qué haría?"
+    },
+    {
+      "turn_id": "t-014",
+      "speaker": "client",
+      "t_start": 71.0,
+      "t_end": 74.0,
+      "text": "Si baja un veinte por ciento, lo saco todo."
+    },
+    {
+      "turn_id": "t-015",
+      "speaker": "agent",
+      "t_start": 75.0,
+      "t_end": 81.0,
+      "text": "Entendido. Última pregunta: ¿le importa que sus inversiones sigan criterios de sostenibilidad, por ejemplo evitar empresas que contaminan mucho?"
+    },
+    {
+      "turn_id": "t-016",
+      "speaker": "client",
+      "t_start": 82.0,
+      "t_end": 85.0,
+      "text": "Eso me da igual, mientras no pierda."
+    },
+    {
+      "turn_id": "t-017",
+      "speaker": "agent",
+      "t_start": 86.0,
+      "t_end": 92.0,
+      "text": "Muchas gracias, Carmen. Ya tenemos su perfil. Una persona del banco lo revisará y le avisaremos."
+    }
+  ]
+}
