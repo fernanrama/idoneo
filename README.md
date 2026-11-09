@@ -162,7 +162,7 @@ Claude lo usa junto al conector público de MyInvestor: pide los límites de Car
 4. En claude.ai: **Ajustes → Conectores → Añadir conector personalizado** → `https://xxxx.trycloudflare.com/mcp`. Activa también el conector de MyInvestor (`https://mcp.myinvestor.es/mcp`).
 5. En un chat nuevo: *«Busca en MyInvestor fondos que encajen con la clienta carmen-68»*.
 
-Con `ADMIN_TOKEN` definido, el botón de validar del frontend todavía no envía la cabecera: para la demo, valida como en el paso 3.
+Para que el botón «Validar perfil» del frontend funcione con el backend protegido, pon el mismo `ADMIN_TOKEN` en `frontend/.env.local`: el servidor de Next añade la cabecera y el token no llega al navegador.
 </details>
 
 **Probado el 9/11/2026:** Claude recibe por la URL pública el perfil activo de Carmen y encuentra fondos de renta fija y monetarios en EUR con riesgo ≤ 3, ninguno de renta variable. Detalles en [backend/app/mcp/README.md](backend/app/mcp/README.md).
