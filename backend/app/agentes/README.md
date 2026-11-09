@@ -20,7 +20,7 @@ flowchart LR
 | `extractor.py` + `prompts/extractor.md` | De los últimos 8 turnos a parches del perfil. El modelo devuelve texto y categorías; el extractor aplica normalización, guardas y rúbrica. |
 | `normalizacion.py` | Cifras como las dice un cliente español («1.450,50», «80 mil», «entre 800 y 1.000», «unos 900 €»), anual→mensual en código (supuesto: 12 pagas) y comparación de citas tolerante a tildes, mayúsculas y puntuación de la transcripción. |
 | `guardas.py` | Comprobaciones deterministas del contexto (¿el asistente avisó de que es una IA, hizo la pregunta de comprobación, planteó la caída, explicó la sostenibilidad?) y límites de plausibilidad (supuestos): lo que supera el límite se guarda marcado para el asesor, nunca se corrige solo. |
-| `chat.py` + `prompts/entrevistador.md` | Entrevistador en modo texto (`POST /api/sessions/{id}/chat`). El mismo prompt sirve para el agente de voz de ElevenLabs. |
+| `chat.py` + `prompts/entrevistador.md` | Entrevistador en modo texto (`POST /api/sessions/{id}/chat`). El mismo prompt sirve para el agente de voz de ElevenLabs: `scripts/sincronizar_voz.py` lo sube al agente (solo el texto; voz, idioma y herramientas no se tocan). |
 | `evaluacion.py` | Puntuación determinista frente a lo esperado: cobertura, precisión y datos prohibidos escritos. |
 | `laboratorio.py` + `cliente_simulado.py` | Laboratorio: Claude hace de cliente con una ficha oculta y habla por texto con el entrevistador real; mide el sistema entero sin voz ni MyInvestor. Solo para pruebas. |
 | `verificador.py`, `contexto.py` | Rol B2: alertas y resumen para otros agentes. |

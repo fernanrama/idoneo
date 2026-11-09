@@ -29,3 +29,4 @@ backend/data/
 
 # Configuración local de Obsidian (cada persona la suya)
 .obsidian/
+backend/scripts/.copias_voz/

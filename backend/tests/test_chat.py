@@ -69,3 +69,17 @@ def test_texto_demasiado_largo_422(api):
 
 def test_pendientes_sigue_el_orden_del_guion():
     assert chat.pendientes(Perfil(client_id="x")) == OBLIGATORIOS
+
+
+def test_lo_que_el_cliente_no_conoce_no_se_vuelve_a_comprobar():
+    from app.perfil.modelos import Fact, Flag, Fuente
+
+    perfil = Perfil(client_id="x", mifid={
+        "knowledge.etfs": Fact(value="none", source=Fuente.declared, confidence=0.5,
+                               flags=[Flag.low_confidence], updated_by="agent:extractor"),
+        "knowledge.stocks": Fact(value="medium", source=Fuente.declared, confidence=0.5,
+                                 flags=[Flag.low_confidence], updated_by="agent:extractor"),
+    })
+    pend = chat.pendientes(perfil)
+    assert "knowledge.etfs" not in pend
+    assert "knowledge.stocks" in pend

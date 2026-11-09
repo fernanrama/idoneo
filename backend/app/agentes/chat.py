@@ -33,8 +33,12 @@ def _sistema() -> str:
 def pendientes(perfil: Perfil) -> list[str]:
     """Qué falta o hay que repreguntar, en el orden del guion. Determinista."""
     faltan = [c for c in OBLIGATORIOS if c not in perfil.mifid or perfil.mifid[c].value is None]
-    dudosos = [c for c, f in perfil.mifid.items() if Flag.low_confidence in f.flags]
-    sin_comprobar = [c for c, f in perfil.mifid.items() if c.startswith("knowledge.") and f.source == Fuente.declared]
+    # «No sé qué es un ETF» no se comprueba: no hay nada que verificar y alarga la entrevista.
+    no_lo_conoce = {c for c, f in perfil.mifid.items()
+                    if c.startswith("knowledge.") and f.source == Fuente.declared and f.value == "none"}
+    dudosos = [c for c, f in perfil.mifid.items() if Flag.low_confidence in f.flags and c not in no_lo_conoce]
+    sin_comprobar = [c for c, f in perfil.mifid.items()
+                     if c.startswith("knowledge.") and f.source == Fuente.declared and c not in no_lo_conoce]
     vistos: set[str] = set()
     return [c for c in faltan + dudosos + sin_comprobar if not (c in vistos or vistos.add(c))]
 
