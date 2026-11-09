@@ -60,3 +60,9 @@ def test_errores_legibles():
 def test_contexto():
     c = llamar("get_client_context", client_id=CID)
     assert c["text"] and len(c["text"].split()) <= 150
+
+
+def test_instrucciones_explican_listas_y_limites():
+    texto = mcp.instructions or ""
+    assert "una búsqueda por cada valor" in texto
+    assert "límites, no una selección" in texto

@@ -23,6 +23,15 @@ npx @modelcontextprotocol/inspector   # URL: http://localhost:8000/mcp · transp
 
 Tests: `pytest tests/test_mcp.py`. Probado el 8/11 con el cliente MCP de Python contra uvicorn: inicializa, lista las 4 herramientas y devuelve las restricciones de Carmen (`usable: false` hasta que el asesor valida). Un `Host` no permitido recibe 421.
 
+## Prueba completa en Claude (9/11)
+
+Hecha con un túnel de cloudflared desde el portátil de Alex, el conector añadido en Claude y Carmen validada (`active`, `usable: true`):
+
+- Claude llamó a `get_investment_constraints` por la URL pública y recibió `max_risk: 3`, `asset_type: ["Monetario", "Renta Fija"]` y la renta variable `not_appropriate`.
+- Con esos límites, en MyInvestor: 450 fondos de renta fija y 28 monetarios en EUR con SRRI ≤ 3; ninguno de renta variable.
+- Detectado: el buscador de MyInvestor solo admite un `asset_type` por búsqueda. Las instrucciones del servidor piden ahora una búsqueda por valor.
+- Recordatorio para el pitch: el orden y la elección de fondos es del agente de la entidad (que asesora); nosotros solo damos los límites del perfil.
+
 ## Conectarlo en Claude (demo)
 
 Claude necesita una URL pública HTTPS. Para pruebas, un túnel temporal desde el portátil:
