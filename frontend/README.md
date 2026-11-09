@@ -23,6 +23,10 @@ El backend tiene que estar en marcha (ver README raíz). Para probar en el móvi
 | `/onboarding/productos` | Filtros del perfil. **No consulta el MCP de MyInvestor por código**: sus términos lo prohíben (ver `docs/proyecto/05_MCP_MYINVESTOR.md`) |
 | `/entidad/[cid]` | Vista de la entidad: datos con fuente, confianza y evidencia, restricciones y validación |
 
+## Validar el perfil con el backend protegido
+
+Si el backend tiene `ADMIN_TOKEN` (obligatorio con URL pública), pon **el mismo valor** en `frontend/.env.local` como `ADMIN_TOKEN` (sin `NEXT_PUBLIC_`). El botón «Validar perfil» y el reinicio de la demo pasan por rutas del propio front (`src/app/api/entidad/`), que añaden la cabecera `X-Admin-Token` en el servidor: el token nunca llega al navegador. Esas rutas solo aceptan peticiones a `localhost`, así que aunque el front se exponga por un túnel nadie de fuera puede validar perfiles.
+
 ## Dónde está cada cosa
 
 - `src/tema/tema.css`: **todo el aspecto visual**. Al recibir las pantallas de MyInvestor, cambiar aquí los tokens y, si hace falta, `src/components/ui.module.css`. El flujo no se toca.
