@@ -73,3 +73,24 @@ def test_una_entrevista_que_no_cierra_se_corta(monkeypatch):
     informe, _ = asyncio.run(_entrevista(monkeypatch, [("¿Y qué más?", False)] * 5, max_turnos=3))
     assert not informe.terminada and not informe.aviso_ia_al_inicio
     assert informe.intervenciones == 3
+
+
+def test_variantes_reproducibles_y_bien_formadas():
+    from app.agentes import variantes
+
+    a, b = variantes.generar(40, semilla=3), variantes.generar(40, semilla=3)
+    assert [p.ficha for p in a] == [p.ficha for p in b]
+    assert [p.ficha for p in a] != [p.ficha for p in variantes.generar(40, semilla=4)]
+    for p in a:
+        assert evaluacion.comprobar_caso(p.caso, con_turnos=False) == [], p.caso.nombre
+    assert len({p.caso.nombre for p in a}) == 40
+
+
+def test_variantes_cubren_los_casos_dificiles():
+    from app.agentes import variantes
+
+    gente = variantes.generar(200, semilla=1)
+    assert any(p.caso.nombre.endswith("no-acepta") for p in gente)
+    assert any(p.alertas for p in gente)  # cree saber de renta variable y se equivoca
+    assert any(p.caso.esperado.get("financial.income_stability") == "variable" for p in gente)
+    assert {p.caso.esperado.get("risk_tolerance.scenario_score") for p in gente} >= {1, 2, 3, 4}

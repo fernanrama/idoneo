@@ -3,6 +3,7 @@
 Uso (desde backend/, con ANTHROPIC_API_KEY en ../.env o en el entorno):
 
     python scripts/laboratorio.py --persona carmen
+    python scripts/laboratorio.py --variantes 20 --semilla 7 --repeticiones 2 --sin-fijas
     python scripts/laboratorio.py --transcripciones ../docs/laboratorio --informe ../docs/laboratorio/informe.md
 
 Cada persona (fixtures/laboratorio/*.json) tiene una ficha oculta que solo ve el cliente simulado. Mide el
@@ -37,7 +38,7 @@ load_dotenv(RAIZ.parent / ".env")
 load_dotenv(RAIZ / ".env")
 
 from app import main  # noqa: E402
-from app.agentes import claude, evaluacion, laboratorio  # noqa: E402
+from app.agentes import claude, evaluacion, laboratorio, variantes  # noqa: E402
 from app.perfil import store  # noqa: E402
 
 CLIENTE = "laboratorio"
@@ -120,7 +121,9 @@ async def principal(a) -> int:
         return 2
     if not a.detalle:
         logging.disable(logging.INFO)
-    elegidas = [p for p in laboratorio.personas() if not a.persona or p.caso.nombre.startswith(a.persona)]
+    fijas = [] if a.sin_fijas else laboratorio.personas()
+    elegidas = [p for p in fijas if not a.persona or p.caso.nombre.startswith(a.persona)]
+    elegidas += variantes.generar(a.variantes, a.semilla) if a.variantes else []
     if not elegidas:
         print(f"No hay personas que empiecen por {a.persona!r} en {laboratorio.CARPETA}")
         return 2
@@ -141,16 +144,34 @@ async def principal(a) -> int:
     claude.reiniciar_metricas()
 
     informes = []
-    for p in elegidas:
-        i = await ejecutar(p, a.max_turnos)
-        imprimir(i, p.caso.que_prueba)
-        informes.append(i)
-        if a.transcripciones:
+    fallidas: list[str] = []
+    total = len(elegidas) * a.repeticiones
+    for rep in range(a.repeticiones):
+        for p in elegidas:
+            try:
+                i = await ejecutar(p, a.max_turnos)
+            except Exception as e:  # una entrevista rota (red, límite de uso) no tira la tirada entera
+                fallidas.append(f"{p.caso.nombre}: {type(e).__name__}: {str(e)[:200]}")
+                print(f"\n✗ {p.caso.nombre} falló: {type(e).__name__}: {str(e)[:200]}")
+                continue
+            sufijo = f" [repetición {rep + 1}]" if a.repeticiones > 1 else ""
+            print(f"\n({len(informes) + 1}/{total})", end="")
+            imprimir(i, p.caso.que_prueba + sufijo)
+            informes.append(i)
+            if not a.transcripciones:
+                continue
             a.transcripciones.mkdir(parents=True, exist_ok=True)
-            (a.transcripciones / f"{i.persona}.txt").write_text(
-                "TRANSCRIPCIÓN SIMULADA (cliente interpretado por Claude)\n\n" + laboratorio.transcripcion(i) + "\n",
-                encoding="utf-8")
+            nombre = i.persona + (f"-r{rep + 1}" if a.repeticiones > 1 else "")
+            (a.transcripciones / f"{nombre}.txt").write_text(
+                "TRANSCRIPCIÓN SIMULADA (cliente interpretado por Claude)\n\nFicha:\n" + p.ficha + "\n\n"
+                + laboratorio.transcripcion(i) + "\n", encoding="utf-8")
 
+    if fallidas:
+        print(f"\n{len(fallidas)} entrevistas fallaron y no cuentan en las métricas:")
+        for f in fallidas:
+            print(f"  {f}")
+    if not informes:
+        return 2
     r = evaluacion.resumen([i.resultado for i in informes])
     medias = {}
     for agente, m in claude.metricas().items():
@@ -167,13 +188,17 @@ async def principal(a) -> int:
         print(f"Transcripciones en {a.transcripciones}")
     if a.informe:
         escribir_informe(a.informe, informes, r, latencias, medias)
-    graves = r["prohibidos"] + sum(i.recomendaciones for i in informes)
+    graves = r["prohibidos"] + sum(i.recomendaciones for i in informes) + len(fallidas)
     return 1 if graves else 0
 
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--persona", help="prefijo de la persona (p. ej. carmen)")
+    p.add_argument("--variantes", type=int, default=0, help="añade N clientes generados")
+    p.add_argument("--semilla", type=int, default=1, help="semilla de las variantes (misma semilla, mismas personas)")
+    p.add_argument("--sin-fijas", action="store_true", help="solo las variantes, sin las personas de fixtures/laboratorio")
+    p.add_argument("--repeticiones", type=int, default=1)
     p.add_argument("--max-turnos", type=int, default=laboratorio.MAX_TURNOS)
     p.add_argument("--transcripciones", type=Path, help="carpeta donde guardar cada conversación")
     p.add_argument("--informe", type=Path, help="escribe un informe en Markdown")
