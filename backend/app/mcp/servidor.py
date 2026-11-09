@@ -38,9 +38,14 @@ corregido por el asesor), su confianza y la cita de la entrevista que lo justifi
 Cómo usarlo:
 1. Antes de proponer cualquier producto, llama a get_investment_constraints. Si `usable` es false, el
    perfil aún no lo ha validado un asesor: no recomiendes nada y dilo.
-2. Usa `funds_query` y `portfolios_query` tal cual como criterios de búsqueda en el catálogo de MyInvestor
-   y aplica después `post_filters` a cada ficha. Respeta `appropriateness`: no ofrezcas familias marcadas
-   como `not_appropriate` sin avisar al cliente.
+2. Usa `funds_query` y `portfolios_query` como criterios de búsqueda en el catálogo de MyInvestor.
+   Si un criterio trae una lista (p. ej. `asset_type: ["Monetario", "Renta Fija"]`) y el catálogo solo
+   acepta un valor, haz una búsqueda por cada valor y une los resultados; no quites ninguno.
+   Aplica después `post_filters` a cada ficha. En `min_initial` la ficha da texto ("1000.00 EUR" o
+   "0.001 participaciones"): compara el importe en euros; si viene en participaciones, no hay mínimo.
+   Respeta `appropriateness`: no ofrezcas familias marcadas como `not_appropriate` sin avisar al cliente.
+   Estas restricciones son límites, no una selección: qué productos proponer y en qué orden lo decide
+   la entidad con su propio criterio.
 3. Para justificar una decisión ante el cliente o el asesor, usa get_evidence con el campo concreto.
 4. get_client_context da un resumen breve para orientar el tono de la conversación.
 
@@ -101,6 +106,8 @@ def get_investment_constraints(client_id: str) -> dict[str, Any]:
     criterios del catálogo de MyInvestor: `funds_query` (búsqueda de fondos), `portfolios_query`
     (carteras automatizadas), `post_filters` (comprobaciones sobre cada ficha), `appropriateness`
     (conveniencia por familia de producto) y `rationale` (por qué). Si `usable` es false, no recomendar.
+    Una lista dentro de `funds_query` (como `asset_type`) significa "cualquiera de estos valores": si el
+    buscador solo admite uno, se hace una búsqueda por valor.
     """
     try:
         return calculos.restricciones(store.perfil_para_consumidor(client_id)).model_dump(mode="json")
