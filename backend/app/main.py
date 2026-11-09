@@ -7,9 +7,11 @@ Docs interactivas: http://localhost:8000/docs
 
 from __future__ import annotations
 
+import asyncio
 import hmac
 import logging
 import os
+import weakref
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -111,7 +113,20 @@ def _lista_de(resultado, origen: str, rechazar) -> list:
     return []
 
 
+_candados_sesion: "weakref.WeakValueDictionary[str, asyncio.Lock]" = weakref.WeakValueDictionary()
+
+
 async def _procesar_turno(session_id: str) -> None:
+    """Un procesamiento por sesión a la vez: si el cliente habla dos veces seguidas, el segundo espera y
+    trabaja sobre el perfil que ya dejó el primero (sin carreras entre extracciones)."""
+    candado = _candados_sesion.get(session_id)
+    if candado is None:
+        candado = _candados_sesion[session_id] = asyncio.Lock()
+    async with candado:
+        await _procesar_turno_sin_candado(session_id)
+
+
+async def _procesar_turno_sin_candado(session_id: str) -> None:
     """Extractor y verificador sobre el turno nuevo, en segundo plano.
 
     Aceptación parcial: cada parche y cada alerta se valida por separado (mismas reglas que store:
@@ -132,7 +147,7 @@ async def _procesar_turno(session_id: str) -> None:
 
     # 1. Extractor: datos nuevos del perfil.
     try:
-        brutos = _lista_de(await extractor.extraer(turnos[-6:], store.perfil(cid), session_id), "extractor", rechazar)
+        brutos = _lista_de(await extractor.extraer(turnos, store.perfil(cid), session_id), "extractor", rechazar)
     except Exception as e:
         log.exception("Fallo del extractor en %s", session_id)
         rechazar("extractor", "error", f"el extractor falló: {type(e).__name__}: {str(e)[:300]}")

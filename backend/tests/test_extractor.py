@@ -26,8 +26,8 @@ ENTREVISTA = json.loads((Path(__file__).parents[1] / "fixtures" / "entrevistas" 
 TURNOS = [Turno(**t) for t in ENTREVISTA["turns"]]
 
 
-def dato(campo, valor, turn_id, cita, certeza="explicita"):
-    return DatoExtraido(campo=campo, valor=valor, certeza=certeza, turn_id=turn_id, cita=cita)
+def dato(campo, valor, turn_id, cita, certeza="explicita", periodo=None):
+    return DatoExtraido(campo=campo, valor=valor, periodo=periodo, certeza=certeza, turn_id=turn_id, cita=cita)
 
 
 RESPUESTA_CARMEN = Extraccion(
@@ -73,14 +73,16 @@ def test_cita_debe_ser_literal(cita, texto, ok):
 
 
 def test_convertir_a_los_tipos_del_catalogo():
-    assert extractor.convertir("financial.liquid_savings_eur", "80000") == 80000.0
-    assert extractor.convertir("disclosures.ai_notice_ack", "true") is True
-    assert extractor.convertir("disclosures.ai_notice_ack", "No") is False
-    assert extractor.convertir("sustainability.min_sfdr_article", "8") == 8
+    from app.agentes.normalizacion import convertir
+
+    assert convertir("financial.liquid_savings_eur", "80000").valor == 80000.0
+    assert convertir("disclosures.ai_notice_ack", "true").valor is True
+    assert convertir("disclosures.ai_notice_ack", "No").valor is False
+    assert convertir("sustainability.min_sfdr_article", "8").valor == 8
     with pytest.raises(ValueError):
-        extractor.convertir("disclosures.ai_notice_ack", "quizá")
+        convertir("disclosures.ai_notice_ack", "quizá")
     with pytest.raises(ValueError):
-        extractor.convertir("financial.debts_eur", "mucho")
+        convertir("financial.debts_eur", "mucho")
 
 
 def test_el_modelo_no_puede_ni_pedir_datos_calculados():
@@ -187,9 +189,10 @@ def test_mensaje_al_modelo_lleva_catalogo_perfil_y_turnos(monkeypatch):
     asyncio.run(extractor.extraer(TURNOS, vacio(), "s-1"))
     kw = llamadas[0]
     assert kw["agente"] == "extractor" and kw["esquema"] is Extraccion
-    assert "Eres el extractor" in kw["sistema"]
-    assert "financial.liquid_savings_eur" in kw["mensaje"] and '"turn_id": "t-012"' in kw["mensaje"]
-    assert "financial.emergency_fund_months" not in kw["mensaje"]
+    # Lo estable (instrucciones y catálogo) va en el sistema, que se cachea; lo variable, en el mensaje.
+    assert "Eres el extractor" in kw["sistema"] and "financial.liquid_savings_eur" in kw["sistema"]
+    assert "financial.emergency_fund_months" not in kw["sistema"]
+    assert '"turn_id": "t-012"' in kw["mensaje"] and '"turn_id": "t-002"' not in kw["mensaje"]  # ventana de 8
 
 
 def test_entrevista_de_carmen_por_la_api_da_el_perfil_y_la_alerta_clave(monkeypatch):

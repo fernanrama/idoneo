@@ -43,6 +43,7 @@ class Uso:
     tokens_entrada: int
     tokens_salida: int
     latencia_s: float
+    tokens_cache_leidos: int = 0  # entrada servida desde la caché del prompt (cuesta ~10 %)
 
 
 def disponible() -> bool:
@@ -87,12 +88,15 @@ _candado_metricas = threading.Lock()
 
 def _registrar(uso: Uso) -> None:
     with _candado_metricas:
-        m = _metricas.setdefault(uso.agente, {"llamadas": 0, "tokens_entrada": 0, "tokens_salida": 0, "latencia_total_s": 0.0})
+        m = _metricas.setdefault(uso.agente, {"llamadas": 0, "tokens_entrada": 0, "tokens_salida": 0,
+                                               "tokens_cache_leidos": 0, "latencia_total_s": 0.0})
         m["llamadas"] += 1
         m["tokens_entrada"] += uso.tokens_entrada
         m["tokens_salida"] += uso.tokens_salida
+        m["tokens_cache_leidos"] += uso.tokens_cache_leidos
         m["latencia_total_s"] += uso.latencia_s
-    log.info("claude %s · %s · in=%d out=%d · %.2fs", uso.agente, uso.modelo, uso.tokens_entrada, uso.tokens_salida, uso.latencia_s)
+    log.info("claude %s · %s · in=%d (caché %d) out=%d · %.2fs", uso.agente, uso.modelo, uso.tokens_entrada,
+             uso.tokens_cache_leidos, uso.tokens_salida, uso.latencia_s)
 
 
 def metricas() -> dict[str, dict[str, float]]:
@@ -121,6 +125,8 @@ async def estructurado(
 
     Lanza ClaudeNoDisponible sin clave, RespuestaNoUtil si el modelo rechaza o se corta, y deja
     pasar los errores tipados del SDK (red, 429, 5xx) tras los reintentos del propio SDK.
+    El sistema va marcado para la caché del prompt: es estable entre llamadas (guion, catálogo), así que
+    las siguientes llamadas del mismo agente pagan y tardan menos en esa parte.
     """
     cliente = _cliente_async()
     nombre_modelo = modelo(agente)
@@ -128,7 +134,7 @@ async def estructurado(
     respuesta = await cliente.messages.parse(
         model=nombre_modelo,
         max_tokens=max_tokens,
-        system=sistema,
+        system=[{"type": "text", "text": sistema, "cache_control": {"type": "ephemeral"}}],
         messages=[{"role": "user", "content": mensaje}],
         output_format=esquema,
         output_config={"effort": esfuerzo(agente, esfuerzo_por_defecto)},
@@ -139,6 +145,7 @@ async def estructurado(
         tokens_entrada=getattr(respuesta.usage, "input_tokens", 0) or 0,
         tokens_salida=getattr(respuesta.usage, "output_tokens", 0) or 0,
         latencia_s=round(time.perf_counter() - inicio, 3),
+        tokens_cache_leidos=getattr(respuesta.usage, "cache_read_input_tokens", 0) or 0,
     )
     _registrar(uso)
     if respuesta.stop_reason == "refusal":
