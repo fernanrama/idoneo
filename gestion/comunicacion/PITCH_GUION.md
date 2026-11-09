@@ -1,12 +1,12 @@
 # Guion del pitch — 6 minutos (diapositivas, luego demo)
 
-Borrador v1 · 8 nov 2026 · Responsable: Rodrigo · Revisión: equipo
-Presentación que lo acompaña: [`Idoneo_presentacion.pptx`](Idoneo_presentacion.pptx) (las notas del orador llevan este mismo texto).
+Borrador v2 · 9 nov 2026 · Responsable: Rodrigo · Revisión: equipo
+Presentación que lo acompaña: [`Idoneo_presentacion.pptx`](Idoneo_presentacion.pptx) (las notas del orador llevan este mismo texto). Se genera con [`fuente-presentacion/`](fuente-presentacion/README.md): versión de trabajo (con etiquetas ámbar) o `--final`.
 
 > **Estado.** Duración oficial: **5-7 minutos** por grupo, minutos exactos por avisar (fuente: `[MEW26] Horas de presentaciones`, no incluido en el repo). Pitch el **jueves 12/11, Tanda 1 (10:30-12:00)**, aula 4.2.E02. Este guion dura 6 min y se recorta a 5 o se amplía a 7.
-> **Orden.** Primero **3:25 de diapositivas** y después **salto directo a la demo en vivo (2:30)**. La demo es lo último que ve el jurado.
+> **Orden.** Primero **3:24 de diapositivas** y después **salto directo a la demo en vivo (2:30)**. La demo es lo último que ve el jurado.
 > **Nombre.** "Idóneo" es provisional (Alex usa `[NOMBRE]`). Decidir antes de congelar, y si se pone nombre de equipo en la portada.
-> **Marcas.** `[PENDIENTE: …]` = dato o función que aún no existe o no está medido. **No se dice en voz alta como hecho.** Si el miércoles sigue pendiente, se quita la frase y la marca amarilla de la diapositiva.
+> **Marcas.** `[PENDIENTE: …]` = dato o función que aún no existe o no está medido. **No se dice en voz alta como hecho.** Si el miércoles sigue pendiente, la versión `--final` de la presentación reescribe esa frase como «siguiente paso» y quita la etiqueta ámbar; aquí se quita la frase.
 
 ## Una frase para todo el pitch
 
@@ -16,61 +16,59 @@ Presentación que lo acompaña: [`Idoneo_presentacion.pptx`](Idoneo_presentacion
 
 ### Diapositiva 1 · Portada (0:00 – 0:05)
 
-> Buenos días. Esto es Idóneo. `[PENDIENTE: nombre y presentación del equipo]`
+> Buenos días. Esto es Idóneo. `[PENDIENTE: nombre definitivo y presentación del equipo]`
 
-### Diapositiva 2 · El problema (0:05 – 0:45)
+### Diapositiva 2 · Carmen: lo que marcó y lo que dijo (0:05 – 0:38)
 
-> Imaginad a Carmen. Tiene 68 años y 80.000 euros en depósitos. Quiere invertir una parte para tener un dinero extra cada mes.
+> Imaginad a Carmen. Tiene 68 años y 80.000 euros en depósitos. En el test MiFID de su banco marcó que conoce bien los fondos de renta variable.
 >
-> Antes de venderle nada, el banco le hace el test MiFID: un formulario de casillas. Carmen marca que conoce los fondos de renta variable. Pero no sabe que un fondo puede perder valor.
+> Pero cuando le preguntan qué pasaría si su fondo baja, dice: *«eso no puede pasar, el fondo es del banco»*. Marcó una cosa y demostró la contraria.
 >
-> El test no lo detecta, porque se basa en lo que ella declara. La normativa europea ya dice que no basta con fiarse de la autoevaluación del cliente. `[VERIFICAR: directrices ESMA 2023]`
+> Y el test, que se basa en lo que ella declara, no lo detecta.
 >
 > *(Carmen es un caso simulado.)*
 
-### Diapositiva 3 · La solución (0:45 – 1:24)
+### Diapositiva 3 · Habla, comprueba y deja pruebas (0:38 – 1:08)
 
-> Idóneo es un onboarding por voz, pensado primero para el móvil.
+> Idóneo cambia el test por una conversación.
 >
-> En vez de casillas, Carmen habla con un asistente que plantea escenarios y comprueba si lo que dice encaja con lo que demuestra. Y construye un perfil donde cada dato lleva su prueba: la cita exacta de la conversación `[PENDIENTE: y su clip de audio]`.
+> Habla: onboarding por voz, pensado primero para el móvil `[PENDIENTE: voz probada]`. Comprueba: plantea escenarios y contrasta lo declarado con lo demostrado. Y deja pruebas: cada dato con su cita, su fuente y su versión `[PENDIENTE: y su clip de audio]`.
 >
-> Ese perfil lo leen los agentes de la entidad, como el de GPTadvisor o el de MyInvestor. Nosotros no recomendamos productos: garantizamos que el agente sabe quién es Carmen.
+> Nosotros no recomendamos productos: garantizamos que el agente de la entidad sabe quién es Carmen.
 
-### Diapositiva 4 · Cómo funciona (1:24 – 1:47)
+### Diapositiva 4 · De la conversación al dato (1:08 – 1:38)
 
-> Son cuatro pasos. Carmen habla desde el móvil. Claude extrae los datos y comprueba las contradicciones `[PENDIENTE: extractor real]`. Todo se guarda en un perfil versionado, con la fuente y la prueba de cada dato. Y los agentes de la entidad lo leen mediante un servidor MCP.
+> Así se ve el paso clave. Carmen dice «eso no puede pasar». El sistema lo compara con lo que declaró `[PENDIENTE: extractor con Claude en directo]`: había dicho alto, ha demostrado ninguno.
+>
+> El dato queda guardado con su fuente, la cita exacta y el minuto en que lo dijo. Y con su tolerancia al riesgo pasa igual: declaró tres sobre cinco, demostró uno.
 
-### Diapositiva 5 · IA de frontera, medible (1:47 – 2:17)
+### Diapositiva 5 · Lo que recibe el agente (1:38 – 2:10)
 
-> ¿Dónde está la IA de frontera? En tres sitios.
+> Esto es lo que recibe el agente. El riesgo máximo de Carmen es tres sobre siete. Sale de tres criterios y manda el más restrictivo: su tolerancia al riesgo.
 >
-> La voz, con ElevenLabs, permite contestar hablando en vez de rellenar cuarenta casillas `[PENDIENTE: voz probada]`.
->
-> Claude detecta las contradicciones mientras ella habla.
->
-> Y las cifras las calcula Python, no el modelo. Así podemos explicar cada resultado.
->
-> ¿Y el impacto? `[PENDIENTE: medir tiempo frente a un formulario, contradicciones detectadas y latencia — Pablo]`
+> Y la conveniencia: la renta variable no es conveniente para ella; los depósitos y la renta fija, sí. Todo se calcula con código, no con el modelo, y lo valida una persona antes de que el perfil sea apto.
 
-### Diapositiva 6 · Valor y diferencial (2:17 – 2:47)
+### Diapositiva 6 · La IA como contrapeso (2:10 – 2:37)
 
-> ¿Qué gana cada parte?
+> ¿Por qué una IA? ESMA advierte de que con sistemas automatizados el riesgo de que el cliente se sobrevalore es mayor. Idóneo es el contrapeso, y tiene tres piezas.
 >
-> MyInvestor recibe un perfil ya hecho y auditable, y cubre también la conveniencia para quien compra sin asesoramiento.
+> La voz, para que Carmen conteste hablando `[PENDIENTE: voz probada]`. Claude, que comprueba lo que dice `[PENDIENTE: extractor]`. Y código, que calcula los números, porque el modelo nunca calcula un número.
 >
-> GPTadvisor ya protege lo que su agente responde. Con Idóneo también protege lo que su agente recibe.
->
-> Y frente a un formulario, dejamos evidencia: la conversación, la versión del perfil y quién lo validó. Coste por entrevista: `[PENDIENTE: medir voz + modelo]`.
+> `[PENDIENTE: impacto medido — tiempo frente a un formulario, contradicciones detectadas y latencia (Pablo). Si no se mide, no se dice.]`
 
-### Diapositiva 7 · Límites, cierre y salto a la demo (2:47 – 3:25)
+### Diapositiva 7 · Entra en vuestros agentes (2:37 – 3:04)
 
-> Seamos claros con los límites. Los datos de Carmen son simulados. Idóneo no recomienda ni sustituye a un asesor: el perfil queda en borrador hasta que una persona lo valida.
+> Y esto encaja en vuestros agentes. GPTadvisor protege lo que su agente responde. Idóneo protege lo que su agente recibe.
 >
-> Lo siguiente: la voz con clips de audio y microentrevistas que mantengan el perfil vivo.
->
-> `[MÓDULO INTERCAMBIABLE — solo si existe: las entidades usan los perfiles para saber qué clientes encajan con un producto nuevo. Si no existe, se dice como idea futura.]`
+> Para MyInvestor, un perfil ya hecho y auditable, y la conveniencia para quien compra sin asesoramiento. Nosotros no recomendamos: recomienda el agente de la entidad, y valida una persona.
+
+### Diapositiva 8 · Cierre y salto a la demo (3:04 – 3:24)
+
+> Seamos claros con los límites: los datos de Carmen son simulados y el perfil queda en borrador hasta que una persona lo valida.
 >
 > GPTadvisor hace fiable la recomendación. **Idóneo hace fiable el perfil sobre el que se recomienda.** Vamos a verlo.
+>
+> `[MÓDULO INTERCAMBIABLE — solo si existe: las entidades usan los perfiles para saber qué clientes encajan con un producto nuevo. Si no existe, se dice como idea futura.]`
 
 ### Demo en vivo (3:30 – 6:00; 5 s para pasar a la app)
 
@@ -98,33 +96,34 @@ Los pasos exactos y el plan B están en [`DEMO_GUION.md`](DEMO_GUION.md). La pan
 
 | Versión | Qué se recorta o se añade |
 |---|---|
-| **5 min** | Demo a 1:45 (sin el paso del conector de MyInvestor). Quitar la diapositiva 4 (se cuenta dentro de la 3). Diapositiva 5 en 25 s |
+| **5 min** | Demo a 1:45 (sin el paso del conector de MyInvestor) y saltar la diapositiva 4 (el paso clave ya se ve en la demo) |
 | **6 min** | El guion de arriba |
-| **7 min** | Dar 30 s más a la diapositiva 4 contando la arquitectura con más detalle y dejar 30 s más de demo para repreguntas del asistente |
+| **7 min** | Dar 15 s más a la diapositiva 4 (el paso clave con calma), 15 s más a la 6 y 30 s más de demo para repreguntas del asistente |
 
 ## Comprobación de tiempos (habla a 130 palabras/min, ritmo tranquilo)
 
 | Diapositiva | Palabras | Habla | Hueco | Margen |
 |---|---:|---:|---:|---:|
 | 1 · Portada | 5 | 2 s | 5 s | +3 s |
-| 2 · Problema | 83 | 38 s | 40 s | +2 s |
-| 3 · Solución | 80 | 37 s | 39 s | +2 s |
-| 4 · Cómo funciona | 45 | 21 s | 23 s | +2 s |
-| 5 · IA de frontera | 47 | 22 s | 30 s | +8 s (aquí entran las métricas medidas) |
-| 6 · Valor y diferencial | 60 | 28 s | 30 s | +2 s |
-| 7 · Límites y cierre | 63 | 29 s | 38 s | +9 s |
-| **Diapositivas** | **383** | **177 s** | **205 s** | **+28 s** |
+| 2 · Carmen | 68 | 31 s | 33 s | +2 s |
+| 3 · Habla, comprueba, deja pruebas | 56 | 26 s | 30 s | +4 s |
+| 4 · De la conversación al dato | 58 | 27 s | 30 s | +3 s |
+| 5 · Lo que recibe el agente | 68 | 31 s | 32 s | +1 s |
+| 6 · La IA como contrapeso | 57 | 26 s | 27 s | +1 s |
+| 7 · Entra en vuestros agentes | 49 | 23 s | 27 s | +4 s |
+| 8 · Cierre | 41 | 19 s | 20 s | +1 s |
+| **Diapositivas** | **402** | **185 s** | **204 s** | **+19 s** |
 | Demo (narración, con clips y esperas) | 219 | 101 s | 150 s | +49 s |
 
-Es una estimación por conteo de palabras. **Hay que cronometrarlo leyendo en voz alta** en el primer ensayo. Los márgenes de las diapositivas 2, 3, 4 y 6 son de 2 segundos: si al ensayar se pasan, recortar una frase a cada una.
+Es una estimación por conteo de palabras. **Hay que cronometrarlo leyendo en voz alta** en el primer ensayo. Si al ensayar alguna diapositiva se pasa de su hueco, recortar una frase a esa y no al resto.
 
 ## Reparto por bloques (propuesta, por si presentan varios)
 
 | Bloque | Quién encaja | Por qué |
 |---|---|---|
-| Diapositivas 1-3, 6-7 | Rodrigo | Historia, valor, límites y cierre |
+| Diapositivas 1-3, 5, 7-8 | Rodrigo | Historia, valor, límites y cierre |
 | Demo en vivo | Quien lleve el móvil y la voz | Es quien sabe qué pasa si falla |
-| Diapositivas 4-5 | Quien lleve los agentes (Hammad o Pablo) | Defiende IA y medición |
+| Diapositivas 4 y 6 | Quien lleve los agentes (Hammad o Pablo) | Defiende IA y medición |
 La organización no ha dicho cuántas personas presentan. Pendiente de acordar con el equipo.
 
 ## Cifras y funciones que NO se pueden decir todavía
@@ -147,19 +146,22 @@ La organización no ha dicho cuántas personas presentan. Pendiente de acordar c
 - Cualquier cifra de la tabla de arriba, hasta que esté medida.
 - Que el perfil "cumple MiFID": decimos que **recoge y documenta** lo que MiFID exige, y que un humano lo valida.
 
-## Diapositivas (7, sin anexos)
+## Diapositivas (8, sin anexos)
 
-| # | Título | Una idea | Visual |
+| # | Título | Visual | Qué demuestra |
 |---|---|---|---|
-| 1 | Idóneo | Un test MiFID que habla, comprueba y deja pruebas | Portada oscura |
-| 2 | El test se fía de lo que dices | Declarado frente a demostrado | Dos tarjetas: lo que marcó, lo que dijo |
-| 3 | Habla, comprueba y deja pruebas | Conversación en vez de formulario | Captura de la entrevista en el móvil |
-| 4 | Cómo funciona | Voz → Claude → perfil con pruebas → agentes | Diagrama de cuatro cajas |
-| 5 | IA de frontera, medible | Voz + Claude + cálculo en Python | Tres columnas y métricas pendientes en amarillo |
-| 6 | Valor para las dos entidades | Perfil auditable; protege lo que el agente recibe | Tres tarjetas: MyInvestor, GPTadvisor, frente a un formulario |
-| 7 | Idóneo hace fiable el perfil | Frase de cierre y paso a la demo (los límites se dicen de palabra) | Dark, frase grande |
+| 1 | Idóneo | Portada oscura con ondas de voz | Identidad |
+| 2 | Carmen: lo que marcó / lo que dijo | Pantalla partida: casilla marcada ≠ cita sobre ondas | El problema (innovación) |
+| 3 | Habla, comprueba y deja pruebas | Tres palabras grandes + móvil con la captura real | La solución y la UX |
+| 4 | De la conversación al dato | Burbujas de chat → tarjeta del dato: declarado Alto → demostrado Ninguno, con cita y minuto | Cómo funciona (implementación) |
+| 5 | Lo que recibe el agente | Escala de riesgo 1-7 con la marca en el 3, tres criterios y semáforo de conveniencia | Resultado calculado y validado |
+| 6 | La IA como contrapeso | Aviso de ESMA (párr. 52) + tres roles: Voz, Claude y Código | IA de frontera (15 %) |
+| 7 | Entra en vuestros agentes | Cauce Cliente → Idóneo → Agente → Propuesta con tramos protegidos | Valor y viabilidad |
+| 8 | Idóneo hace fiable el perfil | Frase de cierre sobre ondas y «demo en vivo» | Cierre y paso a la demo |
 
-Colores: los del tema de la app (azul `#0b2a4a`, verde `#12a37f`), para que pitch y demo parezcan un solo producto. No hay anexos: la arquitectura va en la diapositiva 4 y lo que ve la entidad se enseña en la demo. Los temas de normativa, competencia y datos van en `PREGUNTAS_JURADO.md`, no en diapositivas.
+Colores: los del tema de la app (azul `#0b2a4a`, verde `#12a37f`), para que pitch y demo parezcan un solo producto. Transición suave (fundido) entre diapositivas. No hay anexos: lo que ve la entidad se enseña en la demo, y los temas de normativa, competencia y datos van en `PREGUNTAS_JURADO.md`.
+
+Los valores de «confianza» del perfil **no salen en pantalla**: son de ejemplo (la rúbrica aún no está implementada).
 
 ## Fuentes que sostienen lo que decimos
 
