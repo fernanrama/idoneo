@@ -106,6 +106,17 @@ def test_sostenibilidad_explicada_exige_la_explicacion():
     assert parches(ext, turnos) == {}
 
 
+def test_sostenibilidad_explicada_la_deduce_el_codigo_de_la_pregunta():
+    # Con Claude real (9 nov), el modelo devolvía la preferencia pero no «explained»: lo decide el código.
+    con = [turno(1, "agent", "¿Le importa evitar empresas que contaminan mucho?"), turno(2, "client", "Eso me da igual.")]
+    ext = extraccion([dato("sustainability.preference", "none", "t-002", "Eso me da igual")])
+    p = parches(ext, con)
+    assert p["sustainability.explained"].value is True
+    assert p["sustainability.explained"].evidence[0].turn_id == "t-002"
+    sin = [turno(1, "agent", "¿Algo más?"), turno(2, "client", "Eso me da igual.")]
+    assert "sustainability.explained" not in parches(ext, sin)
+
+
 def test_comportamiento_pasado_solo_es_demostrado_tras_un_escenario():
     turnos = [turno(1, "agent", "¿Ha invertido antes?"), turno(2, "client", "Yo nunca vendo, aguanto siempre.")]
     p = parches(extraccion([dato("risk_tolerance.past_behaviour", "nunca vende", "t-002", "nunca vendo")]), turnos)

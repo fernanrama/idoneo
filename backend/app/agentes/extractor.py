@@ -215,6 +215,11 @@ def a_parches(extraccion: Extraccion, turnos: list[Turno], perfil: Perfil, sessi
             fuente = Fuente.demonstrated  # reacción ante un escenario planteado, no una autoevaluación
         poner(_parche(d.campo, v.valor, fuente, confianza, base, turno, d.cita, session_id,
                       revisar=guardas.implausible(d.campo, v.valor)))
+        if d.campo == "sustainability.preference" and guardas.se_explico_sostenibilidad(turnos, turno):
+            # MiFID exige explicar los criterios antes de preguntar la preferencia. Lo comprueba el código
+            # mirando la pregunta del asistente; la prueba es la propia respuesta del cliente.
+            c, b = rubrica.dato_declarado("explicita")
+            poner(_parche("sustainability.explained", True, Fuente.declared, c, b, turno, d.cita, session_id))
 
     for k in extraccion.conocimientos:
         ruta = f"knowledge.{k.familia}"

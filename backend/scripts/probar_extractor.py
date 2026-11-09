@@ -33,6 +33,7 @@ load_dotenv(RAIZ / ".env")
 from app import main  # noqa: E402
 from app.agentes import claude  # noqa: E402
 from app.perfil import store  # noqa: E402
+from app.agentes.normalizacion import cita_valida  # noqa: E402
 from app.perfil.modelos import Turno  # noqa: E402
 
 
@@ -64,19 +65,33 @@ async def ejecutar(entrevista: Path, esperado: Path) -> int:
     perfil = store.perfil(cid)
     print(f"\nModelo extractor: {claude.modelo('extractor')} · esfuerzo {claude.esfuerzo('extractor', 'low')}\n")
     print(f"{'campo':45} {'esperado':>24} {'obtenido':>24}  fuente        conf")
-    aciertos = comparados = 0
+    textos_cliente = [t["text"] for t in datos["turns"] if t["speaker"] == "client"]
+
+    def en_entrevista(ref: dict) -> bool:
+        """El fixture puede venir de una entrevista más larga: si su cita no está en esta, no se puede acertar."""
+        citas = [e.get("quote", "") for e in ref.get("evidence") or []]
+        return not citas or any(cita_valida(c, t) for c in citas for t in textos_cliente)
+
+    aciertos = comparados = fuera = 0
     for ruta, ref in sorted(referencia.items()):
         f = perfil.mifid.get(ruta)
         if f is not None and f.source.value == "calculated":
             continue
-        comparados += 1
         ok = f is not None and _igual(f.value, ref.get("value"))
-        aciertos += ok
+        if not ok and not en_entrevista(ref):
+            fuera += 1
+            marca = "·"
+        else:
+            comparados += 1
+            aciertos += ok
+            marca = "✓" if ok else "✗"
         obtenido = "—" if f is None else json.dumps(f.value, ensure_ascii=False)
         extra = "" if f is None else f"{f.source.value:12}  {f.confidence if f.confidence is not None else '—'}"
-        print(f"{'✓' if ok else '✗'} {ruta:43} {json.dumps(ref.get('value'), ensure_ascii=False)[:24]:>24} {obtenido[:24]:>24}  {extra}")
+        print(f"{marca} {ruta:43} {json.dumps(ref.get('value'), ensure_ascii=False)[:24]:>24} {obtenido[:24]:>24}  {extra}")
     extra = sorted(set(perfil.mifid) - set(referencia))
-    print(f"\nAciertos: {aciertos}/{comparados}" + (f" · campos extra: {', '.join(extra)}" if extra else ""))
+    print(f"\nAciertos: {aciertos}/{comparados}"
+          + (f" · {fuera} esperados cuya cita no está en esta entrevista (·)" if fuera else "")
+          + (f" · campos extra: {', '.join(extra)}" if extra else ""))
 
     print("\nAlertas:")
     for a in perfil.alerts:
@@ -94,7 +109,7 @@ async def ejecutar(entrevista: Path, esperado: Path) -> int:
     for agente, m in claude.metricas().items():
         media = m["latencia_total_s"] / max(m["llamadas"], 1)
         print(f"  {agente}: {int(m['llamadas'])} llamadas · {int(m['tokens_entrada'])} tokens de entrada · "
-              f"{int(m['tokens_salida'])} de salida · {media:.1f} s de media")
+              f"{int(m['tokens_cache_leidos'])} desde caché · {int(m['tokens_salida'])} de salida · {media:.1f} s de media")
     return 0 if clave else 1
 
 
