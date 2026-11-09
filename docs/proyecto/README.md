@@ -23,6 +23,7 @@ Estado a 8 nov 2026. Esta carpeta recoge la idea actual del equipo para Hack Fin
 | [03_REPARTO_Y_PLAN.md](03_REPARTO_Y_PLAN.md) | Reparto en 6 piezas y calendario de 5 días. |
 | [04_CONTRATO_PERFIL.md](04_CONTRATO_PERFIL.md) | Contrato del perfil: modelo de dato, esquema completo, resultados de idoneidad y conveniencia, estados, restricciones, eventos y herramientas MCP/API. |
 | [05_MCP_MYINVESTOR.md](05_MCP_MYINVESTOR.md) | Hallazgos verificados del MCP público de MyInvestor: herramientas, campos, mapeo al perfil y **condiciones de uso**. |
+| [06_EVOLUCION_PERFIL_CONTINUO.md](06_EVOLUCION_PERFIL_CONTINUO.md) | Propuesta de evolución: entrevista inicial, microentrevistas adaptativas y verificaciones para otros agentes; ejemplo de Carmen y separación entre implementación actual y hoja de ruta. No modifica los contratos. |
 | [diagramas/](diagramas/) | Diagrama de la idea final en Excalidraw (`.excalidraw` editable y vista previa `.png`). |
 
 ## Decisiones clave
