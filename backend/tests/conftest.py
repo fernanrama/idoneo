@@ -23,7 +23,7 @@ from app.perfil.almacenes.bd import url_de_prueba  # noqa: E402
 
 POSTGRES_TEST = os.getenv("TEST_POSTGRES_URL", "").strip()
 ALMACENES = ["memoria", "bd-sqlite"] + (["bd-postgres"] if POSTGRES_TEST else [])
-MODULOS_CONTRATO = {"test_api", "test_mcp", "test_store_contrato", "test_procesamiento_turnos"}
+MODULOS_CONTRATO = {"test_api", "test_mcp", "test_store_contrato", "test_procesamiento_turnos", "test_asesor_demo"}
 
 
 @pytest.fixture(autouse=True)

@@ -56,6 +56,9 @@
 }
 .boton:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(18, 18, 42, 0.25); }
 .boton:disabled { opacity: 0.6; transform: none; }
+.reiniciar { margin-left: 14px; background: none; border: 0; padding: 8px 4px; color: #3b2fb8; font: inherit; font-size: 14px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.reiniciar:disabled { opacity: 0.5; cursor: default; }
+.reiniciar:focus-visible { outline: 2px solid #3b2fb8; outline-offset: 2px; border-radius: 4px; }
 .sello { display: inline-flex; align-items: center; gap: 10px; background: #ddf5ec; color: #0b6b4f; padding: 16px 22px; border-radius: 999px; font-weight: 600; font-size: 16px; animation: v-sello 0.5s both; }
 
 .cuerpo { max-width: 1240px; margin: 0 auto; padding: 0 24px 64px; display: flex; flex-direction: column; gap: 18px; }

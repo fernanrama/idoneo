@@ -27,7 +27,7 @@ from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Re
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from pydantic import BaseModel, ConfigDict, Field, field_validator  # noqa: E402
 
-from . import acceso, voz  # noqa: E402
+from . import acceso, asesor_demo, voz  # noqa: E402
 from .agentes import chat as entrevistador  # noqa: E402
 from .agentes import claude, contexto, extractor, verificador  # noqa: E402
 from .mcp.servidor import mcp  # noqa: E402
@@ -44,6 +44,7 @@ async def lifespan(_app: FastAPI):
     store.tipo_almacen()  # configura el almacén (PERFIL_ALMACEN) y falla pronto si la base no está lista
     if os.getenv("LOAD_DEMO_FIXTURE", "1") == "1":
         store.asegurar_fixture("carmen-68")  # solo si falta: no pisa datos guardados en la base
+    asesor_demo.avisar_si_activo()  # DEMO_ADVISOR_MODE: apagado por defecto
     async with mcp.session_manager.run():
         yield
 
@@ -58,6 +59,7 @@ app.add_middleware(
 )
 app.include_router(voz.router)
 app.include_router(voz.webhook_router)
+app.include_router(asesor_demo.router)  # 404 salvo DEMO_ADVISOR_MODE=1 (docs/MODO_ASESOR_DEMO.md)
 
 
 def _llamar(fn, *args, **kwargs):
@@ -82,7 +84,7 @@ def requiere_admin(x_admin_token: str | None = Header(default=None)) -> None:
 @app.middleware("http")
 async def respuestas_privadas(request: Request, call_next):
     respuesta = await call_next(request)
-    if request.url.path.startswith(("/api/clients/", "/api/sessions", "/api/voice/", "/mcp")):
+    if request.url.path.startswith(("/api/clients/", "/api/sessions", "/api/voice/", "/api/demo/asesor", "/mcp")):
         respuesta.headers["Cache-Control"] = "no-store"
     return respuesta
 

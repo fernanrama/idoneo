@@ -1,5 +1,5 @@
 import { CLIENTE_DEMO, registrarSesion, tokenCliente, tokenSesion } from "./credenciales";
-import type { AltaSesion, BootstrapVoz, ContextoVoz, MemoriaPersonal, Perfil, Restricciones, Sesion, Turno, VersionResumen } from "./tipos";
+import type { AltaSesion, BootstrapVoz, ContextoVoz, ExpedienteAsesor, MemoriaPersonal, ModoAsesor, Perfil, Restricciones, Sesion, Turno, VersionResumen } from "./tipos";
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -44,6 +44,13 @@ async function pedirAlFront<T>(ruta: string, cuerpo: unknown, headers: Record<st
     body: JSON.stringify(cuerpo),
     cache: "no-store",
   });
+  if (!r.ok) throw new ErrorAPI(r.status);
+  return r.json() as Promise<T>;
+}
+
+/** Rutas del propio servidor Next sin credenciales del navegador (modo asesor de demo). */
+async function leerDelFront<T>(ruta: string): Promise<T> {
+  const r = await fetch(ruta, { cache: "no-store" });
   if (!r.ok) throw new ErrorAPI(r.status);
   return r.json() as Promise<T>;
 }
@@ -103,6 +110,12 @@ export const api = {
   validar: (client_id: string, advisor_id: string) =>
     pedirAlFront<Perfil>(`/api/entidad/${id(client_id)}/validar`, { advisor_id, changes: [] }, cliente(client_id)),
   reiniciarDemo: () => pedirAlFront<Perfil>("/api/entidad/reset", {}),
+
+  /** Modo asesor de demo: el servidor Next pone su autorización; el navegador no envía ninguna credencial. */
+  modoAsesor: () => leerDelFront<ModoAsesor>("/api/entidad/asesor"),
+  expedienteAsesor: (client_id: string) => leerDelFront<ExpedienteAsesor>(`/api/entidad/${id(client_id)}/asesor`),
+  validarComoAsesor: (client_id: string) => pedirAlFront<Perfil>(`/api/entidad/${id(client_id)}/validar`, {}),
+  reiniciarComoAsesor: () => pedirAlFront<Perfil>("/api/entidad/reset", {}),
 
   pendientes: (session_id: string) =>
     pedir<{ pending: string[]; text: string }>(`/api/sessions/${id(session_id)}/pending`, { headers: sesion(session_id) }),
