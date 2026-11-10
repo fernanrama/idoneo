@@ -16,6 +16,7 @@ import {
   Subtitulos,
 } from "@/components/ui";
 import { estadoBloques } from "@/lib/bloques";
+import { useOnboarding } from "@/lib/onboarding";
 import { useEntrevista } from "@/lib/useEntrevista";
 
 export default function PaginaEntrevista() {
@@ -28,6 +29,7 @@ export default function PaginaEntrevista() {
 
 function Entrevista() {
   const e = useEntrevista();
+  const { sesion } = useOnboarding();
   const alerta = e.perfil?.alerts.filter((a) => a.status === "open").at(-1);
   const enMarcha = e.estado === "activa" || e.estado === "conectando";
 
@@ -50,6 +52,15 @@ function Entrevista() {
         <Subtitulos turnos={e.turnos} />
 
         {alerta && <AlertaTarjeta alerta={alerta} paraCliente />}
+
+        {sesion && e.estado !== "inactiva" && (
+          <p className="pequena suave" style={{ textAlign: "center", margin: 0 }}>
+            <a href={`/entidad/${encodeURIComponent(sesion.client_id)}`} target="_blank" rel="noopener noreferrer">
+              Abrir la vista de la entidad en otra pestaña
+            </a>{" "}
+            para ver cómo se rellena el perfil en vivo.
+          </p>
+        )}
 
         {e.error && (
           <p role="alert" style={{ color: "var(--c-error)" }}>

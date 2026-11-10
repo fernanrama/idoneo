@@ -7,10 +7,13 @@ import { api } from "@/lib/api";
 import { ESTADOS, ETIQUETAS, FAMILIAS, FUENTES, mostrarValor } from "@/lib/bloques";
 import { usePerfil } from "@/lib/usePerfil";
 
+// Se refresca sola: durante la demo está abierta en una segunda pantalla mientras el cliente habla.
+const SONDEO_MS = 2000;
+
 // Vista mínima de la entidad: perfil con evidencias, resultados y validación humana. No es un panel de banquero.
 export default function VistaEntidad({ params }: { params: Promise<{ cid: string }> }) {
   const { cid } = use(params);
-  const { perfil, restricciones, error, recargar } = usePerfil(cid);
+  const { perfil, restricciones, error, recargar } = usePerfil(cid, SONDEO_MS);
   const [abierto, setAbierto] = useState<string | null>(null);
   const [validando, setValidando] = useState(false);
   const [fallo, setFallo] = useState<string | null>(null);
