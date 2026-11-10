@@ -41,7 +41,7 @@ No registrar secretos ni datos personales financieros. Usar ejemplos sintéticos
 ### Ejecución E-03 · Primera entrevista por voz de punta a punta · 10 nov 2026
 
 - **Ejecución / casos / fecha / ejecutor:** entrevista por voz desde el front (ElevenLabs + backend + extractor + verificador), Alex con un guion de prueba y **cifras inventadas**.
-- **Versión exacta:** commit `1e8c2df` de main; agente de ElevenLabs con Claude Haiku 4.5 y voz castellana.
+- **Versión exacta:** commit `1e8c2df` de main; agente de ElevenLabs con voz castellana (el LLM del agente es el elegido en el panel; por confirmar cuál).
 - **Esperado y observado:** 45 turnos en unos 6 minutos y 15 datos en el perfil, todos con cita; 0 rechazos. Los ingresos de la pareja no entraron en el perfil; la alerta declarado «high» ≠ demostrado «none» en renta variable saltó con la cita «Un fondo del banco no puede bajar»; renta fija demostrada «none»; se negó a recomendar y desvió preguntas ajenas. Fallos: ante «pues normal» el entrevistador sugirió una cifra («¿rondan los mil euros?») y no volvió a pedir los gastos fijos (perfil incompleto); respuestas cortas a preguntas cerradas («No», «Poco») salieron con confianza baja; el agente no colgaba al despedirse. Corregido en `7463e68` y `58d2cdf`.
 - **Evidencia:** sesión y perfil exportados del backend en local (no se suben: es una prueba con la voz de una persona del equipo).
 - **Limitaciones:** una sola entrevista; los tiempos de los turnos de voz son aproximados.
