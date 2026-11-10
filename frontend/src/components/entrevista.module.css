@@ -90,6 +90,7 @@
   .cabecera .bloquesCaja { order: 3; width: 100%; }
   .centro { gap: 20px; padding: 28px 18px 18px; }
   .zonaPregunta { min-height: 120px; }
+  .centro > button > div { max-width: 56vw; max-height: 56vw; }
   .dock { padding: 0 14px 20px; }
 }
 
