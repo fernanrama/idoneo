@@ -28,16 +28,11 @@
 .estadoOk i { background: #10b981; animation: none; }
 .capsula {
   flex: 0 1 420px;
-  height: 280px;
-  background: url(/visual/capsula.webp) center / contain no-repeat;
-  filter: drop-shadow(0 30px 40px rgba(0, 70, 222, 0.18));
-  animation: v-flota 7s ease-in-out infinite;
-  translate: calc(var(--px, 0) * -14px) calc(var(--py, 0) * -10px);
-  transition: translate 0.4s ease-out;
+  min-width: 0;
 }
 
 .rejilla { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 20px; align-items: start; }
-.tarjeta { background: #ffffff; border-radius: 24px; padding: 26px; box-shadow: 0 0 0 1px rgba(14, 16, 32, 0.06), 0 14px 40px rgba(0, 70, 222, 0.06); animation: v-sube 0.6s 0.1s both; }
+.tarjeta { background: #ffffff; border-radius: 24px; padding: 26px; box-shadow: 0 0 0 1px rgba(14, 16, 32, 0.06), 0 14px 40px rgba(0, 70, 222, 0.06); }
 .tarjeta h2 { margin: 0 0 14px; font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
 .tarjeta p { margin: 0 0 10px; font-size: 16px; line-height: 1.55; }
 .suave { color: #4a5066; }
@@ -72,7 +67,7 @@
 .cita { margin: 0 !important; padding: 12px 14px; border-left: 3px solid #0046de; background: #f6f8fd; border-radius: 0 12px 12px 0; font-size: 15px !important; color: #1d2b5c; font-style: italic; }
 .cita span { display: block; font-style: normal; font-size: 12px; font-weight: 600; color: #6a7086; margin-bottom: 4px; }
 
-.aviso { display: flex; gap: 16px; align-items: flex-start; padding: 22px 24px; border-radius: 24px; background: #fff7ea; box-shadow: 0 0 0 1px #f6d9a8; color: #5c3300; animation: v-sube 0.6s 0.2s both; }
+.aviso { display: flex; gap: 16px; align-items: flex-start; padding: 22px 24px; border-radius: 24px; background: #fff7ea; box-shadow: 0 0 0 1px #f6d9a8; color: #5c3300; }
 .aviso h2 { margin: 0 0 6px; font-size: 18px; color: #5c3300; }
 .aviso p { margin: 0; font-size: 15px; line-height: 1.55; }
 .avisoIcono { flex-shrink: 0; width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: #ffe7bf; color: #a45d00; }
@@ -97,7 +92,7 @@
 
 @media (max-width: 900px) {
   .rejilla { grid-template-columns: 1fr; }
-  .capsula { flex-basis: 100%; height: 200px; order: -1; }
+  .capsula { flex-basis: 100%; order: -1; }
   .hero { min-height: 0; padding-top: 20px; }
 }
 @media (max-width: 600px) {
@@ -105,5 +100,6 @@
   .tarjeta { padding: 20px; }
   .botones { width: 100%; }
   .boton, .botonSec { flex: 1 1 100%; }
-  .capsula { height: 160px; }
+  .capsula { margin: 0 -8px; }
+  .capsula span { font-size: 11px; padding: 7px 10px; }
 }

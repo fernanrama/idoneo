@@ -60,6 +60,13 @@ body:has(.tema-noche) { background: #05070d; }
 @keyframes v-chispa { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.6); } 25% { opacity: 1; } 100% { opacity: 0; transform: translate(140px, -60%) scale(0.9); } }
 @keyframes v-flota-giro { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-12px) rotate(3deg); } }
 
+/* Aparición al hacer scroll (ver components/Revela.tsx). */
+.revela { opacity: 0; transform: translateY(32px); transition: opacity 0.8s ease, transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1); transition-delay: var(--retraso, 0s); }
+.revela.revela-izq { transform: translateX(-36px); }
+.revela.revela-zoom { transform: scale(0.94); }
+.revela.visto { opacity: 1; transform: none; }
+
 @media (prefers-reduced-motion: reduce) {
+  .revela { opacity: 1; transform: none; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }

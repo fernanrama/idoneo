@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { BarraCliente } from "@/components/BarraCliente";
 import { nombrePerfil } from "@/components/PanelVivo";
+import { Revela } from "@/components/Revela";
 import s from "@/components/cliente.module.css";
 import { Icono } from "@/components/visual";
 import { FAMILIAS } from "@/lib/bloques";
@@ -43,7 +44,7 @@ export default function Productos() {
             </section>
 
             <div className={s.rejilla}>
-              <section className={s.tarjeta}>
+              <Revela como="section" className={s.tarjeta}>
                 <h2>Filtros de tu perfil</h2>
                 <ul className={s.filas}>
                   <li className={s.fila}>
@@ -71,9 +72,9 @@ export default function Productos() {
                     </div>
                   </li>
                 </ul>
-              </section>
+              </Revela>
 
-              <section className={s.tarjeta}>
+              <Revela como="section" className={s.tarjeta} retraso={0.12}>
                 <h2>Puedes contratar por tu cuenta</h2>
                 <ul className={s.filas}>
                   {Object.entries(perfil.assessments.appropriateness)
@@ -91,10 +92,10 @@ export default function Productos() {
                       </li>
                     ))}
                 </ul>
-              </section>
+              </Revela>
             </div>
 
-            <section className={`${s.tarjeta} ${s.siguiente}`}>
+            <Revela como="section" className={`${s.tarjeta} ${s.siguiente}`}>
               <div className={s.siguienteIcono} aria-hidden="true">
                 {Icono.check}
               </div>
@@ -110,7 +111,7 @@ export default function Productos() {
                   Volver a mi perfil
                 </Link>
               </div>
-            </section>
+            </Revela>
           </>
         )}
       </main>

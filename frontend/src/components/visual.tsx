@@ -48,7 +48,12 @@ export function Aura({ estado = "reposo", tam = 360 }: { estado?: EstadoAura; ta
       <div className={`${s.capa} ${s.c1}`} />
       <div className={`${s.capa} ${s.c2}`} />
       <div className={`${s.capa} ${s.c3}`} />
-      <div className={s.nucleo} />
+      <div className={s.voz} />
+      <div className={`${s.voz} ${s.voz2}`} />
+      <div className={s.nucleo}>
+        <div className={s.plasma} />
+        <div className={s.hilos} />
+      </div>
     </div>
   );
 }

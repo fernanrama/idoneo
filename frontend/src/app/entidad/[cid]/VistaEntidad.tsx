@@ -8,6 +8,7 @@ import { api } from "@/lib/api";
 import { ESTADOS, ETIQUETAS, FAMILIAS, FUENTES, mostrarValor } from "@/lib/bloques";
 import type { Fact, Perfil, Restricciones, VersionResumen } from "@/lib/tipos";
 import { usePerfil } from "@/lib/usePerfil";
+import { Cinta } from "@/components/Formas";
 import s from "./entidad.module.css";
 
 // Se refresca sola: durante la demo está abierta en una segunda pantalla mientras el cliente habla.
@@ -57,15 +58,20 @@ export default function VistaEntidad({ params }: { params: Promise<{ cid: string
             Idóneo <span>para entidades</span>
           </Link>
           <nav className={s.nav} aria-label="Navegación de la entidad">
+            <Link href="/">Inicio</Link>
             <Link href="/escenario">Escenario en vivo</Link>
-            <span>asesor-demo</span>
+            <span className={s.sesion}>
+              <i aria-hidden="true" /> Asesor · demo
+            </span>
           </nav>
         </div>
       </header>
 
       <section className={s.hero}>
         <div className={s.puntos} aria-hidden="true" />
-        <div className={s.cinta} aria-hidden="true" />
+        <div className={s.cinta}>
+          <Cinta />
+        </div>
         <div className={s.heroCaja}>
           <div className={s.heroTexto}>
             {perfil && <span className={`${s.insignia} ${s[`ins_${perfil.status}`] ?? ""}`}>{ESTADOS[perfil.status]}</span>}
@@ -75,10 +81,15 @@ export default function VistaEntidad({ params }: { params: Promise<{ cid: string
               {perfil ? TITULO[perfil.status] : "cargando…"}
             </h1>
             {perfil && (
-              <p>
-                Versión {perfil.version} · {perfil.reason} · {perfil.author}. El agente de la entidad lo consulta por MCP; una persona
-                revisa y aprueba.
-              </p>
+              <>
+                <p>
+                  {perfil.status === "active"
+                    ? `Versión ${perfil.version}, validada. El agente de la entidad ya puede usarla por MCP.`
+                    : `Versión ${perfil.version}. Revisa las evidencias y los avisos y valídalo: hasta entonces, el agente de la entidad no puede usarlo.`}
+                  {esSimulado(perfil) && <span className={s.simulado}>Datos simulados</span>}
+                </p>
+                <Recorrido estado={perfil.status} />
+              </>
             )}
             {error && (
               <p role="alert" className={s.error}>
@@ -183,7 +194,7 @@ function Resumen({ perfil, alVerEvidencia }: { perfil: Perfil; alVerEvidencia: (
           </p>
           {su.rationale.length > 0 && (
             <ul className={s.lista}>
-              {su.rationale.map((m) => (
+              {su.rationale.map(legible).map((m) => (
                 <li key={m}>{m}</li>
               ))}
             </ul>
@@ -327,4 +338,30 @@ function Mcp({ restricciones: r }: { restricciones: Restricciones | null }) {
       </div>
     </div>
   );
+}
+
+const esSimulado = (p: Perfil) => p.author === "fixture" || /simulad/i.test(p.reason ?? "");
+
+/** Dónde está el perfil dentro del recorrido: entrevista, revisión, validado y disponible para el agente. */
+function Recorrido({ estado }: { estado: string }) {
+  const pasos = ["Entrevista", "Revisión de la entidad", "Validado", "Disponible por MCP"];
+  const actual = estado === "active" ? 3 : estado === "pending_validation" ? 1 : estado === "review_due" ? 1 : 0;
+  return (
+    <ol className={s.recorrido} aria-label="Estado del perfil">
+      {pasos.map((p, i) => (
+        <li key={p} className={i < actual ? s.rHecho : i === actual ? s.rActual : ""} aria-current={i === actual ? "step" : undefined}>
+          <span>{i < actual || (estado === "active" && i === actual) ? "✓" : i + 1}</span>
+          {p}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/** Pasa los motivos del cálculo a lenguaje legible: nombres de perfil, miles con punto y sin «.0». */
+function legible(m: string) {
+  return m
+    .replace(/\b(MUY_AGRESIVO|CONSERVADOR|MODERADO|DINAMICO|AGRESIVO)\b/g, (x) => nombrePerfil(x))
+    .replace(/(\d+)\.0\b/g, "$1")
+    .replace(/(\d),(\d{3})/g, "$1.$2");
 }

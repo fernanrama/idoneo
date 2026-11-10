@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useRef, useState } from "react";
+import { OrbePerfil } from "@/components/Formas";
 import { nombrePerfil } from "@/components/PanelVivo";
+import { Revela } from "@/components/Revela";
 import { Icono } from "@/components/visual";
 import { FAMILIAS, mostrarValor } from "@/lib/bloques";
 import { useOnboarding } from "@/lib/onboarding";
@@ -84,6 +86,7 @@ function Contenido({ perfil }: { perfil: Perfil }) {
     .filter(([, x]) => x === "not_appropriate")
     .map(([f]) => FAMILIAS[f] ?? f);
   const filas = FILAS.filter((f) => perfil.mifid[f.ruta]?.value != null);
+  const horizonte = perfil.mifid["objectives.o1.horizon_years"]?.value as number | null | undefined;
 
   return (
     <>
@@ -96,13 +99,22 @@ function Contenido({ perfil }: { perfil: Perfil }) {
           <h1>
             Esto es lo que <span className={s.grad}>hemos entendido</span>
           </h1>
-          <p>Lo hemos resumido a partir de lo que nos has contado. Toca cada punto para ver la frase en la que nos basamos.</p>
+          <p>Lo hemos resumido a partir de lo que nos has contado. Toca cada punto para ver la frase exacta en la que nos basamos. Si algo no encaja, díselo a tu asesor en la revisión.</p>
         </div>
-        <div className={s.capsula} aria-hidden="true" />
+        <div className={s.capsula}>
+          <OrbePerfil
+            rasgos={[
+              `Perfil ${nombrePerfil(su.risk_profile).toLowerCase()}`,
+              `Riesgo hasta ${su.max_sri ?? "—"} de 7`,
+              horizonte ? `Plazo de ${horizonte} años` : "Plazo por definir",
+              revisado ? "Revisado por el banco" : "En revisión",
+            ]}
+          />
+        </div>
       </section>
 
       <div className={s.rejilla}>
-        <section className={`${s.tarjeta} ${s.medidor}`} aria-labelledby="t-riesgo">
+        <Revela como="section" className={`${s.tarjeta} ${s.medidor}`}>
           <h2 id="t-riesgo">Qué significa para ti</h2>
           <Medidor nivel={su.max_sri} />
           <p className={s.perfilNombre}>
@@ -121,23 +133,23 @@ function Contenido({ perfil }: { perfil: Perfil }) {
           <p className={s.pequena}>
             El nivel de riesgo (1 muy bajo, 7 muy alto) aparece en el documento de datos fundamentales de cada fondo.
           </p>
-        </section>
+        </Revela>
 
-        <section className={s.tarjeta} aria-labelledby="t-entendido">
+        <Revela como="section" className={s.tarjeta} retraso={0.12}>
           <h2 id="t-entendido">Lo que nos has contado</h2>
           <ul className={s.filas}>
             {filas.map((f) => (
               <FilaDato key={f.ruta} fila={f} fact={perfil.mifid[f.ruta]} />
             ))}
           </ul>
-        </section>
+        </Revela>
       </div>
 
       {alertas.map((a) => (
         <AvisoCliente key={a.id} alerta={a} />
       ))}
 
-      <section className={`${s.tarjeta} ${s.siguiente}`}>
+      <Revela como="section" className={`${s.tarjeta} ${s.siguiente}`}>
         <div className={s.siguienteIcono} aria-hidden="true">
           {revisado ? Icono.check : <span className={s.reloj} />}
         </div>
@@ -150,9 +162,6 @@ function Contenido({ perfil }: { perfil: Perfil }) {
           </p>
         </div>
         <div className={s.botones}>
-          <Link href="/onboarding/entrevista" className={s.botonSec}>
-            Corregir algo
-          </Link>
           {revisado ? (
             <Link href="/onboarding/productos" className={s.boton}>
               Ver productos que encajan conmigo
@@ -163,7 +172,7 @@ function Contenido({ perfil }: { perfil: Perfil }) {
             </span>
           )}
         </div>
-      </section>
+      </Revela>
     </>
   );
 }
@@ -260,7 +269,7 @@ function AvisoCliente({ alerta }: { alerta: Alerta }) {
       : "Hay un punto que queremos confirmar contigo antes de cerrar tu perfil. Te lo preguntaremos en la revisión.";
   const cita = alerta.evidence[0]?.quote;
   return (
-    <section className={s.aviso} role="status">
+    <Revela como="section" className={s.aviso}>
       <span className={s.avisoIcono} aria-hidden="true">
         {Icono.aviso}
       </span>
@@ -269,6 +278,6 @@ function AvisoCliente({ alerta }: { alerta: Alerta }) {
         <p>{texto}</p>
         {cita && <p className={s.avisoCita}>«{cita}»</p>}
       </div>
-    </section>
+    </Revela>
   );
 }

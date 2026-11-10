@@ -1,0 +1,60 @@
+/* Formas decorativas propias (sin imágenes): cinta SVG y esfera del perfil. */
+
+.cinta { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 24px 40px rgba(107, 78, 240, 0.25)); }
+
+.orbeCaja { position: relative; width: 100%; max-width: 440px; aspect-ratio: 1.35; margin: 0 auto; translate: calc(var(--px, 0) * -12px) calc(var(--py, 0) * -8px); transition: translate 0.4s ease-out; }
+.orbe {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 52%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(circle at 34% 28%, #ffffff 0, #e4edff 18%, #9dbaff 48%, #2f63ea 82%, #0039b8 100%);
+  box-shadow: inset -18px -24px 50px rgba(0, 30, 120, 0.45), inset 14px 16px 40px rgba(255, 255, 255, 0.7), 0 30px 60px rgba(0, 70, 222, 0.28);
+  animation: v-flota 6s ease-in-out infinite;
+}
+.orbeBrillo { position: absolute; left: 16%; top: 12%; width: 34%; height: 20%; border-radius: 50%; background: rgba(255, 255, 255, 0.85); filter: blur(6px); rotate: -28deg; z-index: 2; }
+.orbeLiquido {
+  position: absolute;
+  inset: 48% -20% -40% -20%;
+  border-radius: 42%;
+  background: linear-gradient(180deg, rgba(110, 70, 240, 0.55), rgba(0, 50, 200, 0.75));
+  filter: blur(0.6px);
+  animation: v-gira 9s linear infinite;
+  transform-origin: 50% 46%;
+}
+.orbeLiquido::after {
+  content: "";
+  position: absolute;
+  inset: -8% 4% 10% -6%;
+  border-radius: 46%;
+  background: rgba(160, 190, 255, 0.45);
+  animation: v-gira 6s linear infinite reverse;
+}
+.orbeSombra { position: absolute; left: 50%; bottom: 4%; width: 40%; height: 7%; translate: -50% 0; border-radius: 50%; background: rgba(0, 40, 140, 0.16); filter: blur(10px); animation: v-respira 6s ease-in-out infinite; }
+.rasgo {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 0 0 1px rgba(0, 70, 222, 0.1), 0 12px 30px rgba(0, 40, 140, 0.12);
+  font-size: 13px;
+  font-weight: 600;
+  color: #0e1020;
+  white-space: nowrap;
+  animation: v-flota 5s ease-in-out infinite, f-aparece 0.8s both;
+}
+.rasgo i { width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(135deg, #3ec6a8, #0046de); }
+.r0 { left: 0; top: 14%; animation-delay: -1s, 0.2s; }
+.r1 { right: 0; top: 6%; animation-delay: -2.5s, 0.35s; }
+.r2 { left: 4%; bottom: 14%; animation-delay: -3.5s, 0.5s; }
+.r3 { right: 2%; bottom: 22%; animation-delay: -0.5s, 0.65s; }
+@keyframes f-aparece { from { opacity: 0; } to { opacity: 1; } }
