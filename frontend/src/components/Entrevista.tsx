@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { estadoBloques } from "@/lib/bloques";
+import { ETIQUETAS, estadoBloques, mostrarValor } from "@/lib/bloques";
 import type { useEntrevista } from "@/lib/useEntrevista";
 import s from "./entrevista.module.css";
 import { Anotado, Aura, BloquesNoche, BotonNoche, Icono, MarcaNoche, Ondas, clasesBoton } from "./visual";
@@ -30,7 +30,7 @@ export function Entrevista({ e, compacto = false, alTerminar }: { e: HookEntrevi
           </div>
         )}
         <span className={`${s.datos} mono`} style={{ marginLeft: enMarcha ? undefined : "auto" }}>
-          {e.modo === "guion" ? "Demo guiada · datos simulados" : "Prototipo · datos simulados"}
+          {e.modo === "guion" ? `Demo guiada · ${e.demo.paso} de ${e.demo.total} · datos simulados` : "Prototipo · datos simulados"}
         </span>
       </header>
 
@@ -42,8 +42,14 @@ export function Entrevista({ e, compacto = false, alTerminar }: { e: HookEntrevi
               <p>{enCurso ? enCurso.nombre : "Cerrando la entrevista"}</p>
             </div>
             <div className={`${s.lateral} ${s.lateralDer} vidrio`}>
-              <span className={`${s.titulo} mono`}>Privacidad</span>
-              <p>Lo que digas solo lo ve tu asesor, con la frase exacta.</p>
+              {e.modo === "guion" ? (
+                <UltimoDato e={e} />
+              ) : (
+                <>
+                  <span className={`${s.titulo} mono`}>Privacidad</span>
+                  <p>Lo que digas solo lo ve tu asesor, con la frase exacta.</p>
+                </>
+              )}
             </div>
           </>
         )}
@@ -66,6 +72,16 @@ export function Entrevista({ e, compacto = false, alTerminar }: { e: HookEntrevi
                 </p>
               )}
             </div>
+            {e.modo === "guion" && (
+              <div className={s.respuestaDemo} aria-live="polite">
+                {e.demo.respuesta && (
+                  <p key={e.demo.respuesta} className={`${s.burbuja} vidrio`}>
+                    <span className="mono">Carmen</span>
+                    {e.demo.respuesta}
+                  </p>
+                )}
+              </div>
+            )}
             <LineaEstado e={e} />
           </>
         )}
@@ -73,12 +89,22 @@ export function Entrevista({ e, compacto = false, alTerminar }: { e: HookEntrevi
         {e.estado === "terminada" && (
           <div className={s.fin}>
             <Aura estado="anotado" tam={compacto ? 200 : 300} />
-            <h1>Listo. Tu perfil ya está preparado.</h1>
+            <h1>{e.modo === "guion" ? "Listo. El perfil de Carmen está preparado." : "Listo. Tu perfil ya está preparado."}</h1>
+            <p className={s.finTexto}>
+              {e.modo === "guion"
+                ? "Cada dato lleva su frase y el aviso queda abierto para que la entidad lo revise antes de validar."
+                : "Una persona del banco lo revisará antes de usarlo. Te avisaremos cuando esté listo."}
+            </p>
             <div className={s.finAcciones}>
               {alTerminar ?? (
                 <Link href="/onboarding/perfil">
-                  <span className={clasesBoton.luz}>Ver mi perfil</span>
+                  <span className={clasesBoton.luz}>{e.modo === "guion" ? "Ver el perfil de Carmen" : "Ver mi perfil"}</span>
                 </Link>
+              )}
+              {e.modo === "guion" && (
+                <BotonNoche variante="vidrio" onClick={() => e.iniciarGuion()}>
+                  Repetir la demo
+                </BotonNoche>
               )}
             </div>
           </div>
@@ -88,6 +114,7 @@ export function Entrevista({ e, compacto = false, alTerminar }: { e: HookEntrevi
       {enMarcha && (
         <footer className={s.dock}>
           <div className={`${s.dockCaja} vidrio`}>
+            {e.modo === "guion" && <ControlesDemo e={e} />}
             {e.modo === "voz" && (
               <BotonNoche variante="vidrio" redondo onClick={() => setTeclado((t) => !t)} aria-label="Escribir en lugar de hablar" aria-pressed={teclado}>
                 {Icono.teclado}
@@ -119,12 +146,12 @@ function LineaEstado({ e }: { e: HookEntrevista }) {
   if (e.asistente === "anotado") contenido = <Anotado />;
   else if (e.asistente === "pausa") contenido = <span className="mono">En pausa · toca el aura para seguir</span>;
   else if (e.asistente === "pensando") contenido = <span className="mono">Pensando…</span>;
-  else if (e.asistente === "habla") contenido = <span className="mono">El asistente está hablando</span>;
+  else if (e.asistente === "habla") contenido = <span className="mono">{e.modo === "guion" ? "El asistente pregunta" : "El asistente está hablando"}</span>;
   else if (e.asistente === "escucha")
     contenido = (
       <>
         <Ondas />
-        <span className="mono">{e.modo === "texto" ? "Tu turno" : "Te escucho"}</span>
+        <span className="mono">{e.modo === "guion" ? "Carmen responde" : e.modo === "texto" ? "Tu turno" : "Te escucho"}</span>
       </>
     );
   return (
@@ -165,8 +192,14 @@ function Inicio({ e, compacto }: { e: HookEntrevista; compacto: boolean }) {
           Escribir
         </BotonNoche>
       </div>
-      <button className={s.enlaceDemo} onClick={() => e.iniciarGuion(1)}>
-        Ver la demo guiada (datos simulados)
+      <button className={s.demoBoton} onClick={() => e.iniciarGuion()}>
+        <span className={s.demoPlay} aria-hidden="true">
+          {Icono.play}
+        </span>
+        <span>
+          <strong>Ver la demo guiada</strong>
+          Carmen, 68 años · entrevista simulada de un minuto, con voz
+        </span>
       </button>
       {e.error && (
         <p role="alert" className={s.error}>
@@ -205,5 +238,47 @@ function Respuesta({ onEnviar, deshabilitada }: { onEnviar: (t: string) => void;
         {Icono.enviar}
       </BotonNoche>
     </form>
+  );
+}
+
+/** En la demo: el último dato que ha entrado en el perfil, con su valor. */
+function UltimoDato({ e }: { e: HookEntrevista }) {
+  const datos = e.perfil
+    ? Object.entries(e.perfil.mifid)
+        .filter(([r, f]) => f.value != null && !r.startsWith("disclosures."))
+        .sort(([, a], [, b]) => b.updated_at.localeCompare(a.updated_at))
+    : [];
+  const n = datos.length;
+  const ultimo = datos.find(([r]) => !r.endsWith("_months") && !r.endsWith("_capacity_eur")) ?? datos[0];
+  return (
+    <>
+      <span className={`${s.titulo} mono`}>Anotado · {n} datos</span>
+      {ultimo ? (
+        <p key={ultimo[0]} className={s.anotadoNuevo}>
+          {ETIQUETAS[ultimo[0]] ?? ultimo[0]}: <strong>{mostrarValor(ultimo[1].value)}</strong>
+        </p>
+      ) : (
+        <p>Aún nada: cada dato aparecerá con la frase que lo justifica.</p>
+      )}
+    </>
+  );
+}
+
+function ControlesDemo({ e }: { e: HookEntrevista }) {
+  return (
+    <>
+      <BotonNoche variante="vidrio" redondo onClick={e.alternarPausa} aria-label={e.pausa ? "Reanudar la demo" : "Pausar la demo"}>
+        {e.pausa ? Icono.play : Icono.pausa}
+      </BotonNoche>
+      <BotonNoche variante="vidrio" redondo onClick={e.demo.siguiente} aria-label="Saltar al siguiente turno">
+        {Icono.saltar}
+      </BotonNoche>
+      <BotonNoche variante="vidrio" onClick={e.demo.cambiarVelocidad} aria-label={`Velocidad ${e.demo.velocidad}x`} style={{ minWidth: 64 }}>
+        <span className="mono">{String(e.demo.velocidad).replace(".", ",")}×</span>
+      </BotonNoche>
+      <BotonNoche variante="vidrio" redondo onClick={e.demo.alternarVoz} aria-label={e.demo.voz ? "Quitar el sonido" : "Activar el sonido"} aria-pressed={e.demo.voz}>
+        {e.demo.voz ? Icono.sonido : Icono.silencio}
+      </BotonNoche>
+    </>
   );
 }

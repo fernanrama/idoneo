@@ -126,7 +126,7 @@ function TarjetaDato({ ruta, f, nuevo, alerta }: { ruta: string; f: Fact; nuevo:
         <span>{ETIQUETAS[ruta] ?? ruta}</span>
         <span className={`${s.chip} ${s[`chip_${f.source}`] ?? ""}`}>{FUENTES[f.source] ?? f.source}</span>
       </div>
-      <div className={s.valor}>{mostrarValor(f.value)}</div>
+      <div className={s.valor}>{valorConUnidad(ruta, f.value)}</div>
       {f.declared != null && f.declared !== f.value && <span className={s.declaro}>Declaró «{mostrarValor(f.declared)}»</span>}
       {cita ? (
         <p className={s.cita}>«{cita}»</p>
@@ -143,4 +143,12 @@ function TarjetaDato({ ruta, f, nuevo, alerta }: { ruta: string; f: Fact; nuevo:
       )}
     </div>
   );
+}
+
+/** Euros con separador de miles y meses con una cifra decimal; el resto, como lo muestra la app. */
+export function valorConUnidad(ruta: string, v: unknown) {
+  if (typeof v === "number" && ruta.endsWith("_eur")) return `${v.toLocaleString("es-ES", { maximumFractionDigits: 0 })} €`;
+  if (typeof v === "number" && ruta.endsWith("_months")) return `${v.toLocaleString("es-ES", { maximumFractionDigits: 1 })} meses`;
+  if (typeof v === "number" && ruta.endsWith("horizon_years")) return `${v.toLocaleString("es-ES")} años`;
+  return mostrarValor(v);
 }

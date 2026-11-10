@@ -1,10 +1,11 @@
 "use client";
 
 import { useConversation } from "@elevenlabs/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "./api";
+import { perfilParcial, vocesEspanol } from "./demo";
 import { GUION_CARMEN } from "./guion";
-import { useOnboarding } from "./onboarding";
+import { CLIENTE_DEMO, useOnboarding } from "./onboarding";
 import type { Perfil, Turno } from "./tipos";
 
 export type Modo = "voz" | "texto" | "guion";
@@ -28,7 +29,8 @@ function datosConValor(p: Perfil | null): number {
  *   los marcamos en el cliente: el turno del cliente va desde que el agente deja de hablar
  *   (cambio a "listening") hasta que llega su transcripción. Es una APROXIMACIÓN, por verificar.
  * - modo "texto": el entrevistador de Claude del backend (POST /chat). No gasta minutos de voz.
- * - modo "guion": reproduce GUION_CARMEN (datos simulados) contra el backend real.
+ * - modo "guion": demo guiada. Repite la entrevista simulada de Carmen con las voces del navegador
+ *   (gratis) y reconstruye su perfil de ejemplo dato a dato (ver lib/demo.ts). No escribe en el backend.
  * En todos, el perfil se consulta cada 1,5 s. Las alertas nuevas del verificador se pasan al agente de voz
  * como contexto para que las explique.
  */
@@ -42,6 +44,11 @@ export function useEntrevista() {
   const [pensando, setPensando] = useState(false);
   const [pausa, setPausa] = useState(false);
   const [destello, setDestello] = useState(0); // marca de tiempo del último dato nuevo
+  // Demo guiada
+  const [fuenteDemo, setFuenteDemo] = useState<Perfil | null>(null);
+  const [paso, setPaso] = useState(0);
+  const [vozDemo, setVozDemo] = useState(true);
+  const [velocidad, setVelocidad] = useState(1);
 
   const inicio = useRef(0);
   const finAgente = useRef(0);
@@ -175,28 +182,77 @@ export function useEntrevista() {
     }
   }, [nuevaSesion, turnoTexto]);
 
-  const iniciarGuion = useCallback(
-    async (velocidad = 1) => {
-      setModo("guion");
-      setEstado("conectando");
-      setError(null);
-      try {
-        await nuevaSesion("voice");
-        setEstado("activa");
-        GUION_CARMEN.forEach((t, i) => {
-          const id = setTimeout(() => {
-            registrar(t);
-            if (i === GUION_CARMEN.length - 1) setEstado("terminada");
-          }, (t.t_start * 1000) / velocidad);
-          temporizadores.current.push(id);
-        });
-      } catch (e) {
-        setError(e instanceof Error ? e.message : String(e));
-        setEstado("error");
-      }
-    },
-    [nuevaSesion, registrar],
+  const iniciarGuion = useCallback(async () => {
+    setModo("guion");
+    setEstado("conectando");
+    setError(null);
+    try {
+      const fuente = await api.perfil(CLIENTE_DEMO);
+      setSesion(null); // la demo no crea sesión: el perfil del cliente mostrará el ejemplo
+      setFuenteDemo(fuente);
+      setPaso(0);
+      setPausa(false);
+      cuentaDatos.current = 0;
+      setVozDemo("speechSynthesis" in window);
+      setEstado("activa");
+    } catch (e) {
+      setError(e instanceof Error ? `No se ha podido cargar la demo: ${e.message}` : String(e));
+      setEstado("error");
+    }
+  }, [setSesion]);
+
+  // Reproduce el turno actual de la demo y pasa al siguiente al acabar (con voz o por tiempo de lectura).
+  useEffect(() => {
+    if (modo !== "guion" || estado !== "activa" || pausa) return;
+    if (paso >= GUION_CARMEN.length) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- fin natural de la demo
+      setEstado("terminada");
+      return;
+    }
+    const turno = GUION_CARMEN[paso];
+    let vivo = true;
+    let espera: ReturnType<typeof setTimeout> | undefined;
+    const siguiente = (ms: number) => {
+      clearTimeout(espera);
+      espera = setTimeout(() => vivo && setPaso((p) => p + 1), ms);
+    };
+    const lectura = (900 + turno.text.length * 45) / velocidad;
+    const sintesis = typeof window !== "undefined" && "speechSynthesis" in window ? window.speechSynthesis : null;
+    if (vozDemo && sintesis) {
+      const { asistente, cliente } = vocesEspanol();
+      const u = new SpeechSynthesisUtterance(turno.text);
+      u.lang = "es-ES";
+      const v = turno.speaker === "agent" ? asistente : cliente;
+      if (v) u.voice = v;
+      u.pitch = turno.speaker === "agent" ? 1 : 1.25;
+      u.rate = (turno.speaker === "agent" ? 1.08 : 0.98) * velocidad;
+      u.onend = () => vivo && siguiente(350);
+      sintesis.cancel();
+      sintesis.speak(u);
+      siguiente(lectura * 2.2 + 1500); // por si el navegador no avisa del final
+    } else {
+      siguiente(lectura);
+    }
+    return () => {
+      vivo = false;
+      clearTimeout(espera);
+      sintesis?.cancel();
+    };
+  }, [modo, estado, pausa, paso, vozDemo, velocidad]);
+
+  const turnosDemo = useMemo(() => GUION_CARMEN.slice(0, Math.min(paso + 1, GUION_CARMEN.length)), [paso]);
+  const perfilDemo = useMemo(
+    () => (fuenteDemo ? perfilParcial(fuenteDemo, GUION_CARMEN.slice(0, paso), paso >= GUION_CARMEN.length) : null),
+    [fuenteDemo, paso],
   );
+  useEffect(() => {
+    if (modo !== "guion" || !perfilDemo) return;
+    const n = datosConValor(perfilDemo);
+    if (n > cuentaDatos.current) {
+      if (cuentaDatos.current > 0 || paso > 0) setDestello(Date.now());
+      cuentaDatos.current = n;
+    }
+  }, [modo, perfilDemo, paso]);
 
   const enviarTexto = useCallback(
     (texto: string) => {
@@ -224,6 +280,10 @@ export function useEntrevista() {
     temporizadores.current.forEach(clearTimeout);
     temporizadores.current = [];
     if (modo === "voz") conversacion.endSession();
+    if (modo === "guion") {
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+      setPaso(GUION_CARMEN.length);
+    }
     setEstado("terminada");
   }, [conversacion, modo]);
 
@@ -274,8 +334,9 @@ export function useEntrevista() {
 
   useEffect(() => () => temporizadores.current.forEach(clearTimeout), []);
 
-  const ultimoAgente = [...turnos].reverse().find((t) => t.speaker === "agent");
-  const ultimo = turnos.at(-1);
+  const turnosVista = modo === "guion" ? turnosDemo : turnos;
+  const ultimoAgente = [...turnosVista].reverse().find((t) => t.speaker === "agent");
+  const ultimo = turnosVista.at(-1);
 
   let asistente: EstadoAsistente = "reposo";
   if (estado === "conectando" || pensando) asistente = "pensando";
@@ -283,16 +344,27 @@ export function useEntrevista() {
     if (pausa) asistente = "pausa";
     else if (destelloVivo) asistente = "anotado";
     else if (modo === "voz") asistente = conversacion.isSpeaking ? "habla" : "escucha";
-    else asistente = ultimo?.speaker === "agent" ? (modo === "guion" ? "habla" : "escucha") : "escucha";
+    else if (modo === "guion") asistente = ultimo?.speaker === "agent" ? "habla" : "escucha";
+    else asistente = "escucha";
   }
 
   return {
     modo,
     estado,
     error,
-    turnos,
-    perfil,
+    turnos: turnosVista,
+    perfil: modo === "guion" ? perfilDemo : perfil,
     pregunta: ultimoAgente?.text ?? null,
+    demo: {
+      respuesta: modo === "guion" && ultimo?.speaker === "client" ? ultimo.text : null,
+      paso: Math.min(paso + 1, GUION_CARMEN.length),
+      total: GUION_CARMEN.length,
+      voz: vozDemo,
+      alternarVoz: () => setVozDemo((v) => !v),
+      velocidad,
+      cambiarVelocidad: () => setVelocidad((v) => (v === 1 ? 1.5 : v === 1.5 ? 2 : 1)),
+      siguiente: () => setPaso((p) => Math.min(p + 1, GUION_CARMEN.length)),
+    },
     asistente,
     anotado: destelloVivo,
     pausa,

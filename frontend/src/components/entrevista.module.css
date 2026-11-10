@@ -92,3 +92,15 @@
   .zonaPregunta { min-height: 120px; }
   .dock { padding: 0 14px 20px; }
 }
+
+/* Demo guiada */
+.respuestaDemo { min-height: 64px; display: flex; justify-content: center; width: 100%; max-width: 640px; }
+.burbuja { margin: 0; padding: 12px 18px; border-radius: 18px 18px 18px 6px; font-size: 16px; line-height: 1.5; color: var(--n-tinta); animation: v-sube 0.45s both; text-align: left; }
+.burbuja span { display: block; font-size: 10px; color: var(--n-rosa); margin-bottom: 2px; }
+.anotadoNuevo { animation: v-sube 0.45s both; }
+.anotadoNuevo strong { color: var(--n-verde); font-weight: 600; }
+.demoBoton { display: inline-flex; align-items: center; gap: 14px; padding: 10px 18px 10px 10px; border-radius: 999px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--n-borde); color: var(--n-suave); text-align: left; font-size: 13px; transition: background 0.2s, border-color 0.2s; }
+.demoBoton:hover { background: rgba(157, 184, 255, 0.1); border-color: rgba(157, 184, 255, 0.4); }
+.demoBoton strong { display: block; color: var(--n-tinta); font-size: 15px; font-weight: 600; }
+.demoPlay { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--n-boton); color: #0b1030; flex-shrink: 0; animation: v-pulso 2s ease-out infinite; }
+.finTexto { margin: 0; max-width: 440px; color: var(--n-suave); font-size: 15px; line-height: 1.55; text-align: center; }
