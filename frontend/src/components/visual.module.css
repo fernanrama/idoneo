@@ -1,0 +1,186 @@
+/* Piezas visuales compartidas del rediseño. Animaciones definidas en src/tema/visual.css. */
+
+.noche {
+  position: relative;
+  overflow: hidden;
+  overflow: clip;
+  min-height: 100vh;
+  min-height: 100dvh;
+  isolation: isolate;
+  --mx: 50%;
+  --my: 30%;
+  --px: 0;
+  --py: 0;
+}
+.foco {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(560px circle at var(--mx) var(--my), rgba(120, 140, 255, 0.15), transparent 60%);
+}
+.brillo {
+  position: absolute;
+  z-index: -2;
+  border-radius: 50%;
+  filter: blur(100px);
+  pointer-events: none;
+  animation: v-deriva 18s ease-in-out infinite;
+}
+.brillo1 { width: 640px; height: 640px; left: -220px; top: -260px; background: rgba(43, 91, 255, 0.3); }
+.brillo2 { width: 560px; height: 560px; right: -200px; top: 30%; background: rgba(139, 92, 246, 0.26); animation-delay: -7s; }
+.brillo3 { width: 420px; height: 420px; left: 30%; bottom: -200px; background: rgba(217, 70, 170, 0.14); animation-delay: -11s; }
+
+/* ---------- Aura (el entrevistador) ---------- */
+.auraCaja {
+  position: relative;
+  width: var(--tam, 360px);
+  height: var(--tam, 360px);
+  max-width: 78vw;
+  max-height: 78vw;
+  transform: translate(calc(var(--px) * 14px), calc(var(--py) * 14px));
+  transition: transform 0.3s ease-out;
+}
+.capa {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  filter: blur(24px);
+  mix-blend-mode: screen;
+  transition: opacity 0.6s;
+}
+.c1 { background: radial-gradient(circle at 30% 30%, #5b8cff 0, transparent 62%); animation: v-gira 9s linear infinite; }
+.c2 { background: radial-gradient(circle at 72% 62%, #9b6bff 0, transparent 60%); animation: v-gira 13s linear infinite reverse; }
+.c3 { background: radial-gradient(circle at 50% 82%, #e255b8 0, transparent 55%); opacity: 0.7; animation: v-respira 4s ease-in-out infinite; }
+.nucleo {
+  position: absolute;
+  inset: 15%;
+  border-radius: 50%;
+  box-shadow: 0 0 90px rgba(110, 130, 255, 0.45), 0 0 26px rgba(170, 150, 255, 0.35);
+  animation: v-respira 5s ease-in-out infinite;
+  transition: box-shadow 0.6s;
+}
+/* Respaldo en CSS por si no hay WebGL: queda debajo de la esfera 3D. */
+.respaldo {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(circle at 34% 28%, #dfe6ff 0, #8e9bff 22%, #6b4ef0 55%, #1a1560 100%);
+}
+.respaldo::before {
+  content: "";
+  position: absolute;
+  inset: -35%;
+  background: conic-gradient(from 0deg, #4f7dff, #a77bff, #f08ad0, #6fd0ff, #7b6bff, #4f7dff);
+  filter: blur(22px);
+  opacity: 0.7;
+  mix-blend-mode: screen;
+  animation: v-gira 9s linear infinite;
+}
+.esfera { position: absolute; inset: 0; border-radius: 50%; }
+.voz { position: absolute; inset: 15%; border-radius: 50%; border: 1.5px solid rgba(190, 205, 255, 0.5); opacity: 0; pointer-events: none; }
+.habla .voz { animation: v-voz 1.6s ease-out infinite; }
+.habla .voz2 { animation-delay: 0.8s; }
+@keyframes v-voz { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(1.55); opacity: 0; } }
+.anillo { position: absolute; inset: -9%; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.09); animation: v-gira 30s linear infinite; }
+.anillo::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #c9d6ff;
+  box-shadow: 0 0 12px #9bb2ff;
+}
+.anillo2 { position: absolute; inset: -22%; border-radius: 50%; border: 1px dashed rgba(255, 255, 255, 0.05); animation: v-gira 60s linear infinite reverse; }
+
+.habla .c3 { animation: v-habla 0.45s ease-in-out infinite alternate; }
+.habla .nucleo { animation: v-habla 0.5s ease-in-out infinite alternate; }
+.habla .c1 { animation-duration: 3.5s; }
+.escucha .nucleo { animation: v-escucha 2.4s ease-in-out infinite; }
+.escucha .c3 { opacity: 0.25; }
+.escucha .c2 { animation-duration: 20s; }
+.anotado .nucleo { box-shadow: 0 0 120px rgba(127, 224, 184, 0.65), 0 0 30px rgba(155, 235, 201, 0.5); }
+.anotado .c1 { background: radial-gradient(circle at 30% 30%, #2fc9a0 0, transparent 62%); }
+.anotado .c2 { background: radial-gradient(circle at 72% 62%, #4fa8ff 0, transparent 60%); }
+.pausa .capa { opacity: 0.15; }
+.pausa .nucleo { animation: none; box-shadow: none; }
+.pensando .c1 { animation-duration: 2.5s; }
+
+/* ---------- Ondas y chips ---------- */
+.ondas { display: inline-flex; align-items: center; gap: 4px; height: 24px; }
+.ondas span { display: inline-block; width: 3px; height: 22px; border-radius: 2px; background: #c9d6ff; animation: v-onda 1s ease-in-out infinite; }
+.ondas span:nth-child(2) { animation-delay: 0.1s; }
+.ondas span:nth-child(3) { animation-delay: 0.2s; }
+.ondas span:nth-child(4) { animation-delay: 0.3s; }
+.ondas span:nth-child(5) { animation-delay: 0.4s; }
+.ondas span:nth-child(6) { animation-delay: 0.5s; }
+.ondas span:nth-child(7) { animation-delay: 0.6s; }
+
+.anotadoChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--n-verde);
+  background: rgba(127, 224, 184, 0.12);
+  border: 1px solid rgba(127, 224, 184, 0.35);
+  padding: 6px 12px;
+  border-radius: 999px;
+  animation: v-ok 0.5s both;
+}
+
+.marca { display: inline-flex; align-items: center; gap: 10px; color: var(--n-tinta); font-size: 13px; }
+.marcaPunto {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffffff, #8fa8ff 45%, #6d4bd8 100%);
+  box-shadow: 0 0 14px rgba(143, 168, 255, 0.7);
+}
+
+/* ---------- Bloques de la entrevista (versión noche) ---------- */
+.bloques { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; }
+.bloque { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; color: #6b7489; transition: color 0.4s; }
+.bloquePunto { width: 8px; height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.18); transition: all 0.4s; }
+.bloque_completo { color: var(--n-verde); }
+.bloque_completo .bloquePunto { background: #7fe0b8; }
+.bloque_en_curso { color: var(--n-tinta); }
+.bloque_en_curso .bloquePunto { width: 22px; background: linear-gradient(90deg, #9db8ff, #c49bff); }
+
+.botonLuz {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 0;
+  color: #0b1030;
+  background: var(--n-boton);
+  border-radius: 999px;
+  padding: 16px 30px;
+  min-height: 52px;
+  font-weight: 600;
+  font-size: 17px;
+  box-shadow: 0 12px 40px rgba(120, 150, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.botonLuz:hover { transform: translateY(-2px); box-shadow: 0 18px 50px rgba(120, 150, 255, 0.55); }
+.botonLuz:disabled { opacity: 0.45; transform: none; cursor: not-allowed; }
+.botonVidrio {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--n-tinta);
+  border-radius: 999px;
+  padding: 12px 20px;
+  min-height: 48px;
+  font-weight: 500;
+  font-size: 15px;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+.botonVidrio:hover { background: rgba(157, 184, 255, 0.16); border-color: rgba(157, 184, 255, 0.45); transform: translateY(-1px); }
+.botonVidrio:disabled { opacity: 0.4; transform: none; cursor: not-allowed; background: var(--n-vidrio); }
+.botonRedondo { width: 48px; height: 48px; padding: 0; border-radius: 50%; }

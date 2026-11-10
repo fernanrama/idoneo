@@ -1,0 +1,72 @@
+/*
+ * CAPA VISUAL — pantallas del rediseño (portada, entrevista, escenario, perfil y entidad).
+ *
+ * Tres ambientes:
+ * - .tema-noche   → experiencia del cliente mientras habla: fondo casi negro, brillos azul y violeta,
+ *                   vidrio translúcido y etiquetas en mono (inspirado en landings premiadas de hackathon).
+ * - :root         → resultado del cliente, claro y limpio estilo banco digital (tokens de tema.css).
+ * - .tema-asesor  → entidad, lavanda con degradado magenta-violeta (tokens de tema.css).
+ * Sin logos ni marcas de terceros. Toda animación se desactiva con «reducir movimiento».
+ */
+
+.tema-noche {
+  --n-fondo: #05070d;
+  --n-tinta: #f3f5fb;
+  --n-suave: #b7bfce;
+  --n-tenue: #8a93a8;
+  --n-azul: #9db8ff;
+  --n-violeta: #c49bff;
+  --n-rosa: #f08ad0;
+  --n-verde: #9bebc9;
+  --n-vidrio: rgba(255, 255, 255, 0.05);
+  --n-borde: rgba(255, 255, 255, 0.1);
+  --n-degradado: linear-gradient(90deg, #9db8ff, #c49bff 55%, #f08ad0);
+  --n-boton: linear-gradient(180deg, #dce6ff, #9db8ff);
+  color: var(--n-tinta);
+  background: var(--n-fondo);
+  font-family: var(--font-asesor), system-ui, sans-serif;
+}
+.tema-noche h1, .tema-noche h2, .tema-noche h3 { color: var(--n-tinta); font-family: var(--font-asesor), system-ui, sans-serif; font-weight: 500; }
+.tema-noche a:focus-visible, .tema-noche button:focus-visible, .tema-noche input:focus-visible { outline-color: var(--n-azul); }
+body:has(.tema-noche) { background: #05070d; }
+
+.mono { font-family: var(--font-mono), ui-monospace, monospace; letter-spacing: 0.18em; text-transform: uppercase; }
+.vidrio {
+  background: var(--n-vidrio, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--n-borde, rgba(255, 255, 255, 0.1));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.texto-degradado { background: var(--n-degradado); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+@keyframes v-gira { to { transform: rotate(360deg); } }
+@keyframes v-respira { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+@keyframes v-habla { from { transform: scale(0.92); } to { transform: scale(1.12); } }
+@keyframes v-escucha { 0%, 100% { transform: scale(0.88); opacity: 0.75; } 50% { transform: scale(0.93); opacity: 1; } }
+@keyframes v-deriva { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(40px, -30px); } }
+@keyframes v-flota { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes v-late { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@keyframes v-onda { 0%, 100% { transform: scaleY(0.25); } 50% { transform: scaleY(1); } }
+@keyframes v-entra { from { opacity: 0; transform: translateY(18px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes v-sube { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes v-llega { 0% { opacity: 0; transform: translateX(36px) scale(0.97); } 60% { opacity: 1; } 100% { opacity: 1; transform: none; } }
+@keyframes v-brillo { 0% { box-shadow: 0 0 0 2px rgba(124, 92, 255, 0.55), 0 20px 50px rgba(124, 92, 255, 0.25); } 100% { box-shadow: 0 0 0 1px rgba(18, 18, 42, 0.06), 0 8px 24px rgba(18, 18, 42, 0.06); } }
+@keyframes v-sacude { 0%, 100% { transform: none; } 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
+@keyframes v-ok { 0% { opacity: 0; transform: scale(0.8); } 20% { opacity: 1; transform: scale(1); } 100% { opacity: 1; } }
+@keyframes v-pulso { 0% { box-shadow: 0 0 0 0 rgba(157, 184, 255, 0.5); } 100% { box-shadow: 0 0 0 22px rgba(157, 184, 255, 0); } }
+@keyframes v-ola { from { background-position: 0 0; } to { background-position: 0 -220px; } }
+@keyframes v-sello { 0% { transform: scale(1.6); opacity: 0; } 60% { transform: scale(0.95); opacity: 1; } 100% { transform: scale(1); } }
+@keyframes v-toast { 0% { opacity: 0; transform: translateY(20px); } 10%, 85% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+@keyframes v-chispa { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.6); } 25% { opacity: 1; } 100% { opacity: 0; transform: translate(140px, -60%) scale(0.9); } }
+@keyframes v-flota-giro { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-12px) rotate(3deg); } }
+
+/* Aparición al hacer scroll (ver components/Revela.tsx). */
+.revela { opacity: 0; transform: translateY(32px); transition: opacity 0.8s ease, transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1); transition-delay: var(--retraso, 0s); }
+.revela.revela-izq { transform: translateX(-36px); }
+.revela.revela-zoom { transform: scale(0.94); }
+.revela.visto { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .revela { opacity: 1; transform: none; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

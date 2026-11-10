@@ -15,6 +15,7 @@ export function usePerfil(clientId: string, sondeoMs?: number) {
   const [error, setError] = useState<string | null>(null);
 
   const recargar = useCallback(async () => {
+    if (!clientId) return;
     try {
       const [p, r] = await Promise.all([api.perfil(clientId), api.restricciones(clientId)]);
       setPerfil(p);

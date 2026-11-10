@@ -1,0 +1,116 @@
+[
+  {
+    "speaker": "agent",
+    "t_start": 0.0,
+    "t_end": 7.0,
+    "text": "Hola, Carmen. Soy el asistente de perfil inversor. Soy una inteligencia artificial y una persona del banco revisará todo. ¿Le parece bien que grabemos la conversación?"
+  },
+  {
+    "speaker": "client",
+    "t_start": 8.0,
+    "t_end": 10.5,
+    "text": "Sí, de acuerdo, puede grabar."
+  },
+  {
+    "speaker": "agent",
+    "t_start": 11.0,
+    "t_end": 15.0,
+    "text": "Gracias. ¿Para qué le gustaría invertir su dinero?"
+  },
+  {
+    "speaker": "client",
+    "t_start": 16.0,
+    "t_end": 20.0,
+    "text": "Quiero tener un dinerito extra cada mes para complementar la pensión."
+  },
+  {
+    "speaker": "agent",
+    "t_start": 21.0,
+    "t_end": 24.0,
+    "text": "¿Durante cuánto tiempo, más o menos?"
+  },
+  {
+    "speaker": "client",
+    "t_start": 25.0,
+    "t_end": 28.0,
+    "text": "Para los próximos diez años, más o menos."
+  },
+  {
+    "speaker": "agent",
+    "t_start": 29.0,
+    "t_end": 33.0,
+    "text": "¿Cuánto cobra al mes y cuánto gasta en cosas fijas como luz, comunidad o la compra?"
+  },
+  {
+    "speaker": "client",
+    "t_start": 34.0,
+    "t_end": 41.0,
+    "text": "Cobro unos mil cuatrocientos cincuenta de pensión. Entre luz, comunidad y la compra, unos novecientos."
+  },
+  {
+    "speaker": "agent",
+    "t_start": 42.0,
+    "t_end": 45.0,
+    "text": "¿Y cuánto tiene ahorrado? ¿Tiene alguna deuda?"
+  },
+  {
+    "speaker": "client",
+    "t_start": 46.0,
+    "t_end": 51.0,
+    "text": "Tengo ochenta mil en depósitos. No debo nada, la casa está pagada."
+  },
+  {
+    "speaker": "agent",
+    "t_start": 52.0,
+    "t_end": 55.0,
+    "text": "¿Qué productos conoce? Por ejemplo, depósitos o fondos de renta fija."
+  },
+  {
+    "speaker": "client",
+    "t_start": 55.0,
+    "t_end": 60.0,
+    "text": "Los depósitos los conozco, me dan un poquito al año. Si suben los tipos, el bono vale menos, eso me lo explicó mi hijo."
+  },
+  {
+    "speaker": "agent",
+    "t_start": 60.0,
+    "t_end": 64.0,
+    "text": "En el test de su banco marcó que conoce bien los fondos de renta variable. ¿Podría perder dinero un fondo así?"
+  },
+  {
+    "speaker": "client",
+    "t_start": 57.0,
+    "t_end": 61.0,
+    "text": "Eso no puede pasar, el fondo es del banco."
+  },
+  {
+    "speaker": "agent",
+    "t_start": 62.0,
+    "t_end": 70.0,
+    "text": "Es una duda muy común. Un fondo de renta variable sí puede bajar, aunque lo venda su banco. Imagine que sus ahorros bajan un veinte por ciento en unos meses. ¿Qué haría?"
+  },
+  {
+    "speaker": "client",
+    "t_start": 71.0,
+    "t_end": 74.0,
+    "text": "Si baja un veinte por ciento, lo saco todo."
+  },
+  {
+    "speaker": "agent",
+    "t_start": 75.0,
+    "t_end": 81.0,
+    "text": "Entendido. Última pregunta: ¿le importa que sus inversiones sigan criterios de sostenibilidad, por ejemplo evitar empresas que contaminan mucho?"
+  },
+  {
+    "speaker": "client",
+    "t_start": 82.0,
+    "t_end": 85.0,
+    "text": "Eso me da igual, mientras no pierda."
+  },
+  {
+    "speaker": "agent",
+    "t_start": 86.0,
+    "t_end": 92.0,
+    "text": "Muchas gracias, Carmen. Ya tenemos su perfil. Una persona del banco lo revisará y le avisaremos."
+  }
+]
