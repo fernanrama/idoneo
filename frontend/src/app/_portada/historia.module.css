@@ -1,0 +1,78 @@
+/* «Cómo funciona» guiado por el scroll. */
+
+.historia { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 56px; }
+.escenario { position: relative; }
+.marco { position: sticky; top: calc(50vh - 250px); height: 500px; border-radius: 30px; overflow: hidden; }
+.progreso { position: absolute; left: 24px; right: 24px; top: 20px; display: flex; gap: 6px; z-index: 2; }
+.progreso span { flex: 1; height: 3px; border-radius: 2px; background: rgba(255, 255, 255, 0.1); transition: background 0.5s; }
+.progreso .lleno { background: var(--n-degradado); }
+.escena { position: absolute; inset: 44px 28px 28px; display: flex; align-items: center; justify-content: center; opacity: 0; transform: translateY(24px) scale(0.97); transition: opacity 0.6s, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); pointer-events: none; }
+.escenaActiva { opacity: 1; transform: none; }
+
+.pasos { list-style: none; margin: 0; padding: 0; }
+.paso { min-height: 70vh; display: flex; flex-direction: column; justify-content: center; gap: 14px; opacity: 0.35; transition: opacity 0.5s; }
+.paso:first-child { min-height: 55vh; }
+.pasoActivo { opacity: 1; }
+.paso h3 { margin: 0; font-size: clamp(26px, 2.8vw, 38px); line-height: 1.08; letter-spacing: -0.025em; font-weight: 600; color: var(--n-tinta); }
+.paso p { margin: 0; font-size: 17px; line-height: 1.6; color: var(--n-suave); max-width: 480px; }
+.kicker { font-size: 12px; color: var(--n-azul); }
+.escenaMovil { display: none; }
+
+/* Escenas */
+.e0 { display: flex; flex-direction: column; align-items: center; gap: 22px; text-align: center; }
+.preguntaMini { margin: 0; font-size: 21px; line-height: 1.35; color: var(--n-tinta); max-width: 380px; }
+.respuestaMini { margin: 0; padding: 10px 16px; border-radius: 16px 16px 16px 4px; background: rgba(255, 255, 255, 0.06); border: 1px solid var(--n-borde); color: var(--n-suave); font-size: 15px; }
+.respuestaMini span { display: block; font-size: 10px; color: var(--n-rosa); text-align: left; }
+.escenaActiva .respuestaMini, .escenaMovil .respuestaMini { animation: v-sube 0.6s 0.6s both; }
+
+.e1 { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 12px; }
+.dato { background: #ffffff; color: #12122a; border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35); }
+.escenaActiva .dato, .escenaMovil .dato { animation: v-llega 0.6s both; }
+.datoCab { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: #5a5a7a; }
+.dato strong { font-size: 19px; font-weight: 600; }
+.dato em { font-size: 13px; color: #4b4b6b; }
+.chip { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 999px; }
+.chipVerde { background: #ddf5ec; color: #0b6b4f; }
+.chipAzul { background: #e9e7ff; color: #3b2fb8; }
+.barra { height: 4px; border-radius: 2px; background: #eceaf6; overflow: hidden; }
+.barra span { display: block; height: 100%; background: linear-gradient(90deg, #c2338f, #6b4ef0); }
+
+.e2 { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 12px; }
+.test, .dicho { border-radius: 18px; padding: 14px 16px; font-size: 15px; color: var(--n-tinta); background: rgba(255, 255, 255, 0.05); border: 1px solid var(--n-borde); display: flex; flex-direction: column; gap: 8px; }
+.test span:first-child, .dicho span { font-size: 10px; color: var(--n-tenue); }
+.test label { display: flex; gap: 10px; align-items: center; }
+.casilla { width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center; background: var(--n-azul); color: #0b1030; flex-shrink: 0; }
+.dicho { font-style: italic; }
+.frente { text-align: center; font-size: 12px; color: var(--n-tenue); }
+.aviso { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 18px; background: #fff4e5; color: #7a3307; font-size: 14px; }
+.aviso strong { display: block; }
+.escenaActiva .aviso, .escenaMovil .aviso { animation: v-llega 0.6s 0.5s both, v-sacude 0.6s 1.1s both; }
+
+.e3 { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 10px; }
+.regla { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px 16px; border-radius: 14px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--n-borde); font-size: 14px; color: var(--n-suave); }
+.regla .mono { font-size: 11px; color: var(--n-tinta); }
+.resultado { margin-top: 6px; padding: 18px; border-radius: 18px; background: #ffffff; color: #12122a; display: flex; flex-direction: column; gap: 8px; }
+.resultado .mono { font-size: 10px; color: #5a5a7a; }
+.resultado strong { font-size: 20px; }
+.escenaActiva .regla, .escenaActiva .resultado, .escenaMovil .regla, .escenaMovil .resultado { animation: v-sube 0.5s both; }
+.sri { display: flex; gap: 4px; }
+.sri span { flex: 1; height: 10px; border-radius: 5px; background: #eceaf6; }
+.sri .sriLleno { background: linear-gradient(90deg, #c2338f, #6b4ef0); }
+.escenaActiva .sriLleno, .escenaMovil .sriLleno { animation: v-entra 0.4s both; }
+
+.e4 { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
+.sello { display: inline-flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 999px; background: #ddf5ec; color: #0b6b4f; font-weight: 600; font-size: 15px; }
+.escenaActiva .sello, .escenaMovil .sello { animation: v-sello 0.6s both; }
+.codigo { margin: 0; width: 100%; box-sizing: border-box; padding: 18px; border-radius: 18px; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--n-borde); font: 12.5px/1.7 var(--font-mono), monospace; color: #c9d3ff; overflow-x: auto; }
+.codigo b { color: var(--n-verde); font-weight: 400; }
+.codigo em { color: var(--n-tenue); font-style: normal; }
+
+@media (max-width: 960px) {
+  .historia { grid-template-columns: minmax(0, 1fr); }
+  .paso { min-width: 0; }
+  .codigo { font-size: 11px; }
+  .escenario { display: none; }
+  .paso { min-height: 0; opacity: 1; padding: 26px 0; }
+  .paso:first-child { min-height: 0; }
+  .escenaMovil { display: flex; justify-content: center; margin-top: 10px; padding: 24px 18px; border-radius: 24px; }
+}
