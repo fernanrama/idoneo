@@ -2,22 +2,24 @@
 
 ## Estado y alcance
 
-Comprobado el 10/11/2026 en GitHub: #21 continúa abierta, sin commits nuevos respecto a la auditoría.
+Antes de publicar, el 10/11/2026 se confirmó que #21 seguía abierta en el commit original de Pablo.
+El usuario ha revisado y autorizado publicar la integración `1149da4` y sus límites provisionales.
 
 - Rama de Pablo: `feat/personal-memory-elevenlabs-harness`.
-- Commit: `b1b182ed8aaa6710a7df59dcbc571508d38605d8`.
+- Commit original de Pablo: `b1b182ed8aaa6710a7df59dcbc571508d38605d8`.
 - Base indicada por GitHub: `main`, SHA `0177888e26c78349304f9d95d1fd2a3ba4730663`.
-- GitHub informa conflictos de #21 con su base (`mergeable=false`, `dirty`). Estado remoto: conflictos pendientes allí. La copia local integra main para revisión, sin commit.
+- Antes de publicar GitHub informaba conflictos (`mergeable=false`, `dirty`). El commit `1149da4`
+  incorpora main `8b698b7` y resuelve los conflictos locales; se comprobará el estado remoto tras el push.
 - Rama propia local: `fix/perfil-memoria-atomicidad-propuesta`, creada desde ese commit exacto.
 - Worktree: `/private/tmp/idoneo-pr21-perfil-propuesta`. La demo conserva su checkout de `main`.
 
-**Hay una implementación local sin publicar**, tras la autorización posterior del usuario para
+**La implementación está revisada y su publicación autorizada**, tras la autorización del usuario para
 abordar conjuntamente perfiles, autorización/API y frontend. Se reutilizaron estas reproducciones.
 La primera etapa se detuvo ante el cambio de contrato; el alcance posterior permite implementar
 la propuesta completa para revisión. El contrato y sus decisiones pendientes están en
 [`docs/MEMORIA_PERSONAL_SEGURIDAD.md`](../../docs/MEMORIA_PERSONAL_SEGURIDAD.md).
-No se ha hecho commit, push, merge a main ni PR ni se ha modificado la rama remota de Pablo o la demo.
-Se ha preparado el merge de main en esta copia aislada, sin cerrarlo con un commit.
+El commit `1149da4` conserva exactamente el árbol integrado y probado. Se autoriza push normal
+a la rama de #21, sin force push ni merge a main. La demo permanece intacta.
 
 ## Resultado actual
 
@@ -162,6 +164,7 @@ la demo. No se realizaron llamadas a APIs de pago, Supabase ni PostgreSQL ni se 
 ## Siguiente revisión
 
 Juan, Pablo y Alejandro deben revisar el contrato implementado y las decisiones pendientes antes
-de publicarlo. El usuario no autoriza aún commit, push ni PR. Los conflictos con main se han resuelto en la copia local; el merge permanece sin commit para revisión.
+de publicarlo. El usuario autoriza publicar los commits revisados directamente en #21, sin merge a main.
+Los conflictos con main se han resuelto en el commit de integración local.
 La prueba HTTP Next/API verifica además el bloqueo de autovalidación por el proxy.
 La rama local contiene producción, tests y documentación sin publicar.

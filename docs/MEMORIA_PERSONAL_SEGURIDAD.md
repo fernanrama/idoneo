@@ -1,14 +1,16 @@
 # Propuesta local de seguridad y persistencia de la memoria personal
 
-Trabajo sin publicar sobre `fix/perfil-memoria-atomicidad-propuesta`, basada en #21 en
-`b1b182ed8aaa6710a7df59dcbc571508d38605d8`. No se integra en `main` ni modifica la rama de Pablo.
-La referencia visual de compatibilidad es `main` en `8b698b795da2ee2be8ef28ee58590f0baf819453`,
-que contiene #22 y #23. Este contrato es una propuesta revisable, no una decisión ya adoptada por el equipo.
+Corrección revisable del prototipo local sobre #21, preparada desde el commit original de Pablo
+`b1b182ed8aaa6710a7df59dcbc571508d38605d8` e integrada con main
+`8b698b795da2ee2be8ef28ee58590f0baf819453` (#22/#23). El commit de integración es `1149da4`.
+El usuario ha revisado el resultado y autorizado su publicación mediante push normal a
+`feat/personal-memory-elevenlabs-harness`, manteniendo #21 abierta y sin fusionarla a main.
 
-Actualización: se ha preparado la integración real de ese main en esta copia aislada de #21,
-sin crear commit ni modificar ramas remotas. El cierre del merge local queda pendiente de revisión.
-El respaldo original de los 55 archivos se conserva con SHA256 en
-`/private/tmp/idoneo-pr21-respaldo-20261110-170247/` y en un stash local conservado.
+Se aceptan provisionalmente: credenciales de posesión para clientes ficticios, validación web
+bloqueada, recuperación y revocación individual pendientes, ADMIN_TOKEN exclusivo de servicios
+de confianza y borrado con revisión técnica sin afirmar eliminación de copias externas.
+Estas condiciones no constituyen autenticación bancaria ni autorización para producción.
+Los respaldos locales se conservan fuera del repositorio y no forman parte de los commits.
 
 [Inventario completo de archivos modificados y añadidos](MEMORIA_PERSONAL_ARCHIVOS.md).
 
@@ -115,7 +117,7 @@ El proxy no añade ADMIN_TOKEN ni realiza peticiones al backend. La API de valid
 propietario y servicio explícitos; la interfaz deja el botón deshabilitado. No se inventan roles
 ni un login de asesor: habilitar esa acción exige acordar un contrato independiente.
 
-## Decisiones antes de publicar
+## Límites aceptados provisionalmente y decisiones para producción
 
 | Tema | Propuesta local | Alternativa que requiere acuerdo |
 |---|---|---|
@@ -127,8 +129,8 @@ ni un login de asesor: habilitar esa acción exige acordar un contrato independi
 | Demo pública | Fixture fijo exclusivamente ficticio | Exposición de otro conjunto explícitamente aprobado |
 | Voz y copias externas | Borrado del almacén local | Coordinación con retención, conversaciones activas y copias de proveedores |
 
-No se usan datos reales, Supabase ni APIs de pago. La autorización de esta implementación permite
-prepararla para revisión; no autoriza publicarla o sustituir el contrato del equipo sin revisión.
+No se usan datos reales, Supabase ni APIs de pago. La publicación de esta corrección en #21 está
+autorizada tras la revisión del usuario. No se autoriza fusionar a main ni habilitar uso de producción.
 
 ## Evidencia
 

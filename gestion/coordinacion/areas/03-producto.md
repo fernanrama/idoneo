@@ -68,3 +68,11 @@ permiso independiente de asesor. Suite backend 474 correctos, 18 de cliente, lin
 Next/API correctos. #19 35 correctos/5 omitidos; #20 56 correctos. La demo conserva sus procesos.
 Siguiente acción: revisar el resultado y aprobar el cierre del merge local/publicación a #21;
 confirmar permisos de asesor, transporte/recuperación de credenciales y política de borrado.
+
+Publicación autorizada tras revisión del usuario: integrar mediante push normal en la rama de #21,
+sin merge a main. Commit de integración `1149da4`, árbol idéntico al probado. El usuario acepta
+provisionalmente posesión para clientes ficticios, validación web bloqueada, recuperación/revocación
+individual pendientes, ADMIN_TOKEN solo de servicio y borrado local con revisión técnica.
+Estas condiciones no habilitan producción; faltan permisos reales de entidad, identidad/transporte,
+recuperación/revocación individual y política de retención externa. La evidencia de publicación
+se dejará en la conversación de la PR; no se contacta al equipo por otros canales.

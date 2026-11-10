@@ -1,11 +1,10 @@
 # Inventario de la integración local de #21 y main
 
-Rama de trabajo: `fix/perfil-memoria-atomicidad-propuesta`. HEAD de #21: `b1b182e`.
-Integración local preparada con main `8b698b7`, sin commit ni publicación. Los conflictos de
-README, página de perfil y hook se resolvieron manteniendo la interfaz actual.
-
-La propuesta original de 55 archivos queda respaldada con SHA256 en
-`/private/tmp/idoneo-pr21-respaldo-20261110-170247/` y en el stash local conservado.
+Integración revisable de #21 (`b1b182e`) con main (`8b698b7`), commit `1149da4`.
+Los conflictos de README, página de perfil y hook se resolvieron conservando la interfaz actual.
+El usuario autoriza publicarla en la rama de Pablo mediante push normal, sin fusionar #21 a main.
+La propuesta original de 55 archivos permanece respaldada fuera del repositorio; los respaldos
+no se incluyen en los commits.
 
 Contrato y evidencia: [MEMORIA_PERSONAL_SEGURIDAD.md](MEMORIA_PERSONAL_SEGURIDAD.md).
 
