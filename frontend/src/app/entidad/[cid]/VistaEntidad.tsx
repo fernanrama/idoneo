@@ -5,6 +5,7 @@ import { use, useEffect, useState } from "react";
 import { nombrePerfil } from "@/components/PanelVivo";
 import { Icono } from "@/components/visual";
 import { api } from "@/lib/api";
+import { CLIENTE_DEMO, tokenCliente } from "@/lib/credenciales";
 import {
   ESTADOS,
   ETIQUETAS,
@@ -41,27 +42,9 @@ export default function VistaEntidad({
   params: Promise<{ cid: string }>;
 }) {
   const { cid } = use(params);
-  const { perfil, restricciones, error, recargar } = usePerfil(cid, SONDEO_MS);
+  const { perfil, restricciones, error } = usePerfil(cid, SONDEO_MS);
   const [pestana, setPestana] = useState<Pestana>("Resumen");
   const [abierto, setAbierto] = useState<string | null>(null);
-  const [validando, setValidando] = useState(false);
-  const [fallo, setFallo] = useState<string | null>(null);
-  const [aviso, setAviso] = useState(0);
-
-  const validar = async () => {
-    setValidando(true);
-    setFallo(null);
-    try {
-      await api.validar(cid, "asesor-demo");
-      await recargar();
-      setAviso(Date.now());
-    } catch (e) {
-      setFallo(e instanceof Error ? e.message : String(e));
-    } finally {
-      setValidando(false);
-    }
-  };
-
   const alertas = perfil?.alerts.filter((a) => a.status === "open") ?? [];
 
   return (
@@ -111,14 +94,20 @@ export default function VistaEntidad({
                 <Recorrido estado={perfil.status} />
               </>
             )}
+            {cid === CLIENTE_DEMO && !tokenCliente(cid) && (
+              <p role="note">Ejemplo ficticio fijo de solo lectura; no representa un expediente persistido.</p>
+            )}
+            {perfil?.status === "pending_validation" && (
+              <p role="note">La validación está pendiente de habilitar un permiso independiente de asesor.</p>
+            )}
             <div className={s.accion}>
               {perfil?.status === "pending_validation" && (
                 <button
                   className={s.boton}
-                  onClick={validar}
-                  disabled={validando}
+                  disabled
+                  title="Requiere un permiso independiente de asesor"
                 >
-                  {validando ? "Validando…" : "Validar perfil"}{" "}
+                  Validar perfil{" "}
                   <span aria-hidden="true">→</span>
                 </button>
               )}
@@ -155,11 +144,6 @@ export default function VistaEntidad({
       </section>
 
       <main className={s.cuerpo}>
-        {fallo && (
-          <p role="alert" className={s.error}>
-            {fallo}
-          </p>
-        )}
         <div
           className={s.pestanas}
           role="tablist"
@@ -205,11 +189,6 @@ export default function VistaEntidad({
         )}
       </main>
 
-      {aviso > 0 && (
-        <div key={aviso} className={s.toast} role="status">
-          Perfil validado. El agente de la entidad ya puede usarlo por MCP.
-        </div>
-      )}
     </div>
   );
 }

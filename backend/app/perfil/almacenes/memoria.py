@@ -11,6 +11,7 @@ import os
 import tempfile
 import threading
 import uuid
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -42,12 +43,11 @@ class AlmacenMemoria:
     def _ruta(self, client_id: str, tipo: str = "perfil") -> Path:
         return self.data_dir / f"{tipo}_{client_id}.json"  # client_id ya validado por store
 
-    def _guardar_versiones(self, client_id: str, versiones: list[Perfil]) -> None:
+    def _guardar_json(self, ruta: Path, contenido: str) -> None:
         """Sustituye el JSON completo; un fallo previo no altera el archivo anterior."""
         if not self._persistir():
             return
         self.data_dir.mkdir(parents=True, exist_ok=True)
-        contenido = json.dumps([p.model_dump(mode="json") for p in versiones], ensure_ascii=False, indent=2)
         temporal = None
         try:
             with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=self.data_dir,
@@ -56,21 +56,18 @@ class AlmacenMemoria:
                 archivo.write(contenido)
                 archivo.flush()
                 os.fsync(archivo.fileno())
-            os.replace(temporal, self._ruta(client_id))
+            os.replace(temporal, ruta)
         finally:
             if temporal is not None and temporal.exists():
                 temporal.unlink()
 
+    def _guardar_versiones(self, client_id: str, versiones: list[Perfil]) -> None:
+        self._guardar_json(self._ruta(client_id), json.dumps(
+            [p.model_dump(mode="json") for p in versiones], ensure_ascii=False, indent=2))
+
     def _guardar(self, client_id: str) -> None:
-        if not self._persistir():
-            return
+        # Una escritura MiFID nunca reescribe el archivo personal.
         self._guardar_versiones(client_id, self._versiones.get(client_id, []))
-        personal = [c.model_dump(mode="json") for c in self._personal.get(client_id, [])]
-        ruta_personal = self._ruta(client_id, "personal")
-        if personal:
-            ruta_personal.write_text(json.dumps(personal, ensure_ascii=False, indent=2), "utf-8")
-        elif ruta_personal.exists():
-            ruta_personal.unlink()  # derecho de supresión también en disco
 
     def _cargar(self, client_id: str) -> None:
         if client_id in self._versiones or not self._persistir():
@@ -146,6 +143,18 @@ class AlmacenMemoria:
 
     # ---------- capa personal ----------
 
+    @contextmanager
+    def transaccion_personal(self, client_id: str):
+        # Coordina hilos de UN proceso. Para varios procesos debe usarse SQL.
+        with self._candado:
+            self._cargar(client_id)
+            transaccion = _PersonalMemoria(client_id, self._personal.get(client_id, []))
+            yield transaccion
+            if transaccion.modificada:
+                self._guardar_json(self._ruta(client_id, "personal"), json.dumps(
+                    [c.model_dump(mode="json") for c in transaccion.capas], ensure_ascii=False, indent=2))
+                self._personal[client_id] = transaccion.capas
+
     def ultima_personal(self, client_id: str) -> CapaPersonal | None:
         with self._candado:
             self._cargar(client_id)
@@ -153,19 +162,12 @@ class AlmacenMemoria:
             return capas[-1].model_copy(deep=True) if capas else None
 
     def insertar_personal(self, capa: CapaPersonal) -> None:
-        with self._candado:
-            capas = self._personal.setdefault(capa.client_id, [])
-            if any(c.version == capa.version for c in capas):
-                raise ConflictoVersion(f"La versión personal {capa.version} de {capa.client_id} ya existe")
-            capas.append(capa.model_copy(deep=True))
-            self._guardar(capa.client_id)
+        with self.transaccion_personal(capa.client_id) as transaccion:
+            transaccion.insertar(capa)
 
     def borrar_personal(self, client_id: str) -> int:
-        with self._candado:
-            self._cargar(client_id)
-            n = len(self._personal.pop(client_id, []))
-            self._guardar(client_id)
-            return n
+        with self.transaccion_personal(client_id) as transaccion:
+            return transaccion.borrar()
 
     # ---------- sesiones ----------
 
@@ -179,6 +181,19 @@ class AlmacenMemoria:
         with self._candado:
             s = self._sesiones.get(session_id)
             return dict(s) if s else None
+
+    def finalizar_sesion(self, session_id: str, conversation_id: str, momento: datetime) -> bool:
+        with self._candado:
+            s = self._sesiones.get(session_id)
+            if s is None:
+                return False
+            if s["conversation_id"] not in (None, conversation_id):
+                raise ConflictoVersion(f"La sesión {session_id} ya pertenece a otra conversación")
+            if s["ended_at"] is None:
+                s["ended_at"] = momento
+                s["conversation_id"] = conversation_id
+                return True
+            return False
 
     def insertar_turno(self, session_id: str, turno: Turno, momento: datetime) -> tuple[Turno, bool]:
         with self._candado:
@@ -210,3 +225,30 @@ class AlmacenMemoria:
 
     def cerrar(self) -> None:
         pass
+
+
+class _PersonalMemoria:
+    def __init__(self, client_id: str, capas: list[CapaPersonal]):
+        self.client_id = client_id
+        self.capas = [c.model_copy(deep=True) for c in capas]
+        self.modificada = False
+
+    def ultima(self) -> CapaPersonal | None:
+        return self.capas[-1].model_copy(deep=True) if self.capas else None
+
+    def cantidad(self) -> int:
+        return len(self.capas)
+
+    def insertar(self, capa: CapaPersonal) -> None:
+        if capa.client_id != self.client_id:
+            raise ValueError("La capa pertenece a otro cliente")
+        if any(c.version == capa.version for c in self.capas):
+            raise ConflictoVersion(f"La versión personal {capa.version} ya existe")
+        self.capas.append(capa.model_copy(deep=True))
+        self.modificada = True
+
+    def borrar(self) -> int:
+        n = len(self.capas)
+        self.capas = []
+        self.modificada |= n > 0
+        return n

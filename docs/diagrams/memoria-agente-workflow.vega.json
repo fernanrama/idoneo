@@ -1,0 +1,76 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "description": "Flujo end-to-end del agente y separación entre perfil MiFID y memoria personal.",
+  "width": 1240,
+  "height": 720,
+  "padding": 24,
+  "background": "#f8fafc",
+  "data": [
+    {
+      "name": "nodes",
+      "values": [
+        {"x": 35, "y": 265, "w": 180, "h": 105, "fill": "#dbeafe", "stroke": "#2563eb", "title": "Cliente + frontend", "detail": "Voz, texto y controles\nde memoria"},
+        {"x": 285, "y": 265, "w": 180, "h": 105, "fill": "#e0f2fe", "stroke": "#0284c7", "title": "API de sesión", "detail": "Bootstrap, turnos,\npending y consentimiento"},
+        {"x": 535, "y": 265, "w": 180, "h": 105, "fill": "#fef3c7", "stroke": "#d97706", "title": "Agente entrevistador", "detail": "ElevenLabs o chat\nPregunta, no recomienda"},
+        {"x": 785, "y": 265, "w": 180, "h": 105, "fill": "#ffedd5", "stroke": "#ea580c", "title": "Claude + extractor", "detail": "Extrae evidencias, valida\ny versiona el perfil"},
+        {"x": 1035, "y": 90, "w": 180, "h": 125, "fill": "#dcfce7", "stroke": "#16a34a", "title": "Perfil MiFID", "detail": "Datos regulatorios\nversionados + evidencia\nFuente de verdad"},
+        {"x": 1035, "y": 440, "w": 180, "h": 125, "fill": "#f3e8ff", "stroke": "#9333ea", "title": "Memoria personal", "detail": "Preferencias consentidas\neditables y borrables\nCapa independiente"}
+      ]
+    },
+    {
+      "name": "edges",
+      "values": [
+        {"path": "M215,317 L285,317", "tx": 250, "ty": 300, "label": "inicia"},
+        {"path": "M465,317 L535,317", "tx": 500, "ty": 300, "label": "contexto"},
+        {"path": "M715,317 L785,317", "tx": 750, "ty": 300, "label": "turnos"},
+        {"path": "M965,290 C1010,260 1010,200 1035,170", "tx": 995, "ty": 235, "label": "escribe versión"},
+        {"path": "M1035,140 C820,25 620,70 625,265", "tx": 815, "ty": 72, "label": "pendientes del perfil"},
+        {"path": "M1035,495 C850,635 650,570 625,370", "tx": 815, "ty": 600, "label": "solo contexto personal"},
+        {"path": "M190,370 C300,610 720,665 1035,525", "tx": 500, "ty": 642, "label": "PUT/DELETE explícito con consentimiento"}
+      ]
+    }
+  ],
+  "marks": [
+    {
+      "type": "text",
+      "encode": {"enter": {"x": {"value": 35}, "y": {"value": 28}, "text": {"value": "Flujo del agente y memoria por usuario"}, "font": {"value": "Inter, Arial, sans-serif"}, "fontSize": {"value": 28}, "fontWeight": {"value": 700}, "fill": {"value": "#0f172a"}}}
+    },
+    {
+      "type": "text",
+      "encode": {"enter": {"x": {"value": 35}, "y": {"value": 58}, "text": {"value": "El perfil MiFID existente no se convierte en memoria: ambas capas se guardan y consumen por separado."}, "font": {"value": "Inter, Arial, sans-serif"}, "fontSize": {"value": 16}, "fill": {"value": "#475569"}}}
+    },
+    {
+      "type": "path",
+      "from": {"data": "edges"},
+      "encode": {"enter": {"path": {"field": "path"}, "stroke": {"value": "#64748b"}, "strokeWidth": {"value": 2.5}, "fill": {"value": null}}}
+    },
+    {
+      "type": "text",
+      "from": {"data": "edges"},
+      "encode": {"enter": {"x": {"field": "tx"}, "y": {"field": "ty"}, "text": {"field": "label"}, "align": {"value": "center"}, "font": {"value": "Inter, Arial, sans-serif"}, "fontSize": {"value": 12}, "fontWeight": {"value": 600}, "fill": {"value": "#475569"}}}
+    },
+    {
+      "type": "rect",
+      "from": {"data": "nodes"},
+      "encode": {"enter": {"x": {"field": "x"}, "y": {"field": "y"}, "width": {"field": "w"}, "height": {"field": "h"}, "cornerRadius": {"value": 14}, "fill": {"field": "fill"}, "stroke": {"field": "stroke"}, "strokeWidth": {"value": 2}}}
+    },
+    {
+      "type": "text",
+      "from": {"data": "nodes"},
+      "encode": {"enter": {"x": {"signal": "datum.x + datum.w / 2"}, "y": {"signal": "datum.y + 30"}, "text": {"field": "title"}, "align": {"value": "center"}, "font": {"value": "Inter, Arial, sans-serif"}, "fontSize": {"value": 16}, "fontWeight": {"value": 700}, "fill": {"value": "#0f172a"}}}
+    },
+    {
+      "type": "text",
+      "from": {"data": "nodes"},
+      "encode": {"enter": {"x": {"signal": "datum.x + datum.w / 2"}, "y": {"signal": "datum.y + 58"}, "text": {"field": "detail"}, "lineBreak": {"value": "\n"}, "lineHeight": {"value": 18}, "align": {"value": "center"}, "font": {"value": "Inter, Arial, sans-serif"}, "fontSize": {"value": 13}, "fill": {"value": "#334155"}}}
+    },
+    {
+      "type": "rect",
+      "encode": {"enter": {"x": {"value": 35}, "y": {"value": 655}, "width": {"value": 1180}, "height": {"value": 45}, "cornerRadius": {"value": 10}, "fill": {"value": "#fff1f2"}, "stroke": {"value": "#e11d48"}, "strokeWidth": {"value": 1.5}}}
+    },
+    {
+      "type": "text",
+      "encode": {"enter": {"x": {"value": 625}, "y": {"value": 683}, "text": {"value": "Límite deliberado: el extractor no recibe la memoria y la transcripción nunca se guarda automáticamente como memoria."}, "align": {"value": "center"}, "font": {"value": "Inter, Arial, sans-serif"}, "fontSize": {"value": 14}, "fontWeight": {"value": 700}, "fill": {"value": "#be123c"}}}
+    }
+  ]
+}

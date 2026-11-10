@@ -176,7 +176,7 @@ def test_capa_personal_separada_con_consentimiento(carmen):
     filtros = {f.field for f in calculos.restricciones(store.perfil_para_consumidor(C)).post_filters}
     assert "top_sectors" in filtros
     versiones = len(store.versiones(C))
-    assert store.borrar_personal(C) == 1
+    assert store.borrar_personal_interno(C) == 1
     assert store.perfil(C).personal == {} and len(store.versiones(C)) == versiones  # MiFID intacto
     filtros = {f.field for f in calculos.restricciones(store.perfil_para_consumidor(C)).post_filters}
     assert "top_sectors" not in filtros
@@ -195,7 +195,7 @@ def test_la_capa_personal_no_entra_en_las_versiones(carmen):
     store.guardar_personal(C, {"exclusions": ["armas"]}, True, "system")
     p = store.aplicar(C, [parche("experience.education", "FP")], "x", "agent:extractor")
     assert p.personal  # se ve al leer...
-    store.borrar_personal(C)
+    store.borrar_personal_interno(C)
     assert store.perfil(C, p.version).personal == {}  # ...pero la versión guardada no la contiene
 
 
@@ -216,6 +216,18 @@ def test_turnos_idempotentes_y_numerados(carmen):
         store.crear_sesion(C, "paloma")
     with pytest.raises(store.NoEncontrado):
         store.anadir_turno("s-nada", t)
+
+
+def test_cierre_de_sesion_idempotente_y_vinculado_a_una_conversacion(carmen):
+    sid = store.crear_sesion(C, "voice")["session_id"]
+    assert store.finalizar_sesion(sid, "conv_una") is True
+    assert store.finalizar_sesion(sid, "conv_una") is False
+    sesion = store.sesion(sid)
+    assert sesion["conversation_id"] == "conv_una" and sesion["ended_at"] is not None
+    with pytest.raises(store.Conflicto):
+        store.finalizar_sesion(sid, "conv_otra")
+    with pytest.raises(store.Conflicto):
+        store.anadir_turno(sid, Turno(speaker="client", text="tarde", t_start=1, t_end=2))
 
 
 # ---------- eventos ----------

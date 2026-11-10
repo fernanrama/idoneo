@@ -17,6 +17,7 @@ from fastapi.testclient import TestClient
 
 from app import main
 from app.main import app
+from tests.soporte_acceso import cliente_autorizado
 from app.perfil import store
 from app.perfil.modelos import Alerta, Evidencia, Flag, Parche, Turno
 
@@ -30,7 +31,7 @@ def entorno(monkeypatch):
     """API con Carmen cargada, una sesión con un turno del cliente y agentes simulables."""
     store.reiniciar()
     store.cargar_fixture(C)
-    api = TestClient(app)
+    api = cliente_autorizado()
     sid = api.post("/api/sessions", json={"client_id": C}).json()["session_id"]
     store.anadir_turno(sid, Turno(speaker="client", text="Estudié FP", t_start=0, t_end=1))
 

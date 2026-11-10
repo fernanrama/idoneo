@@ -22,11 +22,18 @@ El backend tiene que estar en marcha (ver README raíz). Para probar en el móvi
 | `/onboarding/perfil` | Perfil para el cliente, en claro: medidor de riesgo, lo que hemos entendido con la frase de cada dato, avisos y siguiente paso |
 | `/onboarding/productos` | Filtros del perfil. **No consulta el MCP de MyInvestor por código**: sus términos lo prohíben (ver `docs/proyecto/05_MCP_MYINVESTOR.md`) |
 | `/escenario` | Pantalla partida para el pitch: entrevista a la izquierda y lo que recibe la entidad, en directo, a la derecha. `?cliente=<id>` muestra un perfil ya existente |
-| `/entidad/[cid]` | Vista de la entidad con pestañas: resumen, evidencias (frase y audio), historial de versiones y lo que ve su agente por MCP; validación |
+| `/entidad/[cid]` | Vista de la entidad con pestañas: resumen, evidencias, historial y restricciones; validación web bloqueada hasta contar con permiso de asesor |
 
 ## Validar el perfil con el backend protegido
 
-Si el backend tiene `ADMIN_TOKEN` (obligatorio con URL pública), pon **el mismo valor** en `frontend/.env.local` como `ADMIN_TOKEN` (sin `NEXT_PUBLIC_`). El botón «Validar perfil» y el reinicio de la demo pasan por rutas del propio front (`src/app/api/entidad/`), que añaden la cabecera `X-Admin-Token` en el servidor: el token nunca llega al navegador. Esas rutas solo aceptan peticiones a `localhost`, así que aunque el front se exponga por un túnel nadie de fuera puede validar perfiles.
+La validación desde el navegador está bloqueada con 403 hasta acordar un permiso independiente
+para asesores. Next no añade `ADMIN_TOKEN` a las peticiones de clientes. El botón de la vista
+conserva su lugar, deshabilitado y con una explicación. Tener la credencial del cliente no permite
+validarlo como asesor. El reset del navegador también permanece bloqueado.
+
+La API de revisión sigue requiriendo ambos permisos explícitos (propietario y servicio); no se
+presenta este mecanismo como identidad autenticada de un asesor. `ADMIN_TOKEN` queda solo en el
+backend y en consumidores de servicio autorizados, sin copiarlo al entorno del frontend.
 
 ## Dónde está cada cosa
 
@@ -54,3 +61,27 @@ Pendiente con la cuenta Creator:
 - [ ] Probar en un móvil real (HTTPS).
 - [ ] Decidir el audio de las evidencias: el que guarda ElevenLabs para cada conversación o una grabación propia en el navegador.
 - [ ] Minutos disponibles del plan.
+
+
+## Propuesta de memoria y permisos integrada localmente
+
+El cliente usa credenciales de posesión por cliente (no identidad real), separadas de los metadatos. La memoria exige consentimiento explícito y ETag/If-Match; un 412 exige revisar y decidir. El bootstrap sustituye la antigua URL de voz sin sesión. La demo usa una fixture fija ficticia, separada del Carmen persistido.
+
+La validación en el navegador está bloqueada hasta acordar un permiso independiente de asesor. El servidor de Next no añade credenciales privilegiadas a las peticiones del cliente.
+
+Contrato, evidencia y límites: [MEMORIA_PERSONAL_SEGURIDAD.md](../docs/MEMORIA_PERSONAL_SEGURIDAD.md).
+Pruebas de contrato sin proveedores: `npm run test:contrato`.
+
+La demo anónima usa `/api/demo/profile` y `/api/demo/constraints`, sin capa personal y sin depender
+del estado guardado de Carmen. `sessionStorage` conserva la credencial de posesión; `localStorage`
+solo metadatos. No hay recuperación por ID, renovación ni revocación individual.
+
+Después del build, `IDONEO_PYTHON=/ruta/al/python-instalado npm run test:integracion` inicia
+Next y uvicorn propios en puertos efímeros, solo con datos y claves ficticios. Comprueba render de
+servidor y contrato HTTP, sin navegador ni proveedores. No utiliza ni detiene la demo en 3000/8000.
+
+La prueba `npm run test:navegador` utiliza Chromium/Playwright existentes contra frontend/backend
+aislados, con `IDONEO_FRONT_URL`, `IDONEO_API_URL` y, si es necesario, las rutas
+`IDONEO_PLAYWRIGHT_MODULE` e `IDONEO_BROWSER_EXECUTABLE`. Incluye navegación real en escritorio y
+móvil emulado, demo, memoria, conflictos y permisos. Requisitos, defectos reproducidos y límites:
+[validación funcional de #21](../docs/VALIDACION_FUNCIONAL_PR21.md).

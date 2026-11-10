@@ -9,7 +9,7 @@ import asyncio
 import json
 
 import pytest
-from fastapi.testclient import TestClient
+from tests.soporte_acceso import cliente_autorizado
 
 from app import main
 from app.agentes import extractor, guardas, rubrica
@@ -185,7 +185,7 @@ def test_los_calculados_no_aparecen_en_el_perfil_que_ve_el_modelo():
 
 def test_dos_turnos_seguidos_se_procesan_de_uno_en_uno(monkeypatch):
     store.reiniciar()
-    api = TestClient(app)
+    api = cliente_autorizado("conc-1")
     sid = api.post("/api/sessions", json={"client_id": "conc-1"}).json()["session_id"]
     store.anadir_turno(sid, turno(1, "client", "hola"))
     activos, maximo = 0, 0

@@ -26,7 +26,7 @@ Estado (8/11, `main`): contrato v1 (PR #9), MCP (PR #7) y persistencia, validaci
 3. **`GET /api/clients/{id}/profile` devuelve la última versión en cualquier estado**, porque el front la necesita durante la entrevista. El "solo activo" se aplica en `constraints`, `context` y el MCP.
 4. **Se añade `alerts[]` a nivel de perfil** con el texto legible de cada flag (lo que el evento `flag.raised` lleva como `message`). El flag sigue también en el `Fact`.
 5. **Se añade `rationale[]`** (texto) junto a `rationale_ids` en idoneidad y restricciones, para la vista de la entidad y para explicarlo al jurado.
-6. **La URL firmada de ElevenLabs va en `GET /api/voice/signed-url`**, no en la respuesta de `POST /sessions`, para que la sesión funcione también sin voz (modo texto y demo guiada).
+6. **La voz se inicia con `POST /api/voice/bootstrap` ligado a `session_id`**, separado de `POST /sessions` para que la sesión funcione también sin voz. La antigua ruta sin sesión queda desactivada por defecto.
 7. **`emergency_fund_months` es calculado**: meses de gastos fijos que cubre el ahorro líquido.
 
 ## Decisiones abiertas del contrato: propuesta implementada
@@ -53,24 +53,36 @@ Comprobación con Carmen (datos simulados), que cubren los tests:
 
 ## API REST implementada (`backend/app/main.py`, docs en `/docs`)
 
+**Propuesta local sobre #21, pendiente de revisión del equipo.** Las rutas de clientes, sesiones,
+memoria, contexto y voz exigen `Authorization: Bearer <credencial del cliente>` o una credencial
+de servicio explícita. Ni `client_id` ni `session_id` autorizan acceso. La posesión no acredita
+identidad real. Sin credencial: 401; recurso de otro cliente: 404. Véase
+[el contrato completo y las decisiones pendientes](MEMORIA_PERSONAL_SEGURIDAD.md).
+
 | Ruta | Qué hace | Códigos |
 |---|---|---|
 | `GET /api/health` | Comprobación | 200 |
-| `POST /api/sessions` `{client_id?, channel}` | Crea el cliente si no existe y abre una sesión → `{session_id, client_id, started_at, channel}`. `channel`: `voice` (por defecto) o `text`. Si el perfil estaba en `review_due`, vuelve a `draft` (versión `reassessment_started`) | 200 · 422 |
+| `POST /api/sessions` `{client_id?, channel}` | Sin ID: alta exclusiva con ID aleatorio del servidor y credencial `access_token`. Con ID: exige permiso y abre sesión sin emitir otra credencial. `channel`: `voice` o `text`. Conserva la transición `review_due → draft` | 200 · 401 · 404 · 409 · 422 · 503 |
 | `POST /api/sessions/{id}/turns` `{turn_id?, speaker, text, t_start, t_end}` | Guarda el turno → `{turn_id}`. Sin `turn_id` se asigna `t-001`, `t-002`…; reenviar el mismo `turn_id` no lo duplica. Con `speaker: "client"` lanza extractor y verificador en segundo plano (extractor aún stub) | 202 · 404 · 422 |
 | `GET /api/sessions/{id}` | Sesión (`channel`, `started_at`, `ended_at`…), `turns[]` y `rejections[]` ([rechazos](#rechazos-visibles)) | 200 · 404 |
 | `GET /api/sessions/{id}/pending` | Qué falta por preguntar → `{pending: [rutas], text}`. `text` va en frases para la herramienta de cliente `datos_pendientes` del agente de voz; si el último turno se está procesando, espera hasta 4 s | 200 · 404 |
+| `GET /api/sessions/{id}/memory` | Memoria autorizada con `version` y ETag fuerte `"personal-N"`, incluso tras revocación | 200 · 401 · 404 |
+| `PUT /api/sessions/{id}/memory` `{consent_given: true, updates, forget}` | Requiere If-Match vigente y consentimiento booleano explícito; mezcla bloques sin crear versión MiFID | 200 · 401 · 404 · 412 · 422 · 428 |
+| `DELETE /api/sessions/{id}/memory` | Requiere If-Match; borra contenido e historial personal y conserva revisión técnica vacía creciente; no toca MiFID | 200 · 401 · 404 · 412 · 428 |
 | `GET /api/clients/{id}/profile[?version=n]` | Última versión en cualquier estado (o la `n`), con la capa personal vigente unida | 200 · 404 |
 | `GET /api/clients/{id}/versions` | `[{version, created_at, reason, author, status}]` | 200 · 404 |
 | `POST /api/clients/{id}/validate` `{advisor_id, changes[]}` | La entidad corrige (opcional) y valida → perfil `active` ([reglas](#estados-y-validación-de-la-entidad)) | 200 · 401 · 404 · 409 · 422 |
 | `GET /api/clients/{id}/constraints` | Restricciones del [perfil para consumidores](#versionado) | 200 · 404 |
 | `GET /api/clients/{id}/evidence/{path}` | `{path, value, source, evidence}` del dato en la última versión | 200 · 404 (cliente, ruta inexistente o dato sin valor) |
 | `GET /api/clients/{id}/context` | Resumen para otro agente, sobre el perfil para consumidores (plantilla; Pablo lo hará con Claude) | 200 · 404 |
-| `GET /api/voice/signed-url` | URL firmada de ElevenLabs; la clave no sale del backend (sin probar con cuenta real) | 200 · 502 · 503 (sin configurar) |
+| `GET /api/voice/signed-url` | Ruta legacy sin sesión, desactivada salvo `ALLOW_LEGACY_SIGNED_URL=1`; usar bootstrap | 200 · 410 · 502 · 503 |
+| `POST /api/voice/bootstrap` `{session_id}` | URL firmada + `user_id` opaco + variables dinámicas mínimas de la sesión | 200 · 404 · 502 · 503 |
+| `GET /api/voice/context/{session_id}` | Mismo contexto mínimo para el fallback de agente público; no devuelve `client_id` | 200 · 404 |
+| `POST /api/webhooks/elevenlabs` | Verifica HMAC, deduplica por conversación y cierra/vincula la sesión post-llamada | 200 · 401 · 404 · 409 · 413 · 422 · 503 |
 | `POST /api/demo/reset` | Recarga a Carmen (DATOS SIMULADOS) como versión nueva; no borra el historial | 200 · 401 · 404 (`DEMO_ENDPOINTS=0`) |
+| `GET /api/demo/profile`, `GET /api/demo/constraints` | Ejemplo ficticio fijo, sin capa personal ni lectura del cliente mutable de Carmen. Desactivable con `DEMO_ENDPOINTS=0` | 200 · 404 |
 | `/mcp` | MCP con las 4 herramientas de solo lectura (Alejandro), sobre el perfil para consumidores | ✔ |
 | `GET /api/sessions/{id}/stream` (SSE) | Pendiente (Juan). El bus de eventos ya existe; el front sondea cada 1,5 s | — |
-| `POST /api/webhooks/elevenlabs` | Pendiente (Juan y Fernán, según la prueba de voz) | — |
 | `GET /api/clients/{id}/dossier.pdf`, clips `.mp3` | Pendiente (Juan) | — |
 
 ## Backend integrado: persistencia, validación y versionado
@@ -125,10 +137,21 @@ Una escritura con varios parches es **todo o nada**. Excepción: lo que proponen
 ### Capa personal
 
 - Se guarda aparte de la capa MiFID (tabla `personal_versions` en base de datos) y con consentimiento propio: sin consentimiento no se admite ningún dato (422).
-- Bloques admitidos: `life_stage`, `retirement`, `held_elsewhere`, `tax`, `exclusions` (lista de textos), `communication` y `concerns`.
+- Bloques admitidos: `life_stage`, `retirement`, `held_elsewhere`, `tax`, `exclusions` (lista de textos), `communication` y `concerns`. La proyección del agente solo usa `communication`, `exclusions` y `concerns`; tiene allowlist, 4 KB por capa, listas de hasta 20 elementos y textos de hasta 300 caracteres.
 - Hacia fuera se ve en `Perfil.personal` con la forma del contrato 04: `{"consent": {"given": true, "at": "…"}, "exclusions": […], …}`. Sin consentimiento, `{}`. Las exclusiones llegan a `post_filters` (`top_sectors`).
-- Se puede borrar entera (derecho de supresión) sin tocar las versiones MiFID. Las versiones guardadas no la contienen: al leer cualquier versión se une la capa personal **vigente**.
-- Todavía no hay endpoint para escribirla: solo `store.guardar_personal` y los fixtures.
+- Se puede borrar entera sin tocar las versiones MiFID. Se purgan los snapshots personales con contenido y se conserva una revisión técnica vacía, sin consentimiento, para rechazar peticiones antiguas. Las versiones MiFID guardadas no la contienen: al leer cualquier versión se une la capa personal **vigente**. No implica borrar copias externas ni todos los metadatos.
+- Se lee, rectifica y revoca mediante las rutas de memoria de la sesión. El frontend muestra consentimiento separado y permite borrarla. El extractor MiFID nunca recibe esta capa; el entrevistador recibe una proyección corta marcada como datos, no instrucciones.
+- Todos los cambios personales comparan y escriben dentro de una transacción. Las ediciones conservan fecha e historial del consentimiento hasta la supresión; reactivar exige la revisión vigente y una aceptación nueva. Datos históricos admitidos por el contrato anterior se conservan, y solo se validan estrictamente los bloques modificados.
+- Falta de If-Match: 428; revisión obsoleta o cabecera ambigua: 412. No se acepta `*`, ni se reintenta automáticamente adoptando otra revisión.
+
+### Voz, correlación y cierre de sesión
+
+- `POST /api/voice/bootstrap` pide la URL temporal a ElevenLabs y añade `userId` seudónimo, `session_id`, memoria consentida y siguiente foco. La API key permanece en el backend.
+- `system__user_id` es solo correlación, no autenticación. `VOICE_USER_ID_SECRET` evita enviar el `client_id`; el fallback fijo solo es aceptable en desarrollo local.
+- El prompt y los placeholders se versionan en el repo y se sincronizan con `python scripts/sincronizar_voz.py --aplicar`, preservando voz, herramientas y ajustes del panel.
+- El webhook exige `ELEVENLABS_WEBHOOK_SECRET`, valida `ElevenLabs-Signature` con una ventana de 30 minutos y limita el cuerpo a 1 MB. Repetir el mismo evento es inocuo; otra conversación sobre la misma sesión devuelve 409.
+- El webhook no convierte la transcripción en memoria personal. En esta iteración solo vincula `conversation_id` y rellena `ended_at`.
+- `ELEVENLABS_SERVER_LOCATION` es opcional. Configurarlo no demuestra por sí solo residencia contractual ni Zero Retention Mode.
 
 ### Rechazos visibles
 
@@ -162,14 +185,15 @@ En cada turno del cliente, extractor y verificador se ejecutan por separado (si 
 
 ### Seguridad y límites conocidos
 
-- Si el backend define `ADMIN_TOKEN`, `POST /api/clients/{id}/validate` y `POST /api/demo/reset` exigen `X-Admin-Token`; sin token configurado (desarrollo), el backend no exige esa cabecera.
-- El frontend envía estas acciones a `POST /api/entidad/[cid]/validar` y `POST /api/entidad/reset` de Next. El servidor añade `X-Admin-Token` leyendo `ADMIN_TOKEN` de `frontend/.env.local`, con el mismo valor que en el `.env` del backend. No debe usarse el prefijo `NEXT_PUBLIC_`: el token permanece en el servidor.
-- Las rutas de Next devuelven 403 si el filtro de host rechaza la petición y 502 si no pueden conectar con el backend; en los demás casos propagan su respuesta, incluido el 401 por token ausente o incorrecto. El filtro se basa en `X-Forwarded-Host` o `Host`; no autentica la identidad del asesor ni sustituye una autorización real.
-- Las lecturas (perfil, versiones, evidencias, sesiones), `/api/voice/signed-url` y el MCP no piden autenticación. Con una URL pública, solo con datos simulados.
-- Pendiente: comparar versiones, marcar un evento vital (`active → review_due`), que `next_review` venza solo, escribir la capa personal por la API y cerrar una sesión (`ended_at` existe, pero nada lo rellena todavía; lo hará el webhook de fin de llamada).
+- `CLIENT_ACCESS_SECRET` obligatorio (mínimo 32 bytes) firma una credencial de posesión al crear un cliente nuevo. Nunca se emite otra por presentar un ID existente. Caducidad propuesta: ocho horas (`CLIENT_ACCESS_TTL_S`). No demuestra identidad ni permite recuperar datos antiguos sin credencial.
+- Lecturas y escrituras REST, contexto de agentes y las cuatro herramientas MCP comprueban el cliente autorizado. El transporte MCP también exige credencial. Los consumidores de servicio necesitan `ADMIN_TOKEN` explícito; no hay acceso implícito por localhost.
+- `POST /api/clients/{id}/validate` exige **ambos**: Bearer del propietario y `X-Admin-Token` de servicio. Reset exige servicio. Sin servicio configurado, estas acciones fallan con 503.
+- Las rutas Next de validación y reset devuelven 403 y no reenvían peticiones ni añaden credenciales de servicio. La validación web queda bloqueada hasta acordar un permiso independiente de asesor; el Bearer del cliente no sirve como ese permiso. La API directa sigue exigiendo propietario y servicio explícitos. La demo fija es de solo lectura.
+- Las credenciales permanecen en `sessionStorage`, fuera de URLs, metadatos de React y `localStorage`. Respuestas privadas con `Cache-Control: no-store`. Host/CORS son restricciones adicionales, no autorización. Una XSS podría leer la credencial; revisar el transporte antes de usar datos reales.
+- Pendiente: identidad real, comparar versiones, marcar un evento vital (`active → review_due`), que `next_review` venza solo, reconciliar tiempos/audio y coordinar el borrado con la retención configurada en ElevenLabs.
 
 ## Para revisar
 
 - **Alex:** las 7 desviaciones y las propuestas de la tabla de decisiones abiertas.
-- **Juan:** endpoint SSE, webhook de ElevenLabs, audio y expediente; persistir los rechazos si hace falta.
+- **Juan:** endpoint SSE, audio y expediente; persistir los rechazos si hace falta.
 - **Hammad y Pablo:** el contrato de sus módulos está en la cabecera de `agentes/extractor.py` y `agentes/verificador.py` (devuelven `Parche` y `Alerta`). Los parches del extractor necesitan evidencia; los rechazos se ven en `GET /api/sessions/{id}`.

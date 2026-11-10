@@ -12,7 +12,7 @@ import json
 from pathlib import Path
 
 import pytest
-from fastapi.testclient import TestClient
+from tests.soporte_acceso import cliente_autorizado
 
 from app import main
 from app.agentes import claude, extractor, rubrica
@@ -199,7 +199,7 @@ def test_entrevista_de_carmen_por_la_api_da_el_perfil_y_la_alerta_clave(monkeypa
     """Criterio de «terminado» de B1: la entrevista de Carmen da su perfil con la alerta clave."""
     simular_claude(monkeypatch, RESPUESTA_CARMEN)
     store.reiniciar()
-    api = TestClient(app)
+    api = cliente_autorizado("carmen-nueva")
     sid = api.post("/api/sessions", json={"client_id": "carmen-nueva"}).json()["session_id"]
     for t in TURNOS:  # como en producción: se procesa cada turno al llegar (ventana de 6 turnos)
         store.anadir_turno(sid, t)

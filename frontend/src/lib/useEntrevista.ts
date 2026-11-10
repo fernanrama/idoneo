@@ -5,7 +5,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "./api";
 import { perfilParcial, vocesEspanol } from "./demo";
 import { GUION_CARMEN } from "./guion";
-import { CLIENTE_DEMO, useOnboarding } from "./onboarding";
+import { useOnboarding } from "./onboarding";
+import { tokenCliente } from "./credenciales";
+import { opcionesVoz } from "./iniciarVoz";
 import type { Perfil, Turno } from "./tipos";
 
 export type Modo = "voz" | "texto" | "guion";
@@ -111,7 +113,8 @@ export function useEntrevista() {
 
   const nuevaSesion = useCallback(
     async (canal: "voice" | "text" = "voice") => {
-      const s = await api.crearSesion(undefined, canal);
+      const previo = sesionRef.current?.client_id;
+      const s = await api.crearSesion(previo && tokenCliente(previo) ? previo : undefined, canal);
       setSesion(s);
       sesionRef.current = s;
       setTurnos([]);
@@ -132,16 +135,8 @@ export function useEntrevista() {
     setError(null);
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
-      await nuevaSesion("voice");
-      let signedUrl: string | null = null;
-      try {
-        signedUrl = (await api.urlFirmadaVoz()).signed_url;
-      } catch {
-        signedUrl = null; // el backend no tiene clave: se intenta con agente público
-      }
-      if (signedUrl) conversacion.startSession({ signedUrl });
-      else if (AGENT_ID) conversacion.startSession({ agentId: AGENT_ID });
-      else throw new Error("Falta configurar el agente de voz (NEXT_PUBLIC_ELEVENLABS_AGENT_ID o clave en el backend).");
+      const s = await nuevaSesion("voice");
+      await conversacion.startSession(await opcionesVoz(s.session_id, AGENT_ID));
       setEstado("activa");
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -162,6 +157,7 @@ export function useEntrevista() {
       } catch (e) {
         const m = e instanceof Error ? e.message : String(e);
         setError(m.startsWith("503") ? "El modo texto no está disponible: el backend no tiene clave de Claude." : m);
+        setEstado("error");
       } finally {
         setPensando(false);
       }
@@ -183,14 +179,15 @@ export function useEntrevista() {
     }
   }, [nuevaSesion, turnoTexto]);
 
-  const iniciarGuion = useCallback(async () => {
+  const iniciarGuion = useCallback(async (velocidadInicial = 1) => {
     setModo("guion");
     setEstado("conectando");
     setError(null);
     try {
-      const fuente = await api.perfil(CLIENTE_DEMO);
+      const fuente = await api.perfilDemo();
       setSesion(null); // la demo no crea sesión: el perfil del cliente mostrará el ejemplo
       setFuenteDemo(fuente);
+      setVelocidad(velocidadInicial);
       setPaso(0);
       setPausa(false);
       cuentaDatos.current = 0;
@@ -211,12 +208,13 @@ export function useEntrevista() {
 
   // Reproduce el turno actual de la demo y pasa al siguiente al acabar (con voz o por tiempo de lectura).
   useEffect(() => {
-    if (modo !== "guion" || estado !== "activa" || pausa) return;
+    if (modo !== "guion" || estado !== "activa") return;
     if (paso >= GUION_CARMEN.length) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- fin natural de la demo
       setEstado("terminada");
       return;
     }
+    if (pausa) return;
     const turno = GUION_CARMEN[paso];
     let vivo = true;
     let espera: ReturnType<typeof setTimeout> | undefined;

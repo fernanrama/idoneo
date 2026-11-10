@@ -1,6 +1,5 @@
-import { reenviar } from "@/lib/servidor/entidad";
-
-/** Recarga a Carmen (datos simulados) como versión nueva (añade X-Admin-Token en el servidor). */
-export async function POST(req: Request) {
-  return reenviar(req, "/api/demo/reset", {});
+/** La demo es fija. No ofrecer un puente anónimo que borre al Carmen persistido. */
+export async function POST() {
+  return Response.json({ detail: "La demo guiada usa un ejemplo fijo y no necesita reiniciar clientes." },
+    { status: 403, headers: { "Cache-Control": "no-store" } });
 }

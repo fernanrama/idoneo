@@ -81,7 +81,7 @@ def test_postgres_bloquea_truncate(bd, tabla):
 def test_borrar_la_capa_personal_si_esta_permitido(bd):
     store.cargar_fixture(C)
     store.guardar_personal(C, {"exclusions": ["armas"]}, True, "system")
-    assert store.borrar_personal(C) == 1
+    assert store.borrar_personal_interno(C) == 1
 
 
 def test_claves_ajenas(bd):

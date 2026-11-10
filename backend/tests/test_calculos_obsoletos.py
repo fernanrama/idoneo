@@ -11,12 +11,14 @@ import json
 from contextlib import closing
 
 import pytest
-from fastapi.testclient import TestClient
+from tests.soporte_acceso import cliente_autorizado
 
 from app.main import app
 from app.mcp.servidor import mcp
 from app.perfil import calculos, store
 from app.perfil.modelos import CALCULADOS, EstadoPerfil, Parche, PerfilRiesgo
+
+pytestmark = pytest.mark.usefixtures("mcp_servicio")
 
 C = "carmen-68"  # fixture ficticia en el proceso de pytest, nunca la demo viva
 AHORRO = "financial.liquid_savings_eur"
@@ -141,7 +143,7 @@ def test_api_restricciones_no_usa_derivados_heredados(perfil_inicial, origen):
     esperado = calculos.restricciones(sin_derivados_heredados(nuevo))
 
     # No ejecutar lifespan ni abrir puertos: solo la API en este proceso.
-    with closing(TestClient(app)) as api:
+    with closing(cliente_autorizado()) as api:
         perfil = api.get(f"/api/clients/{C}/profile")
         respuesta = api.get(f"/api/clients/{C}/constraints")
     assert perfil.status_code == respuesta.status_code == 200

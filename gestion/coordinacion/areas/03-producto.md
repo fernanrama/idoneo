@@ -42,3 +42,50 @@ La elección de stack, alojamiento, servicios y reparto queda pendiente de esas 
 
 ## Siguiente paso
 Cuando llegue el enunciado, extraer restricciones y criterios de éxito; proponer a dirección un MVP con exclusiones, recorrido y riesgos. Tras acordar alcance y propiedad, decidir arquitectura y comenzar la primera integración.
+
+## Evidencia local · 10/11/2026 · propuesta de memoria sobre #21
+
+Por autorización explícita del usuario, se preparó una solución de perfiles, autorización/API y
+adaptación del frontend en el worktree `/private/tmp/idoneo-pr21-perfil-propuesta`, rama
+`fix/perfil-memoria-atomicidad-propuesta`, basada en #21 `b1b182e`. No se publicó ni integró.
+Contrato, archivos, alternativas y límites en [MEMORIA_PERSONAL_SEGURIDAD.md](../../../docs/MEMORIA_PERSONAL_SEGURIDAD.md).
+
+Evidencia: 474 tests backend correctos, 28 omitidos y 1 deseleccionado para evitar invocar migraciones;
+18 tests del cliente, lint y build correctos. Se comprobó también una copia de main `8b698b7`
+(#22/#23) con adaptaciones mínimas explícitas, sin fusionar ramas ni cambiar su diseño.
+No se verificó PostgreSQL real, navegador interactivo ni voz real. Solo datos ficticios y servicios
+locales; no Supabase, APIs de pago ni cambios en los servidores de la demo.
+
+Siguiente acción: revisión por Juan, Pablo y Alejandro del contrato de posesión, revisión/borrado,
+transporte, recuperación y permisos de entidad. Hay conflictos previos de #21 con main; la prueba
+por copia no los resuelve. Commit, push y PR siguen sin autorización; las alternativas documentadas
+no constituyen decisiones del equipo.
+
+Actualización local posterior, por autorización del usuario y de Pablo para preparar correcciones
+sobre #21: se integró main 8b698b7 en la copia aislada y se resolvieron los conflictos, sin commit
+ni publicación. Se retiró el puente de privilegios del proxy de validación: web 403 hasta acordar
+permiso independiente de asesor. Suite backend 474 correctos, 18 de cliente, lint/build y prueba HTTP
+Next/API correctos. #19 35 correctos/5 omitidos; #20 56 correctos. La demo conserva sus procesos.
+Siguiente acción: revisar el resultado y aprobar el cierre del merge local/publicación a #21;
+confirmar permisos de asesor, transporte/recuperación de credenciales y política de borrado.
+
+Publicación autorizada tras revisión del usuario: integrar mediante push normal en la rama de #21,
+sin merge a main. Commit de integración `1149da4`, árbol idéntico al probado. El usuario acepta
+provisionalmente posesión para clientes ficticios, validación web bloqueada, recuperación/revocación
+individual pendientes, ADMIN_TOKEN solo de servicio y borrado local con revisión técnica.
+Estas condiciones no habilitan producción; faltan permisos reales de entidad, identidad/transporte,
+recuperación/revocación individual y política de retención externa. La evidencia de publicación
+se dejará en la conversación de la PR; no se contacta al equipo por otros canales.
+
+Validación funcional posterior de #21 en 7729a81: Chrome real automatizado con perfil temporal,
+escritorio 1440×1000 y móvil/touch emulado 390×844. Se reprodujeron y corrigieron localmente una
+respuesta antigua de Carmen que sustituía el perfil restaurado y el fin de demo al saltar en pausa.
+La corrección del sondeo se probó también con latencia superior a su intervalo, sin solapamientos.
+Resultado: 9 recorridos de navegador, 18 tests de contrato y 474 backend correctos (28 omitidos,
+1 deseleccionado); lint y build correctos. Capturas inspeccionadas; cero errores JavaScript y
+solo respuesta HTTP 412 intencional en consola/red. Informe en
+[VALIDACION_FUNCIONAL_PR21.md](../../../docs/VALIDACION_FUNCIONAL_PR21.md).
+Solo datos ficticios y servicios locales; sin Supabase, migraciones ni APIs de pago. El usuario
+ha revisado y autorizado publicar estas dos correcciones, sus tests y la documentación mediante
+push normal a #21, sin merge a main. Pendiente revisión final y probar dispositivo físico,
+Safari/iOS y voz/modelos/webhook reales cuando se autoricen. La demo 8000/3000 permanece intacta.

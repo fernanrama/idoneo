@@ -26,6 +26,28 @@ ALMACENES = ["memoria", "bd-sqlite"] + (["bd-postgres"] if POSTGRES_TEST else []
 MODULOS_CONTRATO = {"test_api", "test_mcp", "test_store_contrato", "test_procesamiento_turnos"}
 
 
+@pytest.fixture(autouse=True)
+def credenciales_sinteticas(monkeypatch):
+    """Solo material ficticio y una credencial de servicio explícita en tests autorizados."""
+    monkeypatch.setenv("CLIENT_ACCESS_SECRET", "secreto-sintetico-local-de-pruebas-32-bytes-minimo")
+    monkeypatch.setenv("ADMIN_TOKEN", "servicio-sintetico-de-pruebas")
+    monkeypatch.setenv("CLIENT_ACCESS_TTL_S", "28800")
+
+
+@pytest.fixture
+def mcp_servicio(monkeypatch):
+    """Invocación interna de herramientas con Request de servicio ficticia explícita."""
+    from types import SimpleNamespace
+
+    from starlette.requests import Request
+
+    from app.mcp.servidor import mcp
+
+    request = Request({"type": "http", "headers": [(b"x-admin-token", os.environ["ADMIN_TOKEN"].encode())]})
+    monkeypatch.setattr(mcp, "get_context", lambda: SimpleNamespace(
+        request_context=SimpleNamespace(request=request)))
+
+
 def postgres_vacio() -> str:
     """Deja el Postgres local de pruebas sin ningún objeto en public (sin migrar). Devuelve su URL."""
     from sqlalchemy import text

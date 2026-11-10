@@ -26,6 +26,7 @@ from typing import Any
 from mcp.server.fastmcp import FastMCP
 from mcp.server.transport_security import TransportSecuritySettings
 
+from .. import acceso
 from ..agentes import contexto
 from ..perfil import calculos, store
 from ..perfil.modelos import EstadoPerfil
@@ -79,7 +80,19 @@ def _error(e: Exception, client_id: str) -> dict[str, Any]:
     return {"error": "not_found", "client_id": client_id, "detail": str(e)}
 
 
+def _autorizar(client_id: str) -> None:
+    # FastMCP transmite la Request HTTP en request_context (SDK instalado).
+    # Una invocación directa sin contexto tampoco puede saltarse esta comprobación.
+    try:
+        request = mcp.get_context().request_context.request
+    except (ValueError, LookupError):
+        request = None
+    cabeceras = request.headers if request is not None else {}
+    acceso.exigir_cliente(client_id, cabeceras.get("authorization"), cabeceras.get("x-admin-token"))
+
+
 def _perfil(client_id: str, version: int | None = None):
+    _autorizar(client_id)
     return store.perfil(client_id, version) if version else store.perfil_para_consumidor(client_id)
 
 
@@ -109,6 +122,7 @@ def get_investment_constraints(client_id: str) -> dict[str, Any]:
     Una lista dentro de `funds_query` (como `asset_type`) significa "cualquiera de estos valores": si el
     buscador solo admite uno, se hace una búsqueda por valor.
     """
+    _autorizar(client_id)
     try:
         return calculos.restricciones(store.perfil_para_consumidor(client_id)).model_dump(mode="json")
     except store.NoEncontrado as e:
@@ -121,6 +135,7 @@ def get_evidence(client_id: str, field: str) -> dict[str, Any]:
     URL del clip de audio si existe. `field` es la ruta del dato, por ejemplo `knowledge.equity_funds`
     o `risk_tolerance.scenario_score`. Si el dato es calculado, devuelve los datos de los que sale.
     """
+    _autorizar(client_id)
     try:
         p = store.perfil_para_consumidor(client_id)
     except store.NoEncontrado as e:
@@ -148,6 +163,7 @@ async def get_client_context(client_id: str) -> dict[str, Any]:
     riesgo, familias no convenientes y alertas abiertas. Úsalo para orientar la conversación, no como
     sustituto de get_investment_constraints.
     """
+    _autorizar(client_id)
     try:
         p = store.perfil_para_consumidor(client_id)
     except store.NoEncontrado as e:

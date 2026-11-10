@@ -8,28 +8,31 @@ Docs interactivas: http://localhost:8000/docs
 from __future__ import annotations
 
 import asyncio
-import hmac
 import logging
+import json
+import re
+import uuid
 import os
 import weakref
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any, Literal
 
 from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")  # .env en la raíz del repo
 
-from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException  # noqa: E402
+from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Request, Response  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
-from pydantic import BaseModel, Field  # noqa: E402
+from pydantic import BaseModel, ConfigDict, Field, field_validator  # noqa: E402
 
-from . import voz  # noqa: E402
+from . import acceso, voz  # noqa: E402
 from .agentes import chat as entrevistador  # noqa: E402
 from .agentes import claude, contexto, extractor, verificador  # noqa: E402
 from .mcp.servidor import mcp  # noqa: E402
 from .perfil import calculos, store  # noqa: E402
-from .perfil.modelos import Parche, Perfil, Restricciones, Turno  # noqa: E402
+from .perfil.modelos import EstadoPerfil, Parche, Perfil, Restricciones, Turno  # noqa: E402
 
 log = logging.getLogger("perfil.api")
 
@@ -51,8 +54,10 @@ app.add_middleware(
     allow_origins=os.getenv("CORS_ORIGINS", "http://localhost:3000").split(","),
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["ETag"],
 )
 app.include_router(voz.router)
+app.include_router(voz.webhook_router)
 
 
 def _llamar(fn, *args, **kwargs):
@@ -60,6 +65,10 @@ def _llamar(fn, *args, **kwargs):
         return fn(*args, **kwargs)
     except store.NoEncontrado as e:
         raise HTTPException(404, f"No encontrado: {e}") from e
+    except store.PrecondicionRequerida as e:
+        raise HTTPException(428, str(e)) from e
+    except store.RevisionObsoleta as e:
+        raise HTTPException(412, str(e)) from e
     except store.Conflicto as e:
         raise HTTPException(409, str(e)) from e
     except store.DatoInvalido as e:
@@ -67,16 +76,21 @@ def _llamar(fn, *args, **kwargs):
 
 
 def requiere_admin(x_admin_token: str | None = Header(default=None)) -> None:
-    """Si ADMIN_TOKEN está definido, las escrituras de la entidad y de la demo exigen esa cabecera.
-    Sin ADMIN_TOKEN (desarrollo local) no se pide nada, para no romper el front."""
-    esperado = os.getenv("ADMIN_TOKEN", "")
-    if esperado and not hmac.compare_digest((x_admin_token or "").encode(), esperado.encode()):
-        raise HTTPException(401, "Falta o no es válida la cabecera X-Admin-Token")
+    acceso.exigir_servicio(x_admin_token)
+
+
+@app.middleware("http")
+async def respuestas_privadas(request: Request, call_next):
+    respuesta = await call_next(request)
+    if request.url.path.startswith(("/api/clients/", "/api/sessions", "/api/voice/", "/mcp")):
+        respuesta.headers["Cache-Control"] = "no-store"
+    return respuesta
 
 
 class NuevaSesion(BaseModel):
-    client_id: str | None = None
-    channel: str = "voice"  # "voice" | "text"
+    model_config = ConfigDict(extra="forbid")
+    client_id: str | None = Field(default=None, pattern=r"^[a-z0-9][a-z0-9_-]{0,63}$")
+    channel: Literal["voice", "text"] = "voice"
 
 
 class MensajeChat(BaseModel):
@@ -88,6 +102,22 @@ class Validacion(BaseModel):
     changes: list[Parche] = []
 
 
+class ActualizacionMemoria(BaseModel):
+    """Consentimiento explícito del poseedor autorizado, independiente de MiFID."""
+
+    model_config = ConfigDict(extra="forbid")
+    consent_given: Literal[True]
+    updates: dict[str, Any] = Field(default_factory=dict)
+    forget: list[str] = Field(default_factory=list, max_length=20)
+
+    @field_validator("consent_given", mode="before")
+    @classmethod
+    def consentimiento_literal(cls, valor):
+        if valor is not True:
+            raise ValueError("Debe aceptar explícitamente la memoria personal")
+        return valor
+
+
 @app.get("/api/health")
 def health():
     return {"status": "ok"}
@@ -96,8 +126,17 @@ def health():
 # ---------- entrevista ----------
 
 @app.post("/api/sessions")
-def crear_sesion(body: NuevaSesion):
-    return _llamar(store.crear_sesion, body.client_id, body.channel)
+def crear_sesion(body: NuevaSesion, authorization: str | None = Header(default=None),
+                 x_admin_token: str | None = Header(default=None)):
+    if body.client_id is not None:
+        acceso.exigir_cliente(body.client_id, authorization, x_admin_token)
+        return _llamar(store.crear_sesion, body.client_id, body.channel)
+    # Verificar configuración antes de alterar el almacén; solo un alta exclusiva emite posesión.
+    emitir = acceso.preparar_emision()
+    cid = f"cliente-{uuid.uuid4().hex}"
+    _llamar(store.crear_nuevo, cid)
+    sesion = _llamar(store.crear_sesion, cid, body.channel)
+    return {**sesion, "access_token": emitir(cid)}
 
 
 AUTOR_EXTRACTOR, AUTOR_VERIFICADOR = "agent:extractor", "agent:verifier"
@@ -182,7 +221,7 @@ async def _procesar_turno_sin_candado(session_id: str) -> None:
                 rechazar("backend", "alerta", f"no se pudo guardar: {str(e)[:300]}", a.path)
 
 
-@app.post("/api/sessions/{session_id}/turns", status_code=202)
+@app.post("/api/sessions/{session_id}/turns", dependencies=[Depends(acceso.exigir_sesion)], status_code=202)
 def anadir_turno(session_id: str, turno: Turno, tareas: BackgroundTasks):
     t = _llamar(store.anadir_turno, session_id, turno)
     if turno.speaker == "client":
@@ -200,7 +239,7 @@ def _segundos(sesion: dict) -> float:
     return round((datetime.now(timezone.utc) - inicio).total_seconds(), 1)
 
 
-@app.post("/api/sessions/{session_id}/chat")
+@app.post("/api/sessions/{session_id}/chat", dependencies=[Depends(acceso.exigir_sesion)])
 async def chat(session_id: str, body: MensajeChat, tareas: BackgroundTasks):
     """Modo texto: guarda el mensaje del cliente (si lo hay) y devuelve la siguiente intervención del
     entrevistador. El perfil lo actualizan el extractor y el verificador en segundo plano, como en la voz."""
@@ -223,7 +262,7 @@ async def chat(session_id: str, body: MensajeChat, tareas: BackgroundTasks):
     return {"client_turn": cliente, "agent_turn": agente, "finished": r.terminada}
 
 
-@app.get("/api/sessions/{session_id}")
+@app.get("/api/sessions/{session_id}", dependencies=[Depends(acceso.exigir_sesion)])
 def ver_sesion(session_id: str):
     """Sesión con sus turnos y los rechazos del procesamiento (parches, alertas o fallos de agentes)."""
     s = _llamar(store.sesion, session_id)
@@ -233,7 +272,7 @@ def ver_sesion(session_id: str):
 ESPERA_PENDIENTES_S = 4.0
 
 
-@app.get("/api/sessions/{session_id}/pending")
+@app.get("/api/sessions/{session_id}/pending", dependencies=[Depends(acceso.exigir_sesion)])
 async def pendientes(session_id: str):
     """Qué falta por preguntar: lo consulta el agente de voz con su herramienta `datos_pendientes`
     (el modo texto recibe la misma lista dentro del mensaje). Si el último turno se está procesando,
@@ -250,31 +289,81 @@ async def pendientes(session_id: str):
     return {"pending": entrevistador.pendientes(perfil), "text": entrevistador.pendientes_para_voz(perfil)}
 
 
+def _vista_capa(capa) -> dict[str, Any]:
+    revision = capa.version if capa else 0
+    if capa is None or not capa.consent_given:
+        return {"enabled": False, "version": revision, "data": {}}
+    return {"enabled": True, "version": revision, "data": capa.data, "consent_at": capa.consent_at}
+
+
+def _vista_memoria(session_id: str) -> dict[str, Any]:
+    sesion = _llamar(store.sesion, session_id)
+    return _vista_capa(_llamar(store.personal, sesion["client_id"]))
+
+
+def _etag(respuesta: Response, vista: dict[str, Any]):
+    respuesta.headers["ETag"] = f'"personal-{vista["version"]}"'
+    return vista
+
+
+def _revision(if_match: str | None) -> int:
+    if if_match is None:
+        raise HTTPException(428, "If-Match es obligatorio para modificar memoria")
+    coincidencia = re.fullmatch(r'"personal-(0|[1-9][0-9]{0,18})"', if_match)
+    if coincidencia is None:
+        raise HTTPException(412, "If-Match debe contener la revisión personal vigente")
+    return int(coincidencia.group(1))
+
+
+@app.get("/api/sessions/{session_id}/memory", dependencies=[Depends(acceso.exigir_sesion)])
+def ver_memoria(session_id: str, response: Response):
+    return _etag(response, _vista_memoria(session_id))
+
+
+@app.put("/api/sessions/{session_id}/memory", dependencies=[Depends(acceso.exigir_sesion)])
+def actualizar_memoria(session_id: str, body: ActualizacionMemoria, response: Response,
+                       if_match: str | None = Header(default=None)):
+    revision = _revision(if_match)
+    sesion = _llamar(store.sesion, session_id)
+    capa = _llamar(store.actualizar_personal, sesion["client_id"], body.updates, body.forget,
+                  "agent:memory", version_esperada=revision, consentimiento=body.consent_given)
+    return _etag(response, _vista_capa(capa))
+
+
+@app.delete("/api/sessions/{session_id}/memory", dependencies=[Depends(acceso.exigir_sesion)])
+def borrar_memoria(session_id: str, response: Response, if_match: str | None = Header(default=None)):
+    revision = _revision(if_match)
+    sesion = _llamar(store.sesion, session_id)
+    borradas, capa = _llamar(store.revocar_personal, sesion["client_id"], version_esperada=revision,
+                            autor="agent:memory")
+    return _etag(response, {**_vista_capa(capa), "deleted_versions": borradas})
+
+
 # ---------- perfil ----------
 
-@app.get("/api/clients/{client_id}/profile", response_model=Perfil)
+@app.get("/api/clients/{client_id}/profile", dependencies=[Depends(acceso.exigir_cliente)], response_model=Perfil)
 def ver_perfil(client_id: str, version: int | None = None):
     """Última versión en cualquier estado (el front la necesita durante la entrevista)."""
     return _llamar(store.perfil, client_id, version)
 
 
-@app.get("/api/clients/{client_id}/versions")
+@app.get("/api/clients/{client_id}/versions", dependencies=[Depends(acceso.exigir_cliente)])
 def ver_versiones(client_id: str):
     return _llamar(store.versiones, client_id)
 
 
-@app.post("/api/clients/{client_id}/validate", response_model=Perfil, dependencies=[Depends(requiere_admin)])
+@app.post("/api/clients/{client_id}/validate", response_model=Perfil, dependencies=[Depends(acceso.exigir_propietario), Depends(requiere_admin)])
 def validar(client_id: str, body: Validacion):
     return _llamar(store.validar, client_id, body.advisor_id, body.changes)
 
 
-@app.get("/api/clients/{client_id}/constraints", response_model=Restricciones)
+@app.get("/api/clients/{client_id}/constraints", dependencies=[Depends(acceso.exigir_cliente)], response_model=Restricciones)
 def ver_restricciones(client_id: str):
     """Para consumidores: perfil activo más reciente; si no hay, el último con usable=false."""
     return calculos.restricciones(_llamar(store.perfil_para_consumidor, client_id))
 
 
-@app.get("/api/clients/{client_id}/evidence/{path}")
+@app.get("/api/clients/{client_id}/evidence/{path}", dependencies=[Depends(acceso.exigir_cliente)])
 def ver_evidencia(client_id: str, path: str):
     p = _llamar(store.perfil, client_id)
     if path not in p.mifid:
@@ -283,10 +372,32 @@ def ver_evidencia(client_id: str, path: str):
     return {"path": path, "value": f.value, "source": f.source, "evidence": f.evidence}
 
 
-@app.get("/api/clients/{client_id}/context")
+@app.get("/api/clients/{client_id}/context", dependencies=[Depends(acceso.exigir_cliente)])
 async def ver_contexto(client_id: str):
     p = _llamar(store.perfil_para_consumidor, client_id)
     return {"client_id": client_id, "text": await contexto.resumen(p)}
+
+
+def _perfil_demo_fijo() -> Perfil:
+    if os.getenv("DEMO_ENDPOINTS", "1") != "1":
+        raise HTTPException(404, "Endpoint de demo desactivado")
+    datos = json.loads((store.FIXTURES_DIR / "carmen-68.json").read_text(encoding="utf-8"))
+    datos["personal"] = {}
+    perfil = Perfil.model_validate(datos)
+    calculos.recalcular(perfil)
+    perfil.status = EstadoPerfil.pending_validation if perfil.assessments.suitability.complete else EstadoPerfil.draft
+    return perfil
+
+
+@app.get("/api/demo/profile", response_model=Perfil)
+def perfil_demo():
+    """Fixture fijo y ficticio; no lee la memoria ni el estado persistido de Carmen."""
+    return _perfil_demo_fijo()
+
+
+@app.get("/api/demo/constraints", response_model=Restricciones)
+def restricciones_demo():
+    return calculos.restricciones(_perfil_demo_fijo())
 
 
 @app.post("/api/demo/reset", dependencies=[Depends(requiere_admin)])
@@ -301,4 +412,4 @@ def reset_demo():
 # ---------- MCP ----------
 # Servidor MCP en /mcp (transporte HTTP). Se monta en la raíz y al final para que las rutas de arriba
 # tengan prioridad y la URL sea exactamente /mcp, sin redirección a /mcp/.
-app.mount("/", mcp_app)
+app.mount("/", acceso.TransporteMCPAutorizado(mcp_app))

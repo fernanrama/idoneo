@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:contrato": "node scripts/test-contrato.mjs",
+    "test:integracion": "node scripts/test-integracion-local.mjs",
+    "test:navegador": "node scripts/test-navegador-local.mjs"
   },
   "dependencies": {
     "@elevenlabs/react": "^1.21.1",
