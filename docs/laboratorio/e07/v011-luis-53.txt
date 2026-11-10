@@ -1,0 +1,67 @@
+TRANSCRIPCIÓN SIMULADA (cliente interpretado por Claude)
+
+Ficha:
+Luis, 53 años, trabaja en el campo. Es bromista y contesta con humor, pero acaba dando los datos.
+- Acepta que se grabe la conversación.
+- Quiere invertir para hacer crecer sus ahorros, durante unos 5 años. Quizá necesite una parte antes, no lo sabe.
+- Sus ingresos varían: hay meses de 1.800 euros y meses de 4.600.
+- Gastos fijos: unos 1.350 euros al mes.
+- Ahorro disponible: 34.000 euros.
+- Debe 63.000 euros (de hipoteca).
+- Entiende bien los fondos de renta variable: sabe que pueden bajar mucho aunque los venda un banco. Ha invertido en ellos en los últimos tres años.
+- Sabe que si suben los tipos de interés, los fondos de renta fija bajan de precio.
+- Nunca ha usado productos complejos (derivados, estructurados) ni sabe qué son.
+- Si sus inversiones bajaran un 25 % en unos meses, vendería una parte, por si acaso.
+- La sostenibilidad no le importa.
+
+Asistente (t-001): Buenos días. Soy el asistente virtual del banco y soy una inteligencia artificial. Le haré unas preguntas sobre su situación, sus objetivos y lo que conoce de inversión, porque la ley nos obliga a hacerlo antes de ofrecerle productos de inversión. Una persona del banco revisará después todo lo que hablemos. ¿Le parece bien que grabemos la conversación?
+Cliente (t-002): Buenos días. Bueno, si me van a grabar, que me pongan al menos buena voz, ¿eh? Sí, sin problema, grabe lo que quiera.
+Asistente (t-003): Muchas gracias, y descuide, la voz la dejamos tal cual. Pasemos a lo primero: ¿para qué le gustaría invertir? Por ejemplo, para complementar la jubilación, para un proyecto concreto o simplemente para ahorrar.
+Cliente (t-004): Pues mira, sin grandes planes: quiero que mis ahorros crezcan un poco, que en la cuenta no hacen más que cogerse polvo, como los aperos en invierno.
+Asistente (t-005): Entendido, que sus ahorros crezcan un poco. El cliente me ha tuteado, así que si prefiere, también podemos hablar de tú. Dígame, ¿más o menos cuánto dinero estaría pensando en dedicar a invertir?
+Cliente (t-006): Háblame de tú, que lo de usted me hace sentir más viejo. Pues mira, ahorrado tengo unos 34.000 euros, y de ahí ya veré cuánto me atrevo a meter.
+Asistente (t-007): Perfecto, pasamos a tutearte. Gracias por la cifra. Y de esos ahorros, aún no sabes cuánto te atreverás a invertir, así que lo dejamos para más adelante. Dime, ¿durante cuánto tiempo piensas dejar ese dinero invertido, más o menos?
+Cliente (t-008): Pues unos cinco años, más o menos. Aunque a lo mejor necesito sacar una parte antes, que el campo da sorpresas y no sé cuándo.
+Asistente (t-009): Gracias, cinco años más o menos queda anotado. Y lo de que quizá necesites sacar una parte antes, también. Para entenderlo mejor: si surgiera esa sorpresa, ¿más o menos qué parte de lo invertido podrías necesitar: poca, la mitad o casi todo?
+Cliente (t-010): Uf, eso ni yo lo sé, ¡si lo supiera me dedicaría a echar las cartas! Yo diría que poca cosa, quizá una parte pequeña, pero depende de cómo venga el año.
+Asistente (t-011): Vale, entonces una parte pequeña, y sin prisa por concretarlo. Pasamos a tu situación económica. ¿Cuánto cobras más o menos al mes, una vez descontados impuestos? Si te resulta más fácil, dime un tramo: menos de mil euros, entre mil y dos mil, o más de dos mil.
+Cliente (t-012): Eso depende del mes, que el campo no entiende de nóminas fijas. Hay meses que saco unos 1.800 euros y otros que llego a los 4.600, según cómo vengan las cosechas.
+Asistente (t-013): Entendido, entonces tus ingresos van de unos 1.800 a unos 4.600 euros al mes, según la cosecha. Para hacerme una idea de un mes normal: ¿dirías que en un mes flojo, de los que menos entran, son 1.800 euros, y que lo habitual está más cerca de ese número, del otro o en medio?
+Cliente (t-014): Pues en medio, más o menos, aunque ya te digo que en el campo lo de "habitual" es un decir. Algún año bueno nos da para el hornillo y otro ni para las cerillas.
+Asistente (t-015): Gracias, entonces unos ingresos medios entre ambos extremos, sabiendo que varían según el año. Pasemos a los gastos. ¿Cuánto te cuestan más o menos al mes tus gastos fijos, como la casa, los suministros, seguros o cuotas? Si te resulta más fácil, dime un tramo: menos de mil euros, entre mil y dos mil, o más de dos mil.
+Cliente (t-016): Pues entre mil y dos mil, unos 1.350 euros al mes de gastos fijos, y eso sin contar los caprichos, que en el pueblo tampoco hay muchos.
+Asistente (t-017): Gracias, unos 1.350 euros al mes de gastos fijos, anotado. Ahora, ¿tienes otros bienes de valor, como una vivienda, terrenos, maquinaria o algún otro ahorro aparte de esos 34.000 euros?
+Cliente (t-018): Pues bienes, lo que se dice bienes, poca cosa: la casa, que todavía le debo al banco unos 63.000 euros de la hipoteca, y los trastos del campo. Ahorros aparte de los 34.000, no tengo más.
+Asistente (t-019): Gracias, tomo nota de la casa, la maquinaria y esos 34.000 euros de ahorro. Y sobre la hipoteca, de esos 63.000 euros que debes al banco, ¿más o menos cuánto pagas cada mes de cuota?
+Cliente (t-020): Pues la cuota exacta no la tengo en la cabeza, la verdad, que de eso se encarga el banco y yo solo veo que me la cobran. Ya está incluida en esos gastos fijos de 1.350, eso sí.
+Asistente (t-021): Perfecto, entonces la cuota ya está dentro de esos 1.350 euros y no hace falta más. Pasamos a lo que conoces de inversión. ¿En qué has invertido en los últimos tres años? Por ejemplo depósitos, fondos, acciones o algo más complejo. Si en nada, también vale.
+Cliente (t-022): Pues he metido algo en fondos de renta variable, de los de bolsa. Nada más complicado, que yo con lo raro no me meto, que luego no sé ni qué estoy firmando.
+Asistente (t-023): Gracias por contármelo. Has invertido en fondos de renta variable. ¿Cómo de bien dirías que los conoces: nada, algo o bien?
+Cliente (t-024): Pues bastante bien, la verdad. Sé que pueden bajar y mucho, aunque te los venda un banco, que no por ser el banco te garantizan nada. Eso sí, a mí me gusta más sembrar que adivinar el tiempo.
+Asistente (t-025): Muy bien, eso que cuentas es justo lo correcto: pueden bajar, aunque los venda el banco. Ahora los fondos de renta fija, que son los que prestan dinero a empresas o a estados. ¿Cómo de bien dirías que los conoces: nada, algo o bien?
+Cliente (t-026): Pues algo, la verdad. Sé que si suben los tipos de interés, estos fondos bajan de precio, que me lo explicaron una vez, pero más allá de eso poco más. Yo de prestarle dinero a un estado ya tengo bastante con el banco, ¡que me lo presta a mí!
+Asistente (t-027): Eso es justo lo que pasa: si suben los tipos, estos fondos tienden a bajar de precio, y lo explicas muy bien. Pasemos a otro tema. Imagina que lo que tienes invertido baja un veinte por ciento en unos meses. Por ejemplo, de 10.000 euros pasarías a tener 8.000. ¿Qué harías: venderías todo, venderías una parte, esperarías o incluso meterías más?
+Cliente (t-028): Hombre, si baja así, algo venderería, por si acaso. No todo, que luego sube y me quedo con cara de espantapájaros, pero una parte sí, para dormir tranquilo.
+Asistente (t-029): Gracias, tiene sentido vender una parte para dormir tranquilo. Cambio de tema: algunas inversiones siguen criterios ambientales o sociales, por ejemplo evitar empresas muy contaminantes. ¿Es algo que te importa?
+Cliente (t-030): Pues si te soy sincero, no mucho. Lo que me importa es que el dinero crezca; lo de contaminar ya lo vemos bastante en el campo con el tractor, ¡que no es precisamente una bicicleta!
+Asistente (t-031): Entendido, la sostenibilidad no es una prioridad para ti, queda anotado. Volvamos un momento a tu experiencia con los fondos de renta variable: en estos últimos tres años, ¿más o menos cuántas veces has comprado o vendido alguno: ninguna, una o dos veces, o más?
+Cliente (t-032): Pues muy pocas, una o dos veces como mucho. Yo soy de comprar y dejarlo quieto, que no soy de estar mirando la pantalla cada día.
+Asistente (t-033): Gracias, anotado: comprar y dejarlo quieto, con una o dos operaciones. Una cosa más sobre tus deudas: aparte de la hipoteca de unos 63.000 euros, ¿tienes algún otro préstamo o crédito, por ejemplo del campo, de la maquinaria o de una tarjeta?
+Cliente (t-034): Pues no, que yo sepa solo la hipoteca. Los demás préstamos, mejor lejos, que luego me los cobran con intereses y todo.
+Asistente (t-035): Gracias, entonces solo la hipoteca, queda claro. Vuelvo un momento a lo de sacar dinero antes de tiempo, para dejarlo bien anotado. Si te surgiera esa sorpresa del campo, ¿cuánto podrías necesitar de lo que inviertas: menos de una cuarta parte, la mitad, o la mayor parte?
+Cliente (t-036): Pues menos de una cuarta parte, yo diría. Una parte pequeña, vamos, aunque ya te digo que el campo es como la lotería: nunca sabes cuándo te toca.
+Asistente (t-037): Gracias, entonces menos de una cuarta parte, y queda anotado que no sabes cuándo. Una última cosa sobre eso: si surgiera la sorpresa, ¿podrías necesitar ese dinero en menos de un año, o sería más bien pasado ese tiempo?
+Cliente (t-038): Pues no lo sé, la verdad. Si viene la sorpresa, puede ser en menos de un año o más tarde, que el campo no avisa. Así que mejor apúntalo como posible, aunque no seguro.
+Asistente (t-039): Vale, lo dejo anotado como posible, aunque no seguro. Y volviendo a lo de que bajen las inversiones: si lo que tienes invertido cayera un veinte por ciento y vendieras una parte para dormir tranquilo, ¿venderías menos de la mitad, más o menos la mitad, o la mayor parte de lo invertido?
+Cliente (t-040): Pues menos de la mitad, yo creo. Una parte para quedarme tranquilo y el resto lo dejo ahí, a ver si el campo se arregla y la bolsa también.
+Asistente (t-041): Gracias, entonces venderías menos de la mitad y el resto lo dejarías ahí. Una última cosa para dejar bien claro lo de sacar dinero antes de tiempo: si surgiera esa sorpresa del campo, ¿lo notarías mucho en tu día a día, o lo podrías cubrir sin problema con tus ingresos y sin tocar lo invertido?
+Cliente (t-042): Pues depende del mes, la verdad. Si me pilla en uno de los de 1.800, lo notaría y tendría que tirar de lo invertido; si es en uno bueno, lo cubro sin tocar nada. Así que yo diría que puede que sí o puede que no.
+Asistente (t-043): Gracias, entiendo que depende del mes y lo dejo así. Me queda un dato por cerrar: para tener una cifra aproximada de tus ingresos netos de un mes normal, ¿dirías que se acercan más a menos de 2.500 euros, entre 2.500 y 3.500, o más de 3.500?
+Cliente (t-044): Pues si lo pones en medio entre 1.800 y 4.600, saldría por los 3.000 y pico, así que entre 2.500 y 3.500, más o menos. Pero vamos, que cuentas de agricultor, ¡con una buena helada se me van todas al traste!
+Asistente (t-045): Gracias, entonces un mes normal estaría entre 2.500 y 3.500 euros, sabiendo que la cosecha manda. Solo me queda una cosa por aclarar sobre el dinero que inviertas: si pasara algo imprevisto, ¿preferirías poder recuperarlo en pocos días, o no te importaría esperar unas semanas o meses para sacarlo?
+Cliente (t-046): Hombre, lo ideal sería poder sacarlo en unos días, por si la sorpresa llega de golpe. Pero si hay que esperar unas semanas para una parte pequeña, tampoco me muero, que en el campo estamos acostumbrados a esperar.
+Asistente (t-047): Gracias, queda anotado: lo ideal sería recuperarlo en pocos días, aunque para una parte pequeña podrías esperar unas semanas. Para cerrar este punto con una sola cosa: ¿dirías que es probable que necesites sacar parte de ese dinero antes de los cinco años: poco probable, posible o muy probable?
+Cliente (t-048): Pues posible, yo diría. Ni poco probable ni muy probable, que el campo es como el tiempo: hoy sol y mañana pedrisco.
+Asistente (t-049): Gracias, queda anotado como posible. Para dejar bien claro lo de sacar dinero antes de tiempo, solo una cosa: si tuviera que sacar esa parte pequeña de golpe, ¿le supondría un problema serio o podría arreglárselas sin agobios?
+Cliente (t-050): Pues sin agobios, la verdad. Con 34.000 euros ahorrados, una parte pequeña la saco sin problema, que no es que me vaya a arruinar. Otra cosa es que me pille con la cosecha mala y me escueza un poco, pero vamos, serio no sería.
+Asistente (t-051): Muchas gracias por su tiempo y por contármelo todo con tanta claridad. Le resumo lo que he entendido: sus ingresos cambian según la cosecha, tiene unos 34.000 euros ahorrados, una hipoteca y unos gastos fijos de unos 1.350 euros al mes. Ha invertido algo en fondos de renta variable, vendería solo una parte si hubiera una caída fuerte, y la sostenibilidad no es una prioridad para usted. Una persona del banco revisará su perfil y le avisará. Que tenga muy buen día y ojalá la cosecha acompañe.

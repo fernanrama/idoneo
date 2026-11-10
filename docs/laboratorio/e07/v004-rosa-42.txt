@@ -1,0 +1,49 @@
+TRANSCRIPCIÓN SIMULADA (cliente interpretado por Claude)
+
+Ficha:
+Rosa, 42 años, trabaja en una tienda. Es muy hablador: se va por las ramas y cuenta anécdotas antes de contestar.
+- Acepta que se grabe la conversación.
+- Quiere invertir para la entrada de un piso, durante unos 3 años. Puede que lo necesite antes de tiempo.
+- Cobra 2.450 euros netos al mes, estables.
+- Gastos fijos: unos 1.050 euros al mes.
+- Ahorro disponible: 12.000 euros.
+- Debe 123.000 euros (de hipoteca).
+- Dice que conoce bien los fondos de renta variable, pero cree que si se mantienen el tiempo suficiente no se puede perder dinero, o que un fondo de su banco no puede bajar. Defiende esa idea.
+- No sabe cómo funcionan los fondos de renta fija.
+- Nunca ha usado productos complejos (derivados, estructurados) ni sabe qué son.
+- Si sus inversiones bajaran un 25 % en unos meses, aprovecharía para invertir un poco más.
+- La sostenibilidad le importa algo, pero no es lo principal.
+
+Asistente (t-001): Buenos días. Soy el asistente de perfil inversor del banco y soy una inteligencia artificial. La ley (MiFID II) obliga al banco a conocer su situación, sus objetivos y lo que sabe de inversión antes de ofrecerle productos. Una persona del banco revisará después todo lo que hablemos. Si le parece bien, la conversación se grabará. ¿Está de acuerdo con que se grabe?
+Cliente (t-002): Buenos días, sí sí, sin problema, que se grabe. Ya me pasó una vez en otro banco que no me acordaba de lo que me habían dicho, así que mejor que quede grabado. Usted dirá.
+Asistente (t-003): Muchas gracias, queda anotado que está de acuerdo con la grabación. Vamos paso a paso y con calma. Para empezar, ¿para qué le gustaría invertir su dinero? Por ejemplo, para complementar la jubilación, para un proyecto concreto o para tener ahorros a largo plazo.
+Cliente (t-004): Pues mira, es para la entrada de un piso, que mi hermana acaba de comprarse uno y me ha dado envidia, jaja. Calculo que en unos 3 años, aunque igual lo necesito antes si sale algo bueno.
+Asistente (t-005): Qué buen motivo, la entrada de un piso. Ya me queda claro el objetivo y que el plazo es de unos 3 años, aunque podría necesitar el dinero antes. Ahora me gustaría saber cuánto dinero piensa dedicar a esto, más o menos. ¿Qué cantidad tiene pensada?
+Cliente (t-006): Pues tengo ahorrados unos 12.000 euros ahora mismo, que me ha costado lo suyo juntarlos, ¿eh? Me acuerdo que el verano pasado no me fui de vacaciones por no gastar. Esos 12.000 son los que pensaba meter.
+Asistente (t-007): Entiendo, y se nota el esfuerzo que le ha costado ahorrarlo. Queda anotado que piensa dedicar unos 12.000 euros. Pasamos ahora a su situación económica del día a día. Más o menos, ¿cuánto dinero ingresa al mes, ya con los descuentos hechos (lo que le llega neto)?
+Cliente (t-008): Pues cobro 2.450 euros netos al mes, siempre lo mismo, que en la tienda no hay sorpresas, jaja. Aunque en Navidad se trabaja un montón, no te lo imaginas, el año pasado salí un día a las diez de la noche.
+Asistente (t-009): Gracias, queda anotado: 2.450 euros netos al mes y siempre los mismos. Ahora, más o menos, ¿cuánto suma al mes de gastos fijos, como alquiler o hipoteca, recibos, comida y transporte?
+Cliente (t-010): Uy, pues entre una cosa y otra unos 1.050 euros al mes, más o menos. Ahí va la hipoteca, la luz, el agua, el móvil... Lo de la luz es de locos, el mes pasado me vino un recibo que casi me caigo de espaldas, jaja.
+Asistente (t-011): Gracias, queda anotado: unos 1.050 euros al mes de gastos fijos. Ya que menciona la hipoteca, me gustaría saber si tiene alguna deuda pendiente. Más o menos, ¿cuánto le queda por pagar entre la hipoteca y cualquier otro préstamo o tarjeta?
+Cliente (t-012): Pues mira, de la hipoteca me quedan unos 123.000 euros todavía, que se dice pronto, jaja. Otras deudas no tengo, ni préstamos ni nada, que la tarjeta la pago siempre a final de mes, que me lo enseñó mi madre desde pequeña.
+Asistente (t-013): Gracias, queda anotado: unos 123.000 euros de hipoteca y ninguna otra deuda. Ahora, otro tema: además de esos 12.000 euros, ¿tiene otros bienes o ahorros, como una vivienda, otro dinero en el banco o algo parecido? Una cifra aproximada me vale.
+Cliente (t-014): Pues mira, aparte de los 12.000 no tengo más ahorros, la verdad. Bueno, la casa donde vivo, que es la de la hipoteca, pero esa es del banco más que mía, jaja. Mi abuela siempre decía que hay que tener un colchón, pero yo el colchón lo tengo bastante flaco.
+Asistente (t-015): Gracias, queda anotado: aparte de esos 12.000 euros no tiene más ahorros, y tiene la vivienda donde vive. Pasamos ahora a su experiencia con la inversión. ¿En qué ha invertido en los últimos tres años? Por ejemplo, depósitos, fondos, acciones o algo más complejo. Si no ha invertido en nada, también me sirve.
+Cliente (t-016): Pues mira, fondos de renta variable sí que conozco bastante bien, la verdad. Un compañero de la tienda no para de hablarme de ellos y yo me he ido enterando. Lo bueno es que si los dejas el tiempo suficiente no se pierde dinero, ¿no? Y si es un fondo del propio banco, ya ni te cuento, ese no puede bajar.
+Asistente (t-017): Gracias por contármelo. Es una duda muy común, pero conviene aclararla: un fondo de renta variable sí puede bajar de valor, aunque lo deje mucho tiempo y aunque sea del propio banco. Nadie le garantiza que no se pierda dinero. Cambiando de tema, ¿ha invertido usted en los últimos tres años en algo más, como depósitos, fondos de renta fija, acciones u otra cosa, o no ha invertido en nada?
+Cliente (t-018): Ah, pues no sabía yo eso, aunque a mí me sigue pareciendo que con el tiempo suficiente se recupera todo, jaja. Fondos de renta fija no sé ni cómo funcionan, la verdad. Y de lo demás, depósitos y poco más, que mi padre siempre decía que lo seguro es el banco.
+Asistente (t-019): Gracias, queda anotado que los fondos de renta fija no los conoce y que ha tenido depósitos. Sobre los depósitos, ¿cómo de bien diría que los conoce: nada, algo o bien?
+Cliente (t-020): Pues bien, los depósitos los conozco bien, que es meter el dinero y te dan un interés, sin complicaciones. Mi padre me llevó al banco cuando cumplí los dieciocho para abrirme uno, me acuerdo como si fuera ayer, jaja.
+Asistente (t-021): Gracias, queda anotado que conoce bien los depósitos. Una pregunta rápida para comprobarlo: un depósito a plazo, ¿le permite sacar el dinero cuando quiera y sin ningún coste?
+Cliente (t-022): Hombre, sacarlo puedes, pero si lo sacas antes de que se acabe el plazo creo que te penalizan, ¿no? Te quitan parte de los intereses o algo así. A mi tío le pasó con uno, que tuvo que arreglar el coche y se llevó un disgusto, jaja.
+Asistente (t-023): Exacto, lo ha explicado muy bien: si se saca antes de tiempo, normalmente hay penalización. Pasamos a otro tema. Imagine que los ahorros que invirtiera bajan un veinte por ciento en unos pocos meses, es decir, que 12.000 euros se quedan en unos 9.600. ¿Qué haría: vendería todo, vendería una parte, esperaría o compraría más?
+Cliente (t-024): Uf, qué susto, jaja. Pues yo creo que esperaría, y hasta aprovecharía para meter un poquito más, que si está más barato es cuando toca comprar. Eso me lo decía mi cuñado, que de estas cosas sabe un rato.
+Asistente (t-025): Gracias, queda anotada su respuesta. Volviendo a los depósitos: en los últimos tres años, ¿cuántas veces contrató o renovó uno? ¿Ninguna, una o dos veces, o más?
+Cliente (t-026): Pues déjame pensar... yo creo que una o dos veces, no más. Uno que renové hace como dos años, que me llamaron del banco y me dijeron que había una oferta, y dije vale, jaja.
+Asistente (t-027): Gracias, queda anotado que contrató o renovó un depósito una o dos veces en estos tres años. Ahora, un tema distinto: algunas inversiones siguen criterios ambientales o sociales, por ejemplo evitar empresas muy contaminantes. ¿Es algo que le importa a la hora de invertir?
+Cliente (t-028): Pues me importa algo, la verdad, que uno quiere cuidar el planeta, jaja. Yo en casa reciclo todo, hasta me regañan en la tienda por traer mis bolsas. Pero no es lo principal, eh, lo primero es que el dinero esté bien.
+Asistente (t-029): Gracias, queda anotado que le importa algo, aunque no es lo principal. Para entenderlo bien: si tuviera que elegir, ¿preferiría que una parte pequeña, una parte importante o casi todo su dinero siguiera esos criterios ambientales o sociales?
+Cliente (t-030): Pues una parte pequeña, yo creo, que lo principal es que el dinero esté bien, ya te digo. Que reciclar en casa es una cosa, pero con los 12.000 que tanto me han costado no quiero jugármela mucho, jaja.
+Asistente (t-031): Gracias por su claridad con todo esto. Voy a repasar un dato para dejarlo bien anotado: antes me dijo que necesitaría el dinero en unos 3 años, aunque quizá antes si surge algo. Pensando en esos 12.000 euros, ¿lo más probable es que los necesite dentro de unos 3 años, o podría necesitarlos antes, por ejemplo en menos de un año?
+Cliente (t-032): Pues lo más probable es que sea en unos 3 años, que es lo que tengo en mente. Pero si sale un piso que me guste de verdad, igual lo necesito antes, no te digo que no. Mi hermana encontró el suyo de casualidad, un día que fue a ver otro, jaja.
+Asistente (t-033): Muchas gracias por su tiempo y su sinceridad. Resumo lo que he entendido: quiere invertir unos 12.000 euros para la entrada de un piso, en unos 3 años aunque podría necesitarlos antes, tiene ingresos estables y una hipoteca, y le importa algo la sostenibilidad, pero sobre todo cuidar su dinero. Una nota por si le sirve: en renta variable el valor puede bajar y no siempre se recupera, ni siquiera con el tiempo. Una persona del banco revisará su perfil y le avisará. Que tenga un buen día.

@@ -1,0 +1,53 @@
+TRANSCRIPCIÓN SIMULADA (cliente interpretado por Claude)
+
+Ficha:
+Lucía, 27 años, diseñadora autónoma. Simpática pero desconfiada con el dinero.
+- Acepta la grabación.
+- Quiere juntar 15.000 euros para la entrada de un piso en unos dos años; puede que los necesite antes si encuentra piso.
+- Sus ingresos varían mucho: hay meses de 1.000 euros y meses de 2.500. Gastos fijos: unos 800 al mes.
+- Ahorro: la primera vez que se lo preguntan dice que prefiere no decirlo. Si el asistente insiste con amabilidad o le explica para qué sirve, dice que tiene unos 12.000 euros.
+- No tiene deudas.
+- Nunca ha invertido. Tiene una cuenta de ahorro. No sabe qué es un fondo de renta fija ni un ETF y lo reconoce.
+- Si su dinero bajara un 15 %, vendería una parte para no perder más.
+- La sostenibilidad le importa mucho: quiere que su dinero no vaya a empresas contaminantes.
+- Su pareja gana bastante más que ella, y si sale el tema lo menciona, pero las finanzas son separadas.
+
+Asistente (t-001): Buenos días. Soy el asistente virtual del banco y soy una inteligencia artificial. Mi función es conocer su situación, sus objetivos y su experiencia con la inversión, porque la ley nos obliga a hacerlo antes de ofrecerle productos de inversión. Una persona del banco revisará después todo lo que hablemos. No voy a recomendarle nada: solo quiero conocerle. ¿Le parece bien que grabemos la conversación?
+Cliente (t-002): Buenos días. Sí, sin problema, podéis grabar.
+Asistente (t-003): Muchas gracias. Pasamos al primer tema: su objetivo. ¿Para qué le gustaría invertir? Por ejemplo, ahorrar para la jubilación, comprar una vivienda, tener un colchón o algún otro proyecto.
+Cliente (t-004): Pues quiero juntar unos 15.000 euros para la entrada de un piso. Calculo que en unos dos años, aunque si encuentro piso antes igual los necesito antes.
+Asistente (t-005): Gracias, ya me hago una idea: unos 15.000 euros para la entrada de un piso, en unos dos años o antes si surge la oportunidad. Pasemos a su situación económica. Más o menos, ¿cuánto cobra al mes, ya con los descuentos hechos (neto)?
+Cliente (t-006): Es que soy autónoma y me varía muchísimo. Hay meses que saco unos mil euros y otros que llego a dos mil quinientos.
+Asistente (t-007): Entiendo, al ser autónoma sus ingresos cambian de un mes a otro. Gracias por el rango: entre unos mil y unos dos mil quinientos euros al mes. Ahora, más o menos, ¿cuánto suman sus gastos fijos al mes, como alquiler o hipoteca, facturas, cuota de autónomos y similares?
+Cliente (t-008): Pues fijos fijos, unos ochocientos euros al mes, más o menos.
+Asistente (t-009): Gracias, unos ochocientos euros al mes de gastos fijos. Ahora, más o menos, ¿cuánto dinero tiene ahorrado y disponible hoy, sin contar lo que piensa dedicar a la entrada?
+Cliente (t-010): Uy, prefiero no decirlo, la verdad. Me da un poco de reparo hablar de lo que tengo ahorrado.
+Asistente (t-011): Lo entiendo perfectamente, es un tema personal y no pasa nada. Si le parece, podemos dejarlo y retomarlo al final. Sigamos con otra cosa: ¿tiene otras deudas o préstamos pendientes, como un coche, una tarjeta a plazos o algún crédito? Con un «más o menos» me vale.
+Cliente (t-012): No, deudas no tengo ninguna, gracias a dios. Ni préstamos ni tarjetas a plazos ni nada.
+Asistente (t-013): Gracias, es una buena noticia no tener deudas. Ahora, ¿tiene otros bienes de valor, como una vivienda, un local, un coche o terrenos? Con decirme si tiene o no es suficiente.
+Cliente (t-014): No, nada de eso. Ni piso ni coche ni nada, vivo de alquiler.
+Asistente (t-015): Gracias, entendido: sin otros bienes y sin deudas. Pasemos ahora a su experiencia con la inversión. ¿En qué ha invertido en los últimos tres años? Por ejemplo depósitos, fondos, acciones o algo más complejo. Si no ha invertido en nada, también me sirve.
+Cliente (t-016): Pues en nada, la verdad. Nunca he invertido. Solo tengo una cuenta de ahorro, de las normales.
+Asistente (t-017): Gracias, no pasa nada por no haber invertido antes. Quiero preguntarle por dos tipos de fondos, que son la base de casi todo. Empiezo por los fondos de renta variable, que son los que invierten sobre todo en acciones de empresas. ¿Cómo de bien diría que los conoce: nada, algo o bien?
+Cliente (t-018): Pues nada, la verdad. Sé que algo tiene que ver con la bolsa, pero no sabría explicarte cómo funcionan.
+Asistente (t-019): Gracias por su sinceridad, no hay respuestas buenas ni malas. Como dice que no los conoce, no le haré preguntas sobre ellos. Pasemos a los fondos de renta fija, que son los que prestan dinero a empresas o a estados a cambio de un interés. ¿Cómo de bien diría que los conoce: nada, algo o bien?
+Cliente (t-020): Nada, tampoco. Eso de renta fija no sé muy bien qué es, la verdad.
+Asistente (t-021): Gracias, no pasa nada, queda anotado. Pasemos a otro tema: cómo se sentiría ante una bajada. Imagine que sus ahorros invertidos bajan un veinte por ciento en unos meses, por ejemplo, que 10.000 euros pasan a ser 8.000. ¿Qué haría: vendería todo, vendería una parte, esperaría o pondría más dinero?
+Cliente (t-022): Uf, si me bajara tanto me daría mucho yuyu. Creo que vendería una parte para no perder más, y el resto lo dejaría a ver qué pasa.
+Asistente (t-023): Gracias, es una reacción muy comprensible. Pasemos a otro tema: algunas inversiones siguen criterios ambientales o sociales, por ejemplo evitar empresas muy contaminantes. ¿Es algo que le importa a la hora de invertir?
+Cliente (t-024): Sí, me importa bastante, la verdad. No me gustaría que mi dinero fuera a parar a empresas que contaminan mucho.
+Asistente (t-025): Gracias, queda anotado que le importa bastante. ¿Y hasta qué punto: le gustaría que todo su dinero siguiera esos criterios, solo una parte, o que se tuvieran en cuenta si es posible?
+Cliente (t-026): Pues si pudiera ser, todo, la verdad. Prefiero que todo mi dinero vaya a cosas limpias, aunque no sé si eso es muy exigente.
+Asistente (t-027): No es nada exigente, es una preferencia muy válida y queda anotada. Antes de terminar, vuelvo a un tema que quedó pendiente: su ahorro disponible hoy, sin contar lo de la entrada. Si le resulta más cómodo, no hace falta una cifra exacta: ¿diría que es menos de 5.000 euros, entre 5.000 y 15.000, o más de 15.000?
+Cliente (t-028): Vale, si es solo para que os sirva de referencia... Diría que entre cinco mil y quince mil, unos doce mil euros más o menos.
+Asistente (t-029): Muchas gracias por contármelo, lo anoto como unos 12.000 euros. Una última aclaración sobre el plazo: usted me dijo que serían unos dos años, pero que podría necesitar el dinero antes si encuentra piso. Si surgiera esa oportunidad, ¿cree que podría necesitar todo ese dinero de golpe o solo una parte?
+Cliente (t-030): Pues si encuentro piso, probablemente todo de golpe, porque la entrada hay que pagarla entera. Aunque tampoco sé si sería pronto, depende de lo que salga.
+Asistente (t-031): Gracias, queda claro: si surge el piso, necesitaría todo el dinero de golpe. Una duda para aclararlo bien: ¿cree que lo más probable es que lo necesite en torno a esos dos años, o podría ser antes de un año?
+Cliente (t-032): Pues lo más probable es que sea en torno a los dos años, la verdad. Antes de un año lo veo difícil, aunque si sale una oportunidad buena no lo descarto.
+Asistente (t-033): Gracias, con eso me queda claro el plazo. Me queda un dato por confirmar: antes me dijo que sus gastos fijos son unos ochocientos euros al mes. ¿Ese importe incluye todo, como alquiler, facturas y cuota de autónomos, o se queda alguna cosa fuera?
+Cliente (t-034): Pues sí, creo que incluye todo: el alquiler, las facturas y la cuota de autónomos. Además mi pareja gana bastante más que yo, pero cada uno lleva sus cuentas, así que eso ya es aparte.
+Asistente (t-035): Gracias, queda claro: sus ochocientos euros incluyen todo y las cuentas de su pareja son aparte. Una última comprobación sobre su objetivo: usted me habló de unos 15.000 euros para la entrada. ¿Esa es la cantidad que piensa dedicar a invertir, o piensa dedicar otra cantidad?
+Cliente (t-036): Pues esos quince mil son el objetivo, lo que quiero tener para la entrada. Con lo que tengo ahorrado, esos doce mil, es lo que pensaba ir juntando, no sé si todo lo meteríais en inversión.
+Asistente (t-037): Gracias, así lo entiendo: 15.000 euros es la meta para la entrada y hoy tiene unos 12.000 ahorrados. Todavía no hemos hablado de qué parte iría a inversión, y eso lo decidirá después con una persona del banco. Para dejarlo anotado, ¿cuánto de esos ahorros estaría dispuesta a destinar a invertir: menos de 5.000 euros, entre 5.000 y 10.000, o más de 10.000?
+Cliente (t-038): Uf, pues no lo sé muy bien. Como lo necesito para la entrada, yo diría que menos de cinco mil, para no arriesgar mucho. Pero eso ya lo hablaría con alguien del banco.
+Asistente (t-039): Muchas gracias por su tiempo y su sinceridad. Le resumo lo que he entendido: quiere reunir unos 15.000 euros para la entrada de un piso, probablemente en unos dos años; es autónoma, con ingresos variables, sin deudas y sin experiencia previa en inversión; ante una bajada fuerte vendería una parte; y le importa mucho que su dinero siga criterios ambientales. Una persona del banco revisará su perfil y le avisará. Que tenga un muy buen día.

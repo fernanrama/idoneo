@@ -1,0 +1,49 @@
+TRANSCRIPCIÓN SIMULADA (cliente interpretado por Claude)
+
+Ficha:
+Luis, 70 años, cobra una pensión de jubilación. Va con prisa y pide ir al grano.
+- Acepta que se grabe la conversación.
+- Quiere invertir para complementar la pensión, durante unos 10 años. No necesitará ese dinero antes.
+- Cobra 2.050 euros de pensión al mes, estables.
+- Gastos fijos: unos 1.100 euros al mes.
+- Ahorro disponible: 101.000 euros.
+- Debe 85.000 euros (de hipoteca).
+- Entiende bien los fondos de renta variable: sabe que pueden bajar mucho aunque los venda un banco. Ha invertido en ellos en los últimos tres años.
+- No sabe cómo funcionan los fondos de renta fija.
+- Nunca ha usado productos complejos (derivados, estructurados) ni sabe qué son.
+- Si sus inversiones bajaran un 15 % en unos meses, aprovecharía para invertir un poco más.
+- La sostenibilidad no le importa.
+
+Asistente (t-001): Buenos días. Soy el asistente de perfil inversor del banco y soy una inteligencia artificial. Le haré unas preguntas sobre su situación, sus objetivos y lo que conoce de inversión, porque la ley obliga al banco a hacerlo antes de ofrecerle productos de inversión. Una persona del banco revisará todo lo que hablemos. ¿Le parece bien que grabemos la conversación?
+Cliente (t-002): Sí, sí, no hay problema, que se grabe. Pero vamos al grano, que tengo algo de prisa.
+Asistente (t-003): Gracias, iré rápido. Para empezar: ¿para qué querría invertir su dinero? Por ejemplo, ahorrar para la jubilación, comprar algo en el futuro o tener un colchón.
+Cliente (t-004): Pues para complementar la pensión, más que nada. Ya estoy jubilado, tengo 70 años.
+Asistente (t-005): Entendido, gracias. ¿Cuánto dinero piensa dedicar a invertir, más o menos?
+Cliente (t-006): Pues tengo ahorrados unos 101.000 euros, y pensaría en invertir una parte. Todavía no sé cuánto exactamente.
+Asistente (t-007): Gracias, no hace falta decidirlo ahora. ¿Durante cuánto tiempo piensa mantener ese dinero invertido, más o menos?
+Cliente (t-008): Unos diez años, más o menos. Ese dinero no lo voy a necesitar antes.
+Asistente (t-009): Perfecto, gracias. Ahora un poco sobre su situación. ¿Cuánto cobra más o menos al mes, entre pensión y otros ingresos, ya descontados impuestos?
+Cliente (t-010): Cobro 2.050 euros de pensión al mes, siempre lo mismo. No tengo otros ingresos.
+Asistente (t-011): Gracias, queda anotado. Ahora, más o menos, ¿cuánto suman sus gastos fijos al mes, como vivienda, recibos y comida?
+Cliente (t-012): Unos 1.100 euros al mes, más o menos, entre todo.
+Asistente (t-013): Gracias, anotado. Una cosa más sobre su situación: ¿tiene alguna deuda ahora mismo, como un préstamo o una hipoteca? Si es así, dígame más o menos cuánto debe en total.
+Cliente (t-014): Sí, la hipoteca todavía. Me quedan unos 85.000 euros por pagar. Otras deudas no tengo.
+Asistente (t-015): Gracias, anotado. Una pregunta más sobre su situación: aparte de su vivienda, ¿tiene otros bienes de valor, como un segundo piso, un local o terrenos? Más o menos, ¿cuánto valdrían?
+Cliente (t-016): No, nada más. Solo la casa donde vivo y los ahorros que le he dicho. No tengo más bienes.
+Asistente (t-017): Gracias, ya tengo clara su situación económica. Pasamos a la experiencia: ¿en qué ha invertido en los últimos tres años? Por ejemplo, depósitos, fondos, acciones o algo más complejo. Si no ha invertido en nada, dígamelo sin problema.
+Cliente (t-018): Pues sobre todo fondos de renta variable, he estado metido en alguno estos tres años. Productos raros no, eso no.
+Asistente (t-019): Gracias. Ya que ha invertido en fondos de renta variable, ¿cómo de bien diría que los conoce: nada, algo o bien?
+Cliente (t-020): Los conozco bien. Sé que pueden subir, pero también bajar mucho, aunque te los venda un banco. Eso lo tengo claro.
+Asistente (t-021): Muy bien, eso es correcto. Y los fondos de renta fija, ¿cómo de bien diría que los conoce: nada, algo o bien?
+Cliente (t-022): Pues de esos no tengo ni idea, la verdad. No sé cómo funcionan.
+Asistente (t-023): Gracias, no pasa nada, queda anotado. Pasamos a otro tema: imagine que sus ahorros invertidos bajan un veinte por ciento en unos meses. ¿Qué haría: vendería todo, vendería una parte, esperaría o compraría más?
+Cliente (t-024): Pues esperaría, y si acaso metería algo más para aprovechar que está barato. Eso ya me ha pasado y no me asusta.
+Asistente (t-025): Gracias, queda claro. Antes de seguir, una cosa que quiero asegurar: me dijo que sus gastos fijos son unos 1.100 euros al mes. ¿Ese importe incluye la cuota de la hipoteca, o la hipoteca se suma aparte?
+Cliente (t-026): Sí, sí, la hipoteca va incluida ahí, en los 1.100. Eso es todo lo que gasto fijo al mes.
+Asistente (t-027): Gracias, queda aclarado. Ya casi terminamos. Algunas inversiones siguen criterios ambientales o sociales, por ejemplo evitar empresas muy contaminantes. ¿Es algo que le importa?
+Cliente (t-028): No, la verdad es que eso no me importa. Lo que quiero es que rinda y ya está.
+Asistente (t-029): Gracias, queda anotado. Una última cosa sobre productos más complejos: me dijo que no ha tenido "productos raros". Para dejarlo claro, ¿ha invertido alguna vez en productos complejos, como derivados, warrants o criptomonedas? ¿Ninguna vez, una o dos veces, o más?
+Cliente (t-030): No, nunca. Ni sé lo que son los derivados esos ni los warrants. Cripto tampoco, de eso nada.
+Asistente (t-031): Gracias, queda anotado. Una última aclaración, para asegurarme de que lo tengo bien: su pensión de 2.050 euros al mes, ¿es la cantidad que le llega ya descontados los impuestos, o es antes de descontarlos?
+Cliente (t-032): Pues... es lo que me ingresan cada mes en la cuenta, así que supongo que ya descontado. Los 2.050 son los que me llegan, vaya.
+Asistente (t-033): Perfecto, entonces son 2.050 euros netos al mes. Con eso ya tengo todo lo que necesitaba. Gracias por su paciencia y por ir tan rápido. Resumiendo: quiere complementar su pensión, tiene unos 101.000 euros ahorrados, piensa invertir una parte a unos diez años, tiene experiencia en fondos de renta variable y se mantendría tranquilo ante una caída. Una persona del banco revisará su perfil y le avisará. Que tenga un buen día.
