@@ -317,3 +317,12 @@ def test_contradiccion_con_lo_que_acaba_de_decir_aunque_no_este_anotado(monkeypa
     [a] = correr(perfil(financial__debts_eur=fact(0, cita="No debo nada a nadie.")), turnos)
     assert (a.flag, a.path) == (Flag.inconsistent, "financial.debts_eur")
     assert [e.turn_id for e in a.evidence] == ["t-004", "t-002"]
+
+
+def test_una_cita_de_una_palabra_no_prueba_nada(monkeypatch):
+    """Revisión de la PR #26: «sí» o «no» no bastan como prueba de un hallazgo."""
+    turnos = [Turno(turn_id="t-002", speaker="client", text="No.", t_start=1, t_end=2)]
+    simular(monkeypatch, Revision(hallazgos=[
+        hallazgo("dato_dudoso", "respuesta_evasiva", "objectives.o1.horizon_years", "No", turn_id="t-002"),
+    ]))
+    assert correr(perfil(objectives__o1__horizon_years=fact(10)), turnos) == []

@@ -63,6 +63,12 @@ export default function VistaEntidad({
   const [pestana, setPestana] = useState<Pestana>("Resumen");
   const [abierto, setAbierto] = useState<string | null>(null);
   const alertas = perfil?.alerts.filter((a) => a.status === "open") ?? [];
+  // Un borrador completo también se valida: una alerta «revisar por el asesor» deja el perfil en borrador
+  // (store), pero es justo el asesor quien la revisa al validar. El backend ya admite validar un borrador.
+  const paraAsesor = alertas.filter((a) => a.flag === "needs_advisor").length;
+  const validable =
+    perfil?.status === "pending_validation" ||
+    (perfil?.status === "draft" && perfil.assessments.suitability.complete);
 
   return (
     <div className={`tema-asesor ${s.raiz}`}>
@@ -124,11 +130,17 @@ export default function VistaEntidad({
             {asesor === false && cid === CLIENTE_DEMO && !tokenCliente(cid) && (
               <p role="note">Ejemplo ficticio fijo de solo lectura; no representa un expediente persistido.</p>
             )}
-            {asesor === false && !modo?.activo && perfil?.status === "pending_validation" && (
+            {asesor === false && !modo?.activo && validable && (
               <p role="note">La validación está pendiente de habilitar un permiso independiente de asesor.</p>
             )}
+            {validable && paraAsesor > 0 && (
+              <p role="note">
+                {paraAsesor === 1 ? "Hay 1 alerta" : `Hay ${paraAsesor} alertas`} para revisar antes de validar: al validar,
+                quedan revisadas por el asesor.
+              </p>
+            )}
             <div className={s.accion}>
-              {perfil?.status === "pending_validation" && (
+              {validable && (
                 <button
                   type="button"
                   className={s.boton}

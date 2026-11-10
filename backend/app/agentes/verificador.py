@@ -53,6 +53,7 @@ VENTANA = 12  # turnos recientes que ve Claude (el resto del contexto llega con 
 LIMITE_TURNO = 1500
 LIMITE_CITA_PERFIL = 200
 LIMITE_REPREGUNTA = 200
+CITA_MINIMA = 8  # caracteres; o al menos dos palabras
 
 # Supuestos de las reglas fijas (ver docstring).
 PLAZO_CORTO_ANIOS = 2
@@ -236,6 +237,8 @@ def _descarte(h: Hallazgo, turno: Turno | None, actual: Fact | None, relacionada
         return "turno_fuera_de_ventana_o_del_asistente"
     if not cita_valida(h.cita, turno.text):
         return "cita_no_literal"
+    if len(h.cita.strip()) < CITA_MINIMA and len(h.cita.split()) < 2:
+        return "cita_demasiado_corta"  # «sí» o «no» no prueban una contradicción
     if h.tipo != "revisar_asesor" and h.ruta is None:
         return "sin_ruta"
     if h.tipo == "contradiccion" and actual is None and relacionada is None:
