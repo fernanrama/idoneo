@@ -51,6 +51,19 @@ export function useEntrevista() {
   }, []);
 
   const conversacion = useConversation({
+    // Herramienta de cliente del agente (la da de alta scripts/sincronizar_voz.py): el agente pregunta
+    // qué falta y el navegador se lo pide al backend, que lo calcula del perfil de forma determinista.
+    clientTools: {
+      datos_pendientes: async () => {
+        const s = sesionRef.current;
+        if (!s) return "No hay sesión abierta: sigue el guion.";
+        try {
+          return (await api.pendientes(s.session_id)).text;
+        } catch {
+          return "No se ha podido consultar: sigue el guion y no repitas preguntas ya respondidas.";
+        }
+      },
+    },
     onMessage: ({ message, role }) => {
       const t = ahora();
       if (role === "user") {

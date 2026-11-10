@@ -230,6 +230,26 @@ def ver_sesion(session_id: str):
     return {**s, "rejections": store.rechazos(session_id)}
 
 
+ESPERA_PENDIENTES_S = 4.0
+
+
+@app.get("/api/sessions/{session_id}/pending")
+async def pendientes(session_id: str):
+    """Qué falta por preguntar: lo consulta el agente de voz con su herramienta `datos_pendientes`
+    (el modo texto recibe la misma lista dentro del mensaje). Si el último turno se está procesando,
+    espera un poco a que acabe para no pedir otra vez lo que el cliente acaba de decir."""
+    s = _llamar(store.sesion, session_id)
+    candado = _candados_sesion.get(session_id)
+    if candado is not None and candado.locked():
+        try:
+            await asyncio.wait_for(candado.acquire(), ESPERA_PENDIENTES_S)
+            candado.release()
+        except asyncio.TimeoutError:
+            pass
+    perfil = store.perfil(s["client_id"])
+    return {"pending": entrevistador.pendientes(perfil), "text": entrevistador.pendientes_para_voz(perfil)}
+
+
 # ---------- perfil ----------
 
 @app.get("/api/clients/{client_id}/profile", response_model=Perfil)

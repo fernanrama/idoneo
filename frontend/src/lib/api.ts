@@ -56,4 +56,7 @@ export const api = {
 
   /** URL firmada para un agente privado de ElevenLabs; 503 si el backend no tiene clave. */
   urlFirmadaVoz: () => pedir<{ signed_url: string }>("/api/voice/signed-url"),
+  /** Lo que falta por preguntar, para la herramienta `datos_pendientes` del agente de voz. */
+  pendientes: (session_id: string) =>
+    pedir<{ pending: string[]; text: string }>(`/api/sessions/${session_id}/pending`),
 };

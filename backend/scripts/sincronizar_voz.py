@@ -1,8 +1,12 @@
 """Sube el prompt del entrevistador (prompts/entrevistador.md) al agente de voz de ElevenLabs.
 
 Así el prompt vive en un solo sitio, el repo: el modo texto y la voz dicen lo mismo y cada cambio queda
-en git. Solo cambia el texto de las instrucciones del agente; la voz, el primer mensaje, el idioma, el
-modelo y las herramientas se quedan como estén en el panel de ElevenLabs.
+en git. Cambia el texto de las instrucciones del agente y se asegura de que tenga la herramienta
+`datos_pendientes` (la crea en el workspace si no existe); la voz, el primer mensaje, el idioma, el modelo
+y el resto de herramientas se quedan como estén en el panel de ElevenLabs.
+
+`datos_pendientes` es una herramienta de cliente: cuando el agente la llama, el navegador (frontend,
+useEntrevista.ts) pide GET /api/sessions/{id}/pending al backend y le devuelve qué falta por preguntar.
 
 Uso (desde backend/, con ELEVENLABS_API_KEY y ELEVENLABS_AGENT_ID en ../.env):
 
@@ -13,9 +17,10 @@ Uso (desde backend/, con ELEVENLABS_API_KEY y ELEVENLABS_AGENT_ID en ../.env):
 `--crear` solo necesita ELEVENLABS_API_KEY: crea el agente en español con nuestro prompt y un primer
 mensaje con el aviso de IA, y te da el ID para el .env. La voz se elige luego en el panel.
 
-API usada (SDK oficial `elevenlabs`, conversational_ai.agents): GET y PATCH /v1/convai/agents/{agent_id},
-con el prompt en conversation_config.agent.prompt.prompt. Se lee el objeto `prompt` actual y se devuelve
-entero con solo el texto cambiado, para no tocar el resto de su configuración.
+API usada (SDK oficial `elevenlabs` 2.77, conversational_ai.agents y .tools): GET y PATCH
+/v1/convai/agents/{agent_id}, con el prompt en conversation_config.agent.prompt.prompt y las herramientas
+en .prompt.tool_ids; GET y POST /v1/convai/tools. Se lee el objeto `prompt` actual y se devuelve entero
+con solo el texto y la lista de herramientas cambiados, para no tocar el resto de su configuración.
 """
 
 from __future__ import annotations
@@ -40,6 +45,7 @@ from app.agentes import chat  # noqa: E402
 
 API = "https://api.elevenlabs.io/v1/convai/agents/{agente}"
 API_CREAR = "https://api.elevenlabs.io/v1/convai/agents/create"
+API_HERRAMIENTAS = "https://api.elevenlabs.io/v1/convai/tools"
 NOMBRE = "Idóneo – entrevista"
 # El primer mensaje lo dice el agente al conectar: aviso de IA, revisión humana, propósito y consentimiento.
 PRIMER_MENSAJE = ("Hola, soy el asistente de perfil inversor del banco. Soy una inteligencia artificial y una "
@@ -47,21 +53,53 @@ PRIMER_MENSAJE = ("Hola, soy el asistente de perfil inversor del banco. Soy una 
                   "ofrecerle productos de inversión. ¿Le parece bien que grabemos la conversación?")
 # Un agente que no habla inglés necesita un modelo de voz multilingüe (los «v2_5»).
 MODELO_VOZ = "eleven_flash_v2_5"
+HERRAMIENTA = {
+    "type": "client",
+    "name": "datos_pendientes",
+    "description": ("Devuelve qué datos del perfil faltan, cuáles conviene volver a preguntar y qué conocimientos "
+                    "falta comprobar. Llámala al terminar cada bloque del guion y siempre antes de despedirte."),
+    "expects_response": True,
+    "response_timeout_secs": 10,
+}
+
+
+class ErrorElevenLabs(Exception):
+    pass
+
+
+def herramienta(http: httpx.Client, cabeceras: dict, crear_si_falta: bool) -> str | None:
+    """ID de `datos_pendientes` en el workspace; la crea si falta y se pide."""
+    r = http.get(API_HERRAMIENTAS, headers=cabeceras, params={"search": HERRAMIENTA["name"]})
+    if r.status_code != 200:
+        raise ErrorElevenLabs(f"ElevenLabs respondió {r.status_code} al listar herramientas: {r.text[:300]}")
+    for t in r.json().get("tools", []):
+        if (t.get("tool_config") or {}).get("name") == HERRAMIENTA["name"]:
+            return t["id"]
+    if not crear_si_falta:
+        return None
+    r = http.post(API_HERRAMIENTAS, headers=cabeceras, json={"tool_config": HERRAMIENTA})
+    if r.status_code != 200:
+        raise ErrorElevenLabs(f"ElevenLabs respondió {r.status_code} al crear la herramienta: {r.text[:300]}")
+    print(f"Herramienta {HERRAMIENTA['name']} creada en el workspace.")
+    return r.json()["id"]
 
 
 def crear(clave: str) -> int:
     if os.getenv("ELEVENLABS_AGENT_ID", "").strip():
         print("Ya hay un ELEVENLABS_AGENT_ID en el .env: no creo otro. Usa el script sin --crear para sincronizar.")
         return 2
-    cuerpo = {
-        "name": NOMBRE,
-        "conversation_config": {
-            "agent": {"language": "es", "first_message": PRIMER_MENSAJE, "prompt": {"prompt": chat._sistema().strip()}},
-            "tts": {"model_id": MODELO_VOZ},
-        },
-    }
     with httpx.Client(timeout=30) as http:
-        r = http.post(API_CREAR, headers={"xi-api-key": clave}, json=cuerpo)
+        cabeceras = {"xi-api-key": clave}
+        id_herramienta = herramienta(http, cabeceras, crear_si_falta=True)
+        cuerpo = {
+            "name": NOMBRE,
+            "conversation_config": {
+                "agent": {"language": "es", "first_message": PRIMER_MENSAJE,
+                          "prompt": {"prompt": chat._sistema().strip(), "tool_ids": [id_herramienta]}},
+                "tts": {"model_id": MODELO_VOZ},
+            },
+        }
+        r = http.post(API_CREAR, headers=cabeceras, json=cuerpo)
     if r.status_code != 200:
         print(f"ElevenLabs respondió {r.status_code} al crear el agente: {r.text[:400]}")
         return 1
@@ -75,6 +113,14 @@ COPIAS = RAIZ / "scripts" / ".copias_voz"  # ignorado por git: puede contener aj
 
 
 def principal(aplicar: bool, nuevo_agente: bool = False) -> int:
+    try:
+        return _principal(aplicar, nuevo_agente)
+    except ErrorElevenLabs as e:
+        print(e)
+        return 1
+
+
+def _principal(aplicar: bool, nuevo_agente: bool) -> int:
     clave, agente = os.getenv("ELEVENLABS_API_KEY", "").strip(), os.getenv("ELEVENLABS_AGENT_ID", "").strip()
     if nuevo_agente:
         if not clave:
@@ -93,25 +139,36 @@ def principal(aplicar: bool, nuevo_agente: bool = False) -> int:
         datos = r.json()
         prompt = ((datos.get("conversation_config") or {}).get("agent") or {}).get("prompt") or {}
         actual, nuevo = (prompt.get("prompt") or "").strip(), chat._sistema().strip()
+        ids = list(prompt.get("tool_ids") or [])
+        id_herramienta = herramienta(http, cabeceras, crear_si_falta=False)
+        falta_herramienta = id_herramienta is None or id_herramienta not in ids
         print(f"Agente: {datos.get('name', '?')} ({agente})")
-        if actual == nuevo:
-            print("El prompt ya está al día. Nada que hacer.")
+        if actual == nuevo and not falta_herramienta:
+            print("El prompt y la herramienta datos_pendientes ya están al día. Nada que hacer.")
             return 0
-        diff = list(difflib.unified_diff(actual.splitlines(), nuevo.splitlines(), "ElevenLabs", "repo", lineterm="", n=1))
-        print("\n".join(diff[:120]) + ("\n…" if len(diff) > 120 else ""))
+        if actual != nuevo:
+            diff = list(difflib.unified_diff(actual.splitlines(), nuevo.splitlines(), "ElevenLabs", "repo", lineterm="", n=1))
+            print("\n".join(diff[:120]) + ("\n…" if len(diff) > 120 else ""))
+        if falta_herramienta:
+            print(f"Al agente le falta la herramienta {HERRAMIENTA['name']}.")
         if not aplicar:
             print("\nSolo comparación. Para subirlo: python scripts/sincronizar_voz.py --aplicar")
             return 0
 
+        if falta_herramienta:
+            id_herramienta = id_herramienta or herramienta(http, cabeceras, crear_si_falta=True)
+            ids.append(id_herramienta)
         COPIAS.mkdir(exist_ok=True)
         copia = COPIAS / f"{agente}-{datetime.now():%Y%m%d-%H%M%S}.json"
         copia.write_text(json.dumps(prompt, ensure_ascii=False, indent=2), encoding="utf-8")
-        cuerpo = {"conversation_config": {"agent": {"prompt": {**prompt, "prompt": nuevo}}}}
+        # `tools` es la forma antigua de `tool_ids`; enviar las dos a la vez puede chocar.
+        resto = {k: v for k, v in prompt.items() if k != "tools"}
+        cuerpo = {"conversation_config": {"agent": {"prompt": {**resto, "prompt": nuevo, "tool_ids": ids}}}}
         r = http.patch(url, headers=cabeceras, json=cuerpo)
         if r.status_code != 200:
             print(f"ElevenLabs respondió {r.status_code} al actualizar: {r.text[:300]}")
             return 1
-    print(f"\nPrompt subido. Copia del anterior en {copia}")
+    print(f"\nAgente actualizado. Copia del prompt anterior en {copia}")
     return 0
 
 

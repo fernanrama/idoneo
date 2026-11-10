@@ -83,3 +83,43 @@ def test_lo_que_el_cliente_no_conoce_no_se_vuelve_a_comprobar():
     pend = chat.pendientes(perfil)
     assert "knowledge.etfs" not in pend
     assert "knowledge.stocks" in pend
+
+
+def test_pendientes_para_voz_en_palabras_y_sin_rutas():
+    from app.perfil.modelos import Fact, Flag, Fuente
+
+    texto = chat.pendientes_para_voz(Perfil(client_id="x"))
+    assert texto.startswith("Falta preguntar:") and "ingresos netos al mes" in texto
+    assert "qué sabe de fondos de renta variable" in texto and "financial." not in texto
+
+    hecho = {c: Fact(value=1, source=Fuente.declared, confidence=0.9, updated_by="agent:extractor") for c in OBLIGATORIOS}
+    hecho["knowledge.equity_funds"] = Fact(value="medium", source=Fuente.declared, confidence=0.9, updated_by="agent:extractor")
+    hecho["knowledge.fixed_income_funds"] = Fact(value="basic", source=Fuente.demonstrated, confidence=0.9, updated_by="agent:extractor")
+    hecho["financial.debts_eur"] = Fact(value=0, source=Fuente.declared, confidence=0.5, flags=[Flag.low_confidence],
+                                        updated_by="agent:extractor")
+    texto = chat.pendientes_para_voz(Perfil(client_id="x", mifid=hecho))
+    assert "Falta preguntar" not in texto
+    assert "vuelve a preguntar con otras palabras: deudas" in texto
+    assert "falta la pregunta de comprobación: qué sabe de fondos de renta variable." in texto
+
+
+def test_pendientes_para_voz_sin_nada_pendiente():
+    from app.perfil.modelos import Fact, Fuente
+
+    hecho = {c: Fact(value=1, source=Fuente.demonstrated, confidence=0.9, updated_by="agent:extractor") for c in OBLIGATORIOS}
+    assert chat.pendientes_para_voz(Perfil(client_id="x", mifid=hecho)) == "No falta nada: puedes cerrar la entrevista."
+
+
+def test_cada_ruta_del_perfil_tiene_descripcion():
+    from app.perfil.modelos import CALCULADOS, CAMPOS
+
+    sin = [c for c in CAMPOS if c not in CALCULADOS and chat.describir(c) == c]
+    assert sin == []
+
+
+def test_endpoint_de_pendientes_para_el_agente_de_voz(api):
+    cliente, sid, _ = api
+    r = cliente.get(f"/api/sessions/{sid}/pending")
+    assert r.status_code == 200
+    assert r.json()["pending"] == OBLIGATORIOS and r.json()["text"].startswith("Falta preguntar:")
+    assert cliente.get("/api/sessions/s-nope/pending").status_code == 404

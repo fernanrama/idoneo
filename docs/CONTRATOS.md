@@ -59,6 +59,7 @@ Comprobación con Carmen (datos simulados), que cubren los tests:
 | `POST /api/sessions` `{client_id?, channel}` | Crea el cliente si no existe y abre una sesión → `{session_id, client_id, started_at, channel}`. `channel`: `voice` (por defecto) o `text`. Si el perfil estaba en `review_due`, vuelve a `draft` (versión `reassessment_started`) | 200 · 422 |
 | `POST /api/sessions/{id}/turns` `{turn_id?, speaker, text, t_start, t_end}` | Guarda el turno → `{turn_id}`. Sin `turn_id` se asigna `t-001`, `t-002`…; reenviar el mismo `turn_id` no lo duplica. Con `speaker: "client"` lanza extractor y verificador en segundo plano (extractor aún stub) | 202 · 404 · 422 |
 | `GET /api/sessions/{id}` | Sesión (`channel`, `started_at`, `ended_at`…), `turns[]` y `rejections[]` ([rechazos](#rechazos-visibles)) | 200 · 404 |
+| `GET /api/sessions/{id}/pending` | Qué falta por preguntar → `{pending: [rutas], text}`. `text` va en frases para la herramienta de cliente `datos_pendientes` del agente de voz; si el último turno se está procesando, espera hasta 4 s | 200 · 404 |
 | `GET /api/clients/{id}/profile[?version=n]` | Última versión en cualquier estado (o la `n`), con la capa personal vigente unida | 200 · 404 |
 | `GET /api/clients/{id}/versions` | `[{version, created_at, reason, author, status}]` | 200 · 404 |
 | `POST /api/clients/{id}/validate` `{advisor_id, changes[]}` | La entidad corrige (opcional) y valida → perfil `active` ([reglas](#estados-y-validación-de-la-entidad)) | 200 · 401 · 404 · 409 · 422 |
