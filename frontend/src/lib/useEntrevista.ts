@@ -49,6 +49,7 @@ export function useEntrevista() {
   const [paso, setPaso] = useState(0);
   const [vozDemo, setVozDemo] = useState(true);
   const [velocidad, setVelocidad] = useState(1);
+  const audiosDemo = useRef<Record<string, { archivo: string; texto: string }>>({});
 
   const inicio = useRef(0);
   const finAgente = useRef(0);
@@ -193,7 +194,14 @@ export function useEntrevista() {
       setPaso(0);
       setPausa(false);
       cuentaDatos.current = 0;
-      setVozDemo("speechSynthesis" in window);
+      setVozDemo(true);
+      // Audios grabados con ElevenLabs (scripts/generar_audios_demo.py); si faltan, voz del navegador.
+      try {
+        const r = await fetch("/demo/carmen/manifest.json", { cache: "no-store" });
+        audiosDemo.current = r.ok ? ((await r.json()).turnos ?? {}) : {};
+      } catch {
+        audiosDemo.current = {};
+      }
       setEstado("activa");
     } catch (e) {
       setError(e instanceof Error ? `No se ha podido cargar la demo: ${e.message}` : String(e));
@@ -218,7 +226,17 @@ export function useEntrevista() {
     };
     const lectura = (900 + turno.text.length * 45) / velocidad;
     const sintesis = typeof window !== "undefined" && "speechSynthesis" in window ? window.speechSynthesis : null;
-    if (vozDemo && sintesis) {
+    const grabado = audiosDemo.current[String(paso)];
+    let audio: HTMLAudioElement | null = null;
+    if (vozDemo && grabado && grabado.texto === turno.text) {
+      audio = new Audio(`/demo/carmen/${grabado.archivo}`);
+      audio.playbackRate = velocidad;
+      audio.preservesPitch = true;
+      audio.onended = () => vivo && siguiente(300);
+      audio.onerror = () => vivo && siguiente(lectura);
+      audio.play().catch(() => vivo && siguiente(lectura)); // p. ej., el navegador bloquea el sonido
+      siguiente(lectura * 3 + 4000); // por si el audio no avisa del final
+    } else if (vozDemo && sintesis) {
       const { asistente, cliente } = vocesEspanol();
       const u = new SpeechSynthesisUtterance(turno.text);
       u.lang = "es-ES";
@@ -236,6 +254,7 @@ export function useEntrevista() {
     return () => {
       vivo = false;
       clearTimeout(espera);
+      audio?.pause();
       sintesis?.cancel();
     };
   }, [modo, estado, pausa, paso, vozDemo, velocidad]);

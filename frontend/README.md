@@ -39,7 +39,7 @@ Si el backend tiene `ADMIN_TOKEN` (obligatorio con URL pública), pon **el mismo
 - `src/lib/api.ts` y `src/lib/tipos.ts`: cliente y tipos del contrato (`docs/CONTRATOS.md`).
 
 ## Demo guiada
-«Ver la demo guiada» repite la entrevista **simulada** de Carmen (`src/lib/guion.ts`) en un minuto aproximadamente. Las voces son las del propio navegador (Web Speech API): no gasta créditos de ElevenLabs ni de Claude. Se ve la pregunta del asistente y la respuesta de Carmen, y su perfil de ejemplo (`carmen-68`, calculado por el backend) se va reconstruyendo dato a dato a medida que se oye la frase que justifica cada uno (`src/lib/demo.ts`). Tiene pausa, salto al siguiente turno, velocidad (1×, 1,5× y 2×) y botón para quitar el sonido. No escribe nada en el backend.
+«Ver la demo guiada» repite la entrevista **simulada** de Carmen (`src/lib/guion.ts`) en un minuto aproximadamente. Las voces son audios grabados una sola vez con ElevenLabs (`public/demo/carmen/`), así que en la demo no se gasta ningún crédito. Si falta el audio de un turno, se usa la voz del navegador como respaldo. Para grabarlos o regrabarlos, desde `backend/`: `python scripts/generar_audios_demo.py --voz-carmen <ID> --aplicar`. La clave necesita el permiso «Text to Speech»; sin `--aplicar` solo cuenta los caracteres. Se ve la pregunta del asistente y la respuesta de Carmen, y su perfil de ejemplo (`carmen-68`, calculado por el backend) se va reconstruyendo dato a dato a medida que se oye la frase que justifica cada uno (`src/lib/demo.ts`). Tiene pausa, salto al siguiente turno, velocidad (1×, 1,5× y 2×) y botón para quitar el sonido. No escribe nada en el backend.
 
 ## Voz con ElevenLabs: lo comprobado y lo pendiente
 
