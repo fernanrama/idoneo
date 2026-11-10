@@ -43,7 +43,8 @@ export default function VistaEntidad({
 }) {
   const { cid } = use(params);
   // Modo asesor de demo: lo confirma el servidor; mientras tanto no se carga ninguna fuente.
-  const asesor = useModoAsesor(cid);
+  const modo = useModoAsesor(cid);
+  const asesor = modo === null ? null : modo.permitido;
   const { perfil, restricciones, versiones, error, recargar } = usePerfil(cid, SONDEO_MS, {
     asesor: asesor === true,
     esperar: asesor === null,
@@ -113,10 +114,17 @@ export default function VistaEntidad({
             {asesor === true && (
               <p role="note">Modo asesor de demostración: cliente ficticio y validación autorizada por el servidor local.</p>
             )}
+            {modo?.activo && !modo.permitido && (
+              <p role="note">
+                Modo asesor de demostración activo, pero este cliente aún no está autorizado. El operador debe ejecutar en el
+                ordenador del backend <code>python scripts/demo_operador.py autorizar {cid} --confirmo-ficticio</code> y
+                después recargar esta página.
+              </p>
+            )}
             {asesor === false && cid === CLIENTE_DEMO && !tokenCliente(cid) && (
               <p role="note">Ejemplo ficticio fijo de solo lectura; no representa un expediente persistido.</p>
             )}
-            {asesor === false && perfil?.status === "pending_validation" && (
+            {asesor === false && !modo?.activo && perfil?.status === "pending_validation" && (
               <p role="note">La validación está pendiente de habilitar un permiso independiente de asesor.</p>
             )}
             <div className={s.accion}>
@@ -138,7 +146,7 @@ export default function VistaEntidad({
                   Validado · v{perfil.version}
                 </span>
               )}
-              {asesor === true && perfil?.status === "active" && (
+              {asesor === true && cid === CLIENTE_DEMO && perfil?.status === "active" && (
                 <button
                   type="button"
                   className={s.reiniciar}
@@ -542,20 +550,23 @@ function Mcp({ restricciones: r }: { restricciones: Restricciones | null }) {
   );
 }
 
-/** null mientras el servidor responde; true solo si confirma el modo asesor de demo para este cliente. */
-function useModoAsesor(cid: string): boolean | null {
-  const [modo, setModo] = useState<{ cid: string; activo: boolean } | null>(null);
+/**
+ * null mientras el servidor responde. `activo`: el servidor confirma el modo asesor de demo;
+ * `permitido`: además, este cliente es un fixture ficticio o lo ha autorizado el operador.
+ */
+function useModoAsesor(cid: string): { activo: boolean; permitido: boolean } | null {
+  const [modo, setModo] = useState<{ cid: string; activo: boolean; permitido: boolean } | null>(null);
   useEffect(() => {
     let vivo = true;
     api
       .modoAsesor()
-      .then((m) => vivo && setModo({ cid, activo: m.enabled && m.clients.includes(cid) }))
-      .catch(() => vivo && setModo({ cid, activo: false }));
+      .then((m) => vivo && setModo({ cid, activo: m.enabled, permitido: m.enabled && m.clients.includes(cid) }))
+      .catch(() => vivo && setModo({ cid, activo: false, permitido: false }));
     return () => {
       vivo = false;
     };
   }, [cid]);
-  return modo && modo.cid === cid ? modo.activo : null;
+  return modo && modo.cid === cid ? { activo: modo.activo, permitido: modo.permitido } : null;
 }
 
 const esSimulado = (p: Perfil) =>

@@ -153,19 +153,21 @@ El backend sirve un **servidor MCP en `/mcp`** con 4 herramientas de solo lectur
 Claude lo usa junto al conector público de MyInvestor: pide los límites de Carmen a nuestro servidor y busca en el catálogo real con ellos.
 
 <details>
-<summary><b>Pasos para conectarlo (túnel temporal desde el portátil)</b></summary>
+<summary><b>Pasos para conectarlo</b></summary>
 
-1. Instala cloudflared (Windows: `winget install --id Cloudflare.cloudflared` y abre una terminal nueva) y ejecuta `cloudflared tunnel --url http://localhost:8000`. Apunta la URL `https://xxxx.trycloudflare.com`.
-2. En `.env`: `MCP_ALLOWED_HOSTS=xxxx.trycloudflare.com` (sin `https://`) y un `ADMIN_TOKEN` largo y aleatorio (`python -c "import secrets; print(secrets.token_urlsafe(32))"`). Con una URL pública el token es obligatorio: protege la validación.
-3. Arranca (o reinicia) el backend y valida a Carmen enviando la cabecera `X-Admin-Token`, desde `/docs` o con:
-   `curl -X POST http://localhost:8000/api/clients/carmen-68/validate -H "X-Admin-Token: <token>" -H "Content-Type: application/json" -d '{"advisor_id":"asesor-demo"}'`
-4. En claude.ai: **Ajustes → Conectores → Añadir conector personalizado** → `https://xxxx.trycloudflare.com/mcp`. Activa también el conector de MyInvestor (`https://mcp.myinvestor.es/mcp`).
-5. En un chat nuevo: *«Busca en MyInvestor fondos que encajen con la clienta carmen-68»*.
+Todo en el portátil, con Claude Code y sin túneles. **Nunca** pongas `ADMIN_TOKEN` en un conector.
+
+1. En `.env`: `DEMO_ADVISOR_MODE=1`, `DEMO_ADVISOR_TOKEN` y `MCP_DEMO_TOKEN` con valores aleatorios distintos, generados sin mostrarlos en pantalla (comandos en la guía). En `frontend/.env.local`, el mismo `DEMO_ADVISOR_TOKEN`. Reinicia.
+2. Valida a Carmen en `http://localhost:3000/entidad/carmen-68`, o entrevista a un cliente ficticio nuevo y pide al operador que lo autorice con `python scripts/demo_operador.py autorizar <client_id> --confirmo-ficticio`.
+3. Exporta el token en la terminal sin mostrarlo (`IDONEO_MCP_TOKEN`, ver la guía) y conecta Claude Code con **comillas simples**, para que guarde la referencia y no el token: `claude mcp add --transport http idoneo http://localhost:8000/mcp -H 'Authorization: Bearer ${IDONEO_MCP_TOKEN}'` y `claude mcp add --transport http myinvestor https://mcp.myinvestor.es/mcp`.
+4. En el chat: *«Usa Idóneo para leer las restricciones de <cliente> y busca en MyInvestor fondos compatibles»*.
+
+Guía completa: [docs/MODO_ASESOR_DEMO.md](docs/MODO_ASESOR_DEMO.md#recorrido-completo-del-pitch).
 
 `ADMIN_TOKEN` no se copia al frontend. Para que el botón «Validar perfil» funcione en la presentación local, activa el [modo asesor de demostración](docs/MODO_ASESOR_DEMO.md); no funciona a través de un túnel ni de un despliegue público.
 </details>
 
-**Probado el 9/11/2026:** Claude recibe por la URL pública el perfil activo de Carmen y encuentra fondos de renta fija y monetarios en EUR con riesgo ≤ 3, ninguno de renta variable. Detalles en [backend/app/mcp/README.md](backend/app/mcp/README.md).
+**Probado el 9/11/2026, antes de que la PR #21 protegiera `/mcp`:** Claude recibe por la URL pública el perfil activo de Carmen y encuentra fondos de renta fija y monetarios en EUR con riesgo ≤ 3, ninguno de renta variable. Detalles en [backend/app/mcp/README.md](backend/app/mcp/README.md).
 
 > [!IMPORTANT]
 > Nuestro backend **nunca** llama al MCP de MyInvestor: sus [términos](https://mcp.myinvestor.es/terms) solo permiten usarlo como conector dentro de una conversación.

@@ -18,8 +18,11 @@ from typing import Callable
 
 from fastapi import Header, HTTPException
 from starlette.datastructures import Headers
+from starlette.requests import Request
 from starlette.responses import JSONResponse
 
+from .asesor_demo import es_peticion_local
+from .mcp import demo as mcp_demo
 from .perfil import store, validacion
 
 
@@ -156,19 +159,38 @@ def exigir_servicio(x_admin_token: str | None = Header(default=None)) -> None:
         raise _denegar()
 
 
+def alcance_demo_mcp(authorization: str | None, x_admin_token: str | None) -> frozenset[str] | None:
+    """Clientes que abre una credencial MCP de demostración (mcp/demo.py), o None si no es una.
+    Solo para /mcp: la API REST nunca las reconoce."""
+    if x_admin_token is not None:
+        return None
+    return mcp_demo.alcance(mcp_demo.bearer(authorization))
+
+
 class TransporteMCPAutorizado:
-    """Protege el transporte; cada herramienta comprueba además el cliente de sus argumentos."""
+    """Protege el transporte; cada herramienta comprueba además el cliente de sus argumentos.
+    Las credenciales de demostración solo se aceptan desde esta máquina (loopback, Host local, sin proxy)."""
 
     def __init__(self, app):
         self.app = app
 
+    @staticmethod
+    async def _rechazar(scope, receive, send, status: int, detalle: str, headers=None):
+        respuesta = JSONResponse({"detail": detalle}, status_code=status,
+                                 headers={**(headers or {}), "Cache-Control": "no-store"})
+        return await respuesta(scope, receive, send)
+
     async def __call__(self, scope, receive, send):
         if scope["type"] == "http" and scope.get("path", "").rstrip("/") == "/mcp":
             cabeceras = Headers(scope=scope)
-            try:
-                principal(cabeceras.get("authorization"), cabeceras.get("x-admin-token"))
-            except HTTPException as e:
-                respuesta = JSONResponse({"detail": e.detail}, status_code=e.status_code,
-                                         headers={**(e.headers or {}), "Cache-Control": "no-store"})
-                return await respuesta(scope, receive, send)
+            autorizacion, admin = cabeceras.get("authorization"), cabeceras.get("x-admin-token")
+            if alcance_demo_mcp(autorizacion, admin) is not None:
+                if not es_peticion_local(Request(scope)):
+                    return await self._rechazar(scope, receive, send, 403,
+                                                "Las credenciales MCP de demostración solo funcionan en local")
+            else:
+                try:
+                    principal(autorizacion, admin)
+                except HTTPException as e:
+                    return await self._rechazar(scope, receive, send, e.status_code, e.detail, e.headers)
         return await self.app(scope, receive, send)

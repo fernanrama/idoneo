@@ -144,6 +144,28 @@ try {
   assert.equal((await mcpRestricciones()).usable, false);
   console.log("HTTP: estado verificado, 11 intentos rechazados, validación, MCP/REST utilizables y reinicio.");
 
+  // 5b. Cliente ficticio nuevo: invisible para el asesor hasta que el operador lo autoriza (solo backend, X-Admin-Token).
+  const nuevo = await (await pedir(`${api}/api/sessions`, "POST", {}, { channel: "text" })).json();
+  const ruta = `/api/entidad/${nuevo.client_id}`;
+  assert.deepEqual((await (await pedir(`${front}/api/entidad/asesor`)).json()).clients, [C]);
+  assert.equal((await pedir(`${front}${ruta}/asesor`)).status, 404);
+  const op = `${api}/api/demo/operador/autorizaciones`;
+  assert.equal((await pedir(op, "POST", { Authorization: `Bearer ${nuevo.access_token}` }, { client_id: nuevo.client_id, ficticio: true })).status, 401);
+  assert.equal((await pedir(op, "POST", { "X-Admin-Token": TOKEN }, { client_id: nuevo.client_id, ficticio: true })).status, 401);
+  const aut = await pedir(op, "POST", { "X-Admin-Token": ADMIN }, { client_id: nuevo.client_id, ficticio: true });
+  assert.equal(aut.status, 201);
+  const tokenNuevo = (await aut.json()).mcp_token;
+  assert.ok((await (await pedir(`${front}/api/entidad/asesor`)).json()).clients.includes(nuevo.client_id));
+  const exp = await (await pedir(`${front}${ruta}/asesor`)).json();
+  assert.equal(exp.profile.status, "draft");
+  assert.equal((await pedir(`${front}${ruta}/validar`, "POST", mismoOrigen(front), {})).status, 409); // incompleto: MiFID manda
+  const mcpNuevo = await pedir(`${api}/mcp`, "POST", { Authorization: `Bearer ${tokenNuevo}`, Accept: "application/json, text/event-stream" },
+    { jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "get_investment_constraints", arguments: { client_id: nuevo.client_id } } });
+  assert.equal(JSON.parse((await mcpNuevo.json()).result.content[0].text).usable, false);
+  assert.equal((await pedir(`${op}/${nuevo.client_id}`, "DELETE", { "X-Admin-Token": ADMIN })).status, 200);
+  assert.equal((await pedir(`${front}${ruta}/asesor`)).status, 404);
+  console.log("HTTP: cliente nuevo invisible sin operador; autorizado → visible, validación sujeta a MiFID (409 incompleto), MCP propio; revocado → invisible.");
+
   // 6. Navegador real (opcional): el botón se habilita solo con el modo confirmado y valida.
   if (process.env.IDONEO_PLAYWRIGHT_MODULE) {
     const { chromium } = await import(pathToFileURL(process.env.IDONEO_PLAYWRIGHT_MODULE).href);
@@ -191,7 +213,16 @@ try {
     assert.ok(salientes.every((x) => x.origen !== api), "El navegador no llama directamente al backend aislado");
     const directas = salientes.filter((x) => x.origen === apiDelBuild).length;
     assert.ok(directas > 0, "Sin modo, la vista usa el ejemplo fijo del backend");
-    console.log(`Navegador: deshabilitado sin modo o con token rechazado; validado y reiniciado con el modo. Capturas en ${capturas}`);
+    // Cliente nuevo en la vista de la entidad: aviso al operador, y tras autorizar, expediente por el modo asesor.
+    const otro = await (await pedir(`${api}/api/sessions`, "POST", {}, { channel: "text" })).json();
+    const pn = await ctx.newPage(); await pn.goto(`${front}/entidad/${otro.client_id}`);
+    await pn.getByText("este cliente aún no está autorizado").waitFor();
+    assert.equal((await pedir(op, "POST", { "X-Admin-Token": ADMIN }, { client_id: otro.client_id, ficticio: true })).status, 201);
+    await pn.reload(); await pn.getByText("Modo asesor de demostración: cliente ficticio").waitFor();
+    assert.equal(await pn.getByText("este cliente aún no está autorizado").count(), 0);
+    assert.equal(await pn.getByRole("button", { name: "Reiniciar la demo" }).count(), 0);
+    await pn.screenshot({ path: join(capturas, "3-cliente-nuevo-autorizado.png"), fullPage: true });
+    console.log(`Navegador: deshabilitado sin modo o con token rechazado; validado y reiniciado con el modo; cliente nuevo con aviso y luego autorizado. Capturas en ${capturas}`);
   }
 } finally {
   await navegador?.close();
