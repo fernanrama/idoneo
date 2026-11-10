@@ -24,7 +24,7 @@ Estado a **11/11/2026, de madrugada**. Sustituye al tablero de preparación del 
 | Voces grabadas de la demo guiada | ⏳ Elegir voces | Voz del navegador o subtítulos |
 | Entrevista corta por voz (`carmen-corta`) | 🟡 Probada en texto; falta por voz | Demo guiada |
 | Validar en `/entidad/<id>` (modo asesor) | ✅ Un solo clic | Explicarlo sin pulsar |
-| Claude Code + Idóneo + MyInvestor | ⏳ Falta ensayar con `MCP_DEMO_TOKEN` | Pestaña «Agente · MCP» |
+| Claude Code + Idóneo + MyInvestor | ✅ Ensayado (E-09): unos 16 s con el prompt corto | Pestaña «Agente · MCP» |
 | Vídeo de respaldo | ⏳ Tras congelar (18:00) | — |
 
 ## Fuera del alcance de la entrega (visión en el pitch)

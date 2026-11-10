@@ -30,6 +30,16 @@ Registrar cada ejecución con esta ficha:
 
 No registrar secretos ni datos personales financieros. Usar ejemplos sintéticos o referencias seguras. Conservar fallos y repeticiones de salidas variables; no seleccionar solo resultados favorables. Distinguir coste medido de estimado. Una evidencia de otra versión no valida automáticamente la actual.
 
+### Ejecución E-09 · Claude Code con los conectores de Idóneo y MyInvestor · 11 nov 2026
+
+- **Ejecución / casos / fecha / ejecutor:** el paso final del pitch. Claude Code 2.1.322 (`claude -p --model sonnet`) con el conector `idoneo` (`http://localhost:8000/mcp`, cabecera `Authorization: Bearer ${IDONEO_MCP_TOKEN}` con `MCP_DEMO_TOKEN`) y `myinvestor` (`https://mcp.myinvestor.es/mcp`). Cliente `carmen-68` (**simulado**), validado con el modo asesor. Lanzado por Claude Code desde el portátil de Fernán.
+- **Versión exacta:** `main` en `e0dc4dd` (PR #27) más la rama `feat/demo-entrevista-corta`.
+- **Esperado y observado:**
+  - `claude mcp list`: los dos conectores conectados.
+  - Con el prompt largo, Claude leyó las restricciones (`usable: true`, CONSERVADOR, SRRI ≤ 3, renta variable no conveniente) y citó la evidencia con su tiempo («Si baja un veinte por ciento, lo saco todo», 71–74 s; «Eso no puede pasar, el fondo es del banco», 57–61 s). Buscó en MyInvestor una vez por tipo de activo y descartó fondos con motivos, pero la respuesta fue **demasiado larga** para la demo.
+  - Con el prompt corto (6 líneas): unos 16 s, restricciones con evidencia y 3 fondos. Aviso: los fondos son una muestra; la elección es del agente de la entidad.
+- **Limitaciones:** dos ejecuciones; la selección de fondos varía entre ejecuciones. El tiempo es del ordenador de Fernán con la red de casa.
+
 ### Ejecución E-08 · Entrevista corta del pitch por escrito, con Claude real · 11 nov 2026
 
 (E-06 y E-07 están reservadas para la PR #26, del verificador.)

@@ -55,7 +55,7 @@ Borrador v1 · 10 nov 2026 · Responsable: Rodrigo (lleva la demo) · Complement
 | 1:45 | Pestaña 4: Claude con los conectores. Enviar el prompt preparado | Lista de fondos de MyInvestor con riesgo ≤ 3, sin renta variable | «El agente de la entidad usa el perfil. Nosotros no recomendamos.» |
 | 2:10 | Cierre | Respuesta de Claude en pantalla | «Eso es Idóneo. Gracias, y encantados de responder a vuestras preguntas.» |
 
-Prompt preparado para Claude (pestaña 4): *«Usa Idóneo para leer las restricciones del cliente carmen-68 y busca en MyInvestor fondos que las cumplan. Explica por qué encaja cada uno.»* `[PENDIENTE: probarlo con el túnel levantado y ajustar la frase si Claude no llama a las dos herramientas.]`
+Prompt preparado para Claude Code (pestaña 4, abierto en la carpeta `gcx/demo-claude` con los conectores `idoneo` y `myinvestor`; antes, `export IDONEO_MCP_TOKEN=...` según `docs/MODO_ASESOR_DEMO.md`): *«Usa Idóneo para leer las restricciones de carmen-68 y busca en MyInvestor fondos de menor riesgo que las cumplan. Responde en 6 líneas como máximo: las restricciones con su evidencia y 3 fondos compatibles.»* Probado el 11/11 (E-09): unos 16 s y 6 líneas, con las frases de Carmen como evidencia. Sin «en 6 líneas» la respuesta es demasiado larga para la demo.
 
 ## Datos de Carmen (simulada) que salen en pantalla
 
