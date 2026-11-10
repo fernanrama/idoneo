@@ -3,7 +3,7 @@
 Responsable documental: área 04 · Actualizado: 8 de noviembre de 2026.
 
 ## Estado y uso
-**Preparado:** plantilla de criterios, ejecuciones, comparación y revisión final. **Pendiente:** enunciado, rúbrica, producto, datos, responsables humanos y umbrales. Primeras ejecuciones del extractor registradas abajo (E-00 a E-04). Los criterios siguientes son propuestas; no constituyen requisitos oficiales ni financieros o regulatorios.
+**Preparado:** plantilla de criterios, ejecuciones, comparación y revisión final. **Pendiente:** enunciado, rúbrica, producto, datos, responsables humanos y umbrales. Primeras ejecuciones del extractor registradas abajo (E-00 a E-05). Los criterios siguientes son propuestas; no constituyen requisitos oficiales ni financieros o regulatorios.
 
 Trabajar por hitos desde la recepción del reto: acordar criterios → probar recorrido completo → comparar y corregir → verificar versión de entrega. Dirección ajustará el calendario al tiempo restante.
 
@@ -29,6 +29,15 @@ Registrar cada ejecución con esta ficha:
 - **Mediciones pertinentes:** [muestra, repeticiones, latencia, coste o errores; método de medición].
 
 No registrar secretos ni datos personales financieros. Usar ejemplos sintéticos o referencias seguras. Conservar fallos y repeticiones de salidas variables; no seleccionar solo resultados favorables. Distinguir coste medido de estimado. Una evidencia de otra versión no valida automáticamente la actual.
+
+### Ejecución E-05 · Laboratorio de Carmen y extractor tras las correcciones · 10 nov 2026
+
+- **Ejecución / casos / fecha / ejecutor:** `scripts/evaluar_extractor.py` (7 casos **simulados**) y `scripts/laboratorio.py --persona carmen` (cliente **simulado** por Claude), Alex en su portátil.
+- **Versión exacta:** commit `31e86e0` de main.
+- **Antes (mismo día):** en el primer laboratorio no saltó la alerta declarado ≠ demostrado (la entrevista acortada no preguntaba cuánto cree saber el cliente; corregido en `f7d4eb8`); en el segundo saltó, pero la renta variable quedó en `basic` porque el asistente recomprobó tras explicar el error y Carmen repitió la explicación (corregido en `31e86e0`: prompt del entrevistador, del extractor y protección en código).
+- **Esperado y observado:** extractor 100 % de cobertura (31/31), 100 % de precisión, 0 prohibidos. Carmen 10/10, alerta declarado ≠ demostrado en renta variable, 0 recomendaciones, 0 prohibidos, aviso de IA al inicio, 16 intervenciones del asistente (23 el 9 nov), 3 preguntas dobles según el detector del laboratorio.
+- **Mediciones pertinentes:** mediana por llamada 1,8 s (entrevistador), 2,1 s (extractor), 1,6 s (cliente simulado).
+- **Limitaciones:** una persona y una repetición; el cliente lo interpreta Claude.
 
 ### Ejecución E-04 · Extractor (B1) tras los ajustes de la voz · 10 nov 2026
 
