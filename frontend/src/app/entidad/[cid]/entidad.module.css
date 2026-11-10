@@ -31,6 +31,8 @@
 .heroCaja { position: relative; max-width: 1240px; margin: 0 auto; padding: 48px 24px 40px; display: flex; flex-wrap: wrap; gap: 28px; align-items: center; }
 .heroTexto { flex: 1 1 520px; min-width: 0; }
 .heroTexto h1 { margin: 14px 0 10px; font-size: clamp(38px, 5vw, 60px); line-height: 1.02; letter-spacing: -0.03em; font-weight: 600; }
+/* Los clientes nuevos tienen identificadores largos (cliente-<32 hex>): que partan en vez de salirse. */
+.heroTexto h1 .grad { overflow-wrap: anywhere; }
 .heroTexto p { margin: 0; font-size: 17px; color: #4b4b6b; max-width: 600px; line-height: 1.5; }
 .grad { background: linear-gradient(90deg, #c2338f 0, #8b45d6 50%, #5b5bf0 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
