@@ -264,3 +264,42 @@ def test_por_la_api_la_alerta_llega_al_perfil_y_marca_el_dato(monkeypatch):
     [a] = [a for a in p.alerts if a.path == "objectives.o1.horizon_years"]
     assert a.flag == Flag.low_confidence and a.created_by == "agent:verifier" and a.evidence[0].session_id == sid
     assert api.get(f"/api/sessions/{sid}").json()["rejections"] == []
+
+
+# ---------- batería de evaluación (fixtures/verificacion) ----------
+
+def test_casos_de_evaluacion_bien_formados():
+    from app.agentes import evaluacion_verificador as ev
+    from app.agentes.normalizacion import cita_valida
+    from app.perfil.modelos import CAMPOS
+
+    casos = ev.casos()
+    assert len(casos) >= 8 and len({c.nombre for c in casos}) == len(casos)
+    for c in casos:
+        cliente = {t.turn_id: t.text for t in c.turnos if t.speaker == "client"}
+        for ruta, f in c.perfil.mifid.items():
+            assert ruta in CAMPOS, (c.nombre, ruta)
+            e = f.evidence[0]
+            assert e.turn_id in cliente and cita_valida(e.quote, cliente[e.turn_id]), (c.nombre, ruta)
+        for e in c.esperadas:
+            assert all(r is None or r in verificador.RUTAS_REVISABLES for r in e.rutas), c.nombre
+
+
+def test_en_los_casos_las_reglas_fijas_no_dan_falsas_alarmas(sin_clave):
+    from app.agentes import evaluacion_verificador as ev
+
+    for c in ev.casos():
+        r = ev.puntuar(c, correr(c.perfil, c.turnos))
+        assert not r.falsas, (c.nombre, r.falsas)
+
+
+def test_puntuacion_de_la_evaluacion():
+    from app.agentes import evaluacion_verificador as ev
+
+    caso = next(c for c in ev.casos() if c.nombre.startswith("01"))
+    buena = Alerta(id="a", path="objectives.o1.horizon_years", flag=Flag.inconsistent, message="x")
+    otra = Alerta(id="b", path="financial.debts_eur", flag=Flag.low_confidence, message="y")
+    assert ev.puntuar(caso, [buena]).ok
+    r = ev.puntuar(caso, [buena, otra])
+    assert not r.ok and r.falsas == [otra]
+    assert ev.resumen([ev.puntuar(caso, [])])["deteccion"] == 0
