@@ -56,3 +56,35 @@ def test_al_dia_no_sube_nada(monkeypatch, tmp_path):
     m, peticiones = cargar(monkeypatch, tmp_path, s.chat._sistema())
     assert m.principal(aplicar=True) == 0
     assert [p.method for p in peticiones] == ["GET"]
+
+
+def test_crear_agente_en_espanol_con_nuestro_prompt(monkeypatch, tmp_path, capsys):
+    spec = importlib.util.spec_from_file_location("sincronizar_voz", RUTA)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    monkeypatch.setenv("ELEVENLABS_API_KEY", "clave-de-prueba")
+    monkeypatch.delenv("ELEVENLABS_AGENT_ID", raising=False)
+    enviados = []
+
+    def responder(req):
+        enviados.append(req)
+        return httpx.Response(200, json={"agent_id": "agent_nuevo"})
+
+    real = httpx.Client
+    monkeypatch.setattr(m.httpx, "Client", lambda **kw: real(transport=httpx.MockTransport(responder), **kw))
+    assert m.principal(aplicar=False, nuevo_agente=True) == 0
+    cuerpo = json.loads(enviados[0].content)
+    agente = cuerpo["conversation_config"]["agent"]
+    assert enviados[0].url.path == "/v1/convai/agents/create"
+    assert agente["language"] == "es" and "inteligencia artificial" in agente["first_message"]
+    assert agente["prompt"]["prompt"] == m.chat._sistema().strip()
+    assert "ELEVENLABS_AGENT_ID=agent_nuevo" in capsys.readouterr().out
+
+
+def test_no_crea_un_segundo_agente(monkeypatch):
+    spec = importlib.util.spec_from_file_location("sincronizar_voz", RUTA)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    monkeypatch.setenv("ELEVENLABS_API_KEY", "clave-de-prueba")
+    monkeypatch.setenv("ELEVENLABS_AGENT_ID", "agent_ya")
+    assert m.principal(aplicar=False, nuevo_agente=True) == 2
