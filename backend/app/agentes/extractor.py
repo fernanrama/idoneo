@@ -111,7 +111,8 @@ def _estado(perfil: Perfil) -> str:
     if not perfil.mifid:
         return "(vacío)"
     return "\n".join(
-        f"- {ruta} = {json.dumps(f.value, ensure_ascii=False)} ({f.source.value})"
+        f"- {ruta} = {json.dumps(f.value, ensure_ascii=False)} ({f.source.value}"
+        f"{', confianza baja' if Flag.low_confidence in f.flags else ''})"
         for ruta, f in sorted(perfil.mifid.items()) if f.source != Fuente.calculated
     )
 

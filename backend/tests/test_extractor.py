@@ -243,3 +243,17 @@ def test_sin_clave_el_cliente_avisa(monkeypatch):
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     with pytest.raises(claude.ClaudeNoDisponible):
         asyncio.run(claude.estructurado(agente="x", sistema="s", mensaje="m", esquema=Extraccion))
+
+
+def test_el_perfil_actual_marca_la_confianza_baja():
+    from app.agentes import extractor as ex
+    from app.perfil.modelos import Fact, Flag, Fuente, Perfil
+
+    perfil = Perfil(client_id="x", mifid={
+        "financial.debts_eur": Fact(value=0, source=Fuente.declared, confidence=0.55, flags=[Flag.low_confidence],
+                                    updated_by="agent:extractor"),
+        "financial.liquid_savings_eur": Fact(value=80000, source=Fuente.declared, confidence=0.9, updated_by="agent:extractor"),
+    })
+    estado = ex._estado(perfil)
+    assert "- financial.debts_eur = 0 (declared, confianza baja)" in estado
+    assert "- financial.liquid_savings_eur = 80000 (declared)" in estado

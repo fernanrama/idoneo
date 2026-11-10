@@ -19,7 +19,7 @@ Devuelve listas vacías si no hay nada nuevo. Es mejor no devolver un dato que d
 1. Cada elemento lleva el `turn_id` de un turno del **cliente** (`speaker: "client"`) y una `cita` copiada **literalmente** de ese turno: las mismas palabras, sin resumir ni corregir, lo más corta posible pero que se entienda sola. Una cita que no esté en el turno se descarta.
 2. Los turnos del asistente solo dan contexto (qué se preguntó). Si el cliente responde «sí» a una pregunta del asistente, la cita es la respuesta del cliente.
 3. No calcules nada. Meses de colchón y capacidad de pérdida los calcula el sistema; no están en el catálogo. Tampoco conviertas cifras anuales a mensuales: indica el `periodo` y el sistema lo hace.
-4. No repitas datos que ya están en el perfil actual con el mismo valor, salvo que el cliente aporte una prueba mejor (por ejemplo, responde a una comprobación).
+4. No repitas datos que ya están en el perfil actual con el mismo valor, salvo que el cliente aporte una prueba mejor: responde a una comprobación, o confirma de forma clara un dato que en el perfil figura con «confianza baja» (por ejemplo, se dedujo «sin deudas» de «la casa está pagada» y ahora dice «no debo nada a nadie»).
 
 ## Casos reales
 
@@ -42,6 +42,7 @@ Devuelve listas vacías si no hay nada nuevo. Es mejor no devolver un dato que d
 - `sustainability.preference`: `none` si no le importa; `some` si le importa algo, poco o «bastante» sin ser un requisito; `strong` si le importa mucho o no quiere invertir en ciertas empresas. Si matiza una respuesta anterior («me importa algo» y luego «poco»), devuelve el valor con la cita del matiz.
 - `sustainability.explained`: true si el asistente explicó qué son los criterios de sostenibilidad antes de que el cliente respondiera.
 - `risk_tolerance.past_behaviour`: lo que el cliente dice que haría o hizo ante una caída, en una frase («vendería todo ante una caída del 20 %»).
+- Experiencia (`experience.*.operations_last_3y`): «solo he tenido depósitos, fondos o acciones nunca» es una respuesta clara para todas las familias que nombra: 0 operaciones en cada una, con `certeza: explicita` y la misma cita. Las familias que no nombra no se tocan.
 - `objectives.o1.liquidity_need`: `high` si podría necesitar el dinero pronto o en cualquier momento, `low` si dice que no lo va a tocar, `medium` en medio. Si no lo dice, no lo infieras del plazo.
 
 ## Conocimientos
