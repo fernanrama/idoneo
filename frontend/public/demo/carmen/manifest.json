@@ -1,3 +1,99 @@
 {
-  "turnos": {}
+  "turnos": {
+    "0": {
+      "archivo": "00-agent.mp3",
+      "texto": "Hola, Carmen. Soy el asistente de perfil inversor. Soy una inteligencia artificial y una persona del banco revisará todo. ¿Le parece bien que grabemos la conversación?",
+      "voz": "ZCh4e9eZSUf41K4cmCEL"
+    },
+    "1": {
+      "archivo": "01-client.mp3",
+      "texto": "Sí, de acuerdo, puede grabar.",
+      "voz": "ypIbR1aohyRSdDv25DPr"
+    },
+    "2": {
+      "archivo": "02-agent.mp3",
+      "texto": "Gracias. ¿Para qué le gustaría invertir su dinero?",
+      "voz": "ZCh4e9eZSUf41K4cmCEL"
+    },
+    "3": {
+      "archivo": "03-client.mp3",
+      "texto": "Quiero tener un dinerito extra cada mes para complementar la pensión.",
+      "voz": "ypIbR1aohyRSdDv25DPr"
+    },
+    "4": {
+      "archivo": "04-agent.mp3",
+      "texto": "¿Durante cuánto tiempo, más o menos?",
+      "voz": "ZCh4e9eZSUf41K4cmCEL"
+    },
+    "5": {
+      "archivo": "05-client.mp3",
+      "texto": "Para los próximos diez años, más o menos.",
+      "voz": "ypIbR1aohyRSdDv25DPr"
+    },
+    "6": {
+      "archivo": "06-agent.mp3",
+      "texto": "¿Cuánto cobra al mes y cuánto gasta en cosas fijas como luz, comunidad o la compra?",
+      "voz": "ZCh4e9eZSUf41K4cmCEL"
+    },
+    "7": {
+      "archivo": "07-client.mp3",
+      "texto": "Cobro unos mil cuatrocientos cincuenta de pensión. Entre luz, comunidad y la compra, unos novecientos.",
+      "voz": "ypIbR1aohyRSdDv25DPr"
+    },
+    "8": {
+      "archivo": "08-agent.mp3",
+      "texto": "¿Y cuánto tiene ahorrado? ¿Tiene alguna deuda?",
+      "voz": "ZCh4e9eZSUf41K4cmCEL"
+    },
+    "9": {
+      "archivo": "09-client.mp3",
+      "texto": "Tengo ochenta mil en depósitos. No debo nada, la casa está pagada.",
+      "voz": "ypIbR1aohyRSdDv25DPr"
+    },
+    "10": {
+      "archivo": "10-agent.mp3",
+      "texto": "¿Qué productos conoce? Por ejemplo, depósitos o fondos de renta fija.",
+      "voz": "ZCh4e9eZSUf41K4cmCEL"
+    },
+    "11": {
+      "archivo": "11-client.mp3",
+      "texto": "Los depósitos los conozco, me dan un poquito al año. Si suben los tipos, el bono vale menos, eso me lo explicó mi hijo.",
+      "voz": "ypIbR1aohyRSdDv25DPr"
+    },
+    "12": {
+      "archivo": "12-agent.mp3",
+      "texto": "En el test de su banco marcó que conoce bien los fondos de renta variable. ¿Podría perder dinero un fondo así?",
+      "voz": "ZCh4e9eZSUf41K4cmCEL"
+    },
+    "13": {
+      "archivo": "13-client.mp3",
+      "texto": "Eso no puede pasar, el fondo es del banco.",
+      "voz": "ypIbR1aohyRSdDv25DPr"
+    },
+    "14": {
+      "archivo": "14-agent.mp3",
+      "texto": "Es una duda muy común. Un fondo de renta variable sí puede bajar, aunque lo venda su banco. Imagine que sus ahorros bajan un veinte por ciento en unos meses. ¿Qué haría?",
+      "voz": "ZCh4e9eZSUf41K4cmCEL"
+    },
+    "15": {
+      "archivo": "15-client.mp3",
+      "texto": "Si baja un veinte por ciento, lo saco todo.",
+      "voz": "ypIbR1aohyRSdDv25DPr"
+    },
+    "16": {
+      "archivo": "16-agent.mp3",
+      "texto": "Entendido. Última pregunta: ¿le importa que sus inversiones sigan criterios de sostenibilidad, por ejemplo evitar empresas que contaminan mucho?",
+      "voz": "ZCh4e9eZSUf41K4cmCEL"
+    },
+    "17": {
+      "archivo": "17-client.mp3",
+      "texto": "Eso me da igual, mientras no pierda.",
+      "voz": "ypIbR1aohyRSdDv25DPr"
+    },
+    "18": {
+      "archivo": "18-agent.mp3",
+      "texto": "Muchas gracias, Carmen. Ya tenemos su perfil. Una persona del banco lo revisará y le avisaremos.",
+      "voz": "ZCh4e9eZSUf41K4cmCEL"
+    }
+  }
 }
