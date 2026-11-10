@@ -54,67 +54,35 @@
 .c3 { background: radial-gradient(circle at 50% 82%, #e255b8 0, transparent 55%); opacity: 0.7; animation: v-respira 4s ease-in-out infinite; }
 .nucleo {
   position: absolute;
-  inset: 17%;
+  inset: 15%;
+  border-radius: 50%;
+  box-shadow: 0 0 90px rgba(110, 130, 255, 0.45), 0 0 26px rgba(170, 150, 255, 0.35);
+  animation: v-respira 5s ease-in-out infinite;
+  transition: box-shadow 0.6s;
+}
+/* Respaldo en CSS por si no hay WebGL: queda debajo de la esfera 3D. */
+.respaldo {
+  position: absolute;
+  inset: 0;
   border-radius: 50%;
   overflow: hidden;
-  box-shadow: inset 0 0 36px rgba(255, 255, 255, 0.28), inset 0 -24px 60px rgba(240, 138, 208, 0.35), inset 0 20px 50px rgba(90, 130, 255, 0.4), 0 0 90px rgba(110, 130, 255, 0.4);
-  animation: v-respira 5s ease-in-out infinite;
-  transition: box-shadow 0.6s, filter 0.6s;
+  background: radial-gradient(circle at 34% 28%, #dfe6ff 0, #8e9bff 22%, #6b4ef0 55%, #1a1560 100%);
 }
-.nucleo { background: radial-gradient(circle at 50% 55%, #241c6e 0, #0c0a2c 72%); border: 1px solid rgba(255, 255, 255, 0.22); }
-/* Plasma propio: un remolino de color que gira y dos corrientes de luz en sentido contrario. */
-.nucleo::before {
+.respaldo::before {
   content: "";
   position: absolute;
   inset: -35%;
   background: conic-gradient(from 0deg, #4f7dff, #a77bff, #f08ad0, #6fd0ff, #7b6bff, #4f7dff);
-  filter: blur(22px) saturate(1.2);
-  opacity: 0.78;
+  filter: blur(22px);
+  opacity: 0.7;
   mix-blend-mode: screen;
   animation: v-gira 9s linear infinite;
 }
-.plasma {
-  position: absolute;
-  inset: -10%;
-  border-radius: 50%;
-  background:
-    radial-gradient(ellipse 40% 18% at 32% 38%, rgba(255, 255, 255, 0.75), transparent 70%),
-    radial-gradient(ellipse 34% 14% at 68% 66%, rgba(190, 215, 255, 0.6), transparent 70%),
-    radial-gradient(ellipse 22% 30% at 58% 30%, rgba(255, 170, 230, 0.45), transparent 70%);
-  filter: blur(7px);
-  mix-blend-mode: screen;
-  animation: v-gira 6s linear infinite reverse;
-}
-.hilos {
-  position: absolute;
-  inset: 4%;
-  border-radius: 50%;
-  background: repeating-conic-gradient(from 0deg, transparent 0 9deg, rgba(255, 255, 255, 0.2) 11deg, transparent 13deg);
-  -webkit-mask-image: radial-gradient(circle, transparent 20%, #000 45%, transparent 72%);
-  mask-image: radial-gradient(circle, transparent 20%, #000 45%, transparent 72%);
-  filter: blur(1px);
-  mix-blend-mode: overlay;
-  animation: v-gira 14s linear infinite;
-}
-.plasma::after {
-  content: "";
-  position: absolute;
-  inset: 18%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.35), transparent 65%);
-  animation: v-respira 3.2s ease-in-out infinite;
-}
-.voz { position: absolute; inset: 17%; border-radius: 50%; border: 1.5px solid rgba(190, 205, 255, 0.5); opacity: 0; pointer-events: none; }
+.esfera { position: absolute; inset: 0; border-radius: 50%; }
+.voz { position: absolute; inset: 15%; border-radius: 50%; border: 1.5px solid rgba(190, 205, 255, 0.5); opacity: 0; pointer-events: none; }
 .habla .voz { animation: v-voz 1.6s ease-out infinite; }
 .habla .voz2 { animation-delay: 0.8s; }
 @keyframes v-voz { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(1.55); opacity: 0; } }
-.nucleo::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0.55) 0, rgba(255, 255, 255, 0.08) 22%, transparent 45%);
-}
 .anillo { position: absolute; inset: -9%; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.09); animation: v-gira 30s linear infinite; }
 .anillo::after {
   content: "";
@@ -129,19 +97,18 @@
 }
 .anillo2 { position: absolute; inset: -22%; border-radius: 50%; border: 1px dashed rgba(255, 255, 255, 0.05); animation: v-gira 60s linear infinite reverse; }
 
-.habla .c3, .habla .nucleo { animation: v-habla 0.45s ease-in-out infinite alternate; }
+.habla .c3 { animation: v-habla 0.45s ease-in-out infinite alternate; }
+.habla .nucleo { animation: v-habla 0.5s ease-in-out infinite alternate; }
 .habla .c1 { animation-duration: 3.5s; }
-.habla .nucleo::before { animation-duration: 4s; }
-.habla .plasma { animation-duration: 2.6s; }
 .escucha .nucleo { animation: v-escucha 2.4s ease-in-out infinite; }
 .escucha .c3 { opacity: 0.25; }
 .escucha .c2 { animation-duration: 20s; }
-.anotado .nucleo { box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.35), 0 0 120px rgba(127, 224, 184, 0.6); }
+.anotado .nucleo { box-shadow: 0 0 120px rgba(127, 224, 184, 0.65), 0 0 30px rgba(155, 235, 201, 0.5); }
+.anotado .c1 { background: radial-gradient(circle at 30% 30%, #2fc9a0 0, transparent 62%); }
+.anotado .c2 { background: radial-gradient(circle at 72% 62%, #4fa8ff 0, transparent 60%); }
 .pausa .capa { opacity: 0.15; }
-.pausa .nucleo { animation: none; filter: grayscale(0.85) brightness(0.8); }
+.pausa .nucleo { animation: none; box-shadow: none; }
 .pensando .c1 { animation-duration: 2.5s; }
-.pensando .nucleo::before { animation-duration: 3s; }
-.anotado .nucleo::before { filter: blur(22px) hue-rotate(-60deg) saturate(0.9); }
 
 /* ---------- Ondas y chips ---------- */
 .ondas { display: inline-flex; align-items: center; gap: 4px; height: 24px; }

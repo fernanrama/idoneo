@@ -26,17 +26,9 @@
   animation: v-ola 14s linear infinite;
   pointer-events: none;
 }
-.cinta {
-  position: absolute;
-  right: max(2%, calc(50% - 680px));
-  top: 10px;
-  width: 340px;
-  height: 340px;
-  animation: v-flota-giro 9s ease-in-out infinite;
-  pointer-events: none;
-  opacity: 0.95;
-}
-.heroCaja { position: relative; max-width: 1240px; margin: 0 auto; padding: 48px 24px 40px; display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-end; }
+.cinta { flex: 0 1 440px; min-width: 0; align-self: center; pointer-events: none; }
+.accion { margin-top: 26px; }
+.heroCaja { position: relative; max-width: 1240px; margin: 0 auto; padding: 48px 24px 40px; display: flex; flex-wrap: wrap; gap: 28px; align-items: center; }
 .heroTexto { flex: 1 1 520px; min-width: 0; }
 .heroTexto h1 { margin: 14px 0 10px; font-size: clamp(38px, 5vw, 60px); line-height: 1.02; letter-spacing: -0.03em; font-weight: 600; }
 .heroTexto p { margin: 0; font-size: 17px; color: #4b4b6b; max-width: 600px; line-height: 1.5; }
@@ -129,7 +121,7 @@
 .error { color: #b42318; }
 
 @media (max-width: 900px) {
-  .cinta { width: 200px; height: 200px; opacity: 0.5; }
+  .cinta { display: none; }
 }
 @media (max-width: 600px) {
   .pestanas { flex-wrap: nowrap; overflow-x: auto; align-self: stretch; scrollbar-width: none; }

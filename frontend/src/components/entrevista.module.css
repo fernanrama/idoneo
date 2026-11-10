@@ -105,3 +105,4 @@
 .demoBoton strong { display: block; color: var(--n-tinta); font-size: 15px; font-weight: 600; }
 .demoPlay { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--n-boton); color: #0b1030; flex-shrink: 0; animation: v-pulso 2s ease-out infinite; }
 .finTexto { margin: 0; max-width: 440px; color: var(--n-suave); font-size: 15px; line-height: 1.55; text-align: center; }
+.pista { margin: -6px 0 0; font-size: 13px; color: var(--n-tenue); }

@@ -116,6 +116,7 @@
   .escena { gap: 16px; }
   .pasos { display: none; }
   .enlaces { display: none; }
+  .navBoton { margin-left: auto; }
   .acciones a { flex: 1 1 100%; justify-content: center; }
   .panelNo { padding: 24px; }
 }

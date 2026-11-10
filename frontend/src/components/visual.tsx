@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useRef } from "react";
 import type { EstadoBloque } from "@/lib/bloques";
+import { Esfera3D, type AjustesEsfera, type Paleta } from "./Esfera3D";
 import s from "./visual.module.css";
 
 /**
@@ -39,7 +40,17 @@ export function Noche({ children, className = "", style }: { children: React.Rea
 
 export type EstadoAura = "reposo" | "habla" | "escucha" | "anotado" | "pausa" | "pensando";
 
-/** El entrevistador: respira en reposo, late al hablar, se recoge al escuchar y brilla en verde al anotar. */
+const AURA: Paleta = ["#1f3bff", "#8a5cff", "#ff7fd1"];
+const AJUSTES: Record<EstadoAura, AjustesEsfera> = {
+  reposo: { paleta: AURA, velocidad: 0.55, energia: 0.55 },
+  habla: { paleta: AURA, velocidad: 1.9, energia: 1.05, pulso: 1 },
+  escucha: { paleta: ["#1a2fd0", "#6f6bff", "#8fd6ff"], velocidad: 0.4, energia: 0.35 },
+  anotado: { paleta: ["#0c7f8f", "#38d6a4", "#d4ffe9"], velocidad: 1.1, energia: 0.7 },
+  pausa: { paleta: AURA, velocidad: 0.06, energia: 0.3, color: 0.12 },
+  pensando: { paleta: AURA, velocidad: 1.4, energia: 0.9 },
+};
+
+/** El entrevistador: una esfera de plasma en 3D que respira en reposo, se agita al hablar, se calma al escuchar y se vuelve verde al anotar. */
 export function Aura({ estado = "reposo", tam = 360 }: { estado?: EstadoAura; tam?: number }) {
   return (
     <div className={`${s.auraCaja} ${s[estado] ?? ""}`} style={{ "--tam": `${tam}px` } as React.CSSProperties} aria-hidden="true">
@@ -51,8 +62,8 @@ export function Aura({ estado = "reposo", tam = 360 }: { estado?: EstadoAura; ta
       <div className={s.voz} />
       <div className={`${s.voz} ${s.voz2}`} />
       <div className={s.nucleo}>
-        <div className={s.plasma} />
-        <div className={s.hilos} />
+        <div className={s.respaldo} />
+        <Esfera3D className={s.esfera} {...AJUSTES[estado]} />
       </div>
     </div>
   );

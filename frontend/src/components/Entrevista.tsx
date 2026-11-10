@@ -192,6 +192,9 @@ function Inicio({ e, compacto }: { e: HookEntrevista; compacto: boolean }) {
           Escribir
         </BotonNoche>
       </div>
+      <p className={s.pista} aria-live="polite">
+        {listo ? "Elige cómo prefieres responder. Podrás pausar cuando quieras." : "Marca las dos casillas para poder empezar."}
+      </p>
       <button className={s.demoBoton} onClick={() => e.iniciarGuion()}>
         <span className={s.demoPlay} aria-hidden="true">
           {Icono.play}

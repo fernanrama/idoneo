@@ -32,7 +32,7 @@ Si el backend tiene `ADMIN_TOKEN` (obligatorio con URL pública), pon **el mismo
 
 - `src/tema/visual.css`: tokens del tema oscuro (`.tema-noche`), clases `.mono`, `.vidrio` y todas las animaciones (`v-*`). Con «reducir movimiento» activado se apagan.
 - `src/components/visual.tsx`: piezas del tema oscuro (`Noche`, `Aura`, botones, iconos). `Entrevista.tsx` y `PanelVivo.tsx` son la entrevista y el panel en directo; `BarraCliente.tsx` y `cliente.module.css`, las pantallas claras del cliente.
-- `src/components/Formas.tsx`: visuales propios animados en CSS y SVG (esfera del perfil y cinta de la entidad); no hay imágenes. `Revela.tsx` hace aparecer los bloques al hacer scroll.
+- `src/components/Esfera3D.tsx`: la esfera de plasma en 3D (un shader de WebGL, sin librerías ni imágenes). Es el aura del entrevistador y, con otros colores, la esfera del perfil del cliente y la de la entidad (`Formas.tsx`). Si no hay WebGL se ve un respaldo en CSS. `Revela.tsx` hace aparecer los bloques al hacer scroll.
 - `src/tema/tema.css` y `src/components/ui.*`: estilo anterior; ninguna pantalla lo usa ya, se mantiene hasta que Fernán decida si se borra.
 - `src/lib/useEntrevista.ts`: lógica de la entrevista (voz de ElevenLabs o guion), envío de turnos, sondeo del perfil y paso de alertas al agente.
 - `src/lib/guion.ts`: guion de Carmen (**simulado**). Se sustituirá por `backend/eval/carmen.json` de Pablo.
