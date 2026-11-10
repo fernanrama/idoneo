@@ -31,8 +31,15 @@ async function pedirAlFront<T>(ruta: string, cuerpo: unknown): Promise<T> {
 export const api = {
   salud: () => pedir<{ status: string }>("/api/health"),
 
-  crearSesion: (client_id?: string) =>
-    pedir<Sesion>("/api/sessions", { method: "POST", body: JSON.stringify({ client_id }) }),
+  crearSesion: (client_id?: string, channel: "voice" | "text" = "voice") =>
+    pedir<Sesion>("/api/sessions", { method: "POST", body: JSON.stringify({ client_id, channel }) }),
+
+  /** Modo texto: guarda el mensaje del cliente (si lo hay) y devuelve la siguiente intervención del asistente. */
+  chat: (session_id: string, text: string | null) =>
+    pedir<{ client_turn: Turno | null; agent_turn: Turno; finished: boolean }>(`/api/sessions/${session_id}/chat`, {
+      method: "POST",
+      body: JSON.stringify({ text }),
+    }),
 
   enviarTurno: (session_id: string, turno: Turno) =>
     pedir<{ turn_id: string }>(`/api/sessions/${session_id}/turns`, {

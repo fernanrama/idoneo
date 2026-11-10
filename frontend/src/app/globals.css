@@ -1,4 +1,5 @@
 @import "../tema/tema.css";
+@import "../tema/visual.css";
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }

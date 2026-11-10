@@ -1,0 +1,16 @@
+.raiz { display: flex; flex-wrap: wrap; min-height: 100vh; background: #f6f5fb; }
+.raiz .cliente {
+  flex: 1 1 420px;
+  min-width: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+}
+.entidad { flex: 1.35 1 560px; min-width: 0; display: flex; flex-direction: column; }
+.entidad > section { flex: 1; }
+
+@media (max-width: 1000px) {
+  .raiz .cliente { position: relative; height: auto; min-height: 100dvh; }
+}
