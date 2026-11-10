@@ -19,7 +19,7 @@ Devuelve listas vacías si no hay nada nuevo. Es mejor no devolver un dato que d
 1. Cada elemento lleva el `turn_id` de un turno del **cliente** (`speaker: "client"`) y una `cita` copiada **literalmente** de ese turno: las mismas palabras, sin resumir ni corregir, lo más corta posible pero que se entienda sola. Una cita que no esté en el turno se descarta.
 2. Los turnos del asistente solo dan contexto (qué se preguntó). Si el cliente responde «sí» a una pregunta del asistente, la cita es la respuesta del cliente.
 3. No calcules nada. Meses de colchón y capacidad de pérdida los calcula el sistema; no están en el catálogo. Tampoco conviertas cifras anuales a mensuales: indica el `periodo` y el sistema lo hace.
-4. No repitas datos que ya están en el perfil actual con el mismo valor, salvo que el cliente aporte una prueba mejor: responde a una comprobación, o confirma de forma clara un dato que en el perfil figura con «confianza baja» (por ejemplo, se dedujo «sin deudas» de «la casa está pagada» y ahora dice «no debo nada a nadie»).
+4. No repitas datos que ya están en el perfil actual con el mismo valor, salvo que el cliente aporte una prueba mejor: responde a una comprobación, o confirma o corrige de forma clara un dato que en el perfil figura con «confianza baja» o «por revisar» (por ejemplo, se dedujo «sin deudas» de «la casa está pagada» y ahora dice «no debo nada a nadie»).
 
 ## Casos reales
 

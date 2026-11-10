@@ -206,7 +206,7 @@ async def _procesar_turno_sin_candado(session_id: str) -> None:
 
     # 2. Verificador: alertas sobre el perfil ya actualizado (aunque el extractor haya fallado).
     try:
-        brutas = _lista_de(await verificador.verificar(store.perfil(cid), turnos), "verificador", rechazar)
+        brutas = _lista_de(await verificador.verificar(store.perfil(cid), turnos, session_id), "verificador", rechazar)
     except Exception as e:
         log.exception("Fallo del verificador en %s", session_id)
         rechazar("verificador", "error", f"el verificador falló: {type(e).__name__}: {str(e)[:300]}")
