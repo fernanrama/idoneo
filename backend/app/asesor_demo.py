@@ -5,8 +5,9 @@ Recupera el paso «Validar perfil» del pitch sin reabrir la autovalidación que
 - Autorización propia: cabecera `X-Demo-Advisor-Token` con `DEMO_ADVISOR_TOKEN`. No se lee
   `Authorization`, así que ni el Bearer del cliente ni un `client_id` o `session_id` dan permiso
   de asesor. Debe ser distinto de `ADMIN_TOKEN`, `CLIENT_ACCESS_SECRET` y `VOICE_USER_ID_SECRET`.
-- Solo clientes ficticios: `DEMO_ADVISOR_CLIENTS` (por defecto `carmen-68`). Cada uno debe ser un
-  fixture de `backend/fixtures/` marcado como «DATOS SIMULADOS» y con el mismo `client_id`.
+- Solo clientes ficticios: `DEMO_ADVISOR_CLIENTS` (por defecto `carmen-68`), fixtures de `backend/fixtures/`
+  marcados como «DATOS SIMULADOS», y los clientes nuevos que un operador autorice explícitamente
+  (demo_operador.py y demo_autorizaciones.py): uno a uno, con caducidad y solo mientras dure este proceso.
 - Solo local: la conexión debe llegar desde loopback, con `Host` local y sin cabeceras de proxy.
   Un despliegue detrás de un proxy o con un dominio público lo rechaza aunque se active por error.
 - Apagado (`DEMO_ADVISOR_MODE` distinto de `1`), sus rutas responden 404 como si no existieran.
@@ -28,6 +29,7 @@ from urllib.parse import urlsplit
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
 
+from . import demo_autorizaciones
 from .perfil import calculos, store, validacion
 
 log = logging.getLogger("perfil.asesor_demo")
@@ -129,9 +131,14 @@ def exigir_asesor_demo(request: Request,
 
 
 def _cliente_permitido(client_id: str, conf: Configuracion) -> str:
-    if client_id not in conf.clientes:
+    """Fixture ficticio de la lista o cliente nuevo con autorización vigente del operador."""
+    if client_id not in conf.clientes and demo_autorizaciones.activa(client_id) is None:
         raise HTTPException(404, "Recurso no encontrado")
     return client_id
+
+
+def clientes_permitidos(conf: Configuracion) -> list[str]:
+    return sorted(conf.clientes | {a["client_id"] for a in demo_autorizaciones.listar()})
 
 
 def _llamar(fn, *args):
@@ -152,7 +159,7 @@ def _perfil_para_asesor(client_id: str) -> dict[str, Any]:
 
 @router.get("/estado")
 def estado(conf: Configuracion = Depends(exigir_asesor_demo)) -> dict[str, Any]:
-    return {"enabled": True, "simulated": True, "clients": sorted(conf.clientes), "advisor_id": conf.asesor_id}
+    return {"enabled": True, "simulated": True, "clients": clientes_permitidos(conf), "advisor_id": conf.asesor_id}
 
 
 @router.get("/clientes/{client_id}")
@@ -177,8 +184,11 @@ def validar(client_id: str, conf: Configuracion = Depends(exigir_asesor_demo)) -
 
 @router.post("/clientes/{client_id}/reiniciar")
 def reiniciar(client_id: str, conf: Configuracion = Depends(exigir_asesor_demo)) -> dict[str, Any]:
-    """Vuelve a cargar el fixture como versión nueva, para repetir el ensayo. No borra el historial."""
-    cid = _cliente_permitido(client_id, conf)
+    """Vuelve a cargar el fixture como versión nueva, para repetir el ensayo. No borra el historial.
+    Solo fixtures: un cliente nuevo no tiene fixture que recargar."""
+    if client_id not in conf.clientes:
+        raise HTTPException(404, "Recurso no encontrado")
+    cid = client_id
     _llamar(store.cargar_fixture, cid)
     return _perfil_para_asesor(cid)
 
