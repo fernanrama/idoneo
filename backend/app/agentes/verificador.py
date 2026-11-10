@@ -228,39 +228,48 @@ def _repregunta(texto: str | None) -> str:
     return f" Repreguntar: «{t}»" if t else ""
 
 
+def _descarte(h: Hallazgo, turno: Turno | None, actual: Fact | None, relacionada: Fact | None) -> str | None:
+    """Por qué un hallazgo del modelo no se sostiene, o None si se acepta."""
+    if h.motivo not in MOTIVOS[h.tipo]:
+        return "motivo_de_otro_tipo"
+    if turno is None:
+        return "turno_fuera_de_ventana_o_del_asistente"
+    if not cita_valida(h.cita, turno.text):
+        return "cita_no_literal"
+    if h.tipo != "revisar_asesor" and h.ruta is None:
+        return "sin_ruta"
+    if h.tipo == "contradiccion" and actual is None and relacionada is None:
+        # Al menos un lado tiene que estar ya en el perfil; el otro puede ser lo que el cliente acaba de
+        # decir y el extractor aún no ha anotado («no debo nada» frente a «la hipoteca son 800»).
+        return "ningun_dato_en_el_perfil"
+    if h.tipo == "dato_dudoso" and actual is None:
+        return "dato_inexistente"
+    if any(f is not None and f.source == Fuente.advisor for f in (actual, relacionada)):
+        return "lo_reviso_el_asesor"
+    return None
+
+
 def a_alertas(revision: Revision, perfil: Perfil, turnos: list[Turno], session_id: str | None) -> list[Alerta]:
     """Parte determinista: de los hallazgos del modelo a alertas seguras. Pública para poder testearla."""
     del_cliente = {t.turn_id: t for t in turnos if t.speaker == "client" and t.turn_id}
     salida: list[Alerta] = []
     vistos: set[tuple[Flag, str | None]] = set()
     for h in revision.hallazgos:
-        if h.motivo not in MOTIVOS[h.tipo]:
-            log.debug("verificador: motivo %s no es de %s", h.motivo, h.tipo)
-            continue
         turno = del_cliente.get(h.turn_id)
-        if turno is None or not cita_valida(h.cita, turno.text):
-            log.warning("verificador: cita no literal o fuera de ventana (%s)", h.motivo)
-            continue
-        if h.tipo != "revisar_asesor" and h.ruta is None:
-            continue
         actual = perfil.mifid.get(h.ruta) if h.ruta else None
         relacionada = perfil.mifid.get(h.ruta_relacionada) if h.ruta_relacionada else None
-        if h.tipo == "contradiccion":
-            if h.ruta_relacionada and relacionada is None:
-                continue  # choca con un dato que no existe
-            if not h.ruta_relacionada and actual is None:
-                continue  # dos versiones de un dato que ni siquiera está en el perfil
-        if h.tipo == "dato_dudoso" and actual is None:
-            continue  # no hay nada que dudar
-        if any(f is not None and f.source == Fuente.advisor for f in (actual, relacionada)):
-            continue  # lo revisó ya una persona de la entidad
+        motivo = _descarte(h, turno, actual, relacionada)
+        if motivo:
+            # Sin citas ni valores en el log: pueden ser datos personales.
+            log.info("verificador: descartado %s/%s en %s: %s", h.tipo, h.motivo, h.ruta or "-", motivo)
+            continue
         flag = FLAG_DEL_TIPO[h.tipo]
         if (flag, h.ruta) in vistos:
             continue
         vistos.add((flag, h.ruta))
         evidencia = [Evidencia(session_id=session_id or (actual.evidence[0].session_id if actual and actual.evidence else "-"),
                                turn_id=turno.turn_id, t=(turno.t_start, turno.t_end), quote=limpiar(h.cita))]
-        evidencia += _evidencia(relacionada)
+        evidencia += _evidencia(relacionada if relacionada is not None else actual)
         texto = MENSAJE[h.motivo] + ("" if h.tipo == "revisar_asesor" else _repregunta(h.repregunta))
         salida.append(Alerta(id=_id(), path=h.ruta, flag=flag, message=texto, evidence=evidencia))
     return salida

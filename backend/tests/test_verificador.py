@@ -170,7 +170,7 @@ def test_revisar_asesor_sin_ruta_y_sin_repregunta(monkeypatch):
     hallazgo("revisar_asesor", "pide_recomendacion", None, "boda", turn_id="t-099"),
     # motivo de otro tipo
     hallazgo("contradiccion", "presion_de_terceros", "objectives.o1.horizon_years", "boda de mi hija"),
-    # contradicción con un dato que no está en el perfil
+    # contradicción en la que ninguno de los dos datos está en el perfil
     hallazgo("contradiccion", "plazo_vs_liquidez", "objectives.o1.liquidity_need", "boda de mi hija",
              relacionada="financial.debts_eur"),
     # dos versiones de un dato que no existe
@@ -303,3 +303,17 @@ def test_puntuacion_de_la_evaluacion():
     r = ev.puntuar(caso, [buena, otra])
     assert not r.ok and r.falsas == [otra]
     assert ev.resumen([ev.puntuar(caso, [])])["deteccion"] == 0
+
+
+def test_contradiccion_con_lo_que_acaba_de_decir_aunque_no_este_anotado(monkeypatch):
+    """Evaluación real (10 nov, caso 05): «no debo nada» en el perfil frente a «la hipoteca son 800» aún sin anotar."""
+    turnos = [Turno(turn_id="t-002", speaker="client", text="No debo nada a nadie.", t_start=1, t_end=2),
+              Turno(turn_id="t-004", speaker="client", text="Unos 1.400, que solo la hipoteca ya son 800.",
+                    t_start=3, t_end=4)]
+    simular(monkeypatch, Revision(hallazgos=[
+        hallazgo("contradiccion", "cifras_incompatibles", "financial.debts_eur", "solo la hipoteca ya son 800",
+                 relacionada="financial.fixed_monthly_costs_eur"),
+    ]))
+    [a] = correr(perfil(financial__debts_eur=fact(0, cita="No debo nada a nadie.")), turnos)
+    assert (a.flag, a.path) == (Flag.inconsistent, "financial.debts_eur")
+    assert [e.turn_id for e in a.evidence] == ["t-004", "t-002"]
