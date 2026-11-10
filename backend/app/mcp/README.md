@@ -19,9 +19,10 @@ pip install -r requirements.txt
 uvicorn app.main:app --port 8000
 # otra terminal: inspector oficial de MCP (requiere Node)
 npx @modelcontextprotocol/inspector   # URL: http://localhost:8000/mcp · transporte: Streamable HTTP
+#   cabecera: Authorization: Bearer <MCP_DEMO_TOKEN>  (sin credencial responde 401)
 ```
 
-Tests: `pytest tests/test_mcp.py`. Probado el 8/11 con el cliente MCP de Python contra uvicorn: inicializa, lista las 4 herramientas y devuelve las restricciones de Carmen (`usable: false` hasta que el asesor valida). Un `Host` no permitido recibe 421.
+Tests: `pytest tests/test_mcp.py tests/test_mcp_demo.py`. Probado el 8/11 con el cliente MCP de Python contra uvicorn: inicializa, lista las 4 herramientas y devuelve las restricciones de Carmen (`usable: false` hasta que el asesor valida). Un `Host` no permitido recibe 421.
 
 ## Prueba completa en Claude (9/11)
 
@@ -32,20 +33,24 @@ Hecha con un túnel de cloudflared desde el portátil de Alex, el conector añad
 - Detectado: el buscador de MyInvestor solo admite un `asset_type` por búsqueda. Las instrucciones del servidor piden ahora una búsqueda por valor.
 - Recordatorio para el pitch: el orden y la elección de fondos es del agente de la entidad (que asesora); nosotros solo damos los límites del perfil.
 
-## Conectarlo en Claude (demo)
+## Conectarlo en Claude (pitch)
 
-Claude necesita una URL pública HTTPS. Para pruebas, un túnel temporal desde el portátil:
+Desde la PR #21, `/mcp` exige credencial: sin ella responde 401. **Nunca se usa `ADMIN_TOKEN` en un conector**: lee a todos los clientes y abre rutas REST de escritura. Para el pitch hay dos credenciales de demostración ([`demo.py`](demo.py)), ambas de solo lectura, **solo por cabecera `Authorization: Bearer`** (nunca en la URL) y **solo desde esta máquina** (loopback, `Host` local y sin proxy; si no, 403):
 
-```bash
-cloudflared tunnel --url http://localhost:8000      # da https://<algo>.trycloudflare.com
-# en .env:  MCP_ALLOWED_HOSTS=<algo>.trycloudflare.com   y reiniciar uvicorn
-```
+| Credencial | Para | Cómo se obtiene | Vida |
+|---|---|---|---|
+| `MCP_DEMO_TOKEN` | Fixtures ficticios de `MCP_DEMO_CLIENTS` (por defecto `carmen-68`) | Valor aleatorio en el `.env` | Hasta que se quite del `.env` |
+| Token de operador (`idoneo-demo-…`) | Un cliente ficticio nuevo concreto | `scripts/demo_operador.py autorizar <client_id> --confirmo-ficticio` | Caduca (2 h por defecto, máx. 8 h), se revoca y no sobrevive a un reinicio |
 
-En Claude: Ajustes → Conectores → Añadir conector personalizado → `https://<algo>.trycloudflare.com/mcp`. Activar también el conector de MyInvestor (`https://mcp.myinvestor.es/mcp`).
+La API REST no reconoce ninguna de las dos. Las cuatro herramientas se declaran `readOnlyHint`. Si `MCP_DEMO_TOKEN` es insegura (corta, con caracteres no válidos o igual a otro secreto), queda desactivada y el log lo avisa.
 
-La URL estable (despliegue) está pendiente: contratar o usar un servicio requiere la autorización del equipo.
+**Cliente:** Claude Code en el mismo portátil. Admite cabeceras (`claude mcp add -H`; comprobado en Claude Code 2.1.322) y conecta con `localhost` sin túnel. No usamos el conector de claude.ai ni el de Claude Desktop: necesitan una URL pública y, sin cabeceras propias, el token tendría que ir en la URL.
 
-**Ojo:** la URL del túnel es pública. Solo con datos simulados (Carmen). Antes de exponer perfiles reales hace falta autenticación (OAuth del conector), que no está hecha.
+El recorrido completo, con Carmen o con un cliente nuevo entrevistado en directo, está en [docs/MODO_ASESOR_DEMO.md](../../../docs/MODO_ASESOR_DEMO.md#recorrido-completo-del-pitch).
+
+### Test de contrato
+
+`pytest tests/test_mcp_demo.py tests/test_demo_operador.py`: configuración, rechazos, solo local, el protocolo completo contra un uvicorn local en un puerto efímero (con el cliente MCP oficial) y el recorrido «cliente nuevo → entrevista → operador → asesor → MCP», incluidos caducidad, revocación y reinicio. Sin servicios externos y con las claves de proveedores vacías.
 
 ## MyInvestor: lo que se ha comprobado
 

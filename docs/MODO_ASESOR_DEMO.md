@@ -1,24 +1,24 @@
 # Modo asesor de demostración
 
-**Estado:** IMPLEMENTADO en la rama `feat/demo-modo-asesor` (sin fusionar). Solo prototipo, DATOS SIMULADOS.
+**Estado:** modo asesor IMPLEMENTADO en `main` (PR #25). Operador para clientes nuevos y credenciales MCP de demostración: rama `feat/mcp-pitch`, pendiente de revisión. Solo prototipo, DATOS SIMULADOS.
 
 Recupera el paso «Validar perfil» del recorrido de Carmen sin reabrir la autovalidación que cerró la PR #21. Está **apagado por defecto**. Encendido, permite que la vista de la entidad lea el expediente persistido de un cliente ficticio, lo valide con la validación atómica de siempre y lo reinicie para repetir el ensayo.
 
 ## Cómo se activa para la presentación
 
-1. Genera un token largo y aleatorio. Tiene que ser distinto de `ADMIN_TOKEN`, de `CLIENT_ACCESS_SECRET` y de `VOICE_USER_ID_SECRET`:
+1. Genera un token largo y aleatorio directamente en el `.env` de la raíz, **sin que aparezca en pantalla**. Tiene que ser distinto de `ADMIN_TOKEN`, de `CLIENT_ACCESS_SECRET` y de `VOICE_USER_ID_SECRET`. Hazlo solo si esa variable aún no está en el `.env`:
    ```bash
-   python3 -c "import secrets; print(secrets.token_urlsafe(48))"
+   printf 'DEMO_ADVISOR_TOKEN=%s\n' "$(python3 -c 'import secrets; print(secrets.token_urlsafe(48))')" >> .env && chmod 600 .env
    ```
 2. En el `.env` de la raíz (backend):
    ```
    DEMO_ADVISOR_MODE=1
-   DEMO_ADVISOR_TOKEN=<el token>
+   DEMO_ADVISOR_TOKEN=<generado en el paso 1>
    # Opcionales:
    # DEMO_ADVISOR_CLIENTS=carmen-68     (por defecto)
    # DEMO_ADVISOR_ID=asesor-demo        (aparece como validated_by)
    ```
-3. En `frontend/.env.local` (servidor Next; **sin** prefijo `NEXT_PUBLIC_`):
+3. En `frontend/.env.local` (servidor Next; **sin** prefijo `NEXT_PUBLIC_`). Copia el token sin mostrarlo con `grep '^DEMO_ADVISOR_TOKEN=' .env >> frontend/.env.local`:
    ```
    DEMO_ADVISOR_MODE=1
    DEMO_ADVISOR_TOKEN=<el mismo token>
@@ -36,7 +36,7 @@ Recupera el paso «Validar perfil» del recorrido de Carmen sin reabrir la autov
 | Separación cliente/asesor | El backend solo mira `X-Demo-Advisor-Token`; no lee `Authorization`. El Bearer del cliente, su `client_id`, un `session_id` o `ADMIN_TOKEN` usados como token devuelven 401. El token de asesor tampoco abre las rutas del cliente, `/validate`, `/api/demo/reset` ni `/mcp` |
 | Secretos fuera del navegador | El token vive en el entorno del servidor Next y solo se envía a un backend local. El navegador llama a `/api/entidad/...` sin credenciales, y ni la respuesta, ni el HTML, ni el bundle, ni el almacenamiento lo contienen (comprobado) |
 | Botón habilitado solo con autorización comprobada | `GET /api/entidad/asesor` pregunta al backend con el token. Si el backend no lo acepta, el modo aparece apagado |
-| Solo datos ficticios | `DEMO_ADVISOR_CLIENTS` solo admite fixtures de `backend/fixtures/` cuyo `reason` empieza por «DATOS SIMULADOS» y cuyo `client_id` coincide. Cualquier otro cliente, aunque exista, responde 404 |
+| Solo datos ficticios | `DEMO_ADVISOR_CLIENTS` solo admite fixtures de `backend/fixtures/` cuyo `reason` empieza por «DATOS SIMULADOS» y cuyo `client_id` coincide. Un cliente nuevo solo entra si el operador lo autoriza ([ver abajo](#autorizar-un-cliente-nuevo-operador)). Cualquier otro, aunque exista, responde 404 |
 | No activarse en un despliegue público | Apagado salvo `DEMO_ADVISOR_MODE=1` exacto. Backend: conexión desde loopback, `Host` local y sin `Forwarded`, `X-Forwarded-*` ni `X-Real-IP`. Next: `Host` local, `X-Forwarded-*` solo con valores locales, `Origin` del mismo sitio en escrituras y backend local. Token de al menos 32 bytes y distinto de los demás secretos |
 | Validación existente | `store.validar` (atómica, sin correcciones): mismo 409 si ya está activo o incompleto, sin versiones parciales |
 
@@ -60,7 +60,74 @@ Recupera el paso «Validar perfil» del recorrido de Carmen sin reabrir la autov
 | `POST /api/entidad/{id}/validar` | Valida. Con el modo apagado responde 403, como en la PR #21 |
 | `POST /api/entidad/reset` | Reinicia a Carmen. Con el modo apagado responde 403 |
 
+## Autorizar un cliente nuevo (operador)
+
+Para que el asesor de demo valide, y el MCP sirva, a un cliente ficticio **creado en directo con una entrevista**, una persona de confianza lo autoriza desde el ordenador del backend:
+
+```bash
+cd backend
+python scripts/demo_operador.py autorizar <client_id> --confirmo-ficticio     # stdout: solo el token MCP de ese cliente
+python scripts/demo_operador.py listar                                        # vigentes (sin tokens)
+python scripts/demo_operador.py revocar <client_id>                           # al terminar
+python scripts/demo_operador.py revocar-todo
+```
+
+| Garantía | Cómo |
+|---|---|
+| Solo el operador | `POST /api/demo/operador/autorizaciones` exige `X-Admin-Token`, que lee el script del `.env` sin mostrarlo. No acepta el Bearer del cliente, su `client_id`, su `session_id`, el token del asesor ni los tokens MCP (401). Nada de esto pasa por el navegador ni por Next |
+| Solo local y solo en modo demo | Con `DEMO_ADVISOR_MODE=1`, desde loopback, `Host` local y sin proxy. Si no, 404 o 403 |
+| Explícita y por cliente | `"ficticio": true` obligatorio (el script exige `--confirmo-ficticio`). Una autorización = un `client_id`. Como mucho 10 a la vez |
+| Caduca, se revoca y no se reutiliza | 2 h por defecto (60 s–8 h). Vive solo en la memoria del proceso: reiniciar el backend anula todas las autorizaciones y tokens, aunque el cliente siga en la base. Renovar invalida el token anterior. Solo se guarda la huella SHA-256 del token |
+| Sin atajos MiFID | Autorizar no crea versiones ni cambia el estado. El asesor valida con `store.validar`: un perfil incompleto sigue dando 409. Revocar no toca el perfil: solo quita el acceso de demo |
+| MCP de solo lectura y solo ese cliente | El token `idoneo-demo-…` vale en `/mcp`, por cabecera y desde local, para las 4 herramientas de lectura y solo para ese `client_id`. Otro cliente: 404. API REST: 401 |
+
+La vista `/entidad/<client_id>` avisa si el modo asesor está activo pero el cliente no está autorizado, y muestra el comando exacto. «Reiniciar la demo» solo aparece con Carmen: un cliente nuevo no tiene fixture que recargar.
+
+## Recorrido completo del pitch
+
+Todo en el portátil, sin túneles. DATOS FICTICIOS. La entrevista real consume créditos de Claude (2 llamadas por turno); la voz, minutos de ElevenLabs.
+
+**Preparación (una vez)**
+
+1. En el `.env` de la raíz: `DEMO_ADVISOR_MODE=1`, `DEMO_ADVISOR_TOKEN`, `MCP_DEMO_TOKEN` y `ADMIN_TOKEN` (32+ bytes), con valores aleatorios distintos, más `ANTHROPIC_API_KEY` para la entrevista real. `PERFIL_ALMACEN=memoria`. Para añadir un secreto **sin que aparezca en pantalla** (solo si esa variable aún no está en el `.env`):
+   ```bash
+   printf 'MCP_DEMO_TOKEN=%s\n' "$(python3 -c 'import secrets; print(secrets.token_urlsafe(48))')" >> .env && chmod 600 .env
+   ```
+2. En `frontend/.env.local`: `DEMO_ADVISOR_MODE=1` y el mismo `DEMO_ADVISOR_TOKEN`. Cópialo sin mostrarlo: `grep '^DEMO_ADVISOR_TOKEN=' .env >> frontend/.env.local`.
+3. Dependencias: `pip install -r backend/requirements.txt` (incluye `anthropic`). Después, `next build` y arrancar backend y front. El log del backend debe decir `MODO ASESOR DE DEMO ACTIVO` y `CREDENCIAL MCP DE DEMO ACTIVA`.
+4. Claude Code con MyInvestor: `claude mcp add --transport http myinvestor https://mcp.myinvestor.es/mcp`.
+
+**En directo**
+
+1. **Entrevista:** `http://localhost:3000/escenario` → responder por escrito o por voz con el cliente ficticio. A la derecha se rellena el perfil. Al terminar, «Validar en la entidad» abre `/entidad/<client_id>`.
+2. **Perfil pendiente:** la vista muestra los datos con su frase y el aviso «este cliente aún no está autorizado», con el comando exacto.
+3. **Autorización del operador**, en la terminal del backend. El token se captura en una variable y nunca se ve; el script se niega a escribirlo en la terminal:
+   ```bash
+   cd backend
+   export IDONEO_MCP_TOKEN="$(python scripts/demo_operador.py autorizar <client_id> --confirmo-ficticio)"
+   ```
+4. **Validación del asesor:** recarga `/entidad/<client_id>` → «Validar perfil». Si faltan datos obligatorios, el backend lo rechaza (409) y hay que completar la entrevista.
+5. **Conectar el MCP de ese cliente**, desde la misma carpeta en la que luego abrirás Claude Code (el servidor se guarda con alcance local, ligado a esa carpeta):
+   ```bash
+   claude mcp add --transport http idoneo http://localhost:8000/mcp -H "Authorization: Bearer $IDONEO_MCP_TOKEN"
+   claude mcp list        # «idoneo» y «myinvestor» conectados; no muestra cabeceras
+   ```
+   Para Carmen, carga antes su token sin mostrarlo: `export IDONEO_MCP_TOKEN="$(grep '^MCP_DEMO_TOKEN=' .env | cut -d= -f2-)"`.
+   `claude mcp add` oculta la cabecera en su salida, pero **`claude mcp get idoneo` la muestra en claro**: no lo ejecutes con la pantalla proyectada. Claude Code guarda la cabecera sin cifrar en `~/.claude.json` hasta que la borres.
+6. **Claude + MyInvestor:** *«Usa el conector de Idóneo para leer las restricciones de <client_id> y busca en MyInvestor fondos compatibles; explica qué descartas y por qué, con la evidencia de la entrevista.»* Claude llama a `get_investment_constraints` (`usable: true`), busca en MyInvestor con `funds_query` (una búsqueda por `asset_type`), aplica `post_filters` y respeta `appropriateness`. La selección final es del agente de la entidad.
+7. **Al terminar (revocación):**
+   ```bash
+   python scripts/demo_operador.py revocar-todo     # los tokens de operador dejan de valer al instante
+   claude mcp remove idoneo                         # borra la cabecera de ~/.claude.json
+   unset IDONEO_MCP_TOKEN
+   ```
+   Reiniciar el backend también anula todas las autorizaciones. `MCP_DEMO_TOKEN` (la de Carmen) es configuración fija: para revocarla, quítala del `.env` o cámbiala y reinicia.
+
+**Si algo falla:** el MCP responde 401 (token caducado, revocado o de antes de un reinicio: vuelve a autorizar) · 403 (la petición no viene de localhost) · 404 en una herramienta (el token no es de ese cliente). Si la validación da 409, el perfil está incompleto o ya validado.
+
 ## Límites fuera del prototipo
+
+- **Operador y MCP de demostración:** el operador se autentica con `ADMIN_TOKEN` (servicio local), no con una identidad propia. Que el cliente sea ficticio lo declara el operador (`--confirmo-ficticio`); el sistema no puede comprobarlo. Las autorizaciones viven en la memoria de un único proceso: con varios workers de uvicorn no se compartirían. `MCP_DEMO_TOKEN` no caduca sola. Ninguna de estas credenciales sirve para producción, que necesitaría OAuth del conector, identidad del consumidor y permisos por propósito.
 
 - **No es autenticación de asesores.** El token es un secreto compartido de la máquina de la demo: no identifica a una persona, no caduca y no tiene permisos por cliente. Todas las validaciones quedan firmadas como `advisor:<DEMO_ADVISOR_ID>`.
 - Una entidad real necesita identidad del asesor (SSO), permisos por cliente y por función, registro de accesos, caducidad y revocación.
@@ -71,7 +138,7 @@ Recupera el paso «Validar perfil» del recorrido de Carmen sin reabrir la autov
 ## Pruebas
 
 ```bash
-cd backend && python -m pytest -q tests/test_asesor_demo.py   # 31 casos × memoria y SQLite
+cd backend && python -m pytest -q tests/test_asesor_demo.py tests/test_demo_operador.py tests/test_mcp_demo.py
 cd frontend && npm run test:contrato                          # incluye tests/asesor-demo.mjs
 cd frontend && npx next build && IDONEO_PYTHON=../backend/.venv/bin/python npm run test:asesor-demo
 # Opcional, con navegador: IDONEO_PLAYWRIGHT_MODULE=/ruta/a/playwright/index.mjs
