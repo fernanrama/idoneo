@@ -2,7 +2,7 @@
 
 Así el prompt vive en un solo sitio, el repo: el modo texto y la voz dicen lo mismo y cada cambio queda
 en git. Cambia el texto de las instrucciones del agente y se asegura de que tenga la herramienta
-`datos_pendientes` (la crea en el workspace si no existe); la voz, el primer mensaje, el idioma, el modelo
+`datos_pendientes` (la crea en el workspace si no existe) y la de sistema `end_call` para colgar; la voz, el primer mensaje, el idioma, el modelo
 y el resto de herramientas se quedan como estén en el panel de ElevenLabs.
 
 `datos_pendientes` es una herramienta de cliente: cuando el agente la llama, el navegador (frontend,
@@ -62,6 +62,14 @@ HERRAMIENTA = {
     "response_timeout_secs": 10,
 }
 
+# Herramienta de sistema para colgar: sin ella el agente se despide pero la llamada sigue abierta.
+COLGAR = {
+    "type": "system",
+    "name": "end_call",
+    "description": "Cuelga la llamada. Úsala justo después de despedirte, o cuando el cliente pida terminar.",
+    "params": {"system_tool_type": "end_call"},
+}
+
 
 class ErrorElevenLabs(Exception):
     pass
@@ -95,7 +103,8 @@ def crear(clave: str) -> int:
             "name": NOMBRE,
             "conversation_config": {
                 "agent": {"language": "es", "first_message": PRIMER_MENSAJE,
-                          "prompt": {"prompt": chat._sistema().strip(), "tool_ids": [id_herramienta]}},
+                          "prompt": {"prompt": chat._sistema().strip(), "tool_ids": [id_herramienta],
+                                     "built_in_tools": {"end_call": COLGAR}}},
                 "tts": {"model_id": MODELO_VOZ},
             },
         }
@@ -142,15 +151,19 @@ def _principal(aplicar: bool, nuevo_agente: bool) -> int:
         ids = list(prompt.get("tool_ids") or [])
         id_herramienta = herramienta(http, cabeceras, crear_si_falta=False)
         falta_herramienta = id_herramienta is None or id_herramienta not in ids
+        integradas = dict(prompt.get("built_in_tools") or {})
+        falta_colgar = not integradas.get("end_call")
         print(f"Agente: {datos.get('name', '?')} ({agente})")
-        if actual == nuevo and not falta_herramienta:
-            print("El prompt y la herramienta datos_pendientes ya están al día. Nada que hacer.")
+        if actual == nuevo and not falta_herramienta and not falta_colgar:
+            print("El prompt y las herramientas (datos_pendientes, end_call) ya están al día. Nada que hacer.")
             return 0
         if actual != nuevo:
             diff = list(difflib.unified_diff(actual.splitlines(), nuevo.splitlines(), "ElevenLabs", "repo", lineterm="", n=1))
             print("\n".join(diff[:120]) + ("\n…" if len(diff) > 120 else ""))
         if falta_herramienta:
             print(f"Al agente le falta la herramienta {HERRAMIENTA['name']}.")
+        if falta_colgar:
+            print("Al agente le falta la herramienta de sistema end_call (colgar la llamada).")
         if not aplicar:
             print("\nSolo comparación. Para subirlo: python scripts/sincronizar_voz.py --aplicar")
             return 0
@@ -163,7 +176,10 @@ def _principal(aplicar: bool, nuevo_agente: bool) -> int:
         copia.write_text(json.dumps(prompt, ensure_ascii=False, indent=2), encoding="utf-8")
         # `tools` es la forma antigua de `tool_ids`; enviar las dos a la vez puede chocar.
         resto = {k: v for k, v in prompt.items() if k != "tools"}
-        cuerpo = {"conversation_config": {"agent": {"prompt": {**resto, "prompt": nuevo, "tool_ids": ids}}}}
+        if falta_colgar:
+            integradas["end_call"] = COLGAR
+        cuerpo = {"conversation_config": {"agent": {"prompt": {**resto, "prompt": nuevo, "tool_ids": ids,
+                                                              "built_in_tools": integradas}}}}
         r = http.patch(url, headers=cabeceras, json=cuerpo)
         if r.status_code != 200:
             print(f"ElevenLabs respondió {r.status_code} al actualizar: {r.text[:300]}")

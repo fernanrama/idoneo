@@ -9,7 +9,10 @@ import httpx
 RUTA = Path(__file__).resolve().parents[1] / "scripts" / "sincronizar_voz.py"
 
 
-def cargar(monkeypatch, tmp_path, prompt_actual, herramientas=None, tool_ids=("t1",)):
+COLGAR_PUESTO = {"end_call": {"name": "end_call", "params": {"system_tool_type": "end_call"}}}
+
+
+def cargar(monkeypatch, tmp_path, prompt_actual, herramientas=None, tool_ids=("t1",), integradas=COLGAR_PUESTO):
     """`herramientas`: las del workspace (por defecto, ya existe datos_pendientes con id t1)."""
     herramientas = [{"id": "t1", "tool_config": {"name": "datos_pendientes"}}] if herramientas is None else herramientas
     spec = importlib.util.spec_from_file_location("sincronizar_voz", RUTA)
@@ -30,7 +33,8 @@ def cargar(monkeypatch, tmp_path, prompt_actual, herramientas=None, tool_ids=("t
         if req.method == "GET":
             return httpx.Response(200, json={"name": "Entrevista", "conversation_config": {"agent": {
                 "first_message": "Hola", "prompt": {"prompt": prompt_actual, "llm": "modelo-del-panel",
-                                                    "tool_ids": list(tool_ids), "tools": [{"name": "vieja"}]}}}})
+                                                    "tool_ids": list(tool_ids), "tools": [{"name": "vieja"}],
+                                                    "built_in_tools": integradas}}}})
         return httpx.Response(200, json={})
 
     real = httpx.Client
@@ -116,3 +120,15 @@ def test_no_crea_un_segundo_agente(monkeypatch):
     monkeypatch.setenv("ELEVENLABS_API_KEY", "clave-de-prueba")
     monkeypatch.setenv("ELEVENLABS_AGENT_ID", "agent_ya")
     assert m.principal(aplicar=False, nuevo_agente=True) == 2
+
+
+def test_engancha_colgar_si_falta_y_respeta_las_demas(monkeypatch, tmp_path):
+    spec = importlib.util.spec_from_file_location("s", RUTA)
+    s = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(s)
+    otras = {"language_detection": {"name": "language_detection"}}
+    m, peticiones = cargar(monkeypatch, tmp_path, s.chat._sistema(), integradas=otras)
+    assert m.principal(aplicar=True) == 0
+    integradas = json.loads(peticiones[-1].content)["conversation_config"]["agent"]["prompt"]["built_in_tools"]
+    assert integradas["end_call"]["params"]["system_tool_type"] == "end_call"
+    assert integradas["language_detection"] == {"name": "language_detection"}
