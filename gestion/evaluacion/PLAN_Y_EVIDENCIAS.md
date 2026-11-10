@@ -3,7 +3,7 @@
 Responsable documental: área 04 · Actualizado: 8 de noviembre de 2026.
 
 ## Estado y uso
-**Preparado:** plantilla de criterios, ejecuciones, comparación y revisión final. **Pendiente:** enunciado, rúbrica, producto, datos, responsables humanos y umbrales. Primeras ejecuciones del extractor registradas abajo (E-00 a E-05). Los criterios siguientes son propuestas; no constituyen requisitos oficiales ni financieros o regulatorios.
+**Preparado:** plantilla de criterios, ejecuciones, comparación y revisión final. **Pendiente:** enunciado, rúbrica, producto, datos, responsables humanos y umbrales. Ejecuciones registradas abajo: extractor (E-00 a E-05), verificador (E-06) y laboratorio completo (E-07). Los criterios siguientes son propuestas; no constituyen requisitos oficiales ni financieros o regulatorios.
 
 Trabajar por hitos desde la recepción del reto: acordar criterios → probar recorrido completo → comparar y corregir → verificar versión de entrega. Dirección ajustará el calendario al tiempo restante.
 
@@ -29,6 +29,27 @@ Registrar cada ejecución con esta ficha:
 - **Mediciones pertinentes:** [muestra, repeticiones, latencia, coste o errores; método de medición].
 
 No registrar secretos ni datos personales financieros. Usar ejemplos sintéticos o referencias seguras. Conservar fallos y repeticiones de salidas variables; no seleccionar solo resultados favorables. Distinguir coste medido de estimado. Una evidencia de otra versión no valida automáticamente la actual.
+
+### Ejecución E-07 · Laboratorio completo con el verificador nuevo · 10 nov 2026
+
+- **Ejecución / casos / fecha / ejecutor:** `scripts/laboratorio.py --repeticiones 2` (4 personas **simuladas** × 2) y `scripts/laboratorio.py --variantes 12 --semilla 7 --sin-fijas` (12 clientes **simulados** generados), Alex en su portátil.
+- **Versión exacta:** rama `feat/b2-verificador-claude`, commit `69c42a2` (verificador con Claude; antes del arreglo `f1e3783`).
+- **Entorno:** entrevistador, extractor, verificador y cliente simulado con `claude-sonnet-5-5`, esfuerzo `low`. Sin voz ni MyInvestor; almacén en memoria.
+- **Esperado y observado (personas):** cobertura 100 % (70/70), precisión 100 %, 0 prohibidos, 0 recomendaciones; 8/8 entrevistas terminadas con aviso de IA; alerta esperada en 4/4 (Carmen `knowledge.equity_funds` ×2, Ramón `needs_advisor` ×2). 17-20 intervenciones del asistente.
+- **Esperado y observado (variantes):** cobertura 99 % (95/96), precisión 99 %, 0 prohibidos, 0 recomendaciones; 12/12 terminadas con aviso de IA; 3 clientes no aceptan y la entrevista se cierra en 2 turnos (correcto); alerta declarado ≠ demostrado en las 3 variantes que la esperaban. Un fallo de un dato en v007. 14-26 intervenciones.
+- **Mediciones:** mediana por llamada 2,1-2,2 s entrevistador, 1,8-2,0 s extractor, 1,8-1,9 s verificador. Coste **estimado** a partir de los tokens del informe y los precios de Sonnet 5.5: ~3,4 $ las 8 entrevistas y ~3,9 $ las 12 variantes (≈ 0,3-0,4 $ por entrevista; el verificador, ~30 %). Coste real: consola de Anthropic.
+- **Evidencia:** `docs/laboratorio/e07/` (informes y transcripciones).
+- **Limitaciones:** clientes interpretados por Claude; el informe no lista todas las alertas levantadas, así que las falsas alarmas del verificador en el laboratorio no están medidas (sí en E-06).
+
+### Ejecución E-06 · Verificador con Claude real · 10 nov 2026
+
+- **Ejecución / casos / fecha / ejecutor:** `scripts/evaluar_verificador.py --repeticiones 3` sobre 8 tramos de entrevista **simulados** (`backend/fixtures/verificacion/casos.json`), Alex en su portátil.
+- **Versión exacta:** rama `feat/b2-verificador-claude`, commit `69c42a2`; el caso 05 se repitió con `f1e3783`.
+- **Entorno:** `claude-sonnet-5-5`, esfuerzo `low`.
+- **Esperado y observado:** 21/24 casos bien, detección 83 % (15/18), **0 falsas alarmas** (la corrección explícita y el cliente coherente no dan alerta). Fallaba siempre el 05 (no debe nada frente a una hipoteca): el modelo lo detectaba pero el código lo descartaba porque la hipoteca aún no estaba en el perfil. Corregido en `f1e3783`; repetido 3/3 bien. Con el arreglo, detección esperada 18/18 (no repetida la batería entera).
+- **Mediciones:** mediana 1,9 s, p95 3,2 s por caso; ~310 tokens de entrada + ~4.600 desde caché + ~145 de salida por llamada.
+- **Evidencia:** `docs/evaluacion-verificador.md`.
+- **Limitaciones:** 8 casos escritos por el equipo; una persona puede escribir casos a favor del sistema.
 
 ### Ejecución E-05 · Laboratorio de Carmen y extractor tras las correcciones · 10 nov 2026
 

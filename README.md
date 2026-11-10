@@ -182,7 +182,7 @@ Claude lo usa junto al conector público de MyInvestor: pide los límites de Car
 | Verificador (incoherencias, datos dudosos y casos para el asesor) | ✅ Reglas fijas + revisión con Claude, con tests (Claude simulado) · evaluación con la API real: `python scripts/evaluar_verificador.py` · el resumen para agentes sigue siendo una plantilla fija |
 | Voz con ElevenLabs | 🟡 Integrado en código · sin probar con cuenta real |
 | Memoria personal por usuario | ✅ Consentida, versionada, borrable y proyectada a ElevenLabs · falta identidad/login real |
-| Medición de impacto (aciertos, alertas, latencia, coste) | ⏳ Pendiente |
+| Medición de impacto (aciertos, alertas, latencia, coste) | ✅ Con clientes **simulados**: 20 entrevistas completas con 99-100 % de aciertos y 0 datos inventados; verificador con 0 falsas alarmas · [evidencias](gestion/evaluacion/PLAN_Y_EVIDENCIAS.md) |
 
 ## Configuración
 
