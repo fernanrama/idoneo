@@ -23,8 +23,10 @@ from __future__ import annotations
 import os
 from typing import Any
 
+from fastapi import HTTPException
 from mcp.server.fastmcp import FastMCP
 from mcp.server.transport_security import TransportSecuritySettings
+from mcp.types import ToolAnnotations
 
 from .. import acceso
 from ..agentes import contexto
@@ -66,6 +68,9 @@ def _seguridad() -> TransportSecuritySettings:
     )
 
 
+# Las cuatro herramientas solo leen: así lo declaran a los clientes MCP (Claude puede tratarlas como seguras).
+SOLO_LECTURA = ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False)
+
 mcp = FastMCP(
     name="perfil-inversor",
     instructions=INSTRUCCIONES,
@@ -81,6 +86,7 @@ def _error(e: Exception, client_id: str) -> dict[str, Any]:
 
 
 def _autorizar(client_id: str) -> None:
+    """Credencial de cliente, de servicio o de demostración (fija o de operador: solo sus clientes ficticios)."""
     # FastMCP transmite la Request HTTP en request_context (SDK instalado).
     # Una invocación directa sin contexto tampoco puede saltarse esta comprobación.
     try:
@@ -88,7 +94,13 @@ def _autorizar(client_id: str) -> None:
     except (ValueError, LookupError):
         request = None
     cabeceras = request.headers if request is not None else {}
-    acceso.exigir_cliente(client_id, cabeceras.get("authorization"), cabeceras.get("x-admin-token"))
+    autorizacion, admin = cabeceras.get("authorization"), cabeceras.get("x-admin-token")
+    clientes_demo = acceso.alcance_demo_mcp(autorizacion, admin)
+    if clientes_demo is not None:  # credencial de demostración: solo sus clientes ficticios
+        if client_id not in clientes_demo:
+            raise HTTPException(404, "Recurso no encontrado")
+        return
+    acceso.exigir_cliente(client_id, autorizacion, admin)
 
 
 def _perfil(client_id: str, version: int | None = None):
@@ -96,7 +108,7 @@ def _perfil(client_id: str, version: int | None = None):
     return store.perfil(client_id, version) if version else store.perfil_para_consumidor(client_id)
 
 
-@mcp.tool()
+@mcp.tool(annotations=SOLO_LECTURA)
 def get_client_profile(client_id: str, version: int | None = None) -> dict[str, Any]:
     """Perfil inversor completo del cliente: cada dato con su fuente, confianza, evidencias y flags,
     los resultados de idoneidad y conveniencia y las alertas abiertas.
@@ -113,7 +125,7 @@ def get_client_profile(client_id: str, version: int | None = None) -> dict[str, 
     return datos
 
 
-@mcp.tool()
+@mcp.tool(annotations=SOLO_LECTURA)
 def get_investment_constraints(client_id: str) -> dict[str, Any]:
     """Reglas que cualquier propuesta de inversión debe cumplir para este cliente, ya expresadas como
     criterios del catálogo de MyInvestor: `funds_query` (búsqueda de fondos), `portfolios_query`
@@ -129,7 +141,7 @@ def get_investment_constraints(client_id: str) -> dict[str, Any]:
         return _error(e, client_id)
 
 
-@mcp.tool()
+@mcp.tool(annotations=SOLO_LECTURA)
 def get_evidence(client_id: str, field: str) -> dict[str, Any]:
     """Pruebas que justifican un dato del perfil: cita literal, segundos [inicio, fin] en la grabación y
     URL del clip de audio si existe. `field` es la ruta del dato, por ejemplo `knowledge.equity_funds`
@@ -157,7 +169,7 @@ def get_evidence(client_id: str, field: str) -> dict[str, Any]:
     }
 
 
-@mcp.tool()
+@mcp.tool(annotations=SOLO_LECTURA)
 async def get_client_context(client_id: str) -> dict[str, Any]:
     """Resumen breve del cliente (150 palabras como máximo) escrito para otro agente: objetivo, perfil de
     riesgo, familias no convenientes y alertas abiertas. Úsalo para orientar la conversación, no como
