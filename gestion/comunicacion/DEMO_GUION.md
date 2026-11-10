@@ -1,74 +1,95 @@
-# Guion de la demo — 2:30
+# Guion de la demo — 2:15
 
-Borrador v0 · 8 nov 2026 · Responsable: Rodrigo · Complementa a [`PITCH_GUION.md`](PITCH_GUION.md)
+Borrador v1 · 10 nov 2026 · Responsable: Rodrigo (lleva la demo) · Complementa a [`PITCH_GUION.md`](PITCH_GUION.md)
 
-> **Regla de oro.** La demo debe ser la **misma versión que se entrega** (ZIP de GitHub). Datos de Carmen **simulados**, y se dice en voz alta.
-> Los pasos marcados `[PENDIENTE]` dependen de funciones que hoy no están terminadas (ver tabla de estado). Si el miércoles siguen así, se usa el plan B de esa fila.
+> **Regla de oro.** La demo es la **misma versión que se entrega** (ZIP de GitHub). Carmen y sus datos son **simulados**, y se dice en voz alta.
+> **Idea.** La demo guiada repite una conversación grabada en el guion (`frontend/src/lib/guion-carmen.json`). No es la voz en directo: se dice «ejecución guiada». La voz real se enseña solo si hay tiempo (versión de 7 min).
 
-## Estado de cada pieza (a 8/11, comprobado en local)
+## Estado de cada pieza (a 10/11, comprobado en local)
 
 | Pieza | Estado | Si falla |
 |---|---|---|
-| Pantallas de la app (inicio, onboarding, entrevista, perfil, entidad) | ✔ Funcionan | — |
-| **Demo guiada** (reproduce el guion de Carmen, simulado) | ✔ Funciona | Es el plan B de la voz |
-| Vista de la entidad: idoneidad (CONSERVADOR, SRI máx. 3), conveniencia, restricciones | ✔ Funciona con el perfil de Carmen | — |
-| Validar perfil (pasa a activo) | ✔ Funciona (probar antes de salir) | Perfil precargado ya activo |
-| Voz real con ElevenLabs | ✘ **No probada** (sin cuenta/agente) | Demo guiada |
-| El perfil se rellena en directo durante la entrevista | ✘ El extractor aún es un stub | Mostrar el perfil de Carmen ya cargado |
-| Clip de audio al pinchar un dato | ✘ Pendiente | Mostrar la cita escrita |
-| Claude + conectores Idóneo y MyInvestor | `[PENDIENTE]` (MCP hecho en local; falta URL pública y conector) | Vídeo grabado |
+| `/escenario`: cliente a la izquierda, entidad a la derecha | ✔ Funciona | Vídeo de respaldo |
+| **Demo guiada** (19 pasos, ~55 s a 1×) | ✔ Funciona, sin claves. **No escribe en el backend** | Vídeo de respaldo |
+| Panel de la entidad se rellena durante la demo guiada | ✔ Los datos salen a partir del paso 8-9 (antes son avisos y objetivo) | — |
+| Vista de la entidad (`/entidad/carmen-68`): aviso, idoneidad, conveniencia | ✔ Funciona con el perfil precargado | — |
+| Validar perfil (pasa a activo) | ✔ Funciona. **Resetear antes de salir** | Perfil ya activo: se explica sin pulsar |
+| Pestaña **Agente · MCP** (lo que recibe el agente) | ✔ Funciona | Es el plan B del paso de Claude |
+| Voz real con ElevenLabs | ✔ Probada **una vez** de punta a punta (E-03). Necesita claves y saldo | Demo guiada |
+| Claude + conectores Idóneo y MyInvestor | ✔ Probado el 9/11 por **túnel temporal**: hay que levantarlo y poner la URL nueva en Claude | Pestaña Agente · MCP |
+| Clip de audio al pinchar un dato | ✘ Pendiente | Se enseña la frase escrita |
+| Sonido de la demo guiada | Voz del navegador (no hay audios grabados) | Quitar el sonido y leer los subtítulos |
 
-## Antes de salir (checklist, 10 min)
+## Pestañas preparadas (en este orden)
 
-- [ ] Backend y front arrancados desde el ZIP final, en carpeta limpia.
-- [ ] `POST /api/demo/reset` ejecutado: Carmen en estado inicial (`pending_validation`).
-- [ ] Móvil real con HTTPS (túnel) **o** navegador en vista móvil proyectado.
-- [ ] Auriculares con micrófono y un hotspot propio (el wifi del aula puede fallar). El móvil exige HTTPS para el micro.
-- [ ] Minutos de ElevenLabs suficientes `[PENDIENTE: saldo]`.
-- [ ] Vídeo de respaldo abierto en otra pestaña y probado con sonido.
-- [ ] Letra de la app en tamaño grande si se proyecta (botón "Aa").
-- [ ] Ningún `.env`, clave ni correo visibles en pantalla.
+```
+[1] PowerPoint (presentación)     [2] /escenario          [3] /entidad/carmen-68     [4] Claude con el prompt escrito
+     diapositivas 1-8      ->  demo guiada (0:05)  ->  validar (1:05)        ->  conectores (1:45)
+```
 
-## Pasos (con el tiempo orientativo)
+## Antes de salir (checklist, 15 min)
+
+- [ ] Backend y front arrancados **desde el ZIP final**, en carpeta limpia. Front con `npm run build` y `npm start` (sin la insignia «N» del modo desarrollo).
+- [ ] Carmen en estado inicial (`pending_validation`): `POST /api/demo/reset` desde una terminal (con la cabecera `X-Admin-Token` si hay `ADMIN_TOKEN`). **No abrir `/docs` en el proyector.**
+- [ ] Recargar la pestaña 3 y comprobar que pone **«Pendiente de validar»**.
+- [ ] Túnel levantado y URL nueva puesta en el conector de Idóneo en Claude. Probar el prompt una vez.
+- [ ] Navegador a pantalla completa (F11) y zoom 110-125 % para que se lea desde el fondo.
+- [ ] Sonido: decidido en el ensayo (voz del navegador o silencio con subtítulos).
+- [ ] Hotspot propio por si falla el wifi del aula (Claude y el túnel necesitan red; la demo guiada no).
+- [ ] Vídeo de respaldo abierto en otra ventana y probado con sonido.
+- [ ] Ningún `.env`, clave, correo ni notificación visible en pantalla. Modo «no molestar» activado.
+
+## Pasos
 
 | Min | Qué se hace | Qué se ve | Qué se dice (resumen) |
 |---|---|---|---|
-| 0:00 | Abrir la app de Carmen y pulsar **Empezar** | Inicio con "Tu perfil inversor, hablando" | "Esto es el móvil de Carmen. Datos simulados." |
-| 0:10 | Pantalla de **aviso de IA y consentimiento**; aceptar | Texto claro, botón grande | "Primero le dice que es una IA y pide permiso para grabar." |
-| 0:25 | **Entrevista**. Voz real `[PENDIENTE]`, o **Ver demo guiada** | Subtítulos, barra de bloques, burbujas | "Carmen quiere un dinero extra para la pensión." |
-| 0:55 | Momento clave: «*eso no puede pasar, el fondo es del banco*» | **Alerta**: "Algo que conviene aclarar" | "Declaró que conocía la renta variable; acaba de demostrar lo contrario." |
-| 1:15 | Abrir **Vista de la entidad** (`/entidad/carmen-68`) | Idoneidad: CONSERVADOR, SRI máx. 3. Conveniencia: renta variable no conveniente | "Los números salen de funciones de cálculo, no del modelo. Manda el criterio más restrictivo." |
-| 1:40 | Pulsar **Ver evidencia** de un dato | La cita literal (y el clip `[PENDIENTE]`) | "Cada dato lleva su prueba." |
-| 1:55 | Pulsar **Validar perfil** | Estado pasa a "Activo"; restricciones "usables" | "Una persona de la entidad lo valida. Sin validación no es apto." |
-| 2:10 | En Claude, con los conectores Idóneo y MyInvestor: «Busca productos que encajen con Carmen» `[PENDIENTE]` | Lista de productos reales filtrados por el riesgo máximo | "El agente de la entidad usa el perfil. Nosotros no recomendamos." |
-| 2:30 | Fin de la demo (es lo último del pitch) | Vista de la entidad con el perfil activo | "Eso es Idóneo. Gracias, y encantados de responder a vuestras preguntas." |
+| 0:00 | Salir del PowerPoint a la pestaña 2 (`/escenario`) | Pantalla partida: aura a la izquierda, «Perfil inversor, esperando datos» a la derecha | «Izquierda, lo que vive Carmen. Derecha, lo que recibe la entidad. Datos simulados.» |
+| 0:05 | Pulsar **Ver la demo guiada** | Aviso de IA, objetivo, situación | «Avisa de que es una IA y pide permiso. Carmen quiere un extra para la pensión.» |
+| 0:25 | Señalar el panel derecho | Los datos aparecen con su frase | «Cada dato aparece con la frase exacta que lo justifica.» |
+| 0:40 | Momento clave (paso 14 de 19) | «Eso no puede pasar, el fondo es del banco» y el aviso | «Había declarado que conocía ese producto. **Declarado no es igual a demostrado.**» |
+| 1:00 | Fin de la demo guiada; ir a la pestaña 3 (`/entidad/carmen-68`) | «carmen-68, perfil por validar», aviso ámbar, Conservador, SRI 3 de 7 | «Conservador, riesgo máximo 3 de 7, renta variable no conveniente. Reglas fijas, no el modelo.» |
+| 1:20 | Pulsar **Ver la frase** en el aviso | La cita de Carmen | «Cada dato lleva su prueba.» |
+| 1:30 | Pulsar **Validar perfil** | Pasa a validado; aviso «el agente ya puede usarlo por MCP» | «Una persona lo valida. Sin eso, el agente no puede usarlo.» |
+| 1:45 | Pestaña 4: Claude con los conectores. Enviar el prompt preparado | Lista de fondos de MyInvestor con riesgo ≤ 3, sin renta variable | «El agente de la entidad usa el perfil. Nosotros no recomendamos.» |
+| 2:10 | Cierre | Respuesta de Claude en pantalla | «Eso es Idóneo. Gracias, y encantados de responder a vuestras preguntas.» |
+
+Prompt preparado para Claude (pestaña 4): *«Usa Idóneo para leer las restricciones del cliente carmen-68 y busca en MyInvestor fondos que las cumplan. Explica por qué encaja cada uno.»* `[PENDIENTE: probarlo con el túnel levantado y ajustar la frase si Claude no llama a las dos herramientas.]`
 
 ## Datos de Carmen (simulada) que salen en pantalla
 
 - 68 años, 80.000 € en depósitos, objetivo a 10 años.
-- Renta variable: **declaró** nivel alto, **demostró** ninguno. Renta fija: nivel medio.
-- Tolerancia por escenarios: **1 de 5** (declaró 3). Perfil de riesgo: **CONSERVADOR**. SRI máximo: **3**.
+- Renta variable: **declaró** nivel alto, **demostró** ninguno.
+- Tolerancia por escenarios: **1 de 5** (declaró 3). Perfil: **CONSERVADOR**. SRI máximo: **3**.
 - Capacidad de pérdida: 74.600 € (calculada). El plazo daría AGRESIVO y la capacidad MUY_AGRESIVO; manda el más restrictivo.
+- Lo que recibe el agente por MCP: `max_risk: 3`, `asset_type: ["Monetario", "Renta Fija"]`, `equity_funds: not_appropriate`.
 
-Estos valores salen de `backend/fixtures/carmen-68.json` y de `calculos.py`. Si alguien cambia los umbrales, **revisar esta tabla**.
+Salen de `backend/fixtures/carmen-68.json` y `calculos.py`. Si alguien cambia los umbrales, **revisar esta lista y la diapositiva 5**.
 
 ## Plan B (obligatorio)
 
-1. **Falla la voz o la red:** pulsar **Ver demo guiada**. Se reproduce el guion de Carmen contra el backend real. Decir: "Esto es una ejecución guiada con datos simulados."
-2. **Falla el backend:** vídeo de respaldo grabado de la misma versión. Decir que es una ejecución registrada, no en directo.
-3. **Falla el conector de Claude/MyInvestor:** saltar el paso 2:10 y cerrar en la vista de la entidad (ya tiene el valor central).
-4. **Frase de transición ante cualquier fallo:** "Esto es justo lo que pasa en directo; os enseño la ejecución que grabamos de esta misma versión."
+| Falla | Qué hacer | Qué decir |
+|---|---|---|
+| El conector de Claude o el túnel | Pestaña 3 → **Agente · MCP**: enseñar lo que recibe el agente | «Esto es exactamente lo que recibe el agente.» |
+| El backend (la entidad no carga) | Vídeo de respaldo desde el minuto de la entidad | «Os enseño la ejecución que grabamos de esta misma versión.» |
+| El front entero | Vídeo de respaldo completo | La misma frase |
+| La voz real (solo versión de 7 min) | Volver a la demo guiada | «Seguimos con la ejecución guiada.» |
 
 El límite de espera es de **10 segundos**: si algo no responde, se pasa al plan B sin disculparse.
 
+## Preguntas que pueden salir al ver la demo
+
+- **«¿Qué son esos porcentajes junto a cada dato?»** Confianza calculada con supuestos del equipo (rúbrica v2), no una medida. Por debajo de 0,65 se marca para revisar.
+- **«¿Por qué desaparece el aviso al validar?»** Al validar, la persona da el aviso por revisado. `[PENDIENTE: confirmar con el equipo si es lo que queremos o un fallo.]`
+- **«¿Esto es en directo?»** La demo guiada repite una conversación de ejemplo. La voz real funciona y la hemos probado de punta a punta; no la usamos en el pitch para no depender de la red.
+
 ## Qué NO enseñar
 
-- Pantallas con claves, `.env`, el panel de Supabase o correos.
+- Pantallas con claves, `.env`, `/docs` del backend, el panel de ElevenLabs o correos.
 - Un perfil real de una persona: solo Carmen (simulada).
 - El MCP de MyInvestor llamado desde nuestro código: solo como conector dentro de Claude.
 
 ## Vídeo de respaldo
 
-- Grabarlo **de la versión que se entrega**, con subtítulos y narración, de 2:30.
-- Anotar fecha, hora y commit en el nombre del archivo (por ejemplo `demo_2026-11-10_<commit>.mp4`).
-- `[PENDIENTE]`: depende de que el recorrido funcione de punta a punta. No grabarlo antes del martes por la noche.
+- Grabarlo **de la versión que se entrega**, siguiendo esta tabla, de unos 2:15 (Windows: `Win + Alt + R` con la barra de juegos, u OBS).
+- Nombre con fecha y commit: `demo_2026-11-11_<commit>.mp4`. No subirlo al repo si pesa mucho; guardarlo en dos portátiles y en un USB.
+- `[PENDIENTE]`: grabarlo el miércoles tras congelar el código (18:00).
