@@ -136,11 +136,21 @@ def _por_capacidad(capacidad: float, ahorro: float) -> PerfilRiesgo:
     return PerfilRiesgo.MUY_AGRESIVO
 
 
+def desconocimiento_declarado(ruta: str, f: Fact | None) -> bool:
+    """«No lo conozco»: conocimiento declarado `none`. Es un dato cerrado: no hay nada que comprobar.
+
+    Regla común del perfil (`faltan`) y del entrevistador (`agentes.chat`), para que no diverjan. Cubre
+    también perfiles antiguos donde la rúbrica v2 lo dejó con low_confidence."""
+    return (f is not None and ruta.startswith("knowledge.")
+            and f.source == Fuente.declared and f.value == "none")
+
+
 def faltan(perfil: Perfil) -> list[str]:
     out = []
     for ruta in OBLIGATORIOS:
         f = perfil.mifid.get(ruta)
-        if f is None or f.value is None or Flag.low_confidence in f.flags:
+        dudoso = f is not None and Flag.low_confidence in f.flags and not desconocimiento_declarado(ruta, f)
+        if f is None or f.value is None or dudoso:
             out.append(ruta)
     return out
 

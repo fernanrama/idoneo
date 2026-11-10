@@ -12,6 +12,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 
+from ..perfil.calculos import desconocimiento_declarado
 from ..perfil.modelos import OBLIGATORIOS, Flag, Fuente, Perfil, Turno
 from . import claude, memoria
 
@@ -44,8 +45,7 @@ def _pendientes_por_tipo(perfil: Perfil) -> tuple[list[str], list[str], list[str
     """(faltan, dudosos, sin comprobar), en el orden del guion y sin repetir rutas. Determinista."""
     faltan = [c for c in OBLIGATORIOS if c not in perfil.mifid or perfil.mifid[c].value is None]
     # «No sé qué es un ETF» no se comprueba: no hay nada que verificar y alarga la entrevista.
-    no_lo_conoce = {c for c, f in perfil.mifid.items()
-                    if c.startswith("knowledge.") and f.source == Fuente.declared and f.value == "none"}
+    no_lo_conoce = {c for c, f in perfil.mifid.items() if desconocimiento_declarado(c, f)}
     dudosos = [c for c, f in perfil.mifid.items()
                if Flag.low_confidence in f.flags and c not in no_lo_conoce and c not in faltan]
     sin_comprobar = [c for c, f in perfil.mifid.items()
