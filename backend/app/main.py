@@ -45,6 +45,7 @@ async def lifespan(_app: FastAPI):
     store.tipo_almacen()  # configura el almacén (PERFIL_ALMACEN) y falla pronto si la base no está lista
     if os.getenv("LOAD_DEMO_FIXTURE", "1") == "1":
         store.asegurar_fixture("carmen-68")  # solo si falta: no pisa datos guardados en la base
+        store.asegurar_fixture("carmen-corta")  # entrevista corta del pitch (DATOS SIMULADOS)
     asesor_demo.avisar_si_activo()  # DEMO_ADVISOR_MODE: apagado por defecto
     mcp_demo.avisar_si_activa()  # MCP_DEMO_TOKEN: desactivada por defecto
     async with mcp.session_manager.run():

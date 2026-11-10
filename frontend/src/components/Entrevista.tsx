@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
 import { ETIQUETAS, estadoBloques, mostrarValor } from "@/lib/bloques";
 import type { useEntrevista } from "@/lib/useEntrevista";
 import s from "./entrevista.module.css";
@@ -16,6 +17,8 @@ type HookEntrevista = ReturnType<typeof useEntrevista>;
  */
 export function Entrevista({ e, compacto = false, alTerminar }: { e: HookEntrevista; compacto?: boolean; alTerminar?: React.ReactNode }) {
   const [teclado, setTeclado] = useState(false);
+  // Las casillas viven aquí: si algo falla y vuelve el inicio, no hay que marcarlas otra vez.
+  const [permisos, setPermisos] = useState({ ia: false, grabacion: false });
   const bloques = estadoBloques(e.perfil);
   const enCurso = bloques.find((b) => b.estado === "en_curso");
   const enMarcha = e.estado === "activa" || e.estado === "conectando";
@@ -54,7 +57,9 @@ export function Entrevista({ e, compacto = false, alTerminar }: { e: HookEntrevi
           </>
         )}
 
-        {(e.estado === "inactiva" || e.estado === "error") && <Inicio e={e} compacto={compacto} />}
+        {(e.estado === "inactiva" || e.estado === "error") && (
+          <Inicio e={e} compacto={compacto} permisos={permisos} setPermisos={setPermisos} />
+        )}
 
         {enMarcha && (
           <>
@@ -72,6 +77,14 @@ export function Entrevista({ e, compacto = false, alTerminar }: { e: HookEntrevi
                 </p>
               )}
             </div>
+            {e.modo === "texto" && e.error && (
+              <p role="alert" className={s.error}>
+                {e.error}{" "}
+                <button className={s.demoBoton} style={{ display: "inline-flex" }} onClick={e.reintentar}>
+                  Reintentar
+                </button>
+              </p>
+            )}
             {e.modo === "guion" && (
               <div className={s.respuestaDemo} aria-live="polite">
                 {e.demo.respuesta && (
@@ -161,17 +174,37 @@ function LineaEstado({ e }: { e: HookEntrevista }) {
   );
 }
 
-function Inicio({ e, compacto }: { e: HookEntrevista; compacto: boolean }) {
-  const [ia, setIa] = useState(false);
-  const [grabacion, setGrabacion] = useState(false);
+type Permisos = { ia: boolean; grabacion: boolean };
+
+function Inicio({ e, compacto, permisos, setPermisos }: {
+  e: HookEntrevista; compacto: boolean; permisos: Permisos; setPermisos: (p: Permisos) => void;
+}) {
+  const { ia, grabacion } = permisos;
+  const setIa = (v: boolean) => setPermisos({ ...permisos, ia: v });
+  const setGrabacion = (v: boolean) => setPermisos({ ...permisos, grabacion: v });
   const listo = ia && grabacion;
+  // Entrevista corta del pitch: solo se ofrece con el modo asesor de demostración activo (en local).
+  const [hayCorta, setHayCorta] = useState(false);
+  useEffect(() => {
+    let vivo = true;
+    api.modoAsesor()
+      .then((m) => vivo && setHayCorta(m.enabled && m.clients.includes("carmen-corta")))
+      .catch(() => vivo && setHayCorta(false));
+    return () => {
+      vivo = false;
+    };
+  }, []);
   return (
     <div className={s.inicio}>
       <Aura estado="reposo" tam={compacto ? 200 : 260} />
       <h1>
         Cuando quieras, <span className="texto-degradado">empezamos</span>
       </h1>
-      <p>Una pregunta cada vez, sobre tus objetivos, tu situación y lo que sabes de inversión. Unos ocho minutos.</p>
+      <p>
+        {e.corta
+          ? "Carmen ya ha contado casi todo: faltan tres preguntas. Unos dos minutos."
+          : "Una pregunta cada vez, sobre tus objetivos, tu situación y lo que sabes de inversión. Unos ocho minutos."}
+      </p>
       <div className={`${s.permisos} vidrio`}>
         <label className={s.permiso}>
           <input type="checkbox" checked={ia} onChange={(ev) => setIa(ev.target.checked)} />
@@ -182,6 +215,16 @@ function Inicio({ e, compacto }: { e: HookEntrevista; compacto: boolean }) {
           <span>Acepto que se guarde la conversación para justificar mi perfil. No se usará mi voz para identificarme.</span>
         </label>
       </div>
+      {hayCorta && (
+        <label className={`${s.permiso} vidrio`}>
+          <input type="checkbox" checked={e.corta} onChange={(ev) => e.setCorta(ev.target.checked)} />
+          <span>
+            <strong>Entrevista corta del pitch.</strong> Carmen (datos simulados) ya tiene casi todo el perfil; en
+            directo solo se comprueban sus conocimientos, la reacción ante una caída y la sostenibilidad.
+          </span>
+        </label>
+      )}
+      <p className={`${s.pista} mono`}>¿Cómo prefieres hacerlo?</p>
       <div className={s.modos}>
         <BotonNoche onClick={e.iniciarVoz} disabled={!listo}>
           {Icono.micro}
@@ -193,7 +236,9 @@ function Inicio({ e, compacto }: { e: HookEntrevista; compacto: boolean }) {
         </BotonNoche>
       </div>
       <p className={s.pista} aria-live="polite">
-        {listo ? "Elige cómo prefieres responder. Podrás pausar cuando quieras." : "Marca las dos casillas para poder empezar."}
+        {listo
+          ? "Hablando o escribiendo, como te resulte más cómodo. Al empezar, el asistente te lo confirmará en voz alta para que quede en tu expediente. Podrás pausar cuando quieras."
+          : "Marca las dos casillas para poder empezar."}
       </p>
       <button className={s.demoBoton} onClick={() => e.iniciarGuion()}>
         <span className={s.demoPlay} aria-hidden="true">

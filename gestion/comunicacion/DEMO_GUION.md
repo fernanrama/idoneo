@@ -16,6 +16,7 @@ Borrador v1 · 10 nov 2026 · Responsable: Rodrigo (lleva la demo) · Complement
 | Validar perfil (pasa a activo) | ✔ Funciona con el **modo asesor de demostración** (PR 25, apagado por defecto): `DEMO_ADVISOR_MODE=1` y el mismo `DEMO_ADVISOR_TOKEN` en `.env` y `frontend/.env.local`. Solo desde el propio portátil. **Un solo clic**: un segundo clic seguido puede dar error 409. **Reiniciar antes de salir** | Perfil ya activo: se explica sin pulsar |
 | Pestaña **Agente · MCP** (lo que recibe el agente) | ✔ Funciona | Es el plan B del paso de Claude |
 | Voz real con ElevenLabs | ✔ Probada **una vez** de punta a punta (E-03). Necesita claves y saldo | Demo guiada |
+| **Entrevista corta** sobre `carmen-corta` (versión de 7 min) | ✔ Probada por escrito con Claude real (E-08): unos 45 s, va directo a lo que falta y llega a «Pendiente de validar» con el aviso. Falta ensayarla **por voz**. Casilla «Entrevista corta del pitch» en `/escenario` (modo asesor) | Demo guiada |
 | Claude + conectores Idóneo y MyInvestor | ⚠ Probado el 9/11 por **túnel temporal**, antes de la PR 21. Desde la PR 21 `/mcp` exige credencial (sin ella responde 401). `[PENDIENTE: Juan está comprobando cómo conectar Claude.ai con la autenticación nueva]` | Pestaña Agente · MCP |
 | Clip de audio al pinchar un dato | ✘ Pendiente | Se enseña la frase escrita |
 | Sonido de la demo guiada | Voz del navegador (no hay audios grabados) | Quitar el sonido y leer los subtítulos |
@@ -54,7 +55,7 @@ Borrador v1 · 10 nov 2026 · Responsable: Rodrigo (lleva la demo) · Complement
 | 1:45 | Pestaña 4: Claude con los conectores. Enviar el prompt preparado | Lista de fondos de MyInvestor con riesgo ≤ 3, sin renta variable | «El agente de la entidad usa el perfil. Nosotros no recomendamos.» |
 | 2:10 | Cierre | Respuesta de Claude en pantalla | «Eso es Idóneo. Gracias, y encantados de responder a vuestras preguntas.» |
 
-Prompt preparado para Claude (pestaña 4): *«Usa Idóneo para leer las restricciones del cliente carmen-68 y busca en MyInvestor fondos que las cumplan. Explica por qué encaja cada uno.»* `[PENDIENTE: probarlo con el túnel levantado y ajustar la frase si Claude no llama a las dos herramientas.]`
+Prompt preparado para Claude Code (pestaña 4, abierto en la carpeta `gcx/demo-claude` con los conectores `idoneo` y `myinvestor`; antes, `export IDONEO_MCP_TOKEN=...` según `docs/MODO_ASESOR_DEMO.md`): *«Usa Idóneo para leer las restricciones de carmen-68 y busca en MyInvestor fondos de menor riesgo que las cumplan. Responde en 6 líneas como máximo: las restricciones con su evidencia y 3 fondos compatibles.»* Probado el 11/11 (E-09): unos 16 s y 6 líneas, con las frases de Carmen como evidencia. Sin «en 6 líneas» la respuesta es demasiado larga para la demo.
 
 ## Datos de Carmen (simulada) que salen en pantalla
 
@@ -73,7 +74,7 @@ Salen de `backend/fixtures/carmen-68.json` y `calculos.py`. Si alguien cambia lo
 | El conector de Claude o el túnel | Pestaña 3 → **Agente · MCP**: enseñar lo que recibe el agente | «Esto es exactamente lo que recibe el agente.» |
 | El backend (la entidad no carga) | Vídeo de respaldo desde el minuto de la entidad | «Os enseño la ejecución que grabamos de esta misma versión.» |
 | El front entero | Vídeo de respaldo completo | La misma frase |
-| La voz real (solo versión de 7 min) | Volver a la demo guiada | «Seguimos con la ejecución guiada.» |
+| La voz real o la entrevista corta (solo versión de 7 min) | Volver a la demo guiada | «Seguimos con la ejecución guiada.» |
 
 El límite de espera es de **10 segundos**: si algo no responde, se pasa al plan B sin disculparse.
 
