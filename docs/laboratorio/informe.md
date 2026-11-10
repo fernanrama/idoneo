@@ -5,19 +5,19 @@ cliente simulado `claude-sonnet-5-5`. Personas **simuladas** de `backend/fixture
 
 | Métrica | Valor |
 |---|---|
-| Cobertura del perfil frente a la ficha oculta | 100% (10/10) |
-| Precisión | 100% |
+| Cobertura del perfil frente a la ficha oculta | 90% (9/10) |
+| Precisión | 90% |
 | Datos prohibidos escritos | 0 |
 | Recomendaciones del asistente (deben ser 0) | 0 |
 
 | Persona | Aciertos | Prohibidos | Turnos asistente | Terminada | Aviso IA | Comprobados | Alerta esperada | Pendientes |
 |---|---|---|---|---|---|---|---|---|
-| carmen-jubilada-confiada | 10/10 | 0 | 17 | sí | sí | deposits_money_market, equity_funds, fixed_income_funds | knowledge.equity_funds: NO | 7 |
+| carmen-jubilada-confiada | 9/10 | 0 | 20 | sí | sí | deposits_money_market, equity_funds | knowledge.equity_funds: sí | 1 |
 
 | Agente | Mediana | p95 | Llamadas |
 |---|---|---|---|
-| cliente_simulado | 1.5 s | 2.1 s | 16 |
-| entrevistador | 2.0 s | 2.5 s | 17 |
-| extractor | 2.0 s | 3.0 s | 16 |
+| cliente_simulado | 1.7 s | 2.5 s | 19 |
+| entrevistador | 1.8 s | 2.7 s | 20 |
+| extractor | 2.2 s | 3.5 s | 19 |
 
-Tokens medios por llamada: cliente_simulado 1497 entrada / 1083 caché / 62 salida, entrevistador 1635 entrada / 2776 caché / 139 salida, extractor 1192 entrada / 6080 caché / 229 salida.
+Tokens medios por llamada: cliente_simulado 1537 entrada / 1094 caché / 54 salida, entrevistador 1640 entrada / 2934 caché / 130 salida, extractor 1123 entrada / 6258 caché / 262 salida.
