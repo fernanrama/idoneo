@@ -101,8 +101,8 @@ v2 · 10 nov 2026 · Responsable: Rodrigo · Revisión: equipo
 
 ### 16. ¿Cómo se integra con MyInvestor? ¿Usáis su MCP?
 - **Respuesta:** Idóneo publica su propio servidor MCP con 4 herramientas (perfil, restricciones, evidencia y contexto). El agente de la entidad usa esas restricciones sobre el catálogo de MyInvestor. El MCP público de MyInvestor se usa como **conector dentro de Claude**.
-- **Prueba:** el 9/11 Claude leyó el perfil activo de Carmen por nuestro MCP (9 de 11 comprobaciones) a través de un túnel temporal.
-- **Límite:** **sus términos prohíben el acceso programático sin permiso**: no decir que lo llamamos desde nuestro código. No hay URL pública fija: el túnel se levanta desde un portátil para la demo.
+- **Prueba:** el 9/11 Claude leyó el perfil activo de Carmen por nuestro MCP a través de un túnel temporal.
+- **Límite:** **sus términos prohíben el acceso programático sin permiso**: no decir que lo llamamos desde nuestro código. No hay URL pública fija: el túnel se levanta desde un portátil para la demo. Desde la PR 21 el MCP exige credencial; la conexión de Claude.ai con la autenticación nueva está en revisión.
 
 ### 17. ¿Por qué Idóneo no recomienda productos?
 - **Respuesta:** Es una decisión de diseño (D1): recomendar es asesorar, y eso lo hace el agente de la entidad, con su licencia y sus controles. Nosotros garantizamos que el agente sabe quién es el cliente.
@@ -126,7 +126,7 @@ v2 · 10 nov 2026 · Responsable: Rodrigo · Revisión: equipo
 | «¿El perfil se rellena solo mientras hablan?» | «Sí: Claude extrae cada dato con su frase mientras habla, y el código decide si lo acepta.» |
 | «¿Cuánto cuesta cada entrevista?» | «Unos 0,6 $ estimados por tokens; no es la factura y falta sumar la voz.» |
 | «¿Qué son los porcentajes junto a cada dato?» | «La confianza, de una rúbrica fija en código con supuestos nuestros. No es una medida; por debajo de 0,65 se revisa.» |
-| «¿Por qué desaparece el aviso al validar?» | «Al validar, la persona da el aviso por revisado.» `[PENDIENTE: confirmar con el equipo si es así o es un fallo.]` |
+| «¿Por qué desaparece el aviso al validar?» | «Al validar, la persona da el aviso por revisado; queda registrado quién lo hizo y cuándo.» (Intencionado: `backend/app/perfil/store.py`.) |
 | «¿Vuestro sistema es el que cumple MiFID?» | «Ayuda a documentarlo; la responsabilidad es de la entidad y valida una persona.» |
 | «¿Podéis acceder al MCP de MyInvestor desde vuestro backend?» | «Solo como conector en Claude; sus términos no permiten otra cosa sin permiso.» |
 

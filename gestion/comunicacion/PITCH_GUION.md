@@ -69,7 +69,7 @@ Las fuentes `E-0x` están en `gestion/evaluacion/PLAN_Y_EVIDENCIAS.md`.
 >
 > La voz, para que Carmen conteste hablando. Claude, que extrae cada dato y marca las contradicciones. Y código, que calcula los números, porque el modelo nunca calcula un número.
 >
-> Lo que hemos medido: el extractor acertó 31 de 31 datos en siete entrevistas; con Carmen, 10 de 10, y detectó la contradicción; y el asistente responde en 1,8 segundos de mediana. Con un límite que decimos claro: clientes simulados, una repetición y casos escritos por nosotros.
+> Lo que hemos medido: el extractor acertó 31 de 31 datos en siete entrevistas; con Carmen, 10 de 10, y detectó la contradicción; y el asistente responde en 1,8 segundos de mediana, en la prueba por escrito. Con un límite que decimos claro: clientes simulados, una repetición y casos escritos por nosotros.
 
 ### Diapositiva 7 · Entra en los agentes que ya tenéis (2:58 – 3:28)
 
@@ -133,7 +133,7 @@ Conteo por palabras: **cronometrarlo en voz alta** en el primer ensayo. Si algun
 | Habla (diapositivas y demo) | `[PENDIENTE: decidir, una o dos personas]` | Cuenta la historia. Mejor una sola voz en las diapositivas |
 | Lleva la demo | Rodrigo | Pasa las diapositivas, cambia a la app, lanza la demo y aplica el plan B si algo falla |
 | Tiempos | Rodrigo | Cronometra los ensayos y avisa con la mano a los 3:45 y a los 5:30 |
-| Preguntas técnicas | Quien lleve los agentes (Hammad o Pablo) | Responde IA, medición y MCP (ver `PREGUNTAS_JURADO.md`) |
+| Preguntas técnicas | Quien lleve los agentes (Alex o Pablo) | Responde IA, medición y MCP (ver `PREGUNTAS_JURADO.md`) |
 
 ## Cifras: qué se puede decir y cómo
 

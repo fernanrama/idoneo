@@ -38,7 +38,7 @@ const EQUIPO = "";
 const METRICAS = [
   { n: "31/31", t: "datos bien sacados de 7 entrevistas de prueba" },
   { n: "10/10", t: "datos de Carmen, y detecta su contradicción" },
-  { n: "1,8 s", t: "tarda el asistente en responder (mediana)" },
+  { n: "1,8 s", t: "tarda el asistente en responder (mediana, en texto)" },
 ];
 
 // ---------- Paleta (visual.css · .tema-noche) ----------
@@ -212,7 +212,7 @@ async function main() {
   texto(s, "Idóneo", { x: 0.7, y: 1.05, w: 5, h: 1.3, fontFace: F.tit, fontSize: 72, charSpacing: -1, valign: "middle", objectName: "Nombre del producto" });
   texto(s, [{ text: "Tu perfil inversor,", options: { color: K.tinta, breakLine: true } }, ...grad("en una conversación.")],
     { x: 0.7, y: 2.45, w: 5.2, h: 1.2, fontFace: F.tit, fontSize: 30, valign: "top", lineSpacingMultiple: 0.95, objectName: "Lema" });
-  texto(s, "El test de idoneidad MiFID que habla, comprueba y deja pruebas.", { x: 0.7, y: 3.8, w: 4.6, h: 0.75, fontSize: 16, color: K.suave, valign: "top", objectName: "Qué es" });
+  texto(s, "El test MiFID que habla, comprueba y deja pruebas.", { x: 0.7, y: 3.8, w: 4.6, h: 0.75, fontSize: 16, color: K.suave, valign: "top", objectName: "Qué es" });
   s.addNotes("[0:00 – 0:05] Buenos días. " + (EQUIPO ? "Somos " + EQUIPO + " y esto" : "Esto") + " es Idóneo: tu perfil inversor, en una conversación." +
     nota(EQUIPO ? "" : " (Pendiente: decidir si se dice el nombre del equipo.)"));
 
@@ -304,7 +304,7 @@ async function main() {
   // Derecha: las tres cosas que importan, con icono
   const claves = [
     [IC.escudo, [{ text: "Perfil conservador", options: { fontFace: F.tit, color: K.tinta } }, { text: "\nProductos hasta riesgo 3 de 7", options: { color: K.suave, fontSize: 13 } }]],
-    [IC.nada, [{ text: "Renta variable: no", options: { fontFace: F.tit, color: K.tinta } }, { text: "\nNo la entiende, no se le ofrece", options: { color: K.suave, fontSize: 13 } }]],
+    [IC.nada, [{ text: "Renta variable: no", options: { fontFace: F.tit, color: K.tinta } }, { text: "\nNo demostró entenderla: no es conveniente", options: { color: K.suave, fontSize: 13 } }]],
     [IC.checkVerde, [{ text: "Lo valida una persona", options: { fontFace: F.tit, color: K.tinta } }, { text: "\nSi no, el agente no puede usarlo", options: { color: K.suave, fontSize: 13 } }]],
   ];
   texto(s, "Pantalla real del prototipo: vista de la entidad", { x: bx, y: by + bh + 0.12, w: bw, h: 0.3, fontSize: 12, color: K.tenue, align: "center", valign: "middle", objectName: "Qué es la captura" });
@@ -344,7 +344,7 @@ async function main() {
   }
   // Sin métricas, la diapositiva se queda con el aviso de ESMA y los tres papeles (no se inventan cifras).
   s.addNotes("[2:10 – 2:58] ¿Por qué una IA? ESMA advierte de que con sistemas automatizados el riesgo de que el cliente se sobrevalore es mayor. Idóneo es el contrapeso. La voz, para que Carmen conteste hablando. Claude, que extrae cada dato y marca las contradicciones. Y código, que calcula los números, porque el modelo nunca calcula un número." +
-    (METRICAS ? " Lo que hemos medido: el extractor acertó 31 de 31 datos en siete entrevistas; con Carmen, 10 de 10, y detectó la contradicción; y el asistente responde en 1,8 segundos de mediana. Con un límite que decimos claro: clientes simulados, una repetición y casos escritos por nosotros." + nota(" (Fuente: PLAN_Y_EVIDENCIAS, E-04 y E-05. Si cambian las METRICAS, cambiar también esta frase.)") : nota(" (Pendiente: impacto medido. Si no se mide, no se dice.)")));
+    (METRICAS ? " Lo que hemos medido: el extractor acertó 31 de 31 datos en siete entrevistas; con Carmen, 10 de 10, y detectó la contradicción; y el asistente responde en 1,8 segundos de mediana, en la prueba por escrito. Con un límite que decimos claro: clientes simulados, una repetición y casos escritos por nosotros." + nota(" (Fuente: PLAN_Y_EVIDENCIAS, E-04 y E-05. Si cambian las METRICAS, cambiar también esta frase.)") : nota(" (Pendiente: impacto medido. Si no se mide, no se dice.)")));
 
   // =========================================================
   // 7 · Entra en vuestros agentes: el cauce, con iconos

@@ -27,7 +27,7 @@ node build.js ../Idoneo_presentacion.pptx --final --hecho=voz,extractor,mcp    #
 |---|---|---|
 | `voz` | Entrevista por voz con ElevenLabs de punta a punta | Hecho (E-03, una vez) |
 | `extractor` | Claude rellena el perfil mientras el cliente habla | Hecho (E-04, E-05) |
-| `mcp` | Claude lee el perfil por nuestro MCP | Hecho por túnel temporal (levantarlo antes de la demo) |
+| `mcp` | Claude lee el perfil por nuestro MCP | Hecho por túnel temporal el 9/11, antes de la PR 21 (el MCP exige ahora credencial: revisar la conexión) |
 | `audio` | Al pulsar un dato suena su clip | Pendiente |
 
 ## Qué se edita a mano en `build.js`

@@ -13,10 +13,10 @@ Borrador v1 · 10 nov 2026 · Responsable: Rodrigo (lleva la demo) · Complement
 | **Demo guiada** (19 pasos, ~55 s a 1×) | ✔ Funciona, sin claves. **No escribe en el backend** | Vídeo de respaldo |
 | Panel de la entidad se rellena durante la demo guiada | ✔ Los datos salen a partir del paso 8-9 (antes son avisos y objetivo) | — |
 | Vista de la entidad (`/entidad/carmen-68`): aviso, idoneidad, conveniencia | ✔ Funciona con el perfil precargado | — |
-| Validar perfil (pasa a activo) | ✔ Funciona. **Resetear antes de salir** | Perfil ya activo: se explica sin pulsar |
+| Validar perfil (pasa a activo) | ✔ Funciona con el **modo asesor de demostración** (PR 25, apagado por defecto): `DEMO_ADVISOR_MODE=1` y el mismo `DEMO_ADVISOR_TOKEN` en `.env` y `frontend/.env.local`. Solo desde el propio portátil. **Un solo clic**: un segundo clic seguido puede dar error 409. **Reiniciar antes de salir** | Perfil ya activo: se explica sin pulsar |
 | Pestaña **Agente · MCP** (lo que recibe el agente) | ✔ Funciona | Es el plan B del paso de Claude |
 | Voz real con ElevenLabs | ✔ Probada **una vez** de punta a punta (E-03). Necesita claves y saldo | Demo guiada |
-| Claude + conectores Idóneo y MyInvestor | ✔ Probado el 9/11 por **túnel temporal**: hay que levantarlo y poner la URL nueva en Claude | Pestaña Agente · MCP |
+| Claude + conectores Idóneo y MyInvestor | ⚠ Probado el 9/11 por **túnel temporal**, antes de la PR 21. Desde la PR 21 `/mcp` exige credencial (sin ella responde 401). `[PENDIENTE: Juan está comprobando cómo conectar Claude.ai con la autenticación nueva]` | Pestaña Agente · MCP |
 | Clip de audio al pinchar un dato | ✘ Pendiente | Se enseña la frase escrita |
 | Sonido de la demo guiada | Voz del navegador (no hay audios grabados) | Quitar el sonido y leer los subtítulos |
 
@@ -29,8 +29,9 @@ Borrador v1 · 10 nov 2026 · Responsable: Rodrigo (lleva la demo) · Complement
 
 ## Antes de salir (checklist, 15 min)
 
-- [ ] Backend y front arrancados **desde el ZIP final**, en carpeta limpia. Front con `npm run build` y `npm start` (sin la insignia «N» del modo desarrollo).
-- [ ] Carmen en estado inicial (`pending_validation`): `POST /api/demo/reset` desde una terminal (con la cabecera `X-Admin-Token` si hay `ADMIN_TOKEN`). **No abrir `/docs` en el proyector.**
+- [ ] Backend y front arrancados **desde el ZIP final**, en carpeta limpia. Front con `npm run build` y `npm start -- -H 127.0.0.1` (sin la insignia «N» del modo desarrollo y escuchando solo en el portátil: con el modo asesor activo no debe quedar expuesto a la wifi del aula).
+- [ ] Modo asesor de demostración activo: en el registro del backend sale «MODO ASESOR DE DEMO ACTIVO». **Después del pitch, apagarlo** (`DEMO_ADVISOR_MODE=0` en los dos archivos).
+- [ ] Carmen en estado inicial (`pending_validation`): botón **«Reiniciar la demo»** de la vista de la entidad. Alternativa por terminal: `POST /api/demo/reset` con la cabecera `X-Admin-Token` (obligatoria: sin `ADMIN_TOKEN` configurado responde 503). **No abrir `/docs` en el proyector.**
 - [ ] Recargar la pestaña 3 y comprobar que pone **«Pendiente de validar»**.
 - [ ] Túnel levantado y URL nueva puesta en el conector de Idóneo en Claude. Probar el prompt una vez.
 - [ ] Navegador a pantalla completa (F11) y zoom 110-125 % para que se lea desde el fondo.
@@ -49,7 +50,7 @@ Borrador v1 · 10 nov 2026 · Responsable: Rodrigo (lleva la demo) · Complement
 | 0:40 | Momento clave (paso 14 de 19) | «Eso no puede pasar, el fondo es del banco» y el aviso | «Había declarado que conocía ese producto. **Declarado no es igual a demostrado.**» |
 | 1:00 | Fin de la demo guiada; ir a la pestaña 3 (`/entidad/carmen-68`) | «carmen-68, perfil por validar», aviso ámbar, Conservador, SRI 3 de 7 | «Conservador, riesgo máximo 3 de 7, renta variable no conveniente. Reglas fijas, no el modelo.» |
 | 1:20 | Pulsar **Ver la frase** en el aviso | La cita de Carmen | «Cada dato lleva su prueba.» |
-| 1:30 | Pulsar **Validar perfil** | Pasa a validado; aviso «el agente ya puede usarlo por MCP» | «Una persona lo valida. Sin eso, el agente no puede usarlo.» |
+| 1:30 | Pulsar **Validar perfil** (una sola vez) | Pasa a validado; aviso «el agente ya puede usarlo por MCP» | «Una persona lo valida. Sin eso, el agente no puede usarlo.» |
 | 1:45 | Pestaña 4: Claude con los conectores. Enviar el prompt preparado | Lista de fondos de MyInvestor con riesgo ≤ 3, sin renta variable | «El agente de la entidad usa el perfil. Nosotros no recomendamos.» |
 | 2:10 | Cierre | Respuesta de Claude en pantalla | «Eso es Idóneo. Gracias, y encantados de responder a vuestras preguntas.» |
 
@@ -79,7 +80,7 @@ El límite de espera es de **10 segundos**: si algo no responde, se pasa al plan
 ## Preguntas que pueden salir al ver la demo
 
 - **«¿Qué son esos porcentajes junto a cada dato?»** Confianza calculada con supuestos del equipo (rúbrica v2), no una medida. Por debajo de 0,65 se marca para revisar.
-- **«¿Por qué desaparece el aviso al validar?»** Al validar, la persona da el aviso por revisado. `[PENDIENTE: confirmar con el equipo si es lo que queremos o un fallo.]`
+- **«¿Por qué desaparece el aviso al validar?»** Al validar, la persona da el aviso por revisado. Es intencionado: las alertas abiertas pasan a «resuelta» y queda quién lo validó (`backend/app/perfil/store.py`).
 - **«¿Esto es en directo?»** La demo guiada repite una conversación de ejemplo. La voz real funciona y la hemos probado de punta a punta; no la usamos en el pitch para no depender de la red.
 
 ## Qué NO enseñar
