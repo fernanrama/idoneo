@@ -125,12 +125,12 @@ npm run dev
 | 1 | http://localhost:3000 | La entrada a la feature dentro de la app |
 | 2 | http://localhost:3000/onboarding/entrevista → **Ver demo guiada** | La entrevista de Carmen turno a turno, con subtítulos y barra de bloques |
 | 3 | http://localhost:3000/entidad/carmen-68 | Cada dato con fuente, confianza y cita; perfil CONSERVADOR; la alerta *declarado ≠ demostrado* |
-| 4 | Botón **Validar perfil** en esa vista | El perfil pasa a `active` y ya se puede usar |
+| 4 | Botón **Validar perfil** en esa vista (requiere el [modo asesor de demostración](docs/MODO_ASESOR_DEMO.md); apagado, aparece deshabilitado) | El perfil pasa a `active` y ya se puede usar |
 | 5 | http://localhost:8000/api/clients/carmen-68/constraints | Las restricciones en el formato del catálogo de MyInvestor (`usable: true` tras validar) |
 | 6 | http://localhost:8000/api/clients/carmen-68/evidence/knowledge.equity_funds | La prueba: *«Eso no puede pasar, el fondo es del banco.»*, segundos 57–61 |
 | 7 | http://localhost:8000/docs | Toda la API, para probarla a mano |
 
-Si algo se queda en un estado raro, `POST /api/demo/reset` (desde `/docs`) vuelve a cargar a Carmen como versión nueva.
+Si algo se queda en un estado raro, **Reiniciar la demo** en esa vista (con el modo asesor de demostración) o `POST /api/demo/reset` con `X-Admin-Token` (desde `/docs`) vuelven a cargar a Carmen como versión nueva.
 
 ### 4. Tests
 
@@ -162,7 +162,7 @@ Claude lo usa junto al conector público de MyInvestor: pide los límites de Car
 4. En claude.ai: **Ajustes → Conectores → Añadir conector personalizado** → `https://xxxx.trycloudflare.com/mcp`. Activa también el conector de MyInvestor (`https://mcp.myinvestor.es/mcp`).
 5. En un chat nuevo: *«Busca en MyInvestor fondos que encajen con la clienta carmen-68»*.
 
-Para que el botón «Validar perfil» del frontend funcione con el backend protegido, pon el mismo `ADMIN_TOKEN` en `frontend/.env.local`: el servidor de Next añade la cabecera y el token no llega al navegador.
+`ADMIN_TOKEN` no se copia al frontend. Para que el botón «Validar perfil» funcione en la presentación local, activa el [modo asesor de demostración](docs/MODO_ASESOR_DEMO.md); no funciona a través de un túnel ni de un despliegue público.
 </details>
 
 **Probado el 9/11/2026:** Claude recibe por la URL pública el perfil activo de Carmen y encuentra fondos de renta fija y monetarios en EUR con riesgo ≤ 3, ninguno de renta variable. Detalles en [backend/app/mcp/README.md](backend/app/mcp/README.md).
@@ -200,7 +200,9 @@ Todas están en `.env.example`.
 | `DATA_DIR` | `backend/data` | Carpeta de los volcados JSON (memoria) y de la base SQLite |
 | `DATA_PERSIST` | `1` | `1` vuelca el almacén en memoria a `DATA_DIR`; `0` no escribe nada en disco (lo usan los tests) |
 | `LOAD_DEMO_FIXTURE` | `1` | Carga a Carmen (DATOS SIMULADOS) al arrancar, solo si no existe |
-| `ADMIN_TOKEN` | vacío | Si se define, `POST /validate` y `POST /api/demo/reset` exigen la cabecera `X-Admin-Token`. El front la añade desde su servidor con el mismo valor en `frontend/.env.local` |
+| `ADMIN_TOKEN` | vacío | Credencial de servicio: `POST /validate` (junto con el Bearer del propietario), `POST /api/demo/reset` y consumidores del MCP. Nunca va al frontend |
+| `DEMO_ADVISOR_MODE`, `DEMO_ADVISOR_TOKEN` | `0`, vacío | [Modo asesor de demostración](docs/MODO_ASESOR_DEMO.md): habilita «Validar perfil» solo en local y para clientes ficticios. El mismo token en `frontend/.env.local` |
+| `DEMO_ADVISOR_CLIENTS`, `DEMO_ADVISOR_ID` | `carmen-68`, `asesor-demo` | Clientes ficticios permitidos y autor de la validación en ese modo |
 | `DEMO_ENDPOINTS` | `1` | `0` desactiva `POST /api/demo/reset` (para un despliegue público) |
 | `CORS_ORIGINS` | `http://localhost:3000` | Orígenes del front permitidos, separados por comas |
 | `MCP_ALLOWED_HOSTS` | vacío | Hosts públicos del MCP (túnel o despliegue) |
