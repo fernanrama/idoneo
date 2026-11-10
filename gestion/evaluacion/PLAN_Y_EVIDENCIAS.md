@@ -3,7 +3,7 @@
 Responsable documental: área 04 · Actualizado: 8 de noviembre de 2026.
 
 ## Estado y uso
-**Preparado:** plantilla de criterios, ejecuciones, comparación y revisión final. **Pendiente:** enunciado, rúbrica, producto, datos, responsables humanos y umbrales. Primeras ejecuciones del extractor registradas abajo (E-00, E-01, E-02). Los criterios siguientes son propuestas; no constituyen requisitos oficiales ni financieros o regulatorios.
+**Preparado:** plantilla de criterios, ejecuciones, comparación y revisión final. **Pendiente:** enunciado, rúbrica, producto, datos, responsables humanos y umbrales. Primeras ejecuciones del extractor registradas abajo (E-00 a E-04). Los criterios siguientes son propuestas; no constituyen requisitos oficiales ni financieros o regulatorios.
 
 Trabajar por hitos desde la recepción del reto: acordar criterios → probar recorrido completo → comparar y corregir → verificar versión de entrega. Dirección ajustará el calendario al tiempo restante.
 
@@ -29,6 +29,22 @@ Registrar cada ejecución con esta ficha:
 - **Mediciones pertinentes:** [muestra, repeticiones, latencia, coste o errores; método de medición].
 
 No registrar secretos ni datos personales financieros. Usar ejemplos sintéticos o referencias seguras. Conservar fallos y repeticiones de salidas variables; no seleccionar solo resultados favorables. Distinguir coste medido de estimado. Una evidencia de otra versión no valida automáticamente la actual.
+
+### Ejecución E-04 · Extractor (B1) tras los ajustes de la voz · 10 nov 2026
+
+- **Ejecución / casos / fecha / ejecutor:** `scripts/evaluar_extractor.py`, las mismas 7 entrevistas **simuladas** de E-01, Alex en su portátil.
+- **Versión exacta:** commit `58d2cdf` de main (respuestas cortas a preguntas cerradas = explícitas; criterio de `sustainability.preference`).
+- **Esperado y observado:** cobertura 100 % (31/31), precisión 100 %, 0 erróneos, 0 prohibidos. En E-01 la cobertura era 97 % (30/31).
+- **Mediciones pertinentes:** `claude-sonnet-5-5`, esfuerzo low; 33 llamadas; mediana 1,7 s, p95 2,7 s; por llamada 404 tokens de entrada, 5.896 desde caché y 142 de salida.
+- **Limitaciones:** una repetición; el modelo no es determinista.
+
+### Ejecución E-03 · Primera entrevista por voz de punta a punta · 10 nov 2026
+
+- **Ejecución / casos / fecha / ejecutor:** entrevista por voz desde el front (ElevenLabs + backend + extractor + verificador), Alex con un guion de prueba y **cifras inventadas**.
+- **Versión exacta:** commit `1e8c2df` de main; agente de ElevenLabs con Claude Haiku 4.5 y voz castellana.
+- **Esperado y observado:** 45 turnos en unos 6 minutos y 15 datos en el perfil, todos con cita; 0 rechazos. Los ingresos de la pareja no entraron en el perfil; la alerta declarado «high» ≠ demostrado «none» en renta variable saltó con la cita «Un fondo del banco no puede bajar»; renta fija demostrada «none»; se negó a recomendar y desvió preguntas ajenas. Fallos: ante «pues normal» el entrevistador sugirió una cifra («¿rondan los mil euros?») y no volvió a pedir los gastos fijos (perfil incompleto); respuestas cortas a preguntas cerradas («No», «Poco») salieron con confianza baja; el agente no colgaba al despedirse. Corregido en `7463e68` y `58d2cdf`.
+- **Evidencia:** sesión y perfil exportados del backend en local (no se suben: es una prueba con la voz de una persona del equipo).
+- **Limitaciones:** una sola entrevista; los tiempos de los turnos de voz son aproximados.
 
 ### Ejecución E-02 · Laboratorio con cliente simulado · 9 nov 2026
 
