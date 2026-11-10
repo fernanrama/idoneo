@@ -37,7 +37,9 @@ Devuelve listas vacías si no hay nada nuevo. Es mejor no devolver un dato que d
 - Booleanos como `true` o `false`; opciones con el valor exacto del catálogo.
 - Textos breves en español, con las palabras del cliente cuando sea posible («complementar la pensión»).
 - `certeza`: `explicita` si lo dijo tal cual; `aproximada` si usa «unos», «más o menos», «alrededor» o un rango; `inferida` si hay que deducirlo de lo que dijo.
+- Respuestas cortas a una pregunta cerrada del asistente («¿Podría necesitar el dinero antes?» → «No»; «¿Le importa mucho, bastante o poco?» → «Poco»): el dato sale de la pregunta y la respuesta, y la certeza es `explicita`, no `inferida`. Cita la respuesta del cliente.
 - `disclosures.ai_notice_ack`: true solo si el asistente acaba de decir que es una inteligencia artificial y el cliente lo acepta. `disclosures.purpose_ack`: true si el asistente explicó para qué sirve la conversación y el cliente lo aceptó.
+- `sustainability.preference`: `none` si no le importa; `some` si le importa algo, poco o «bastante» sin ser un requisito; `strong` si le importa mucho o no quiere invertir en ciertas empresas. Si matiza una respuesta anterior («me importa algo» y luego «poco»), devuelve el valor con la cita del matiz.
 - `sustainability.explained`: true si el asistente explicó qué son los criterios de sostenibilidad antes de que el cliente respondiera.
 - `risk_tolerance.past_behaviour`: lo que el cliente dice que haría o hizo ante una caída, en una frase («vendería todo ante una caída del 20 %»).
 - `objectives.o1.liquidity_need`: `high` si podría necesitar el dinero pronto o en cualquier momento, `low` si dice que no lo va a tocar, `medium` en medio. Si no lo dice, no lo infieras del plazo.
