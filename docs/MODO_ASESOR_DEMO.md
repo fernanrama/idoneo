@@ -107,18 +107,19 @@ Todo en el portátil, sin túneles. DATOS FICTICIOS. La entrevista real consume 
    export IDONEO_MCP_TOKEN="$(python scripts/demo_operador.py autorizar <client_id> --confirmo-ficticio)"
    ```
 4. **Validación del asesor:** recarga `/entidad/<client_id>` → «Validar perfil». Si faltan datos obligatorios, el backend lo rechaza (409) y hay que completar la entrevista.
-5. **Conectar el MCP de ese cliente**, desde la misma carpeta en la que luego abrirás Claude Code (el servidor se guarda con alcance local, ligado a esa carpeta):
+5. **Conectar el MCP de ese cliente**, desde la misma carpeta en la que luego abrirás Claude Code (el servidor se guarda con alcance local, ligado a esa carpeta). Usa **comillas simples**: así la shell no sustituye la variable y Claude Code guarda la referencia `${IDONEO_MCP_TOKEN}`, no el token; la resuelve al conectar:
    ```bash
-   claude mcp add --transport http idoneo http://localhost:8000/mcp -H "Authorization: Bearer $IDONEO_MCP_TOKEN"
-   claude mcp list        # «idoneo» y «myinvestor» conectados; no muestra cabeceras
+   claude mcp add --transport http idoneo http://localhost:8000/mcp -H 'Authorization: Bearer ${IDONEO_MCP_TOKEN}'
+   claude mcp list        # «idoneo» y «myinvestor» conectados
    ```
    Para Carmen, carga antes su token sin mostrarlo: `export IDONEO_MCP_TOKEN="$(grep '^MCP_DEMO_TOKEN=' .env | cut -d= -f2-)"`.
-   `claude mcp add` oculta la cabecera en su salida, pero **`claude mcp get idoneo` la muestra en claro**: no lo ejecutes con la pantalla proyectada. Claude Code guarda la cabecera sin cifrar en `~/.claude.json` hasta que la borres.
+   Abre Claude Code (`claude`) **en la misma terminal** en la que exportaste `IDONEO_MCP_TOKEN`: la variable se lee al conectar, no al añadir. Para cambiar de cliente basta con exportar el token nuevo y reiniciar Claude Code; el servidor no se vuelve a añadir.
+   `~/.claude.json`, `claude mcp list` y `claude mcp get idoneo` solo muestran `Bearer ${IDONEO_MCP_TOKEN}`, nunca el token (comprobado en Claude Code 2.1.322 con un servidor local de prueba y un token ficticio). Con comillas dobles, la shell escribiría el token real en `~/.claude.json` y `claude mcp get` lo mostraría en claro.
 6. **Claude + MyInvestor:** *«Usa el conector de Idóneo para leer las restricciones de <client_id> y busca en MyInvestor fondos compatibles; explica qué descartas y por qué, con la evidencia de la entrevista.»* Claude llama a `get_investment_constraints` (`usable: true`), busca en MyInvestor con `funds_query` (una búsqueda por `asset_type`), aplica `post_filters` y respeta `appropriateness`. La selección final es del agente de la entidad.
 7. **Al terminar (revocación):**
    ```bash
    python scripts/demo_operador.py revocar-todo     # los tokens de operador dejan de valer al instante
-   claude mcp remove idoneo                         # borra la cabecera de ~/.claude.json
+   claude mcp remove idoneo                         # quita el servidor de ~/.claude.json (solo guardaba la referencia)
    unset IDONEO_MCP_TOKEN
    ```
    Reiniciar el backend también anula todas las autorizaciones. `MCP_DEMO_TOKEN` (la de Carmen) es configuración fija: para revocarla, quítala del `.env` o cámbiala y reinicia.

@@ -44,7 +44,7 @@ Desde la PR #21, `/mcp` exige credencial: sin ella responde 401. **Nunca se usa 
 
 La API REST no reconoce ninguna de las dos. Las cuatro herramientas se declaran `readOnlyHint`. Si `MCP_DEMO_TOKEN` es insegura (corta, con caracteres no válidos o igual a otro secreto), queda desactivada y el log lo avisa.
 
-**Cliente:** Claude Code en el mismo portátil. Admite cabeceras (`claude mcp add -H`; comprobado en Claude Code 2.1.322) y conecta con `localhost` sin túnel. No usamos el conector de claude.ai ni el de Claude Desktop: necesitan una URL pública y, sin cabeceras propias, el token tendría que ir en la URL.
+**Cliente:** Claude Code en el mismo portátil. Admite cabeceras (`claude mcp add -H`; comprobado en Claude Code 2.1.322) y conecta con `localhost` sin túnel. La cabecera se registra como referencia, `-H 'Authorization: Bearer ${IDONEO_MCP_TOKEN}'` con comillas simples: `~/.claude.json` guarda la referencia y Claude Code la resuelve al conectar, así que el token no queda escrito en disco. No usamos el conector de claude.ai ni el de Claude Desktop: necesitan una URL pública y, sin cabeceras propias, el token tendría que ir en la URL.
 
 El recorrido completo, con Carmen o con un cliente nuevo entrevistado en directo, está en [docs/MODO_ASESOR_DEMO.md](../../../docs/MODO_ASESOR_DEMO.md#recorrido-completo-del-pitch).
 

@@ -159,7 +159,7 @@ Todo en el portátil, con Claude Code y sin túneles. **Nunca** pongas `ADMIN_TO
 
 1. En `.env`: `DEMO_ADVISOR_MODE=1`, `DEMO_ADVISOR_TOKEN` y `MCP_DEMO_TOKEN` con valores aleatorios distintos, generados sin mostrarlos en pantalla (comandos en la guía). En `frontend/.env.local`, el mismo `DEMO_ADVISOR_TOKEN`. Reinicia.
 2. Valida a Carmen en `http://localhost:3000/entidad/carmen-68`, o entrevista a un cliente ficticio nuevo y pide al operador que lo autorice con `python scripts/demo_operador.py autorizar <client_id> --confirmo-ficticio`.
-3. Conecta Claude Code: `claude mcp add --transport http idoneo http://localhost:8000/mcp -H "Authorization: Bearer <token>"` y `claude mcp add --transport http myinvestor https://mcp.myinvestor.es/mcp`.
+3. Exporta el token en la terminal sin mostrarlo (`IDONEO_MCP_TOKEN`, ver la guía) y conecta Claude Code con **comillas simples**, para que guarde la referencia y no el token: `claude mcp add --transport http idoneo http://localhost:8000/mcp -H 'Authorization: Bearer ${IDONEO_MCP_TOKEN}'` y `claude mcp add --transport http myinvestor https://mcp.myinvestor.es/mcp`.
 4. En el chat: *«Usa Idóneo para leer las restricciones de <cliente> y busca en MyInvestor fondos compatibles»*.
 
 Guía completa: [docs/MODO_ASESOR_DEMO.md](docs/MODO_ASESOR_DEMO.md#recorrido-completo-del-pitch).
