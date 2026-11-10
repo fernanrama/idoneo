@@ -85,6 +85,12 @@ export interface Sesion {
   session_id: string;
   client_id: string;
   started_at: string;
+  channel?: "voice" | "text";
+}
+
+/** Solo llega en el alta; se extrae antes de persistir metadatos. */
+export interface AltaSesion extends Sesion {
+  access_token?: string;
 }
 
 export type VariableDinamica = string | number | boolean;
@@ -101,7 +107,8 @@ export interface BootstrapVoz extends ContextoVoz {
 
 export interface MemoriaPersonal {
   enabled: boolean;
-  version: number | null;
+  version: number;
+  etag: string;
   data: Record<string, unknown>;
   consent_at?: string | null;
   deleted_versions?: number;

@@ -9,7 +9,9 @@ versión; la segunda recibe ConflictoVersion y `store` relee y reintenta.
 from __future__ import annotations
 
 import sqlite3
+import threading
 import uuid
+from contextlib import contextmanager, nullcontext
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -37,6 +39,21 @@ class AlmacenBD:
 
     def __init__(self, motor: Engine):
         self.motor = motor
+        # StaticPool comparte una conexión física SQLite. Todas las operaciones
+        # del almacén deben respetar el mismo candado, también sesiones y MiFID.
+        self._personal_sqlite = threading.RLock()
+
+    @contextmanager
+    def _conexion(self):
+        candado = self._personal_sqlite if self.motor.dialect.name == "sqlite" else nullcontext()
+        with candado, self.motor.connect() as conexion:
+            yield conexion
+
+    @contextmanager
+    def _transaccion(self):
+        candado = self._personal_sqlite if self.motor.dialect.name == "sqlite" else nullcontext()
+        with candado, self.motor.begin() as conexion:
+            yield conexion
 
     @classmethod
     def desde_url(cls, url: str | None = None) -> AlmacenBD:
@@ -56,7 +73,7 @@ class AlmacenBD:
     def crear(self, perfil: Perfil) -> bool:
         """Crea el cliente y su versión 1 en una transacción. False si ya existía."""
         try:
-            with self.motor.begin() as c:
+            with self._transaccion() as c:
                 c.execute(insert(clients).values(client_id=perfil.client_id, created_at=perfil.created_at))
                 c.execute(insert(profile_versions).values(**self._fila(perfil)))
             return True
@@ -67,7 +84,7 @@ class AlmacenBD:
 
     def insertar(self, perfil: Perfil) -> None:
         try:
-            with self.motor.begin() as c:
+            with self._transaccion() as c:
                 c.execute(insert(profile_versions).values(**self._fila(perfil)))
         except IntegrityError as e:
             # Solo es conflicto si otra escritura ya creó esa versión; otra violación se propaga.
@@ -78,7 +95,7 @@ class AlmacenBD:
     def insertar_lote(self, perfiles: list[Perfil]) -> None:
         cid = cliente_del_lote(perfiles)
         try:
-            with self.motor.begin() as c:
+            with self._transaccion() as c:
                 # Comparación optimista. La PK protege además si otro proceso escribe
                 # después de esta lectura; cualquier colisión deshace el lote entero.
                 ultima = c.execute(select(func.max(profile_versions.c.version)).where(
@@ -104,7 +121,7 @@ class AlmacenBD:
             raise
 
     def _un_perfil(self, consulta) -> Perfil | None:
-        with self.motor.connect() as c:
+        with self._conexion() as c:
             fila = c.execute(consulta).first()
         return None if fila is None else Perfil.model_validate(fila.snapshot)
 
@@ -125,53 +142,69 @@ class AlmacenBD:
 
     def ultima_de_autor(self, client_id: str, autor: str) -> int | None:
         t = profile_versions.c
-        with self.motor.connect() as c:
+        with self._conexion() as c:
             return c.execute(select(func.max(t.version)).where(t.client_id == client_id, t.author == autor)).scalar()
 
     def historial(self, client_id: str) -> list[dict[str, Any]]:
         t = profile_versions.c
         consulta = (select(t.version, t.created_at, t.reason, t.author, t.status)
                     .where(t.client_id == client_id).order_by(t.version))
-        with self.motor.connect() as c:
+        with self._conexion() as c:
             return [{**f._asdict(), "created_at": _utc(f.created_at), "status": EstadoPerfil(f.status)}
                     for f in c.execute(consulta)]
 
     # ---------- capa personal ----------
 
+    @contextmanager
+    def transaccion_personal(self, client_id: str):
+        # SQLite reserva la escritura ANTES de leer la revisión. PostgreSQL bloquea
+        # una fila estable, existente aunque no haya ninguna versión personal.
+        sqlite = self.motor.dialect.name == "sqlite"
+        try:
+            with self._conexion() as conexion:
+                try:
+                    if sqlite:
+                        conexion.exec_driver_sql("BEGIN IMMEDIATE")
+                    else:
+                        conexion.begin()
+                        conexion.execute(select(clients.c.client_id).where(
+                            clients.c.client_id == client_id).with_for_update()).one()
+                    yield _PersonalBD(conexion, client_id)
+                    conexion.commit()
+                except BaseException:
+                    conexion.rollback()
+                    raise
+        except OperationalError as e:
+            codigo = getattr(e.orig, "sqlite_errorcode", 0) or 0
+            if ((sqlite and (codigo & 0xFF) in (sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED))
+                    or getattr(e.orig, "sqlstate", None) in ("40001", "40P01")):
+                raise ConflictoVersion(f"Escritura personal concurrente en {client_id}") from e
+            raise
+
     def ultima_personal(self, client_id: str) -> CapaPersonal | None:
-        t = personal_versions.c
-        with self.motor.connect() as c:
-            fila = c.execute(select(personal_versions).where(t.client_id == client_id)
-                             .order_by(t.version.desc()).limit(1)).first()
-        if fila is None:
-            return None
-        d = fila._asdict()
-        d["consent_at"], d["created_at"] = _utc(d["consent_at"]), _utc(d["created_at"])
-        return CapaPersonal.model_validate(d)
+        # No cerrar una lectura sobre la conexión compartida de StaticPool
+        # mientras otra operación personal está usando su transacción.
+        with self._conexion() as c:
+            return _PersonalBD(c, client_id).ultima()
 
     def insertar_personal(self, capa: CapaPersonal) -> None:
-        try:
-            with self.motor.begin() as c:
-                c.execute(insert(personal_versions).values(
-                    client_id=capa.client_id, version=capa.version, consent_given=capa.consent_given,
-                    consent_at=capa.consent_at, data=capa.data, author=capa.author, created_at=capa.created_at))
-        except IntegrityError as e:
-            raise ConflictoVersion(f"La versión personal {capa.version} de {capa.client_id} ya existe") from e
+        with self.transaccion_personal(capa.client_id) as transaccion:
+            transaccion.insertar(capa)
 
     def borrar_personal(self, client_id: str) -> int:
         """Derecho de supresión (RGPD): borra la capa personal del cliente. El registro MiFID no se toca."""
-        with self.motor.begin() as c:
-            return c.execute(delete(personal_versions).where(personal_versions.c.client_id == client_id)).rowcount
+        with self.transaccion_personal(client_id) as transaccion:
+            return transaccion.borrar()
 
     # ---------- sesiones y transcripción ----------
 
     def crear_sesion(self, session_id: str, client_id: str, canal: str, momento: datetime) -> None:
-        with self.motor.begin() as c:
+        with self._transaccion() as c:
             c.execute(insert(sessions).values(session_id=session_id, client_id=client_id,
                                               channel=canal, started_at=momento))
 
     def sesion(self, session_id: str) -> dict[str, Any] | None:
-        with self.motor.connect() as c:
+        with self._conexion() as c:
             fila = c.execute(select(sessions).where(sessions.c.session_id == session_id)).first()
         if fila is None:
             return None
@@ -180,7 +213,7 @@ class AlmacenBD:
         return d
 
     def finalizar_sesion(self, session_id: str, conversation_id: str, momento: datetime) -> bool:
-        with self.motor.begin() as c:
+        with self._transaccion() as c:
             resultado = c.execute(update(sessions).where(
                 sessions.c.session_id == session_id,
                 sessions.c.ended_at.is_(None),
@@ -200,7 +233,7 @@ class AlmacenBD:
         t = turns.c
         for _ in range(5):
             try:
-                with self.motor.begin() as c:
+                with self._transaccion() as c:
                     if turno.turn_id:
                         previo = c.execute(select(t.turn_id, t.speaker, t.text, t.t_start, t.t_end).where(
                             t.session_id == session_id, t.turn_id == turno.turn_id)).first()
@@ -227,7 +260,7 @@ class AlmacenBD:
         t = turns.c
         consulta = (select(t.turn_id, t.speaker, t.text, t.t_start, t.t_end)
                     .where(t.session_id == session_id).order_by(t.idx))
-        with self.motor.connect() as c:
+        with self._conexion() as c:
             return [Turno.model_validate(f._asdict()) for f in c.execute(consulta)]
 
     # ---------- utilidades ----------
@@ -260,3 +293,31 @@ def url_de_prueba(url: str) -> str:
     if "supabase" in url or (u.host or "") not in ("", "localhost", "127.0.0.1") or "test" not in (u.database or ""):
         raise RuntimeError("Solo un Postgres local de pruebas (nombre con 'test'), nunca Supabase")
     return url
+
+
+class _PersonalBD:
+    def __init__(self, conexion, client_id: str):
+        self.conexion, self.client_id = conexion, client_id
+
+    def ultima(self) -> CapaPersonal | None:
+        t = personal_versions.c
+        fila = self.conexion.execute(select(personal_versions).where(t.client_id == self.client_id)
+                                     .order_by(t.version.desc()).limit(1)).first()
+        if fila is None:
+            return None
+        datos = fila._asdict()
+        datos["consent_at"], datos["created_at"] = _utc(datos["consent_at"]), _utc(datos["created_at"])
+        return CapaPersonal.model_validate(datos)
+
+    def cantidad(self) -> int:
+        return self.conexion.execute(select(func.count()).select_from(personal_versions).where(
+            personal_versions.c.client_id == self.client_id)).scalar_one()
+
+    def insertar(self, capa: CapaPersonal) -> None:
+        if capa.client_id != self.client_id:
+            raise ValueError("La capa pertenece a otro cliente")
+        self.conexion.execute(insert(personal_versions).values(**capa.model_dump()))
+
+    def borrar(self) -> int:
+        return self.conexion.execute(delete(personal_versions).where(
+            personal_versions.c.client_id == self.client_id)).rowcount

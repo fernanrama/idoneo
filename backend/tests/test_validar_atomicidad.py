@@ -12,7 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
 
 import pytest
-from fastapi.testclient import TestClient
+from tests.soporte_acceso import cliente_autorizado
 from sqlalchemy import event, text
 from sqlalchemy.exc import IntegrityError, OperationalError
 
@@ -35,7 +35,7 @@ def api_perfil(almacen, request, tmp_path):
     if request.param == "sqlite":
         store.configurar("bd", f"sqlite:///{tmp_path / 'validacion_test.db'}")
     store.cargar_fixture(CLIENTE)
-    cliente = TestClient(app)
+    cliente = cliente_autorizado()
     yield cliente
     cliente.close()
 
@@ -349,7 +349,7 @@ def test_memoria_con_json_guarda_el_lote_entero_o_nada(almacen, tmp_path, monkey
     monkeypatch.setenv("DATA_PERSIST", "1")
     store.configurar("memoria")
     store.cargar_fixture(CLIENTE)
-    with closing(TestClient(app)) as api:
+    with closing(cliente_autorizado()) as api:
         antes = instantanea(api)
         ruta = tmp_path / f"perfil_{CLIENTE}.json"
         original = ruta.read_bytes()

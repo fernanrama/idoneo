@@ -1,6 +1,11 @@
 "use client";
 
-import { Cabecera, Chip, Contenido, IndicadorRiesgo, Marco, Pasos, Tarjeta } from "@/components/ui";
+import Link from "next/link";
+import { BarraCliente } from "@/components/BarraCliente";
+import { nombrePerfil } from "@/components/PanelVivo";
+import { Revela } from "@/components/Revela";
+import s from "@/components/cliente.module.css";
+import { Icono } from "@/components/visual";
 import { FAMILIAS } from "@/lib/bloques";
 import { useOnboarding } from "@/lib/onboarding";
 import { usePerfil } from "@/lib/usePerfil";
@@ -15,57 +20,101 @@ import { usePerfil } from "@/lib/usePerfil";
 export default function Productos() {
   const { clientId } = useOnboarding();
   const { perfil, restricciones: r, error } = usePerfil(clientId);
-  const s = perfil?.assessments.suitability;
+  const su = perfil?.assessments.suitability;
 
   return (
-    <Marco>
-      <Cabecera titulo="Productos para ti" />
-      <Contenido>
-        {error && <p role="alert">No se han podido cargar las restricciones.</p>}
-        {perfil && s && r && (
+    <div className={s.raiz}>
+      <BarraCliente paso={3} />
+      <main className={s.caja}>
+        {error && (
+          <p role="alert" className={s.error}>
+            No hemos podido cargar tus filtros. Inténtalo de nuevo en un momento.
+          </p>
+        )}
+        {!perfil && !error && <div className={s.cargando} aria-label="Cargando" />}
+        {perfil && su && r && (
           <>
-            <Pasos actual={3} />
-            <Tarjeta>
-              <h2>Filtros de tu perfil</h2>
-              <div className="pila">
-                <IndicadorRiesgo nivel={s.max_sri} />
-                <div className="fila entre">
-                  <span>Perfil</span>
-                  <strong>{s.risk_profile?.toLowerCase().replace("_", " ") ?? "—"}</strong>
-                </div>
-                <div className="fila entre">
-                  <span>Criterios sostenibles</span>
-                  <strong>{r.funds_query.esg_only ? "sí" : "no es necesario"}</strong>
-                </div>
+            <section className={s.hero} style={{ minHeight: 0 }}>
+              <div className={s.heroTexto}>
+                <h1>
+                  Productos <span className={s.grad}>para ti</span>
+                </h1>
+                <p>Estos son los filtros que tu perfil pone a cualquier producto que te ofrezcamos.</p>
               </div>
-            </Tarjeta>
-            <Tarjeta>
-              <h2>Puedes comprar por tu cuenta</h2>
-              <div className="pila">
-                {Object.entries(perfil.assessments.appropriateness)
-                  .filter(([, v]) => v !== "not_assessed")
-                  .map(([f, v]) => (
-                    <div key={f} className="fila entre">
-                      <span>{FAMILIAS[f] ?? f}</span>
-                      <Chip tipo={v === "appropriate" ? "demonstrated" : "aviso"}>
-                        {v === "appropriate" ? "Sí" : "Con aviso previo"}
-                      </Chip>
+            </section>
+
+            <div className={s.rejilla}>
+              <Revela como="section" className={s.tarjeta}>
+                <h2>Filtros de tu perfil</h2>
+                <ul className={s.filas}>
+                  <li className={s.fila}>
+                    <div className={s.filaBoton}>
+                      <span className={s.filaTexto}>
+                        <span className={s.filaTitulo}>Riesgo máximo</span>
+                        <span className={s.filaValor}>{su.max_sri ?? "—"} sobre 7</span>
+                      </span>
                     </div>
-                  ))}
+                  </li>
+                  <li className={s.fila}>
+                    <div className={s.filaBoton}>
+                      <span className={s.filaTexto}>
+                        <span className={s.filaTitulo}>Perfil</span>
+                        <span className={s.filaValor}>{nombrePerfil(su.risk_profile)}</span>
+                      </span>
+                    </div>
+                  </li>
+                  <li className={s.fila}>
+                    <div className={s.filaBoton}>
+                      <span className={s.filaTexto}>
+                        <span className={s.filaTitulo}>Criterios sostenibles</span>
+                        <span className={s.filaValor}>{r.funds_query.esg_only ? "Sí" : "No es necesario"}</span>
+                      </span>
+                    </div>
+                  </li>
+                </ul>
+              </Revela>
+
+              <Revela como="section" className={s.tarjeta} retraso={0.12}>
+                <h2>Puedes contratar por tu cuenta</h2>
+                <ul className={s.filas}>
+                  {Object.entries(perfil.assessments.appropriateness)
+                    .filter(([, v]) => v !== "not_assessed")
+                    .map(([f, v]) => (
+                      <li key={f} className={s.fila}>
+                        <div className={s.filaBoton}>
+                          <span className={s.filaTexto}>
+                            <span className={s.filaValor}>{(FAMILIAS[f] ?? f).replace(/^./, (c) => c.toUpperCase())}</span>
+                          </span>
+                          <span className={`${s.estado} ${v === "appropriate" ? s.estadoOk : ""}`}>
+                            {v === "appropriate" ? "Sí" : "Con aviso previo"}
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+                </ul>
+              </Revela>
+            </div>
+
+            <Revela como="section" className={`${s.tarjeta} ${s.siguiente}`}>
+              <div className={s.siguienteIcono} aria-hidden="true">
+                {Icono.check}
               </div>
-            </Tarjeta>
-            <Tarjeta>
-              <div className="fila entre">
-                <h2 style={{ margin: 0 }}>Catálogo</h2>
-                <Chip tipo="aviso">Pendiente</Chip>
+              <div style={{ flex: "1 1 280px" }}>
+                <h2>Qué pasa ahora</h2>
+                <p className={s.suave}>
+                  Con estos filtros, el asistente de la entidad busca en su catálogo los productos que encajan contigo. Nosotros
+                  no elegimos productos: solo nos aseguramos de que encajen con tu perfil.
+                </p>
               </div>
-              <p className="suave" style={{ marginTop: 8 }}>
-                Con estos filtros, el asistente de la entidad busca en el catálogo los fondos que encajan contigo.
-              </p>
-            </Tarjeta>
+              <div className={s.botones}>
+                <Link href="/onboarding/perfil" className={s.botonSec}>
+                  Volver a mi perfil
+                </Link>
+              </div>
+            </Revela>
           </>
         )}
-      </Contenido>
-    </Marco>
+      </main>
+    </div>
   );
 }

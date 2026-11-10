@@ -1,17 +1,18 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import type { Sesion } from "./tipos";
+import { usePathname } from "next/navigation";
+import { MemoriaPersonal } from "@/components/memoria-personal";
+import { Suspense, createContext, useCallback, useContext, useEffect, useState } from "react";
+import { CLIENTE_DEMO, persistirSesion, restaurarSesion } from "./credenciales";
+import type { AltaSesion, Sesion } from "./tipos";
 
-// Estado compartido del onboarding entre pantallas (persistido en localStorage para sobrevivir recargas).
+export { CLIENTE_DEMO } from "./credenciales";
+
 interface EstadoOnboarding {
   sesion: Sesion | null;
-  setSesion: (s: Sesion | null) => void;
-  clientId: string; // cliente cuyo perfil se muestra; por defecto, el ejemplo simulado de Carmen
+  setSesion: (s: AltaSesion | null) => void;
+  clientId: string;
 }
-
-const CLAVE = "idoneo.sesion";
-export const CLIENTE_DEMO = "carmen-68";
 
 const Ctx = createContext<EstadoOnboarding | null>(null);
 
@@ -19,21 +20,31 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
   const [sesion, setSesionState] = useState<Sesion | null>(null);
 
   useEffect(() => {
-    const guardada = localStorage.getItem(CLAVE);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- lectura única de localStorage al montar
-    if (guardada) setSesionState(JSON.parse(guardada));
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- recuperar metadatos, con credencial de esta pestaña
+    setSesionState(restaurarSesion());
   }, []);
 
-  const setSesion = useCallback((s: Sesion | null) => {
-    setSesionState(s);
-    if (s) localStorage.setItem(CLAVE, JSON.stringify(s));
-    else localStorage.removeItem(CLAVE);
+  const setSesion = useCallback((s: AltaSesion | null) => {
+    setSesionState(persistirSesion(s));
   }, []);
 
   return (
     <Ctx.Provider value={{ sesion, setSesion, clientId: sesion?.client_id ?? CLIENTE_DEMO }}>
       {children}
+      <Suspense fallback={null}>
+        {sesion && <MemoriaEnPagina sessionId={sesion.session_id} />}
+      </Suspense>
     </Ctx.Provider>
+  );
+}
+
+function MemoriaEnPagina({ sessionId }: { sessionId: string }) {
+  const pathname = usePathname();
+  if (pathname !== "/onboarding/perfil") return null;
+  return (
+    <div style={{ width: "min(1040px, calc(100% - 32px))", margin: "24px auto" }}>
+      <MemoriaPersonal sessionId={sessionId} />
+    </div>
   );
 }
 

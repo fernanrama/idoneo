@@ -12,6 +12,7 @@ from fastapi.testclient import TestClient
 
 from app import voz
 from app.main import app
+from tests.soporte_acceso import cliente_autorizado
 from app.perfil import store
 
 
@@ -33,7 +34,7 @@ def evento(session_id: str, conversation_id: str = "conv_prueba") -> bytes:
 
 
 def test_bootstrap_incluye_url_contexto_y_user_id_opaco(monkeypatch):
-    api = TestClient(app)
+    api = cliente_autorizado()
     sesion = api.post("/api/sessions", json={}).json()
     monkeypatch.setenv("ELEVENLABS_API_KEY", "clave")
     monkeypatch.setenv("ELEVENLABS_AGENT_ID", "agente")
@@ -55,7 +56,7 @@ def test_bootstrap_incluye_url_contexto_y_user_id_opaco(monkeypatch):
 
 
 def test_bootstrap_sin_claves_falla_pero_contexto_publico_funciona(monkeypatch):
-    api = TestClient(app)
+    api = cliente_autorizado()
     sesion = api.post("/api/sessions", json={}).json()
     monkeypatch.delenv("ELEVENLABS_API_KEY", raising=False)
     monkeypatch.delenv("ELEVENLABS_AGENT_ID", raising=False)
@@ -64,7 +65,7 @@ def test_bootstrap_sin_claves_falla_pero_contexto_publico_funciona(monkeypatch):
 
 
 def test_webhook_firmado_cierra_sesion_y_es_idempotente(monkeypatch):
-    api = TestClient(app)
+    api = cliente_autorizado()
     sesion = api.post("/api/sessions", json={}).json()
     secreto = "webhook-secret"
     monkeypatch.setenv("ELEVENLABS_WEBHOOK_SECRET", secreto)
@@ -85,7 +86,7 @@ def test_webhook_firmado_cierra_sesion_y_es_idempotente(monkeypatch):
 
 
 def test_webhook_rechaza_firma_invalida_antigua_y_conflicto(monkeypatch):
-    api = TestClient(app)
+    api = cliente_autorizado()
     sesion = api.post("/api/sessions", json={}).json()
     secreto = "webhook-secret"
     monkeypatch.setenv("ELEVENLABS_WEBHOOK_SECRET", secreto)
@@ -109,7 +110,7 @@ def test_webhook_rechaza_firma_invalida_antigua_y_conflicto(monkeypatch):
 def test_webhook_limita_el_cuerpo_antes_de_verificarlo(monkeypatch):
     monkeypatch.setenv("ELEVENLABS_WEBHOOK_SECRET", "secreto")
     raw = b"x" * (voz.MAX_WEBHOOK_BYTES + 1)
-    r = TestClient(app).post("/api/webhooks/elevenlabs", content=raw, headers={
+    r = cliente_autorizado().post("/api/webhooks/elevenlabs", content=raw, headers={
         "ElevenLabs-Signature": "t=1,v0=no-importa", "Content-Type": "application/json",
     })
     assert r.status_code == 413

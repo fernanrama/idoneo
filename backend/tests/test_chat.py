@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from app.agentes import chat, claude
 from app.agentes.extractor import Extraccion
 from app.main import app
+from tests.soporte_acceso import cliente_autorizado
 from app.perfil import store
 from app.perfil.modelos import OBLIGATORIOS, Perfil
 
@@ -28,8 +29,9 @@ def api(monkeypatch):
         return salida, claude.Uso(agente=kw["agente"], modelo="simulado", tokens_entrada=1, tokens_salida=1, latencia_s=0)
 
     monkeypatch.setattr(claude, "estructurado", falso)
-    cliente = TestClient(app)
-    sid = cliente.post("/api/sessions", json={"client_id": "texto-1", "channel": "text"}).json()["session_id"]
+    cliente = cliente_autorizado()
+    sesion = cliente.post("/api/sessions", json={"channel": "text"}).json()
+    sid = sesion["session_id"]
     return cliente, sid, llamadas
 
 

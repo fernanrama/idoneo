@@ -42,3 +42,29 @@ La elección de stack, alojamiento, servicios y reparto queda pendiente de esas 
 
 ## Siguiente paso
 Cuando llegue el enunciado, extraer restricciones y criterios de éxito; proponer a dirección un MVP con exclusiones, recorrido y riesgos. Tras acordar alcance y propiedad, decidir arquitectura y comenzar la primera integración.
+
+## Evidencia local · 10/11/2026 · propuesta de memoria sobre #21
+
+Por autorización explícita del usuario, se preparó una solución de perfiles, autorización/API y
+adaptación del frontend en el worktree `/private/tmp/idoneo-pr21-perfil-propuesta`, rama
+`fix/perfil-memoria-atomicidad-propuesta`, basada en #21 `b1b182e`. No se publicó ni integró.
+Contrato, archivos, alternativas y límites en [MEMORIA_PERSONAL_SEGURIDAD.md](../../../docs/MEMORIA_PERSONAL_SEGURIDAD.md).
+
+Evidencia: 474 tests backend correctos, 28 omitidos y 1 deseleccionado para evitar invocar migraciones;
+18 tests del cliente, lint y build correctos. Se comprobó también una copia de main `8b698b7`
+(#22/#23) con adaptaciones mínimas explícitas, sin fusionar ramas ni cambiar su diseño.
+No se verificó PostgreSQL real, navegador interactivo ni voz real. Solo datos ficticios y servicios
+locales; no Supabase, APIs de pago ni cambios en los servidores de la demo.
+
+Siguiente acción: revisión por Juan, Pablo y Alejandro del contrato de posesión, revisión/borrado,
+transporte, recuperación y permisos de entidad. Hay conflictos previos de #21 con main; la prueba
+por copia no los resuelve. Commit, push y PR siguen sin autorización; las alternativas documentadas
+no constituyen decisiones del equipo.
+
+Actualización local posterior, por autorización del usuario y de Pablo para preparar correcciones
+sobre #21: se integró main 8b698b7 en la copia aislada y se resolvieron los conflictos, sin commit
+ni publicación. Se retiró el puente de privilegios del proxy de validación: web 403 hasta acordar
+permiso independiente de asesor. Suite backend 474 correctos, 18 de cliente, lint/build y prueba HTTP
+Next/API correctos. #19 35 correctos/5 omitidos; #20 56 correctos. La demo conserva sus procesos.
+Siguiente acción: revisar el resultado y aprobar el cierre del merge local/publicación a #21;
+confirmar permisos de asesor, transporte/recuperación de credenciales y política de borrado.

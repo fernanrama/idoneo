@@ -13,6 +13,7 @@ Garantías que debe cumplir cualquier almacén:
 from __future__ import annotations
 
 from datetime import datetime
+from contextlib import AbstractContextManager
 from typing import Any, Protocol
 
 from ..modelos import Perfil, Turno
@@ -21,6 +22,15 @@ from ..personal import CapaPersonal
 
 class ConflictoVersion(Exception):
     """Otra escritura ya creó esa versión: hay que releer y reintentar."""
+
+
+class TransaccionPersonal(Protocol):
+    """Todas las operaciones de una capa usan el mismo bloqueo/conexión."""
+
+    def ultima(self) -> CapaPersonal | None: ...
+    def cantidad(self) -> int: ...
+    def insertar(self, capa: CapaPersonal) -> None: ...
+    def borrar(self) -> int: ...
 
 
 class Almacen(Protocol):
@@ -37,6 +47,7 @@ class Almacen(Protocol):
     def insertar_lote(self, perfiles: list[Perfil]) -> None: ...
 
     # capa personal
+    def transaccion_personal(self, client_id: str) -> AbstractContextManager[TransaccionPersonal]: ...
     def ultima_personal(self, client_id: str) -> CapaPersonal | None: ...
     def insertar_personal(self, capa: CapaPersonal) -> None: ...
     def borrar_personal(self, client_id: str) -> int: ...

@@ -21,6 +21,8 @@ import pytest
 BACKEND = Path(__file__).resolve().parents[1]
 POSTGRES_TEST = os.getenv("TEST_POSTGRES_URL", "").strip()
 MOTORES = ["sqlite"] + (["postgres"] if POSTGRES_TEST else [])
+from tests.soporte_acceso import cabeceras_cliente
+
 C = "carmen-68"
 
 
@@ -35,10 +37,11 @@ class Servidor:
         self.url_bd, self.registro = url_bd, registro
         self.proceso: subprocess.Popen | None = None
         self.base = ""
+        self.headers = cabeceras_cliente(C)
 
     def arrancar(self) -> None:
         puerto = _puerto_libre()
-        entorno = {k: v for k, v in os.environ.items() if k not in ("ADMIN_TOKEN", "TEST_POSTGRES_URL")}
+        entorno = {k: v for k, v in os.environ.items() if k not in ("TEST_POSTGRES_URL",)}
         entorno.update(PERFIL_ALMACEN="bd", DATABASE_URL=self.url_bd, DATA_PERSIST="0",
                        LOAD_DEMO_FIXTURE="1", DEMO_ENDPOINTS="1")
         with open(self.registro, "a") as salida:
@@ -62,11 +65,12 @@ class Servidor:
             self.proceso.wait(timeout=10)
 
     def api(self, metodo: str, ruta: str, **kw) -> httpx.Response:
-        return httpx.request(metodo, f"{self.base}{ruta}", timeout=10, **kw)
+        cabeceras = {**self.headers, **kw.pop("headers", {})}
+        return httpx.request(metodo, f"{self.base}{ruta}", headers=cabeceras, timeout=10, **kw)
 
     def mcp(self, herramienta: str, **argumentos) -> dict:
         r = httpx.post(f"{self.base}/mcp", timeout=10,
-                       headers={"accept": "application/json, text/event-stream"},
+                       headers={**self.headers, "accept": "application/json, text/event-stream"},
                        json={"jsonrpc": "2.0", "id": 1, "method": "tools/call",
                              "params": {"name": herramienta, "arguments": argumentos}})
         assert r.status_code == 200, r.text

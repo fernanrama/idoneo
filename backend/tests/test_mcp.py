@@ -3,11 +3,14 @@
 import asyncio
 import json
 import os
+import pytest
 
 os.environ["DATA_PERSIST"] = "0"
 
 from app.mcp.servidor import mcp  # noqa: E402
 from app.perfil import store  # noqa: E402
+
+pytestmark = pytest.mark.usefixtures("mcp_servicio")
 
 CID = "carmen-68"
 

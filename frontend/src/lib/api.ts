@@ -1,76 +1,128 @@
-import type { BootstrapVoz, ContextoVoz, MemoriaPersonal, Perfil, Restricciones, Sesion, Turno, VersionResumen } from "./tipos";
+import { CLIENTE_DEMO, registrarSesion, tokenCliente, tokenSesion } from "./credenciales";
+import type { AltaSesion, BootstrapVoz, ContextoVoz, MemoriaPersonal, Perfil, Restricciones, Sesion, Turno, VersionResumen } from "./tipos";
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
-async function pedir<T>(ruta: string, init?: RequestInit): Promise<T> {
+export class ErrorAPI extends Error {
+  constructor(public readonly status: number) {
+    super(status === 401 || status === 403
+      ? `${status} Necesitas la credencial de esta pestaña para acceder a este cliente.`
+      : status === 412
+        ? "412 La memoria ha cambiado. Vuelve a cargarla y decide si quieres guardar de nuevo."
+        : `${status} No se ha podido completar la petición.`);
+    this.name = "ErrorAPI";
+  }
+}
+
+function autorizacion(token: string | null): Record<string, string> {
+  if (!token) throw new ErrorAPI(401);
+  return { Authorization: `Bearer ${token}` };
+}
+const cliente = (cid: string) => autorizacion(tokenCliente(cid));
+const sesion = (sid: string) => autorizacion(tokenSesion(sid));
+const id = encodeURIComponent;
+
+async function respuesta(ruta: string, init?: RequestInit): Promise<Response> {
   const r = await fetch(`${API_URL}${ruta}`, {
     ...init,
     headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
     cache: "no-store",
   });
-  if (!r.ok) {
-    throw new Error(`${r.status} ${ruta}: ${await r.text()}`);
-  }
-  return r.json() as Promise<T>;
+  // No incluir cuerpos remotos, URLs firmadas ni credenciales en errores mostrados o registrados.
+  if (!r.ok) throw new ErrorAPI(r.status);
+  return r;
 }
 
-/** Acciones de la entidad: van a las rutas del propio front, no directamente al backend. */
-async function pedirAlFront<T>(ruta: string, cuerpo: unknown): Promise<T> {
+async function pedir<T>(ruta: string, init?: RequestInit): Promise<T> {
+  return (await respuesta(ruta, init)).json() as Promise<T>;
+}
+
+async function pedirAlFront<T>(ruta: string, cuerpo: unknown, headers: Record<string, string> = {}): Promise<T> {
   const r = await fetch(ruta, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...headers },
     body: JSON.stringify(cuerpo),
     cache: "no-store",
   });
-  if (!r.ok) {
-    throw new Error(`${r.status} ${ruta}: ${await r.text()}`);
-  }
+  if (!r.ok) throw new ErrorAPI(r.status);
   return r.json() as Promise<T>;
+}
+
+async function memoria(ruta: string, init: RequestInit): Promise<MemoriaPersonal> {
+  const r = await respuesta(ruta, init);
+  const etag = r.headers.get("ETag");
+  if (!etag || !/^"personal-\d+"$/.test(etag)) throw new Error("La respuesta de memoria no contiene una revisión válida.");
+  return { ...(await r.json()), etag } as MemoriaPersonal;
+}
+
+function revision(etag: string): Record<string, string> {
+  if (!/^"personal-\d+"$/.test(etag)) throw new Error("Vuelve a cargar la memoria antes de modificarla.");
+  return { "If-Match": etag };
 }
 
 export const api = {
   salud: () => pedir<{ status: string }>("/api/health"),
 
-  crearSesion: (client_id?: string) =>
-    pedir<Sesion>("/api/sessions", { method: "POST", body: JSON.stringify({ client_id }) }),
+  crearSesion: async (client_id?: string, channel: "voice" | "text" = "voice"): Promise<Sesion> => {
+    const s = await pedir<AltaSesion>("/api/sessions", {
+      method: "POST",
+      headers: client_id ? cliente(client_id) : {},
+      body: JSON.stringify({ ...(client_id ? { client_id } : {}), channel }),
+    });
+    return registrarSesion(s);
+  },
+
+  chat: (session_id: string, text: string | null) =>
+    pedir<{ client_turn: Turno | null; agent_turn: Turno; finished: boolean }>(`/api/sessions/${id(session_id)}/chat`, {
+      method: "POST", headers: sesion(session_id), body: JSON.stringify({ text }),
+    }),
 
   enviarTurno: (session_id: string, turno: Turno) =>
-    pedir<{ turn_id: string }>(`/api/sessions/${session_id}/turns`, {
-      method: "POST",
-      body: JSON.stringify(turno),
+    pedir<{ turn_id: string }>(`/api/sessions/${id(session_id)}/turns`, {
+      method: "POST", headers: sesion(session_id), body: JSON.stringify(turno),
     }),
 
-  perfil: (client_id: string) => pedir<Perfil>(`/api/clients/${client_id}/profile`),
+  perfilDemo: () => pedir<Perfil>("/api/demo/profile"),
+  restriccionesDemo: () => pedir<Restricciones>("/api/demo/constraints"),
+  perfil: (client_id: string) => client_id === CLIENTE_DEMO && !tokenCliente(client_id)
+    ? pedir<Perfil>("/api/demo/profile")
+    : pedir<Perfil>(`/api/clients/${id(client_id)}/profile`, { headers: cliente(client_id) }),
+  restricciones: (client_id: string) => client_id === CLIENTE_DEMO && !tokenCliente(client_id)
+    ? pedir<Restricciones>("/api/demo/constraints")
+    : pedir<Restricciones>(`/api/clients/${id(client_id)}/constraints`, { headers: cliente(client_id) }),
+  versiones: async (client_id: string): Promise<VersionResumen[]> => {
+    if (client_id === CLIENTE_DEMO && !tokenCliente(client_id)) {
+      const p = await pedir<Perfil>("/api/demo/profile");
+      return [{ version: p.version, created_at: p.created_at,
+        reason: "DATOS SIMULADOS: ejemplo fijo sin historial persistido", author: "fixture", status: p.status }];
+    }
+    return pedir<VersionResumen[]>(`/api/clients/${id(client_id)}/versions`, { headers: cliente(client_id) });
+  },
 
-  versiones: (client_id: string) =>
-    pedir<VersionResumen[]>(`/api/clients/${client_id}/versions`),
-
-  restricciones: (client_id: string) =>
-    pedir<Restricciones>(`/api/clients/${client_id}/constraints`),
-
-  /** Pasa por el servidor de Next, que añade el token de la entidad (ver src/lib/servidor/entidad.ts). */
+  /** El servidor añade el token de entidad; la posesión del cliente viaja solo en cabecera. */
   validar: (client_id: string, advisor_id: string) =>
-    pedirAlFront<Perfil>(`/api/entidad/${encodeURIComponent(client_id)}/validar`, { advisor_id, changes: [] }),
-
+    pedirAlFront<Perfil>(`/api/entidad/${id(client_id)}/validar`, { advisor_id, changes: [] }, cliente(client_id)),
   reiniciarDemo: () => pedirAlFront<Perfil>("/api/entidad/reset", {}),
 
-  /** Lo que falta por preguntar, para la herramienta `datos_pendientes` del agente de voz. */
   pendientes: (session_id: string) =>
-    pedir<{ pending: string[]; text: string }>(`/api/sessions/${session_id}/pending`),
-
+    pedir<{ pending: string[]; text: string }>(`/api/sessions/${id(session_id)}/pending`, { headers: sesion(session_id) }),
   bootstrapVoz: (session_id: string) =>
-    pedir<BootstrapVoz>("/api/voice/bootstrap", { method: "POST", body: JSON.stringify({ session_id }) }),
-
-  contextoVoz: (session_id: string) => pedir<ContextoVoz>(`/api/voice/context/${session_id}`),
-
-  memoria: (session_id: string) => pedir<MemoriaPersonal>(`/api/sessions/${session_id}/memory`),
-
-  guardarMemoria: (session_id: string, updates: Record<string, unknown>, forget: string[] = []) =>
-    pedir<MemoriaPersonal>(`/api/sessions/${session_id}/memory`, {
-      method: "PUT",
-      body: JSON.stringify({ consent_given: true, updates, forget }),
+    pedir<BootstrapVoz>("/api/voice/bootstrap", {
+      method: "POST", headers: sesion(session_id), body: JSON.stringify({ session_id }),
     }),
+  contextoVoz: (session_id: string) =>
+    pedir<ContextoVoz>(`/api/voice/context/${id(session_id)}`, { headers: sesion(session_id) }),
 
-  borrarMemoria: (session_id: string) =>
-    pedir<MemoriaPersonal>(`/api/sessions/${session_id}/memory`, { method: "DELETE" }),
+  memoria: (session_id: string) =>
+    memoria(`/api/sessions/${id(session_id)}/memory`, { headers: sesion(session_id) }),
+  guardarMemoria: (session_id: string, etag: string, consent_given: boolean, updates: Record<string, unknown>, forget: string[] = []) =>
+    memoria(`/api/sessions/${id(session_id)}/memory`, {
+      method: "PUT",
+      headers: { ...sesion(session_id), ...revision(etag) },
+      body: JSON.stringify({ consent_given, updates, forget }),
+    }),
+  borrarMemoria: (session_id: string, etag: string) =>
+    memoria(`/api/sessions/${id(session_id)}/memory`, {
+      method: "DELETE", headers: { ...sesion(session_id), ...revision(etag) },
+    }),
 };

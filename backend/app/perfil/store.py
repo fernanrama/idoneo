@@ -34,12 +34,13 @@ from collections import deque
 from collections.abc import Callable, Iterable
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, TypeVar
 
 from pydantic import BaseModel, Field, ValidationError
 
 from . import calculos, personal as personal_mod, validacion
 from .almacenes import Almacen, ConflictoVersion, crear_almacen
+from .almacenes.base import TransaccionPersonal
 from .eventos import BusEventos, Evento
 from .modelos import (
     CALCULADOS,
@@ -74,8 +75,17 @@ class Conflicto(ValueError):
     pass
 
 
+class PrecondicionRequerida(Conflicto):
+    """Una escritura pública necesita la revisión personal que vio el cliente."""
+
+
+class RevisionObsoleta(Conflicto):
+    """La capa cambió; el llamador debe revisar y confirmar de nuevo su intención."""
+
+
 __all__ = [
-    "NoEncontrado", "Conflicto", "DatoInvalido", "bus", "configurar", "tipo_almacen",
+    "NoEncontrado", "Conflicto", "DatoInvalido", "PrecondicionRequerida", "RevisionObsoleta",
+    "bus", "configurar", "tipo_almacen", "crear_nuevo", "borrar_personal_interno", "revocar_personal",
     "perfil", "perfil_para_consumidor", "versiones", "crear", "comprobar_parche", "aplicar",
     "anadir_alertas", "validar", "crear_sesion", "sesion", "anadir_turno", "cargar_fixture",
     "asegurar_fixture", "guardar_personal", "actualizar_personal", "personal", "borrar_personal",
@@ -250,6 +260,18 @@ def crear(client_id: str | None = None) -> Perfil:
     return perfil(cid)  # otra petición lo creó a la vez
 
 
+def crear_nuevo(client_id: str) -> Perfil:
+    """Alta exclusiva: nunca permite acreditar la posesión de un cliente ya existente."""
+    cid = validacion.comprobar_client_id(client_id)
+    p = Perfil(client_id=cid, created_at=ahora())
+    calculos.recalcular(p)
+    p.status = _estado_tras_cambio(p, revisar_si_activo=False)
+    if not _a().crear(p):
+        raise Conflicto("El cliente ya existe")
+    _publicar(None, p)
+    return _con_personal(p)
+
+
 def comprobar_parche(parche: Parche, autor: str) -> Parche:
     """Valida un parche sin escribirlo (p. ej. para descartar uno inválido del extractor)."""
     try:
@@ -375,48 +397,132 @@ def personal(client_id: str) -> CapaPersonal | None:
 
 
 def guardar_personal(client_id: str, datos: dict[str, Any], consentimiento: bool, autor: str) -> CapaPersonal:
-    """Guarda una versión nueva de la capa personal. Sin consentimiento no admite datos."""
+    """Escritura interna de confianza (fixtures). La API debe usar actualizar_personal con CAS."""
     validacion.comprobar_autor(autor)
     _ultima(client_id)
-    with _candado(client_id):
-        previa = _a().ultima_personal(client_id)
-        momento = ahora()
-        consentido_en = None
-        if consentimiento:
-            consentido_en = previa.consent_at if previa and previa.consent_given else momento
+    datos = _datos_personales_nuevos(datos)
+    return _operar_personal(client_id, lambda t: _guardar_capa(t, client_id, datos, consentimiento, autor))
+
+
+def _datos_personales_nuevos(datos: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return personal_mod.DatosPersonalesNuevos(data=datos).data
+    except ValidationError as e:
+        raise DatoInvalido(f"Capa personal no válida: {e.errors()[0]['msg']}") from e
+
+
+_ResultadoPersonal = TypeVar("_ResultadoPersonal")
+
+
+def _operar_personal(client_id: str, operacion: Callable[[TransaccionPersonal], _ResultadoPersonal]) -> _ResultadoPersonal:
+    # Solo se repite tras rollback por bloqueo/serialización. La revisión esperada
+    # permanece en la clausura y nunca se sustituye por una revisión más reciente.
+    for _ in range(MAX_REINTENTOS):
         try:
-            capa = CapaPersonal(client_id=client_id, version=(previa.version + 1) if previa else 1,
-                                consent_given=consentimiento, consent_at=consentido_en,
-                                data=datos, author=autor, created_at=momento)
-        except ValidationError as e:
-            raise DatoInvalido(f"Capa personal no válida: {e.errors()[0]['msg']}") from e
-        if previa and previa.consent_given == capa.consent_given and previa.data == capa.data:
-            return previa
-        _a().insertar_personal(capa)
-        return capa
+            with _a().transaccion_personal(client_id) as transaccion:
+                resultado = operacion(transaccion)
+            return resultado
+        except ConflictoVersion:
+            continue
+    raise Conflicto("No se pudo confirmar la escritura personal; inténtalo de nuevo")
 
 
-def actualizar_personal(client_id: str, cambios: dict[str, Any], olvidar: Iterable[str], autor: str) -> CapaPersonal:
-    """Mezcla cambios consentidos sin tocar MiFID. Las claves a olvidar deben ser bloques conocidos."""
+def _guardar_capa(transaccion: TransaccionPersonal, client_id: str, datos: dict[str, Any],
+                  consentimiento: bool, autor: str) -> CapaPersonal:
+    previa = transaccion.ultima()
+    if type(consentimiento) is not bool:
+        raise DatoInvalido("El consentimiento debe ser explícito y booleano")
+    momento = ahora()
+    consentido_en = (previa.consent_at if previa and previa.consent_given else momento) if consentimiento else None
+    try:
+        capa = CapaPersonal(client_id=client_id, version=previa.version + 1 if previa else 1,
+                            consent_given=consentimiento, consent_at=consentido_en,
+                            data=datos, author=autor, created_at=momento)
+    except ValidationError as e:
+        raise DatoInvalido(f"Capa personal no válida: {e.errors()[0]['msg']}") from e
+    if previa and previa.consent_given == capa.consent_given and previa.data == capa.data:
+        return previa
+    transaccion.insertar(capa)
+    return capa
+
+
+def _revision_esperada(version_esperada: int | None) -> int:
+    if version_esperada is None:
+        raise PrecondicionRequerida("Falta la revisión esperada de la memoria")
+    if type(version_esperada) is not int or version_esperada < 0:
+        raise DatoInvalido("La revisión personal debe ser un entero no negativo")
+    return version_esperada
+
+
+def _comprobar_revision(transaccion: TransaccionPersonal, esperada: int) -> CapaPersonal | None:
+    capa = transaccion.ultima()
+    if (capa.version if capa else 0) != esperada:
+        raise RevisionObsoleta("La memoria ha cambiado; revisa la versión vigente antes de confirmar")
+    return capa
+
+
+def actualizar_personal(client_id: str, cambios: dict[str, Any], olvidar: Iterable[str], autor: str,
+                        *, version_esperada: int | None = None, consentimiento: bool | None = None) -> CapaPersonal:
+    """Mezcla bloques explícitos sobre la revisión vista, dentro de la misma transacción."""
     validacion.comprobar_autor(autor)
     _ultima(client_id)
+    esperada = _revision_esperada(version_esperada)
+    if consentimiento is not True:
+        raise DatoInvalido("Guardar memoria requiere consentimiento explícito")
+    cambios = _datos_personales_nuevos(cambios)
     olvidar = list(olvidar)
-    desconocidas = (set(cambios) | set(olvidar)) - set(personal_mod.BLOQUES)
+    if len(olvidar) > personal_mod.MAX_ELEMENTOS or not all(isinstance(k, str) for k in olvidar):
+        raise DatoInvalido("Las claves a olvidar no son válidas")
+    desconocidas = set(olvidar) - set(personal_mod.BLOQUES)
     if desconocidas:
         raise DatoInvalido(f"Bloques personales no previstos: {sorted(desconocidas)}")
-    with _candado(client_id):
-        previa = _a().ultima_personal(client_id)
+
+    def actualizar(transaccion):
+        previa = _comprobar_revision(transaccion, esperada)
         datos = dict(previa.data) if previa and previa.consent_given else {}
         for clave in olvidar:
             datos.pop(clave, None)
         datos.update(cambios)
-        return guardar_personal(client_id, datos, True, autor)
+        return _guardar_capa(transaccion, client_id, datos, consentimiento, autor)
+    return _operar_personal(client_id, actualizar)
 
 
-def borrar_personal(client_id: str) -> int:
-    """Derecho de supresión: borra la capa personal. El registro MiFID no se toca."""
+def _borrar_capa(transaccion: TransaccionPersonal, client_id: str, autor: str) -> int:
+    previa = transaccion.ultima()
+    if previa and not previa.consent_given and not previa.data and transaccion.cantidad() == 1:
+        return 0  # revocación repetida: conserva revisión y metadatos originales
+    n = transaccion.borrar()
+    transaccion.insertar(CapaPersonal(client_id=client_id, version=previa.version + 1 if previa else 1,
+                                     consent_given=False, data={}, author=autor, created_at=ahora()))
+    return n
+
+
+def revocar_personal(client_id: str, *, version_esperada: int | None = None,
+                     autor: str = "agent:memory") -> tuple[int, CapaPersonal]:
+    """Devuelve el contador y snapshot confirmado, sin releer posibles escrituras posteriores."""
+    validacion.comprobar_autor(autor)
     _ultima(client_id)
-    return _a().borrar_personal(client_id)
+    esperada = _revision_esperada(version_esperada)
+
+    def borrar(transaccion):
+        _comprobar_revision(transaccion, esperada)
+        n = _borrar_capa(transaccion, client_id, autor)
+        snapshot = transaccion.ultima()
+        assert snapshot is not None  # el borrado siempre deja una revisión técnica
+        return n, snapshot
+    return _operar_personal(client_id, borrar)
+
+
+def borrar_personal(client_id: str, *, version_esperada: int | None = None, autor: str = "agent:memory") -> int:
+    """Suprime contenido e historial personal; conserva una revisión técnica vacía durable."""
+    return revocar_personal(client_id, version_esperada=version_esperada, autor=autor)[0]
+
+
+def borrar_personal_interno(client_id: str, autor: str = "system") -> int:
+    """Revocación interna de confianza para fixtures; nunca usar desde una API pública."""
+    validacion.comprobar_autor(autor)
+    _ultima(client_id)
+    return _operar_personal(client_id, lambda t: _borrar_capa(t, client_id, autor))
 
 
 # ---------- sesiones ----------
@@ -510,7 +616,9 @@ def cargar_fixture(nombre: str) -> Perfil:
                 _escribir(cid, mutar, AUTOR_FIXTURE, lambda n: _estado_tras_cambio(n, False))
         else:
             _escribir(cid, mutar, AUTOR_FIXTURE, lambda n: _estado_tras_cambio(n, False))
-        _a().borrar_personal(cid)
+        # No crear tombstone en una carga inicial que nunca tuvo capa personal.
+        if _a().ultima_personal(cid) is not None:
+            borrar_personal_interno(cid, AUTOR_FIXTURE)
         if personal_fixture:
             consentimiento, datos = separar(personal_fixture)
             guardar_personal(cid, datos, consentimiento, AUTOR_FIXTURE)

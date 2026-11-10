@@ -1,91 +1,223 @@
-import Link from "next/link";
-import {
-  Boton,
-  Hero,
-  ListaCheck,
-  Marca,
-  Marco,
-  Pie,
-  Tarjeta,
-} from "@/components/ui";
-import s from "@/components/ui.module.css";
+"use client";
 
-// Inicio de la app del banco, con el aspecto de la web pública de MyInvestor (sin su logo). Datos simulados.
-export default function Inicio() {
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Revela } from "@/components/Revela";
+import { clasesBoton, Icono, MarcaNoche, Noche } from "@/components/visual";
+import { AuraPreguntas } from "./_portada/AuraPreguntas";
+import { Historia } from "./_portada/Historia";
+import s from "./_portada/portada.module.css";
+
+const CLIENTE_DEMO = "carmen-68";
+
+const ENLACES = [
+  ["#problema", "El problema"],
+  ["#como", "Cómo funciona"],
+  ["#entidad", "Para la entidad"],
+  ["#probar", "Pruébalo"],
+] as const;
+
+// Portada del producto. Solo explica qué hace Idóneo; no muestra resultados de pruebas.
+export default function Portada() {
+  const [conFondo, setConFondo] = useState(false);
+  useEffect(() => {
+    const f = () => setConFondo(window.scrollY > 24);
+    f();
+    window.addEventListener("scroll", f, { passive: true });
+    return () => window.removeEventListener("scroll", f);
+  }, []);
+
   return (
-    <Marco>
-      <header className={s.cabecera}>
-        <Marca />
-      </header>
-      <main>
-        <Hero>
-          <p
-            className="pequena"
-            style={{ margin: 0, fontWeight: 700, color: "var(--c-primario)" }}
-          >
-            Hola, Carmen
-          </p>
-          <h1 style={{ margin: "6px 0 12px" }}>Tu perfil inversor, hablando</h1>
-          <p>
-            Antes de invertir necesitamos conocerte. Sin test de casillas:
-            cuéntanoslo con tu voz o por escrito.
-          </p>
-          <ListaCheck
-            items={[
-              <>
-                <strong>Unos 7 minutos.</strong> Puedes parar y seguir luego.
-              </>,
-              <>
-                <strong>Con tus palabras.</strong> Si algo no lo sabes, dilo.
-              </>,
-              <>
-                <strong>Revisado por una persona</strong> del banco antes de
-                usarse.
-              </>,
-            ]}
-          />
-          <div style={{ marginTop: 22 }}>
-            <Link href="/onboarding">
-              <Boton style={{ width: "auto", paddingInline: 28 }}>
-                Empezar
-              </Boton>
-            </Link>
-          </div>
-        </Hero>
-        <div className={s.contenido}>
-          <Tarjeta>
-            <p className="suave pequena" style={{ margin: 0, fontWeight: 600 }}>
-              Cuenta y depósitos
-            </p>
-            <p
-              style={{
-                fontSize: 30,
-                fontWeight: 800,
-                margin: "4px 0 0",
-                letterSpacing: "-0.02em",
-              }}
-            >
-              80.000,00 €
-            </p>
-          </Tarjeta>
+    <Noche className={s.raiz}>
+      <header className={`${s.nav} ${conFondo ? s.navFondo : ""}`}>
+        <div className={s.navCaja}>
+          <MarcaNoche />
+          <nav className={`${s.enlaces} mono`} aria-label="Principal">
+            {ENLACES.map(([h, t]) => (
+              <a key={h} href={h}>
+                {t}
+              </a>
+            ))}
+          </nav>
+          <Link href="/onboarding/entrevista" className={s.navBoton}>
+            Empezar
+          </Link>
         </div>
-      </main>
-      <Pie>
-        <Link
-          href="/entidad/carmen-68"
-          className="pequena"
-          style={{
-            textAlign: "center",
-            color: "var(--c-primario)",
-            fontWeight: 700,
-          }}
-        >
-          Vista de la entidad (demo)
-        </Link>
-        <p className="pequena suave" style={{ textAlign: "center", margin: 0 }}>
-          Prototipo de feature · no es un producto oficial · datos simulados
-        </p>
-      </Pie>
-    </Marco>
+      </header>
+
+      <div className={s.caja}>
+        <main>
+          <section className={s.hero}>
+            <div>
+              <span className={`${s.etiqueta} vidrio mono`}>
+                <i aria-hidden="true" /> Perfil inversor MiFID II
+              </span>
+              <h1 className={s.titulo}>
+                <span>Tu perfil inversor.</span>
+                <span className="texto-degradado">En una conversación.</span>
+              </h1>
+              <p className={s.entrada}>
+                Idóneo sustituye el test de idoneidad por una conversación. Escucha al cliente, anota cada dato con la frase que lo
+                justifica y entrega a la entidad un perfil que se puede revisar, validar y auditar.
+              </p>
+              <div className={s.acciones}>
+                <Link href="/onboarding/entrevista" className={clasesBoton.luz}>
+                  {Icono.micro} Empezar a hablar
+                </Link>
+                <Link href="/escenario" className={clasesBoton.vidrio}>
+                  {Icono.play} Ver la demo guiada
+                </Link>
+              </div>
+              <ul className={s.claves}>
+                <li>Voz o texto</li>
+                <li>Una pregunta cada vez</li>
+                <li>Revisado por una persona</li>
+              </ul>
+            </div>
+            <AuraPreguntas />
+          </section>
+
+          <a href="#problema" className={`${s.bajar} mono`} aria-label="Bajar a la explicación">
+            <span aria-hidden="true" />
+            Desliza
+          </a>
+
+          <section id="problema" className={s.seccion}>
+            <Revela className={s.seccionCab}>
+              <div>
+                <span className={`${s.kicker} mono`}>El problema</span>
+                <h2>El test de idoneidad mide lo que el cliente cree saber.</h2>
+              </div>
+              <p>
+                Las directrices de ESMA sobre idoneidad (2023) piden no depender indebidamente de la autoevaluación del cliente y
+                advierten de que el riesgo de sobrevalorarse es mayor en procesos automatizados con poca interacción humana.
+              </p>
+            </Revela>
+            <div className={s.compara}>
+              <Revela variante="izq" className={`${s.lado} vidrio`}>
+                <span className={`${s.ladoTitulo} mono`}>Hoy · test de casillas</span>
+                <ul className={s.casillas}>
+                  {["Conozco bien los fondos de renta variable", "Tolero pérdidas temporales", "Mi horizonte es de más de 5 años"].map(
+                    (c, i) => (
+                      <li key={c} style={{ animationDelay: `${0.4 + i * 0.35}s` }}>
+                        <span className={s.casilla}>{Icono.check}</span>
+                        {c}
+                      </li>
+                    ),
+                  )}
+                </ul>
+                <p className={s.ladoPie}>Tres clics. Nadie comprueba si es verdad ni de dónde sale cada respuesta.</p>
+              </Revela>
+              <Revela retraso={0.15} className={`${s.lado} ${s.ladoBueno} vidrio`}>
+                <span className={`${s.ladoTitulo} mono`}>Con Idóneo · una conversación</span>
+                <p className={s.cita}>«Eso no puede pasar, el fondo es del banco.»</p>
+                <div className={s.alertaMini}>
+                  {Icono.aviso}
+                  <span>
+                    <strong>Declarado ≠ demostrado.</strong> Marcó que conoce la renta variable, pero cree que un fondo de su banco no
+                    puede perder valor.
+                  </span>
+                </div>
+                <p className={s.ladoPie}>La entidad ve la frase exacta, sabe qué revisar y decide con pruebas.</p>
+              </Revela>
+            </div>
+          </section>
+
+          <section id="como" className={s.seccion}>
+            <Revela className={s.seccionCab}>
+              <div>
+                <span className={`${s.kicker} mono`}>Cómo funciona</span>
+                <h2>De una conversación a un perfil que se puede auditar.</h2>
+              </div>
+              <p>Cinco pasos. La inteligencia artificial escucha y anota; las reglas calculan; una persona decide.</p>
+            </Revela>
+            <Historia />
+          </section>
+
+          <section id="entidad" className={s.seccion}>
+            <Revela className={s.seccionCab}>
+              <div>
+                <span className={`${s.kicker} mono`}>Para la entidad</span>
+                <h2>Un perfil listo para revisar, no un PDF que firmar.</h2>
+              </div>
+              <p>Pensado para que el equipo de cumplimiento y el agente de la entidad trabajen sobre el mismo perfil.</p>
+            </Revela>
+            <div className={s.tres}>
+              <Revela como="article" className={`${s.carta} vidrio`}>
+                <span className={s.cartaIcono}>{Icono.aviso}</span>
+                <h3>Avisos con su prueba</h3>
+                <p>Cada incoherencia llega con la frase que la provoca y el momento exacto de la conversación, listo para repreguntar.</p>
+                <div className={s.fuentes}>
+                  <span className={s.fDeclarado}>Declarado</span>
+                  <span className={s.fDemostrado}>Demostrado</span>
+                  <span className={s.fCalculado}>Calculado</span>
+                  <span className={s.fAsesor}>Asesor</span>
+                </div>
+              </Revela>
+              <Revela como="article" retraso={0.12} className={`${s.carta} vidrio`}>
+                <span className={s.cartaIcono}>{Icono.check}</span>
+                <h3>Versionado y validado</h3>
+                <p>Cada cambio crea una versión nueva con su motivo y su autor. Nada se usa hasta que una persona lo valida.</p>
+                <ol className={s.versiones}>
+                  <li>
+                    <b>v1</b> Entrevista inicial
+                  </li>
+                  <li>
+                    <b>v2</b> Validado por la entidad
+                  </li>
+                </ol>
+              </Revela>
+              <Revela como="article" retraso={0.24} className={`${s.carta} vidrio`}>
+                <span className={s.cartaIcono}>{Icono.enviar}</span>
+                <h3>Servido por MCP</h3>
+                <p>El agente de la entidad pide las restricciones del cliente y solo recibe un perfil validado y vigente.</p>
+                <code className={s.codigoMini}>get_investment_constraints</code>
+              </Revela>
+            </div>
+
+            <Revela className={`${s.limite} vidrio`}>
+              <div>
+                <span className={`${s.kicker} mono`}>Qué no hace</span>
+                <h3>No recomienda productos.</h3>
+              </div>
+              <p>
+                Idóneo solo construye el perfil. Qué ofrecer al cliente lo decide la entidad, con su catálogo y sus agentes, dentro de
+                los límites de un perfil ya validado.
+              </p>
+            </Revela>
+          </section>
+
+          <section id="probar" className={s.seccion}>
+            <Revela className={s.seccionCab}>
+              <div>
+                <span className={`${s.kicker} mono`}>Pruébalo</span>
+                <h2>Tres formas de verlo.</h2>
+              </div>
+            </Revela>
+            <div className={s.tres}>
+              {[
+                { h: "/onboarding/entrevista", t: "Como cliente", p: "Haz tu propia entrevista, por voz o escribiendo.", i: Icono.micro },
+                { h: "/escenario", t: "La demo guiada", p: "Carmen, 68 años: la entrevista y lo que recibe la entidad, a la vez.", i: Icono.play },
+                { h: `/entidad/${CLIENTE_DEMO}`, t: "Como entidad", p: "Revisa evidencias y avisos, valida el perfil y mira qué ve el agente.", i: Icono.check },
+              ].map((c, n) => (
+                <Revela key={c.h} retraso={n * 0.12}>
+                  <Link href={c.h} className={`${s.carta} ${s.cartaEnlace} vidrio`}>
+                    <span className={s.cartaIcono}>{c.i}</span>
+                    <h3>{c.t}</h3>
+                    <p>{c.p}</p>
+                    <span className={`${s.ir} mono`}>Abrir →</span>
+                  </Link>
+                </Revela>
+              ))}
+            </div>
+          </section>
+        </main>
+
+        <footer className={`${s.pie} mono`}>
+          <span>Idóneo · prototipo · datos simulados</span>
+          <span>Hack Finance UC3M</span>
+        </footer>
+      </div>
+    </Noche>
   );
 }

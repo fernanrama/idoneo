@@ -1,22 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
-import { Boton } from "./ui";
+import { api, ErrorAPI } from "@/lib/api";
+import type { MemoriaPersonal as Memoria } from "@/lib/tipos";
 import s from "./memoria-personal.module.css";
 
 type Trato = "usted" | "tu";
 type Detalle = "low" | "normal" | "high";
 type Ritmo = "slow" | "normal" | "fast";
 
-function comunicacion(data: Record<string, unknown>) {
-  const valor = data.communication;
-  return valor && typeof valor === "object" ? (valor as Record<string, unknown>) : {};
+export function MemoriaPersonal({ sessionId }: { sessionId: string }) {
+  return <FormularioMemoria key={sessionId} sessionId={sessionId} />;
 }
 
-export function MemoriaPersonal({ sessionId }: { sessionId: string }) {
+function FormularioMemoria({ sessionId }: { sessionId: string }) {
   const [activa, setActiva] = useState(false);
   const [consiente, setConsiente] = useState(false);
+  const [etag, setEtag] = useState<string | null>(null);
   const [trato, setTrato] = useState<Trato>("usted");
   const [detalle, setDetalle] = useState<Detalle>("normal");
   const [ritmo, setRitmo] = useState<Ritmo>("normal");
@@ -24,58 +24,68 @@ export function MemoriaPersonal({ sessionId }: { sessionId: string }) {
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  function cargarValores(memoria: Memoria) {
+    const valor = memoria.data.communication;
+    const preferencias = valor && typeof valor === "object" ? valor as Record<string, unknown> : {};
+    setActiva(memoria.enabled);
+    setEtag(memoria.etag);
+    setConsiente(false); // Cada escritura exige una decisión explícita, también tras un conflicto.
+    setTrato(preferencias.treatment === "tu" ? "tu" : "usted");
+    setDetalle(preferencias.detail === "low" || preferencias.detail === "high" ? preferencias.detail : "normal");
+    setRitmo(preferencias.pace === "slow" || preferencias.pace === "fast" ? preferencias.pace : "normal");
+  }
+
   useEffect(() => {
     let viva = true;
-    api
-      .memoria(sessionId)
-      .then((memoria) => {
-        if (!viva) return;
-        const preferencias = comunicacion(memoria.data);
-        setActiva(memoria.enabled);
-        setConsiente(memoria.enabled);
-        if (preferencias.treatment === "tu" || preferencias.treatment === "usted") setTrato(preferencias.treatment);
-        if (["low", "normal", "high"].includes(String(preferencias.detail))) setDetalle(preferencias.detail as Detalle);
-        if (["slow", "normal", "fast"].includes(String(preferencias.pace))) setRitmo(preferencias.pace as Ritmo);
-      })
-      .catch((e) => viva && setError(String(e)))
-      .finally(() => viva && setOcupada(false));
-    return () => {
-      viva = false;
-    };
+    api.memoria(sessionId)
+      .then((m) => { if (viva) cargarValores(m); })
+      .catch((e) => { if (viva) setError(e instanceof Error ? e.message : "No se ha podido cargar la memoria."); })
+      .finally(() => { if (viva) setOcupada(false); });
+    return () => { viva = false; };
   }, [sessionId]);
 
+  function fallo(e: unknown) {
+    if (e instanceof ErrorAPI && e.status === 412) {
+      // No actualizar revisión ni repetir PUT/DELETE automáticamente: podría reactivar una memoria borrada.
+      setEtag(null);
+      setConsiente(false);
+    }
+    setError(e instanceof Error ? e.message : "No se ha podido actualizar la memoria.");
+  }
+
+  async function recargar() {
+    setOcupada(true);
+    setError(null);
+    setMensaje(null);
+    try { cargarValores(await api.memoria(sessionId)); }
+    catch (e) { fallo(e); }
+    finally { setOcupada(false); }
+  }
+
   async function guardar() {
+    if (!etag || !consiente || ocupada) return;
     setOcupada(true);
     setError(null);
     setMensaje(null);
     try {
-      const memoria = await api.guardarMemoria(sessionId, {
+      cargarValores(await api.guardarMemoria(sessionId, etag, consiente, {
         communication: { treatment: trato, detail: detalle, pace: ritmo, language: "es" },
-      });
-      setActiva(memoria.enabled);
-      setConsiente(memoria.enabled);
+      }));
       setMensaje("Preferencias guardadas. Se aplicarán al empezar tu próxima conversación.");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setOcupada(false);
-    }
+    } catch (e) { fallo(e); }
+    finally { setOcupada(false); }
   }
 
   async function olvidar() {
+    if (!etag || ocupada) return;
     setOcupada(true);
     setError(null);
     setMensaje(null);
     try {
-      await api.borrarMemoria(sessionId);
-      setActiva(false);
-      setConsiente(false);
+      cargarValores(await api.borrarMemoria(sessionId, etag));
       setMensaje("Hemos borrado tus preferencias personales. Tu expediente MiFID no se ha modificado.");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setOcupada(false);
-    }
+    } catch (e) { fallo(e); }
+    finally { setOcupada(false); }
   }
 
   return (
@@ -84,58 +94,46 @@ export function MemoriaPersonal({ sessionId }: { sessionId: string }) {
         <span className={s.icono} aria-hidden="true">↻</span>
         <div>
           <h2 id="memoria-titulo">Recordar cómo prefieres hablar</h2>
-          <p className="pequena suave">Solo guardamos estas preferencias. No se usan para calcular tu perfil inversor.</p>
+          <p>Estas opciones sustituyen tus preferencias de conversación anteriores y se guardan separadas del expediente MiFID.</p>
         </div>
       </div>
-
       <span className={`${s.estado} ${activa ? s.estadoActiva : ""}`}>
         {activa ? "Memoria personal activa" : "No estamos recordando preferencias"}
       </span>
-
-      <fieldset className={s.campos} disabled={ocupada}>
+      <fieldset className={s.campos} disabled={ocupada || !etag}>
         <label className={s.campo}>
           <span>Cómo dirigirse a ti</span>
           <select value={trato} onChange={(e) => setTrato(e.target.value as Trato)}>
-            <option value="usted">De usted</option>
-            <option value="tu">De tú</option>
+            <option value="usted">De usted</option><option value="tu">De tú</option>
           </select>
         </label>
         <label className={s.campo}>
           <span>Nivel de detalle</span>
           <select value={detalle} onChange={(e) => setDetalle(e.target.value as Detalle)}>
-            <option value="low">Breve</option>
-            <option value="normal">Normal</option>
-            <option value="high">Con más contexto</option>
+            <option value="low">Breve</option><option value="normal">Normal</option><option value="high">Con más contexto</option>
           </select>
         </label>
         <label className={s.campo}>
           <span>Ritmo</span>
           <select value={ritmo} onChange={(e) => setRitmo(e.target.value as Ritmo)}>
-            <option value="slow">Pausado</option>
-            <option value="normal">Normal</option>
-            <option value="fast">Ágil</option>
+            <option value="slow">Pausado</option><option value="normal">Normal</option><option value="fast">Ágil</option>
           </select>
         </label>
       </fieldset>
-
       <label className={s.consentimiento}>
-        <input type="checkbox" checked={consiente} onChange={(e) => setConsiente(e.target.checked)} />
+        <input type="checkbox" checked={consiente} disabled={ocupada || !etag} onChange={(e) => setConsiente(e.target.checked)} />
         <span>Autorizo a guardar estas preferencias para futuras conversaciones. Puedo borrarlas cuando quiera.</span>
       </label>
-
+      <p>Borrar memoria elimina toda tu capa personal, incluidas otras preferencias guardadas. No borra tu expediente MiFID.</p>
       <div className={`${s.acciones} ${activa ? s.accionesConBorrado : ""}`}>
-        <Boton onClick={guardar} disabled={ocupada || !consiente}>
-          {ocupada ? "Guardando…" : "Guardar preferencias"}
-        </Boton>
-        {activa && (
-          <Boton variante="texto" onClick={olvidar} disabled={ocupada}>
-            Borrar memoria personal
-          </Boton>
-        )}
+        <button type="button" className={s.boton} onClick={guardar} disabled={ocupada || !consiente || !etag}>
+          {ocupada ? "Cargando…" : "Guardar preferencias"}
+        </button>
+        {activa && <button type="button" className={s.botonBorrar} onClick={olvidar} disabled={ocupada || !etag}>Borrar memoria personal</button>}
+        {!etag && !ocupada && <button type="button" className={s.botonBorrar} onClick={recargar}>Volver a cargar la memoria</button>}
       </div>
-
       {mensaje && <p className={s.mensaje} role="status">{mensaje}</p>}
-      {error && <p className={`${s.mensaje} ${s.error}`} role="alert">No hemos podido actualizar la memoria: {error}</p>}
+      {error && <p className={`${s.mensaje} ${s.error}`} role="alert">{error}</p>}
     </section>
   );
 }

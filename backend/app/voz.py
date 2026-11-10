@@ -18,6 +18,7 @@ import httpx
 from fastapi import APIRouter, Header, HTTPException, Request
 from pydantic import BaseModel
 
+from . import acceso
 from .agentes import chat, memoria
 from .perfil import store
 
@@ -83,22 +84,27 @@ async def _url_firmada() -> str:
 
 
 @router.get("/signed-url", deprecated=True)
-async def url_firmada():
+async def url_firmada(x_admin_token: str | None = Header(default=None)):
     """Compatibilidad local; desactivada por defecto porque no vincula la URL a una sesión."""
     if os.getenv("ALLOW_LEGACY_SIGNED_URL", "0") != "1":
         raise HTTPException(410, "Ruta obsoleta: usa POST /api/voice/bootstrap")
+    acceso.exigir_servicio(x_admin_token)
     return {"signed_url": await _url_firmada()}
 
 
 @router.post("/bootstrap")
-async def bootstrap(body: BootstrapVoz):
+async def bootstrap(body: BootstrapVoz, authorization: str | None = Header(default=None),
+                    x_admin_token: str | None = Header(default=None)):
+    acceso.exigir_sesion(body.session_id, authorization, x_admin_token)
     contexto = contexto_sesion(body.session_id)
     return {"signed_url": await _url_firmada(), **contexto}
 
 
 @router.get("/context/{session_id}")
-def obtener_contexto(session_id: str):
-    """Contexto sin credenciales para el fallback de agente público; nunca incluye el client_id."""
+def obtener_contexto(session_id: str, authorization: str | None = Header(default=None),
+                     x_admin_token: str | None = Header(default=None)):
+    """Fallback autorizado: no devuelve credenciales de proveedor ni el client_id."""
+    acceso.exigir_sesion(session_id, authorization, x_admin_token)
     return contexto_sesion(session_id)
 
 

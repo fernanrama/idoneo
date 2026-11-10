@@ -12,7 +12,7 @@ import json
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from .modelos import ahora
 
@@ -27,6 +27,8 @@ MAX_TEXTO = 300
 
 class PreferenciasComunicacion(BaseModel):
     """Preferencias cerradas que sí pueden proyectarse al agente de conversación."""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
 
     treatment: Literal["usted", "tu"] | None = None
     detail: Literal["low", "normal", "high"] | None = None
@@ -47,14 +49,11 @@ def _lista_textos(valor: Any, campo: str) -> list[str]:
     return salida
 
 
-class CapaPersonal(BaseModel):
-    client_id: str
-    version: int = Field(default=1, ge=1)
-    consent_given: bool
-    consent_at: datetime | None = None
-    data: dict[str, Any] = Field(default_factory=dict)
-    author: str = "system"
-    created_at: datetime = Field(default_factory=ahora)
+class DatosPersonalesNuevos(BaseModel):
+    """Valida solo bloques entrantes; nunca se aplica a snapshots ya persistidos."""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+    data: dict[str, Any]
 
     @field_validator("data")
     @classmethod
@@ -76,6 +75,29 @@ class CapaPersonal(BaseModel):
             raise ValueError("la capa personal debe contener datos JSON") from e
         if len(serializado.encode("utf-8")) > MAX_BYTES:
             raise ValueError(f"la capa personal supera {MAX_BYTES} bytes")
+        return data
+
+
+class CapaPersonal(BaseModel):
+    """Lectura compatible con el contrato anterior, sin normalizar datos históricos."""
+
+    client_id: str
+    version: int = Field(default=1, ge=1)
+    consent_given: bool
+    consent_at: datetime | None = None
+    data: dict[str, Any] = Field(default_factory=dict)
+    author: str = "system"
+    created_at: datetime = Field(default_factory=ahora)
+
+    @field_validator("data")
+    @classmethod
+    def _bloques_persistidos(cls, data: dict[str, Any]) -> dict[str, Any]:
+        desconocidos = set(data) - BLOQUES
+        if desconocidos:
+            raise ValueError(f"Bloques personales no previstos: {sorted(desconocidos)}")
+        excl = data.get("exclusions")
+        if excl is not None and not (isinstance(excl, list) and all(isinstance(x, str) for x in excl)):
+            raise ValueError("exclusions debe ser una lista de textos")
         return data
 
     @model_validator(mode="after")

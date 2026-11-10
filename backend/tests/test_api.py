@@ -5,6 +5,7 @@ os.environ["DATA_PERSIST"] = "0"
 from fastapi.testclient import TestClient  # noqa: E402
 
 from app.main import app  # noqa: E402
+from tests.soporte_acceso import cliente_autorizado  # noqa: E402
 from app.perfil import calculos, store  # noqa: E402
 from app.perfil.modelos import Evidencia, Parche  # noqa: E402
 
@@ -14,7 +15,7 @@ C = "/api/clients/carmen-68"
 def cliente():
     store.reiniciar()
     store.cargar_fixture("carmen-68")
-    return TestClient(app)
+    return cliente_autorizado()
 
 
 def test_calculos_deterministas():
@@ -83,7 +84,8 @@ def test_no_se_puede_escribir_un_campo_calculado():
 def test_validar_incompleto_da_409():
     c = cliente()
     s = c.post("/api/sessions", json={}).json()
-    assert c.post(f"/api/clients/{s['client_id']}/validate", json={"advisor_id": "a"}).status_code == 409
+    assert c.post(f"/api/clients/{s['client_id']}/validate", json={"advisor_id": "a"},
+                  headers={"Authorization": f"Bearer {s['access_token']}"}).status_code == 409
 
 
 def test_evidencia_y_contexto():

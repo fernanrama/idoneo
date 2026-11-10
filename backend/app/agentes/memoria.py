@@ -11,7 +11,9 @@ import json
 import re
 from typing import Any
 
-from ..perfil.personal import CapaPersonal
+from pydantic import ValidationError
+
+from ..perfil.personal import CapaPersonal, MAX_ELEMENTOS, MAX_TEXTO, PreferenciasComunicacion
 
 MAX_CONTEXTO = 1200
 _CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
@@ -60,10 +62,17 @@ def contexto(capa: CapaPersonal | dict[str, Any] | None) -> str:
     if isinstance(comunicacion, dict):
         for clave in _ETIQUETAS:
             if clave in comunicacion:
-                lineas.append(f"- {_ETIQUETAS[clave]}: {_limpiar(comunicacion[clave], 80)}")
+                try:
+                    valida = PreferenciasComunicacion.model_validate({clave: comunicacion[clave]})
+                except ValidationError:
+                    continue  # datos antiguos legibles no implican permiso para enviarlos al agente
+                valor = valida.model_dump(exclude_none=True).get(clave)
+                if valor is not None:
+                    lineas.append(f"- {_ETIQUETAS[clave]}: {_limpiar(valor, 80)}")
     for clave, etiqueta in (("exclusions", "exclusiones voluntarias"), ("concerns", "preocupaciones expresadas")):
         valor = datos.get(clave)
-        if isinstance(valor, list) and valor:
+        if (isinstance(valor, list) and 0 < len(valor) <= MAX_ELEMENTOS
+                and all(isinstance(v, str) and 0 < len(v.strip()) <= MAX_TEXTO for v in valor)):
             lineas.append(f"- {etiqueta}: {_limpiar(valor, 400)}")
     if not lineas:
         return "Sin preferencias personales autorizadas para esta conversación."
