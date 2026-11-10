@@ -6,140 +6,196 @@
 <!--
   Fuente del PDF de una cara (entregable del enunciado). Se convierte a PDF con Edge:
     msedge --headless=new --disable-gpu --no-pdf-header-footer --print-to-pdf=Idoneo_una_cara.pdf Idoneo_una_cara.html
-  VERSIÓN DE TRABAJO: las etiquetas amarillas (.pend) marcan lo que aún no está hecho o medido.
-  Para la versión final: quitar class="trabajo" de <body> y reescribir las frases que sigan pendientes
-  como "siguiente paso". Colores del tema de la app (frontend/src/tema/tema.css).
+  VERSIÓN DE TRABAJO: las etiquetas ámbar (.pend) marcan lo que aún no está hecho.
+  Para la versión final: quitar class="trabajo" de <body>.
+  Estilo de la web: cabecera «noche» (frontend/src/tema/visual.css) con la esfera 3D y cuerpo claro lavanda
+  como la vista de la entidad (.tema-asesor en frontend/src/tema/tema.css). Cifras: gestion/evaluacion/PLAN_Y_EVIDENCIAS.md.
 -->
 <style>
   @page { size: A4; margin: 0; }
-  :root { --azul:#0b2a4a; --verde:#12a37f; --verde-s:#e3f6f0; --verde-o:#0b6b53;
-          --amb:#b45309; --amb-s:#fff4e0; --txt:#14202b; --suave:#5b6875; --fondo:#f4f6f8; --blanco:#fff; }
+  :root {
+    --noche:#05070d; --tinta-n:#f3f5fb; --suave-n:#b7bfce; --tenue-n:#8a93a8;
+    --azul-n:#9db8ff; --violeta-n:#c49bff; --rosa-n:#f08ad0; --verde-n:#9bebc9;
+    --fondo:#f6f6fa; --tinta:#0e1020; --suave:#575a6b; --borde:#e6e7ee; --violeta:#5a3fe0; --violeta-s:#f1eefe;
+    --verde:#0e8a57; --verde-s:#e5f6ee; --amb:#a45d00; --amb-s:#fff4e0;
+    --degradado:linear-gradient(90deg,#d44285 0%,#8f4be0 45%,#2f6fe0 100%);
+    --degradado-n:linear-gradient(90deg,#9db8ff,#c49bff 55%,#f08ad0);
+  }
   * { box-sizing:border-box; }
   html,body { margin:0; padding:0; }
-  body { width:210mm; height:297mm; font-family:Calibri,"Segoe UI",Arial,sans-serif; font-size:10.5pt;
-         line-height:1.34; color:var(--txt); background:var(--blanco); overflow:hidden; }
-  header { background:var(--azul); color:var(--blanco); padding:8mm 13mm 6mm; display:flex; align-items:flex-end; justify-content:space-between; gap:8mm; }
-  header h1 { margin:0; font-size:29pt; line-height:1; letter-spacing:-.5pt; }
-  header .lema { margin:2mm 0 0; font-size:12.5pt; color:var(--verde-s); }
-  header .meta { text-align:right; font-size:8.6pt; color:#cfe0ee; line-height:1.35; }
-  main { padding:6mm 13mm 0; }
-  h2 { margin:0 0 2mm; font-size:11pt; letter-spacing:.8pt; text-transform:uppercase; color:var(--azul); display:flex; align-items:center; gap:2.4mm; }
-  h2 .n { background:var(--verde); color:#fff; width:6mm; height:6mm; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:9.5pt; letter-spacing:0; }
-  section { margin-bottom:5mm; }
-  p { margin:0 0 2mm; }
-  .dos { display:grid; grid-template-columns:1.25fr 1fr; gap:6mm; align-items:stretch; }
-  .carmen { background:var(--azul); color:#fff; border-radius:3mm; padding:4mm 4.5mm; }
-  .carmen .et { font-size:7.8pt; letter-spacing:.8pt; text-transform:uppercase; color:var(--verde-s); }
-  .carmen .cita { font-size:12pt; font-style:italic; margin:1.5mm 0 2mm; line-height:1.25; }
-  .carmen .dif { display:inline-block; background:var(--amb-s); color:var(--amb); font-weight:700; font-size:8.6pt; padding:.6mm 2.6mm; border-radius:5mm; }
-  .tres { display:grid; grid-template-columns:repeat(3,1fr); gap:3.5mm; margin:0 0 2.4mm; }
-  .caja { background:var(--fondo); border-radius:3mm; padding:2.4mm 3.2mm; }
-  .caja b { display:block; color:var(--azul); font-size:10.8pt; margin-bottom:.6mm; }
-  .flujo { display:grid; grid-template-columns:1fr auto 1fr auto 1fr auto 1fr; gap:1.6mm; align-items:stretch; margin:0 0 2.4mm; }
-  .paso { background:var(--blanco); border:1px solid #dfe5ea; border-radius:2.4mm; padding:2.2mm 2.6mm; font-size:9pt; line-height:1.25; }
-  .paso b { display:block; color:var(--azul); font-size:9.6pt; }
-  .fl { align-self:center; color:var(--suave); font-weight:700; }
-  .res { display:grid; grid-template-columns:1.1fr 1fr; gap:4mm; align-items:center; background:var(--verde-s); border-radius:3mm; padding:2.2mm 4mm; }
-  .res .t { color:var(--verde-o); font-weight:700; font-size:9.2pt; text-transform:uppercase; letter-spacing:.6pt; }
-  .res ul { margin:1mm 0 0; padding-left:4.2mm; }
-  .res li { margin:0 0 .6mm; }
-  .tag-ok,.tag-no { display:inline-block; font-weight:700; font-size:8.4pt; padding:.2mm 2mm; border-radius:4mm; margin-left:1mm; }
-  .tag-ok { background:#fff; color:var(--verde-o); } .tag-no { background:var(--amb-s); color:var(--amb); }
-  .valor { margin:0; padding:0; list-style:none; display:grid; gap:2mm; }
-  .valor li { display:grid; grid-template-columns:6mm 1fr; gap:1.5mm; align-items:start; }
-  .valor .ic { background:var(--verde); width:2.4mm; height:2.4mm; border-radius:.6mm; margin:1.5mm 0 0 1.6mm; }
-  .valor b { color:var(--azul); }
-  .ent { display:grid; grid-template-columns:1fr 1fr; gap:4mm; }
-  .ent .caja { background:var(--blanco); border:1px solid #dfe5ea; }
-  footer { position:absolute; left:0; right:0; bottom:0; padding:2.6mm 13mm 3.6mm; background:var(--fondo); font-size:8.2pt; color:var(--suave); display:flex; justify-content:space-between; gap:6mm; }
-  footer b { color:var(--azul); }
-  .pend { display:none; background:var(--amb-s); color:var(--amb); font-weight:700; font-size:7.4pt; letter-spacing:.3pt; text-transform:uppercase; padding:.3mm 1.8mm; border-radius:4mm; margin-left:1.2mm; white-space:nowrap; vertical-align:middle; }
+  html { width:210mm; height:297mm; overflow:hidden; }
+  body { width:210mm; height:297mm; position:relative; overflow:hidden; font-family:"Segoe UI",system-ui,Arial,sans-serif;
+         font-size:9.2pt; line-height:1.32; color:var(--tinta); background:var(--fondo);
+         -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .mono { font-family:Consolas,"JetBrains Mono",monospace; text-transform:uppercase; letter-spacing:.14em; }
+
+  /* Cabecera oscura con brillos y la esfera */
+  header { position:relative; overflow:hidden; color:var(--tinta-n); padding:5.5mm 13mm 5mm;
+           background:
+             radial-gradient(60mm 45mm at 82% 50%, rgba(138,92,255,.45), transparent 70%),
+             radial-gradient(70mm 50mm at 0% 0%, rgba(31,59,255,.30), transparent 70%),
+             radial-gradient(50mm 40mm at 100% 100%, rgba(255,127,209,.18), transparent 70%),
+             var(--noche); }
+  header .pastilla { display:inline-flex; align-items:center; gap:2mm; font-size:7pt; color:var(--suave-n);
+                     padding:1.2mm 3mm; border-radius:5mm; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.05); }
+  header .pastilla i { width:1.6mm; height:1.6mm; border-radius:50%; background:var(--verde-n); display:inline-block; }
+  header h1 { margin:3mm 0 0; font-family:"Segoe UI Semibold","Segoe UI",sans-serif; font-weight:600; font-size:27pt; line-height:1; letter-spacing:-.02em; }
+  header .lema { margin:1.8mm 0 0; font-family:"Segoe UI Semibold","Segoe UI",sans-serif; font-weight:600; font-size:14pt; line-height:1.15; }
+  .grad-n { background:var(--degradado-n); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  header .sub { margin:2mm 0 0; font-size:10pt; color:var(--suave-n); max-width:110mm; }
+  header .meta { margin-top:2mm; font-size:6.8pt; color:var(--tenue-n); }
+  header .esfera { position:absolute; right:12mm; top:50%; width:36mm; height:36mm; transform:translateY(-50%); }
+  header .orbita { position:absolute; right:3mm; top:50%; width:70mm; height:17mm; transform:translateY(-50%);
+                   border:1px solid rgba(196,155,255,.35); border-radius:50%; }
+
+  main { padding:4mm 13mm 0; }
+  section { margin-bottom:3mm; }
+  .kicker { font-size:7.4pt; color:var(--violeta); margin:0 0 1.6mm; }
+  h2 { margin:0 0 2mm; font-family:"Segoe UI Semibold","Segoe UI",sans-serif; font-weight:600; font-size:13pt; line-height:1.15; letter-spacing:-.01em; }
+  p { margin:0 0 1.6mm; }
+  .tarj { background:#fff; border:1px solid var(--borde); border-radius:3.2mm; padding:2.8mm 3.4mm; }
+  .dos { display:grid; grid-template-columns:1fr 1.05fr; gap:4.5mm; align-items:stretch; }
+
+  /* Carmen: tarjeta oscura como la entrevista */
+  .carmen { background:#0e1020; color:var(--tinta-n); border-radius:3.2mm; padding:3.4mm 4.2mm; }
+  .carmen .quien { font-size:7.8pt; color:var(--tenue-n); margin-bottom:2mm; }
+  .carmen .et { font-size:8pt; color:var(--suave-n); margin-top:1.6mm; }
+  .carmen .et.azul { color:var(--azul-n); margin-top:0; }
+  .carmen .marca { display:flex; align-items:center; gap:2mm; margin:.8mm 0 0; font-weight:600; }
+  .carmen .casilla { width:3.4mm; height:3.4mm; border-radius:.8mm; background:var(--azul-n); color:#0b1030; font-size:7pt; display:grid; place-items:center; flex-shrink:0; }
+  .carmen .preg { font-weight:600; margin-top:.4mm; }
+  .carmen .cita { font-size:11pt; font-style:italic; font-weight:600; color:var(--rosa-n); margin-top:.4mm; line-height:1.25; }
+  .carmen .concl { margin-top:2.4mm; padding-top:2mm; border-top:1px solid rgba(255,255,255,.12); font-weight:600; }
+
+  .tres { display:grid; grid-template-columns:repeat(3,1fr); gap:3mm; margin:0 0 2.4mm; }
+  .tres .tarj b { display:block; font-family:"Segoe UI Semibold","Segoe UI",sans-serif; font-size:11pt; margin-bottom:.4mm; }
+    .flujo { display:grid; grid-template-columns:1fr auto 1fr auto 1fr auto 1fr; gap:1.4mm; align-items:stretch; margin:0 0 2.4mm; }
+  .paso { background:#fff; border:1px solid var(--borde); border-radius:2.6mm; padding:2mm 2.6mm; font-size:8.6pt; line-height:1.25; }
+  .paso b { display:block; font-size:9.3pt; }
+  .paso.idoneo { background:var(--violeta-s); border-color:#cfc6fb; }
+  .fl { align-self:center; color:var(--suave); }
+  .res { display:grid; grid-template-columns:1.1fr 1fr; gap:4mm; align-items:start; }
+  .res .t { font-size:8pt; font-weight:600; color:var(--violeta); margin-bottom:1mm; }
+  .res ul { margin:0; padding-left:4mm; }
+  .res li { margin:0 0 .5mm; }
+  .barras { display:flex; gap:1.1mm; margin:1.2mm 0 1mm; }
+  .barras span { flex:1; height:1.5mm; border-radius:1mm; background:#e4e3ef; }
+  .barras span.on { background:linear-gradient(90deg,#d44285,#8f4be0); }
+  .tag-ok,.tag-no { display:inline-block; font-weight:600; font-size:8pt; padding:.1mm 2mm; border-radius:4mm; margin-left:1mm; }
+  .tag-ok { background:var(--verde-s); color:var(--verde); } .tag-no { background:#fce7f3; color:#9d1c66; }
+  .conv { list-style:none; padding:0 !important; }
+
+  /* Lo medido: cifras grandes con el degradado de la entidad */
+  .medido { display:grid; grid-template-columns:repeat(3,1fr); gap:3mm; }
+  .cifra { font-family:"Segoe UI Semibold","Segoe UI",sans-serif; font-weight:600; font-size:22pt; line-height:1.05;
+           background:var(--degradado); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .medido .tarj { padding:2.4mm 3.4mm; font-size:8.6pt; color:var(--suave); }
+  .limite { margin-top:1.6mm; font-size:8pt; color:var(--suave); }
+
+  .valor { margin:0; padding:0; list-style:none; display:grid; grid-template-columns:1fr 1fr; gap:1.6mm 5mm; }
+  .valor li { display:grid; grid-template-columns:3.5mm 1fr; gap:1mm; align-items:start; }
+  .valor .ic { width:2mm; height:2mm; border-radius:50%; background:var(--degradado); margin:1.4mm 0 0; }
+  .valor b { font-weight:600; }
+  .ent { display:grid; grid-template-columns:1fr 1fr; gap:3mm; }
+  .ent .tarj b { display:block; font-family:"Segoe UI Semibold","Segoe UI",sans-serif; font-size:10.5pt; }
+
+  footer { position:absolute; left:0; right:0; bottom:0; padding:2.6mm 13mm 3.4mm; background:var(--noche); color:var(--suave-n);
+           font-size:7.6pt; display:flex; justify-content:space-between; gap:6mm; }
+  footer b { color:var(--tinta-n); font-weight:600; }
+  .pend { display:none; background:var(--amb-s); color:var(--amb); font-family:Consolas,monospace; font-size:6.4pt; letter-spacing:.06em;
+          text-transform:uppercase; padding:.3mm 1.8mm; border-radius:4mm; margin-left:1.2mm; white-space:nowrap; vertical-align:middle; }
   body.trabajo .pend { display:inline-block; }
 </style>
 </head>
 <body class="trabajo">
 
 <header>
-  <div>
-    <h1>Idóneo</h1>
-    <p class="lema">Un test MiFID que habla, comprueba y deja pruebas</p>
-  </div>
-  <div class="meta">Hack Finance UC3M 2026<br>Prototipo con datos simulados<br>Voz · IA · Finanzas</div>
+  <span class="pastilla mono"><i></i>Perfil inversor MiFID II</span>
+  <h1>Idóneo</h1>
+  <p class="lema">Tu perfil inversor, <span class="grad-n">en una conversación.</span></p>
+  <p class="sub">El test MiFID que habla, comprueba y deja pruebas.</p>
+  <div class="meta mono">Hack Finance UC3M 2026 · Prototipo · Datos simulados</div>
+  <div class="orbita"></div>
+  <img class="esfera" src="fuente-presentacion/assets/esfera_aura.png" alt="Esfera de Idóneo">
 </header>
 
 <main>
   <section>
-    <h2><span class="n">1</span>El problema</h2>
+    <div class="kicker mono">01 · El problema</div>
     <div class="dos">
       <div>
-        <p>Antes de ofrecer un producto de inversión, la entidad debe evaluar si es <b>idóneo</b> para el cliente (MiFID II). Hoy eso es un <b>formulario de casillas basado en lo que el cliente declara de sí mismo</b>, y el cliente tiende a sobrevalorarse.</p>
-        <p>No deja constancia de qué entendía el cliente y resulta poco accesible para personas mayores. El Reglamento Delegado (UE) 2017/565 (art. 54.7) y las directrices de ESMA de 2023 piden asegurar que la información del cliente sea fiable, sin fiarse solo de su autoevaluación.</p>
+        <h2>El test se fía de lo que el cliente declara</h2>
+        <p>Antes de ofrecer una inversión, la entidad tiene que comprobar que encaja con el cliente: es el <b>test de idoneidad</b> que exige MiFID II. Hoy es un formulario de casillas: el cliente marca lo que cree saber y nadie comprueba si de verdad lo entiende.</p>
+        <p>La normativa pide que sea fiable (Reglamento Delegado 2017/565, art. 54.7) y ESMA, el supervisor europeo, avisa: con sistemas automatizados el cliente tiende más a sobrevalorarse (2023, párr. 52).</p>
       </div>
       <div class="carmen">
-        <div class="et">Carmen · 68 años · 80.000 € en depósitos · caso simulado</div>
-        <div class="et" style="margin-top:2mm">En el test marcó</div>
-        <div style="font-weight:700">«Conozco bien los fondos de renta variable»</div>
-        <div class="et" style="margin-top:2mm">Hablando dijo</div>
+        <div class="quien">Carmen · 68 años · 80.000 € en depósitos · caso simulado</div>
+        <div class="et azul">En el test de su banco marcó:</div>
+        <div class="marca"><span class="casilla">✓</span>Conozco bien los fondos de renta variable</div>
+        <div class="et">En la conversación le preguntan:</div>
+        <div class="preg">¿Un fondo de renta variable puede perder dinero?</div>
+        <div class="et">Carmen responde:</div>
         <div class="cita">«Eso no puede pasar, el fondo es del banco.»</div>
-        <span class="dif">Declarado ≠ demostrado</span>
+        <div class="concl">Dice que los conoce, <span class="grad-n">pero no sabe que pueden perder dinero.</span></div>
       </div>
     </div>
   </section>
 
   <section>
-    <h2><span class="n">2</span>La solución</h2>
+    <div class="kicker mono">02 · La solución</div>
+    <h2>Idóneo cambia el formulario por una conversación</h2>
     <div class="tres">
-      <div class="caja"><b>Habla</b>Onboarding por voz, pensado primero para el móvil, con subtítulos y alternativa escrita.<span class="pend">voz por probar</span></div>
-      <div class="caja"><b>Comprueba</b>Plantea escenarios y contrasta lo declarado con lo demostrado; avisa de las contradicciones.<span class="pend">extractor en desarrollo</span></div>
-      <div class="caja"><b>Deja pruebas</b>Cada dato guarda su fuente, su versión y la cita exacta de la conversación.<span class="pend">clip de audio pendiente</span></div>
+      <div class="tarj"><b>1 · Habla</b>El cliente contesta por voz o por escrito, desde el móvil, como hablaría con un asesor.</div>
+      <div class="tarj"><b>2 · Comprueba</b>Le plantea casos prácticos y detecta cuando lo que dice no cuadra con lo que declaró.</div>
+      <div class="tarj"><b>3 · Deja pruebas</b>Cada dato del perfil guarda la frase exacta que lo justifica, para que la entidad pueda revisarlo.</div>
     </div>
     <div class="flujo">
       <div class="paso"><b>Cliente</b>Habla desde el móvil</div><div class="fl">→</div>
-      <div class="paso"><b>Claude</b>Extrae los datos y comprueba</div><div class="fl">→</div>
-      <div class="paso"><b>Perfil verificado</b>Versionado, con pruebas</div><div class="fl">→</div>
-      <div class="paso"><b>La entidad</b>GPTadvisor o Claude con MyInvestor, por MCP</div>
+      <div class="paso"><b>Claude (IA)</b>Saca cada dato de lo que dice</div><div class="fl">→</div>
+      <div class="paso idoneo"><b>Perfil con pruebas</b>Una persona de la entidad lo revisa y lo valida</div><div class="fl">→</div>
+      <div class="paso"><b>Agente de la entidad</b>Lo usa para recomendar (GPTadvisor, o Claude con MyInvestor)</div>
     </div>
-    <div class="res">
+    <div class="res tarj">
       <div>
-        <div class="t">Resultado para Carmen</div>
-        <ul>
-          <li>Perfil de riesgo <b>CONSERVADOR</b>: riesgo máximo <b>3&nbsp;sobre&nbsp;7</b>.</li>
-          <li>Manda el criterio más restrictivo de tres: tolerancia, capacidad de pérdida y plazo.</li>
-        </ul>
+        <div class="t">Resultado para Carmen · lo calculan reglas fijas, no la IA</div>
+        <b>Perfil conservador:</b> solo productos de riesgo hasta <b>3</b> en una escala de 1 a 7.
+        <div class="barras"><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span><span></span><span></span></div>
+        Se miran su tolerancia al riesgo, cuánto puede perder y su plazo, y manda el criterio más prudente.
       </div>
       <div>
-        <div class="t">Conveniencia de productos</div>
-        <ul style="list-style:none;padding:0">
-          <li>Depósitos y monetarios <span class="tag-ok">Conveniente</span></li>
-          <li>Fondos de renta fija <span class="tag-ok">Conveniente</span></li>
-          <li>Fondos de renta variable <span class="tag-no">No conveniente</span></li>
+        <div class="t">¿Entiende cada producto? (conveniencia)</div>
+        <ul class="conv">
+          <li>Depósitos y monetarios <span class="tag-ok">Sí</span></li>
+          <li>Fondos de renta fija <span class="tag-ok">Sí</span></li>
+          <li>Fondos de renta variable <span class="tag-no">No</span></li>
         </ul>
       </div>
     </div>
   </section>
 
   <section>
-    <h2><span class="n">3</span>Valor diferencial</h2>
+    <div class="kicker mono">03 · Lo medido</div>
+    <div class="medido">
+      <div class="tarj"><div class="cifra">31/31</div>datos bien sacados de 7 entrevistas de prueba, sin ningún dato erróneo</div>
+      <div class="tarj"><div class="cifra">10/10</div>datos de Carmen, y su contradicción detectada</div>
+      <div class="tarj"><div class="cifra">1,8 s</div>tarda el asistente en responder (mediana, en texto)</div>
+    </div>
+    <div class="limite">Medido con clientes simulados (por Claude o escritos por el equipo) y una repetición: no es una validación independiente.</div>
+  </section>
+
+  <section>
+    <div class="kicker mono">04 · Por qué es diferente y a quién ayuda</div>
     <ul class="valor">
-      <li><span class="ic"></span><div><b>Comprueba, no solo pregunta.</b> Detecta cuando lo demostrado no coincide con lo declarado.</div></li>
-      <li><span class="ic"></span><div><b>Cada dato deja prueba.</b> Fuente, confianza, cita y versión; nada se sobrescribe, y queda un registro para una revisión.</div></li>
-      <li><span class="ic"></span><div><b>Los números no los pone el modelo.</b> Riesgo y conveniencia salen de funciones deterministas, explicables.</div></li>
-      <li><span class="ic"></span><div><b>Cubre idoneidad y conveniencia</b>: asesoramiento y compra sin asesoramiento.</div></li>
-      <li><span class="ic"></span><div><b>Se integra, no compite.</b> Perfil por API y MCP; no recomienda productos y un asesor lo valida antes de que sea apto.</div></li>
+      <li><span class="ic"></span><div><b>La IA no pone los números.</b> Riesgo y conveniencia salen de reglas fijas en código, que se pueden explicar.</div></li>
+      <li><span class="ic"></span><div><b>No recomienda productos.</b> Lo hace el agente de la entidad, que lee el perfil por MCP, el estándar de los agentes de IA.</div></li>
+      <li><span class="ic"></span><div><b>Para MyInvestor:</b> un perfil hecho y revisable, que cubre también al cliente que compra sin asesor.</div></li>
+      <li><span class="ic"></span><div><b>Para GPTadvisor:</b> protege lo que su agente responde; con Idóneo, también lo que recibe.</div></li>
     </ul>
-  </section>
-
-  <section>
-    <h2><span class="n">4</span>Qué aporta a las entidades</h2>
-    <div class="ent">
-      <div class="caja"><b>MyInvestor</b>Recibe un perfil ya hecho y auditable y cubre la conveniencia sin asesoramiento.</div>
-      <div class="caja"><b>GPTadvisor</b>Protege lo que su agente responde; con Idóneo, también lo que recibe.<span class="pend">coste por medir</span></div>
-    </div>
   </section>
 </main>
 
 <footer>
-  <div><b>Límites:</b> datos simulados · Idóneo no recomienda ni sustituye a un asesor · los umbrales de riesgo son supuestos del equipo, pendientes de revisión.</div>
+  <div><b>Límites:</b> datos simulados · Idóneo no recomienda ni sustituye a un asesor · umbrales de riesgo y pesos de confianza son supuestos del equipo.</div>
   <div style="text-align:right;white-space:nowrap"><b>Next.js · FastAPI · ElevenLabs · Claude · MCP</b><br>github.com/fernanrama/hack-finance-uc3m-2026</div>
 </footer>
 
