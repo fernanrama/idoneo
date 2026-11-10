@@ -218,6 +218,18 @@ def test_turnos_idempotentes_y_numerados(carmen):
         store.anadir_turno("s-nada", t)
 
 
+def test_cierre_de_sesion_idempotente_y_vinculado_a_una_conversacion(carmen):
+    sid = store.crear_sesion(C, "voice")["session_id"]
+    assert store.finalizar_sesion(sid, "conv_una") is True
+    assert store.finalizar_sesion(sid, "conv_una") is False
+    sesion = store.sesion(sid)
+    assert sesion["conversation_id"] == "conv_una" and sesion["ended_at"] is not None
+    with pytest.raises(store.Conflicto):
+        store.finalizar_sesion(sid, "conv_otra")
+    with pytest.raises(store.Conflicto):
+        store.anadir_turno(sid, Turno(speaker="client", text="tarde", t_start=1, t_end=2))
+
+
 # ---------- eventos ----------
 
 def test_eventos_para_el_panel(carmen):

@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "./api";
 import { GUION_CARMEN } from "./guion";
 import { useOnboarding } from "./onboarding";
-import type { Perfil, Turno } from "./tipos";
+import type { ContextoVoz, Perfil, Turno } from "./tipos";
 
 export type Modo = "voz" | "guion";
 export type EstadoEntrevista = "inactiva" | "conectando" | "activa" | "terminada" | "error";
@@ -84,7 +84,8 @@ export function useEntrevista() {
   });
 
   const nuevaSesion = useCallback(async () => {
-    const s = await api.crearSesion();
+    // Reutilizar el cliente permite recuperar su memoria backend; localStorage solo conserva la referencia.
+    const s = await api.crearSesion(sesionRef.current?.client_id);
     setSesion(s);
     sesionRef.current = s;
     setTurnos([]);
@@ -101,16 +102,33 @@ export function useEntrevista() {
     setError(null);
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
-      await nuevaSesion();
+      const s = await nuevaSesion();
+      let inicio: ContextoVoz;
       let signedUrl: string | null = null;
       try {
-        signedUrl = (await api.urlFirmadaVoz()).signed_url;
+        const bootstrap = await api.bootstrapVoz(s.session_id);
+        inicio = bootstrap;
+        signedUrl = bootstrap.signed_url;
       } catch {
-        signedUrl = null; // el backend no tiene clave: se intenta con agente público
+        inicio = await api.contextoVoz(s.session_id);
       }
-      if (signedUrl) conversacion.startSession({ signedUrl });
-      else if (AGENT_ID) conversacion.startSession({ agentId: AGENT_ID });
-      else throw new Error("Falta configurar el agente de voz (NEXT_PUBLIC_ELEVENLABS_AGENT_ID o clave en el backend).");
+      const localizacion = inicio.server_location ? { serverLocation: inicio.server_location } : {};
+      if (signedUrl) {
+        await conversacion.startSession({
+          signedUrl,
+          userId: inicio.user_id,
+          dynamicVariables: inicio.dynamic_variables,
+          ...localizacion,
+        });
+      } else {
+        if (!AGENT_ID) throw new Error("Falta configurar el agente de voz (NEXT_PUBLIC_ELEVENLABS_AGENT_ID o clave en el backend).");
+        await conversacion.startSession({
+          agentId: AGENT_ID,
+          userId: inicio.user_id,
+          dynamicVariables: inicio.dynamic_variables,
+          ...localizacion,
+        });
+      }
       setEstado("activa");
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));

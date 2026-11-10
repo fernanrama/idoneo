@@ -102,6 +102,9 @@ def test_sesion_y_turnos_con_id():
     assert c.get(f"/api/clients/{s['client_id']}/profile").json()["status"] == "draft"
 
 
-def test_voz_sin_clave_responde_503(monkeypatch):
+def test_url_firmada_legacy_desactivada_y_sin_clave_responde_503_si_se_habilita(monkeypatch):
     monkeypatch.delenv("ELEVENLABS_API_KEY", raising=False)
+    monkeypatch.delenv("ALLOW_LEGACY_SIGNED_URL", raising=False)
+    assert cliente().get("/api/voice/signed-url").status_code == 410
+    monkeypatch.setenv("ALLOW_LEGACY_SIGNED_URL", "1")
     assert cliente().get("/api/voice/signed-url").status_code == 503

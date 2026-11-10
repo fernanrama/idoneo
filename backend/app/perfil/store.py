@@ -38,7 +38,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field, ValidationError
 
-from . import calculos, validacion
+from . import calculos, personal as personal_mod, validacion
 from .almacenes import Almacen, ConflictoVersion, crear_almacen
 from .eventos import BusEventos, Evento
 from .modelos import (
@@ -78,7 +78,8 @@ __all__ = [
     "NoEncontrado", "Conflicto", "DatoInvalido", "bus", "configurar", "tipo_almacen",
     "perfil", "perfil_para_consumidor", "versiones", "crear", "comprobar_parche", "aplicar",
     "anadir_alertas", "validar", "crear_sesion", "sesion", "anadir_turno", "cargar_fixture",
-    "asegurar_fixture", "guardar_personal", "personal", "borrar_personal", "reiniciar",
+    "asegurar_fixture", "guardar_personal", "actualizar_personal", "personal", "borrar_personal",
+    "finalizar_sesion", "reiniciar",
     "Rechazo", "separar_parches", "separar_alertas", "registrar_rechazo", "rechazos",
 ]
 
@@ -389,8 +390,27 @@ def guardar_personal(client_id: str, datos: dict[str, Any], consentimiento: bool
                                 data=datos, author=autor, created_at=momento)
         except ValidationError as e:
             raise DatoInvalido(f"Capa personal no válida: {e.errors()[0]['msg']}") from e
+        if previa and previa.consent_given == capa.consent_given and previa.data == capa.data:
+            return previa
         _a().insertar_personal(capa)
         return capa
+
+
+def actualizar_personal(client_id: str, cambios: dict[str, Any], olvidar: Iterable[str], autor: str) -> CapaPersonal:
+    """Mezcla cambios consentidos sin tocar MiFID. Las claves a olvidar deben ser bloques conocidos."""
+    validacion.comprobar_autor(autor)
+    _ultima(client_id)
+    olvidar = list(olvidar)
+    desconocidas = (set(cambios) | set(olvidar)) - set(personal_mod.BLOQUES)
+    if desconocidas:
+        raise DatoInvalido(f"Bloques personales no previstos: {sorted(desconocidas)}")
+    with _candado(client_id):
+        previa = _a().ultima_personal(client_id)
+        datos = dict(previa.data) if previa and previa.consent_given else {}
+        for clave in olvidar:
+            datos.pop(clave, None)
+        datos.update(cambios)
+        return guardar_personal(client_id, datos, True, autor)
 
 
 def borrar_personal(client_id: str) -> int:
@@ -428,6 +448,18 @@ def anadir_turno(session_id: str, turno: Turno) -> Turno:
         raise Conflicto(f"La sesión {session_id} ya terminó")
     guardado, _nuevo = _a().insertar_turno(session_id, turno, ahora())
     return guardado
+
+
+def finalizar_sesion(session_id: str, conversation_id: str) -> bool:
+    """Vincula y cierra una sesión desde un webhook verificado; repetir el mismo evento es inocuo."""
+    if not isinstance(conversation_id, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", conversation_id):
+        raise DatoInvalido("conversation_id no válido")
+    if _a().sesion(session_id) is None:
+        raise NoEncontrado(session_id)
+    try:
+        return _a().finalizar_sesion(session_id, conversation_id, ahora())
+    except ConflictoVersion as e:
+        raise Conflicto(str(e)) from e
 
 
 # ---------- fixtures (DATOS SIMULADOS) ----------

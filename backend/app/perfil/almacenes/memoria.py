@@ -180,6 +180,19 @@ class AlmacenMemoria:
             s = self._sesiones.get(session_id)
             return dict(s) if s else None
 
+    def finalizar_sesion(self, session_id: str, conversation_id: str, momento: datetime) -> bool:
+        with self._candado:
+            s = self._sesiones.get(session_id)
+            if s is None:
+                return False
+            if s["conversation_id"] not in (None, conversation_id):
+                raise ConflictoVersion(f"La sesión {session_id} ya pertenece a otra conversación")
+            if s["ended_at"] is None:
+                s["ended_at"] = momento
+                s["conversation_id"] = conversation_id
+                return True
+            return False
+
     def insertar_turno(self, session_id: str, turno: Turno, momento: datetime) -> tuple[Turno, bool]:
         with self._candado:
             lista = self._turnos[session_id]

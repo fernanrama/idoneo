@@ -19,7 +19,7 @@ El backend tiene que estar en marcha (ver README raíz). Para probar en el móvi
 | `/` | Inicio de la app (maqueta) con la entrada a la feature |
 | `/onboarding` | Explicación, aviso de IA y consentimiento de grabación |
 | `/onboarding/entrevista` | Entrevista: micrófono, subtítulos, barra de bloques, alerta, respuesta escrita y **demo guiada** |
-| `/onboarding/perfil` | Resumen para el cliente en lenguaje claro |
+| `/onboarding/perfil` | Resumen para el cliente y preferencias de memoria consentida/revocable |
 | `/onboarding/productos` | Filtros del perfil. **No consulta el MCP de MyInvestor por código**: sus términos lo prohíben (ver `docs/proyecto/05_MCP_MYINVESTOR.md`) |
 | `/entidad/[cid]` | Vista de la entidad: datos con fuente, confianza y evidencia, restricciones y validación |
 
@@ -37,16 +37,18 @@ Si el backend tiene `ADMIN_TOKEN` (obligatorio con URL pública), pon **el mismo
 ## Demo guiada
 "Ver demo guiada" reproduce el guion de Carmen turno a turno **contra el backend real**. Mientras el extractor (Hammad) sea un stub, el perfil no se rellenará solo: la vista de la entidad usa el perfil simulado `carmen-68`.
 
-## Voz con ElevenLabs: lo comprobado y lo pendiente
+## Voz con ElevenLabs y memoria
 
-Comprobado leyendo los tipos del SDK instalado (`@elevenlabs/react` 1.21.1), sin cuenta todavía:
-- `useConversation` dentro de `ConversationProvider`; `startSession({ signedUrl })` para un agente privado o `startSession({ agentId })` para uno público.
+Comprobado con tipos y tests locales del SDK instalado (`@elevenlabs/react` 1.21.1), todavía sin credenciales reales en este entorno:
+- `useConversation` dentro de `ConversationProvider`; el front usa `startSession({ signedUrl|agentId, userId, dynamicVariables })`.
+- `POST /api/voice/bootstrap` entrega URL temporal, ID seudónimo y una proyección mínima de preferencias; el fallback público obtiene el mismo contexto de `/api/voice/context/{sid}`.
+- La memoria vive en el backend y la pantalla de perfil permite consentimiento, rectificación y borrado. `localStorage` solo conserva la referencia de sesión/cliente, no los datos de memoria.
 - `onMessage` entrega `{ message, role: "user" | "agent" }` **sin tiempos**. Los marcamos en el cliente: el turno del cliente va desde que el agente pasa a `listening` hasta que llega su transcripción. Es una **aproximación**.
 - Existen `sendUserMessage` (respuesta escrita dentro de la sesión de voz), `sendContextualUpdate` (las alertas del verificador se pasan al agente para que las explique) y `getId()` (id de conversación, útil para recuperar el audio después).
 
-Pendiente con la cuenta Creator:
-- [ ] Crear el agente en español con Claude como modelo y el prompt de Hammad.
-- [ ] Probar `GET /api/voice/signed-url` del backend con la clave real.
+Pendiente con la cuenta real:
+- [ ] Ejecutar `python scripts/sincronizar_voz.py --crear` o `--aplicar` y comprobar prompt/placeholders en el panel.
+- [ ] Configurar el post-call webhook hacia `/api/webhooks/elevenlabs` y verificar un evento real.
 - [ ] Probar en un móvil real (HTTPS).
 - [ ] Decidir el audio de las evidencias: el que guarda ElevenLabs para cada conversación o una grabación propia en el navegador.
 - [ ] Minutos disponibles del plan.

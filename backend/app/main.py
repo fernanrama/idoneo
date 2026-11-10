@@ -15,6 +15,7 @@ import weakref
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any, Literal
 
 from dotenv import load_dotenv
 
@@ -53,6 +54,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(voz.router)
+app.include_router(voz.webhook_router)
 
 
 def _llamar(fn, *args, **kwargs):
@@ -86,6 +88,14 @@ class MensajeChat(BaseModel):
 class Validacion(BaseModel):
     advisor_id: str
     changes: list[Parche] = []
+
+
+class ActualizacionMemoria(BaseModel):
+    """Cambios explícitamente consentidos; la sesión identifica al cliente en esta demo sin login."""
+
+    consent_given: Literal[True]
+    updates: dict[str, Any] = Field(default_factory=dict)
+    forget: list[str] = Field(default_factory=list, max_length=20)
 
 
 @app.get("/api/health")
@@ -248,6 +258,35 @@ async def pendientes(session_id: str):
             pass
     perfil = store.perfil(s["client_id"])
     return {"pending": entrevistador.pendientes(perfil), "text": entrevistador.pendientes_para_voz(perfil)}
+
+
+def _vista_memoria(session_id: str) -> dict[str, Any]:
+    s = _llamar(store.sesion, session_id)
+    capa = _llamar(store.personal, s["client_id"])
+    if capa is None or not capa.consent_given:
+        return {"enabled": False, "version": None, "data": {}}
+    return {"enabled": True, "version": capa.version, "data": capa.data,
+            "consent_at": capa.consent_at}
+
+
+@app.get("/api/sessions/{session_id}/memory")
+def ver_memoria(session_id: str):
+    """Memoria durable del cliente de esta sesión. El ID de sesión es una capability de la demo."""
+    return _vista_memoria(session_id)
+
+
+@app.put("/api/sessions/{session_id}/memory")
+def actualizar_memoria(session_id: str, body: ActualizacionMemoria):
+    s = _llamar(store.sesion, session_id)
+    _llamar(store.actualizar_personal, s["client_id"], body.updates, body.forget, "agent:memory")
+    return _vista_memoria(session_id)
+
+
+@app.delete("/api/sessions/{session_id}/memory")
+def borrar_memoria(session_id: str):
+    s = _llamar(store.sesion, session_id)
+    borradas = _llamar(store.borrar_personal, s["client_id"])
+    return {"enabled": False, "version": None, "data": {}, "deleted_versions": borradas}
 
 
 # ---------- perfil ----------

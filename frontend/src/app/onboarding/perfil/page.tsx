@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { MemoriaPersonal } from "@/components/memoria-personal";
 import { AlertaTarjeta, Boton, Cabecera, Contenido, IndicadorRiesgo, Marco, Pasos, Pie, Tarjeta } from "@/components/ui";
 import { FAMILIAS, mostrarValor } from "@/lib/bloques";
 import { useOnboarding } from "@/lib/onboarding";
@@ -8,7 +9,7 @@ import { usePerfil } from "@/lib/usePerfil";
 
 // Resumen para el cliente, en lenguaje claro. No es un informe para el banquero.
 export default function MiPerfil() {
-  const { clientId } = useOnboarding();
+  const { clientId, sesion } = useOnboarding();
   const { perfil, error } = usePerfil(clientId);
   const v = (c: string) => perfil?.mifid[c]?.value;
   const noConvenientes = perfil
@@ -76,6 +77,8 @@ export default function MiPerfil() {
                   : "Una persona del banco revisará tu perfil. Te avisaremos cuando esté listo."}
               </p>
             </Tarjeta>
+
+            {sesion && <MemoriaPersonal sessionId={sesion.session_id} />}
           </>
         )}
       </Contenido>

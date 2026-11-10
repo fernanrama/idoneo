@@ -87,6 +87,26 @@ export interface Sesion {
   started_at: string;
 }
 
+export type VariableDinamica = string | number | boolean;
+
+export interface ContextoVoz {
+  user_id: string;
+  dynamic_variables: Record<string, VariableDinamica>;
+  server_location?: string | null;
+}
+
+export interface BootstrapVoz extends ContextoVoz {
+  signed_url: string;
+}
+
+export interface MemoriaPersonal {
+  enabled: boolean;
+  version: number | null;
+  data: Record<string, unknown>;
+  consent_at?: string | null;
+  deleted_versions?: number;
+}
+
 export interface VersionResumen {
   version: number;
   created_at: string;

@@ -1,4 +1,4 @@
-import type { Perfil, Restricciones, Sesion, Turno, VersionResumen } from "./tipos";
+import type { BootstrapVoz, ContextoVoz, MemoriaPersonal, Perfil, Restricciones, Sesion, Turno, VersionResumen } from "./tipos";
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -54,9 +54,23 @@ export const api = {
 
   reiniciarDemo: () => pedirAlFront<Perfil>("/api/entidad/reset", {}),
 
-  /** URL firmada para un agente privado de ElevenLabs; 503 si el backend no tiene clave. */
-  urlFirmadaVoz: () => pedir<{ signed_url: string }>("/api/voice/signed-url"),
   /** Lo que falta por preguntar, para la herramienta `datos_pendientes` del agente de voz. */
   pendientes: (session_id: string) =>
     pedir<{ pending: string[]; text: string }>(`/api/sessions/${session_id}/pending`),
+
+  bootstrapVoz: (session_id: string) =>
+    pedir<BootstrapVoz>("/api/voice/bootstrap", { method: "POST", body: JSON.stringify({ session_id }) }),
+
+  contextoVoz: (session_id: string) => pedir<ContextoVoz>(`/api/voice/context/${session_id}`),
+
+  memoria: (session_id: string) => pedir<MemoriaPersonal>(`/api/sessions/${session_id}/memory`),
+
+  guardarMemoria: (session_id: string, updates: Record<string, unknown>, forget: string[] = []) =>
+    pedir<MemoriaPersonal>(`/api/sessions/${session_id}/memory`, {
+      method: "PUT",
+      body: JSON.stringify({ consent_given: true, updates, forget }),
+    }),
+
+  borrarMemoria: (session_id: string) =>
+    pedir<MemoriaPersonal>(`/api/sessions/${session_id}/memory`, { method: "DELETE" }),
 };

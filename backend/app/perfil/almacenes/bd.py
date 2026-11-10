@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import Engine, delete, func, insert, inspect, select, text
+from sqlalchemy import Engine, delete, func, insert, inspect, or_, select, text, update
 from sqlalchemy.engine import make_url
 from sqlalchemy.exc import IntegrityError, OperationalError
 
@@ -178,6 +178,23 @@ class AlmacenBD:
         d = fila._asdict()
         d["started_at"], d["ended_at"] = _utc(d["started_at"]), _utc(d["ended_at"])
         return d
+
+    def finalizar_sesion(self, session_id: str, conversation_id: str, momento: datetime) -> bool:
+        with self.motor.begin() as c:
+            resultado = c.execute(update(sessions).where(
+                sessions.c.session_id == session_id,
+                sessions.c.ended_at.is_(None),
+                or_(sessions.c.conversation_id.is_(None), sessions.c.conversation_id == conversation_id),
+            ).values(conversation_id=conversation_id, ended_at=momento))
+            if resultado.rowcount == 1:
+                return True
+            actual = c.execute(select(sessions.c.conversation_id, sessions.c.ended_at).where(
+                sessions.c.session_id == session_id)).first()
+            if actual is None:
+                return False
+            if actual.conversation_id not in (None, conversation_id):
+                raise ConflictoVersion(f"La sesión {session_id} ya pertenece a otra conversación")
+            return False
 
     def insertar_turno(self, session_id: str, turno: Turno, momento: datetime) -> tuple[Turno, bool]:
         t = turns.c
