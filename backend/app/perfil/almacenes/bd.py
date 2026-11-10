@@ -8,6 +8,7 @@ versión; la segunda recibe ConflictoVersion y `store` relee y reintenta.
 
 from __future__ import annotations
 
+import sqlite3
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,13 +16,13 @@ from typing import Any
 
 from sqlalchemy import Engine, delete, func, insert, inspect, select, text
 from sqlalchemy.engine import make_url
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 
 from ..modelos import EstadoPerfil, Perfil, Turno
 from ..persistencia import db, migrar
 from ..persistencia.tablas import clients, metadata, personal_versions, profile_versions, sessions, turns
 from ..personal import CapaPersonal
-from .base import ConflictoVersion, id_turno
+from .base import ConflictoVersion, cliente_del_lote, id_turno
 
 
 def _utc(momento: datetime | None) -> datetime | None:
@@ -72,6 +73,34 @@ class AlmacenBD:
             # Solo es conflicto si otra escritura ya creó esa versión; otra violación se propaga.
             if self.version(perfil.client_id, perfil.version) is not None:
                 raise ConflictoVersion(f"La versión {perfil.version} de {perfil.client_id} ya existe") from e
+            raise
+
+    def insertar_lote(self, perfiles: list[Perfil]) -> None:
+        cid = cliente_del_lote(perfiles)
+        try:
+            with self.motor.begin() as c:
+                # Comparación optimista. La PK protege además si otro proceso escribe
+                # después de esta lectura; cualquier colisión deshace el lote entero.
+                ultima = c.execute(select(func.max(profile_versions.c.version)).where(
+                    profile_versions.c.client_id == cid)).scalar()
+                if ultima is None or perfiles[0].version != ultima + 1:
+                    raise ConflictoVersion(f"La versión de {cid} ha cambiado")
+                for perfil in perfiles:
+                    c.execute(insert(profile_versions).values(**self._fila(perfil)))
+        except IntegrityError as e:
+            # Tras el rollback, solo se reintenta si una versión fue ocupada por otro escritor.
+            # Otros fallos de integridad se propagan: no son conflictos de versión.
+            if any(self.version(cid, p.version) is not None for p in perfiles):
+                raise ConflictoVersion(f"La versión de {cid} ha cambiado") from e
+            raise
+        except OperationalError as e:
+            codigo_sqlite = getattr(e.orig, "sqlite_errorcode", 0) or 0
+            ocupado = (self.motor.dialect.name == "sqlite"
+                       and (codigo_sqlite & 0xFF) in (sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED))
+            # En PostgreSQL también se debe repetir la transacción completa tras
+            # una serialización fallida o un deadlock, nunca solo su último INSERT.
+            if ocupado or getattr(e.orig, "sqlstate", None) in ("40001", "40P01"):
+                raise ConflictoVersion(f"Escritura concurrente en {cid}") from e
             raise
 
     def _un_perfil(self, consulta) -> Perfil | None:

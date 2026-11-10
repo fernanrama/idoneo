@@ -188,19 +188,26 @@ def _estado_tras_cambio(p: Perfil, revisar_si_activo: bool) -> EstadoPerfil:
     return estado
 
 
+def _preparar_version(actual: Perfil, mutar: Callable[[Perfil], str], autor: str,
+                      estado: Callable[[Perfil], EstadoPerfil]) -> Perfil:
+    """Construye un candidato sin guardar ni publicar eventos."""
+    n = actual.model_copy(deep=True)
+    n.version, n.created_at, n.author, n.personal = actual.version + 1, ahora(), autor, {}
+    n.reason = mutar(n)
+    calculos.recalcular(n)
+    n.status = estado(n)
+    return n
+
+
 def _escribir(client_id: str, mutar: Callable[[Perfil], str], autor: str,
               estado: Callable[[Perfil], EstadoPerfil]) -> Perfil:
     with _candado(client_id):
         for _ in range(MAX_REINTENTOS):
             actual = _ultima(client_id)
-            n = actual.model_copy(deep=True)
-            n.version, n.created_at, n.author, n.personal = actual.version + 1, ahora(), autor, {}
             try:
-                n.reason = mutar(n)
+                n = _preparar_version(actual, mutar, autor, estado)
             except _SinCambios:
                 return _con_personal(actual)
-            calculos.recalcular(n)
-            n.status = estado(n)
             try:
                 _a().insertar(n)
             except ConflictoVersion:
@@ -250,30 +257,32 @@ def comprobar_parche(parche: Parche, autor: str) -> Parche:
         raise Conflicto(str(e)) from e
 
 
+def _aplicar_parches(n: Perfil, normalizados: list[Parche], motivo: str, autor: str) -> str:
+    """Misma mutación para aplicar() y para los candidatos de validar()."""
+    cambiado = False
+    for c in normalizados:
+        previo = n.mifid.get(c.path)
+        if c.value is None:
+            cambiado |= n.mifid.pop(c.path, None) is not None
+            continue
+        nuevo = _fact(c, autor, n.created_at)
+        if previo is None or not _iguales(previo, nuevo):
+            n.mifid[c.path] = nuevo
+            cambiado = True
+    if not cambiado:
+        raise _SinCambios
+    return motivo
+
+
 def aplicar(client_id: str, parches: Iterable[Parche], motivo: str, autor: str) -> Perfil:
     """Escribe datos. `autor`: "agent:extractor", "agent:verifier" o "advisor:<id>".
     Si un parche no es válido no se escribe ninguno. Reescribir lo mismo no crea versión."""
     validacion.comprobar_autor(autor)
     motivo = _motivo(motivo)
     normalizados = [comprobar_parche(p, autor) for p in parches]
-
-    def mutar(n: Perfil) -> str:
-        cambiado = False
-        for c in normalizados:
-            previo = n.mifid.get(c.path)
-            if c.value is None:
-                cambiado |= n.mifid.pop(c.path, None) is not None
-                continue
-            nuevo = _fact(c, autor, n.created_at)
-            if previo is None or not _iguales(previo, nuevo):
-                n.mifid[c.path] = nuevo
-                cambiado = True
-        if not cambiado:
-            raise _SinCambios
-        return motivo
-
     revisar = not autor.startswith("advisor:")
-    return _escribir(client_id, mutar, autor, lambda n: _estado_tras_cambio(n, revisar_si_activo=revisar))
+    return _escribir(client_id, lambda n: _aplicar_parches(n, normalizados, motivo, autor), autor,
+                     lambda n: _estado_tras_cambio(n, revisar_si_activo=revisar))
 
 
 def anadir_alertas(client_id: str, alertas: Iterable[Alerta], autor: str = "agent:verifier") -> Perfil:
@@ -303,14 +312,13 @@ def anadir_alertas(client_id: str, alertas: Iterable[Alerta], autor: str = "agen
 
 def validar(client_id: str, asesor_id: str, cambios: Iterable[Parche] = ()) -> Perfil:
     """La entidad corrige (opcional) y valida: el perfil pasa a 'active'.
-    Solo desde draft o pending_validation (desde review_due hay que reentrevistar)."""
+    Solo desde draft o pending_validation (desde review_due hay que reentrevistar).
+    Correcciones y validación se guardan juntas, o no se guarda ninguna."""
     autor = validacion.comprobar_autor(f"advisor:{asesor_id}")
-    actual = _ultima(client_id)
-    if actual.status not in (EstadoPerfil.draft, EstadoPerfil.pending_validation):
-        raise Conflicto(f"No se puede validar un perfil en estado '{actual.status.value}'")
-    cambios = [c.model_copy(update={"source": Fuente.advisor}) for c in cambios]  # sin tocar la entrada
-    if cambios:
-        aplicar(client_id, cambios, "advisor_correction", autor)
+
+    def comprobar_estado(n: Perfil) -> None:
+        if n.status not in (EstadoPerfil.draft, EstadoPerfil.pending_validation):
+            raise Conflicto(f"No se puede validar un perfil en estado '{n.status.value}'")
 
     def mutar(n: Perfil) -> str:
         # Regla de la PR #7: la revisión humana cierra las alertas abiertas. Queda registrado quién y cuándo.
@@ -322,13 +330,40 @@ def validar(client_id: str, asesor_id: str, cambios: Iterable[Parche] = ()) -> P
         return "validated"
 
     def estado(n: Perfil) -> EstadoPerfil:
-        if n.status not in (EstadoPerfil.draft, EstadoPerfil.pending_validation):
-            raise Conflicto(f"No se puede validar un perfil en estado '{n.status.value}'")
+        comprobar_estado(n)
         if not n.assessments.suitability.complete:
             raise Conflicto(f"Faltan datos obligatorios: {', '.join(n.assessments.suitability.missing)}")
         return EstadoPerfil.active
 
-    return _escribir(client_id, mutar, autor, estado)
+    with _candado(client_id):
+        comprobar_estado(_ultima(client_id))
+        normalizados = [comprobar_parche(c.model_copy(update={"source": Fuente.advisor}), autor)
+                        for c in cambios]  # no modifica los parches del llamante
+        for _ in range(MAX_REINTENTOS):
+            actual = _ultima(client_id)
+            comprobar_estado(actual)
+            candidatos = []
+            if normalizados:
+                try:
+                    corregido = _preparar_version(
+                        actual, lambda n: _aplicar_parches(n, normalizados, "advisor_correction", autor), autor,
+                        lambda n: _estado_tras_cambio(n, revisar_si_activo=False))
+                except _SinCambios:
+                    pass
+                else:
+                    candidatos.append(corregido)
+            validado = _preparar_version(candidatos[-1] if candidatos else actual, mutar, autor, estado)
+            candidatos.append(validado)
+            try:
+                _a().insertar_lote(candidatos)
+            except ConflictoVersion:
+                continue  # releer y preparar de nuevo todo el lote, incluidas las reglas de estado
+            anterior = actual
+            for candidato in candidatos:
+                _publicar(anterior, candidato)
+                anterior = candidato
+            return _con_personal(validado)
+    raise Conflicto(f"{client_id}: demasiadas escrituras simultáneas, inténtalo de nuevo")
 
 
 # ---------- capa personal ----------
