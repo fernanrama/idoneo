@@ -5,7 +5,7 @@ Recupera el paso «Validar perfil» del pitch sin reabrir la autovalidación que
 - Autorización propia: cabecera `X-Demo-Advisor-Token` con `DEMO_ADVISOR_TOKEN`. No se lee
   `Authorization`, así que ni el Bearer del cliente ni un `client_id` o `session_id` dan permiso
   de asesor. Debe ser distinto de `ADMIN_TOKEN`, `CLIENT_ACCESS_SECRET` y `VOICE_USER_ID_SECRET`.
-- Solo clientes ficticios: `DEMO_ADVISOR_CLIENTS` (por defecto `carmen-68`), fixtures de `backend/fixtures/`
+- Solo clientes ficticios: `DEMO_ADVISOR_CLIENTS` (por defecto `carmen-68,carmen-corta`), fixtures de `backend/fixtures/`
   marcados como «DATOS SIMULADOS», y los clientes nuevos que un operador autorice explícitamente
   (demo_operador.py y demo_autorizaciones.py): uno a uno, con caducidad y solo mientras dure este proceso.
 - Solo local: la conexión debe llegar desde loopback, con `Host` local y sin cabeceras de proxy.
@@ -29,12 +29,14 @@ from urllib.parse import urlsplit
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
 
-from . import demo_autorizaciones
+from . import acceso, demo_autorizaciones
 from .perfil import calculos, store, validacion
 
 log = logging.getLogger("perfil.asesor_demo")
 
 router = APIRouter(prefix="/api/demo/asesor", tags=["demo asesor"])
+CLIENTES_POR_DEFECTO = "carmen-68,carmen-corta"
+CANALES = {"voice", "text"}
 
 CABECERA = "X-Demo-Advisor-Token"
 IPS_LOCALES = frozenset({"127.0.0.1", "::1"})
@@ -84,7 +86,7 @@ def configuracion() -> Configuracion:
         otro = os.getenv(nombre, "").strip()
         if otro and hmac.compare_digest(otro.encode(), token.encode()):
             raise _mal_configurado(f"DEMO_ADVISOR_TOKEN debe ser distinto de {nombre}")
-    clientes = [c.strip() for c in os.getenv("DEMO_ADVISOR_CLIENTS", "carmen-68").split(",") if c.strip()]
+    clientes = [c.strip() for c in os.getenv("DEMO_ADVISOR_CLIENTS", CLIENTES_POR_DEFECTO).split(",") if c.strip()]
     if not clientes:
         raise _mal_configurado("DEMO_ADVISOR_CLIENTS está vacío")
     no_ficticios = [c for c in clientes if not es_cliente_ficticio(c)]
@@ -191,6 +193,26 @@ def reiniciar(client_id: str, conf: Configuracion = Depends(exigir_asesor_demo))
     cid = client_id
     _llamar(store.cargar_fixture, cid)
     return _perfil_para_asesor(cid)
+
+
+@router.post("/clientes/{client_id}/entrevista")
+def entrevista_corta(client_id: str, channel: str = "voice",
+                     conf: Configuracion = Depends(exigir_asesor_demo)) -> dict[str, Any]:
+    """Entrevista corta en directo para el pitch, sobre un fixture ficticio casi completo.
+
+    Recarga el fixture (versión nueva, sin borrar historial), abre una sesión y emite la credencial de
+    cliente de ESE fixture para que el navegador pueda hablar o escribir. Mismas guardas que el resto del
+    modo asesor: apagado por defecto, solo local, `X-Demo-Advisor-Token` y solo fixtures de la lista.
+    """
+    if client_id not in conf.clientes:
+        raise HTTPException(404, "Recurso no encontrado")
+    if channel not in CANALES:
+        raise HTTPException(422, "channel debe ser voice o text")
+    emitir = acceso.preparar_emision()  # falla antes de tocar el almacén si falta CLIENT_ACCESS_SECRET
+    _llamar(store.cargar_fixture, client_id)
+    sesion = _llamar(store.crear_sesion, client_id, channel)
+    log.warning("Modo asesor de demo: entrevista corta de %s (DATOS SIMULADOS)", client_id)
+    return {**sesion, "access_token": emitir(client_id)}
 
 
 def avisar_si_activo() -> None:

@@ -5,7 +5,7 @@ a todos los clientes y a rutas REST de escritura. Dos credenciales, ambas por `A
 (nunca en la URL) y solo desde esta máquina:
 
 1. `MCP_DEMO_TOKEN` (fija, en el `.env`): lee los fixtures ficticios de `MCP_DEMO_CLIENTS`
-   (por defecto `carmen-68`). Vacía = desactivada. 32+ bytes, distinta de los demás secretos.
+   (por defecto `carmen-68,carmen-corta`). Vacía = desactivada. 32+ bytes, distinta de los demás secretos.
 2. Token de operador (efímero): lo emite `scripts/demo_operador.py` al autorizar un cliente ficticio nuevo
    (demo_autorizaciones.py). Solo lee ese cliente, caduca, se revoca y no sobrevive a un reinicio.
 
@@ -36,7 +36,7 @@ class Configuracion:
 
 
 def _clientes() -> list[str]:
-    return [c.strip() for c in os.getenv("MCP_DEMO_CLIENTS", "carmen-68").split(",") if c.strip()]
+    return [c.strip() for c in os.getenv("MCP_DEMO_CLIENTS", "carmen-68,carmen-corta").split(",") if c.strip()]
 
 
 def _motivo_invalida() -> str | None:
