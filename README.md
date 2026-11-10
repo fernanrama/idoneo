@@ -184,7 +184,7 @@ Guía completa: [docs/MODO_ASESOR_DEMO.md](docs/MODO_ASESOR_DEMO.md#recorrido-co
 | Verificador con Claude y resumen para agentes | 🟡 Reglas deterministas hechas · versión con Claude en desarrollo |
 | Voz con ElevenLabs | ✅ Probada de punta a punta con cuenta real (E-03) · agente compartido sincronizado con `scripts/sincronizar_voz.py` · audios de la demo guiada pendientes de elegir voces |
 | Memoria personal por usuario | ✅ Consentida, versionada, borrable y proyectada a ElevenLabs · falta identidad/login real |
-| Medición de impacto (aciertos, alertas, latencia, coste) | 🟡 Medido con clientes **simulados** (E-00 a E-08, [`PLAN_Y_EVIDENCIAS.md`](gestion/evaluacion/PLAN_Y_EVIDENCIAS.md)) · sin pruebas con personas reales · coste solo estimado |
+| Medición de impacto (aciertos, alertas, latencia, coste) | 🟡 Medido con clientes **simulados** (E-00 a E-09, [`PLAN_Y_EVIDENCIAS.md`](gestion/evaluacion/PLAN_Y_EVIDENCIAS.md)) · sin pruebas con personas reales · coste solo estimado |
 
 ## Configuración
 
