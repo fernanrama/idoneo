@@ -42,7 +42,23 @@ export default function VistaEntidad({
   params: Promise<{ cid: string }>;
 }) {
   const { cid } = use(params);
-  const { perfil, restricciones, error } = usePerfil(cid, SONDEO_MS);
+  // Modo asesor de demo: lo confirma el servidor; mientras tanto no se carga ninguna fuente.
+  const asesor = useModoAsesor(cid);
+  const { perfil, restricciones, versiones, error, recargar } = usePerfil(cid, SONDEO_MS, {
+    asesor: asesor === true,
+    esperar: asesor === null,
+  });
+  const [accion, setAccion] = useState<{ enCurso: boolean; error: string | null }>({ enCurso: false, error: null });
+  const ejecutar = async (fn: () => Promise<unknown>) => {
+    setAccion({ enCurso: true, error: null });
+    try {
+      await fn();
+      await recargar();
+      setAccion({ enCurso: false, error: null });
+    } catch (e) {
+      setAccion({ enCurso: false, error: e instanceof Error ? e.message : String(e) });
+    }
+  };
   const [pestana, setPestana] = useState<Pestana>("Resumen");
   const [abierto, setAbierto] = useState<string | null>(null);
   const alertas = perfil?.alerts.filter((a) => a.status === "open") ?? [];
@@ -87,27 +103,32 @@ export default function VistaEntidad({
                   {perfil.status === "active"
                     ? `Versión ${perfil.version}, validada. El agente de la entidad ya puede usarla por MCP.`
                     : `Versión ${perfil.version}. Revisa las evidencias y los avisos y valídalo: hasta entonces, el agente de la entidad no puede usarlo.`}
-                  {esSimulado(perfil) && (
+                  {(esSimulado(perfil) || asesor) && (
                     <span className={s.simulado}>Datos simulados</span>
                   )}
                 </p>
                 <Recorrido estado={perfil.status} />
               </>
             )}
-            {cid === CLIENTE_DEMO && !tokenCliente(cid) && (
+            {asesor === true && (
+              <p role="note">Modo asesor de demostración: cliente ficticio y validación autorizada por el servidor local.</p>
+            )}
+            {asesor === false && cid === CLIENTE_DEMO && !tokenCliente(cid) && (
               <p role="note">Ejemplo ficticio fijo de solo lectura; no representa un expediente persistido.</p>
             )}
-            {perfil?.status === "pending_validation" && (
+            {asesor === false && perfil?.status === "pending_validation" && (
               <p role="note">La validación está pendiente de habilitar un permiso independiente de asesor.</p>
             )}
             <div className={s.accion}>
               {perfil?.status === "pending_validation" && (
                 <button
+                  type="button"
                   className={s.boton}
-                  disabled
-                  title="Requiere un permiso independiente de asesor"
+                  disabled={asesor !== true || accion.enCurso}
+                  title={asesor === true ? undefined : "Requiere un permiso independiente de asesor"}
+                  onClick={asesor === true ? () => ejecutar(() => api.validarComoAsesor(cid)) : undefined}
                 >
-                  Validar perfil{" "}
+                  {accion.enCurso ? "Validando…" : "Validar perfil"}{" "}
                   <span aria-hidden="true">→</span>
                 </button>
               )}
@@ -117,7 +138,22 @@ export default function VistaEntidad({
                   Validado · v{perfil.version}
                 </span>
               )}
+              {asesor === true && perfil?.status === "active" && (
+                <button
+                  type="button"
+                  className={s.reiniciar}
+                  disabled={accion.enCurso}
+                  onClick={() => ejecutar(api.reiniciarComoAsesor)}
+                >
+                  Reiniciar la demo
+                </button>
+              )}
             </div>
+            {accion.error && (
+              <p role="alert" className={s.error}>
+                {accion.error}
+              </p>
+            )}
             {error && (
               <p role="alert" className={s.error}>
                 {error}
@@ -182,7 +218,7 @@ export default function VistaEntidad({
           />
         )}
         {perfil && pestana === "Historial" && (
-          <Historial cid={cid} version={perfil.version} />
+          <Historial cid={cid} version={perfil.version} precargadas={asesor === true ? versiones : undefined} />
         )}
         {perfil && pestana === "Agente · MCP" && (
           <Mcp restricciones={restricciones} />
@@ -413,9 +449,11 @@ function FilaEvidencia({
   );
 }
 
-function Historial({ cid, version }: { cid: string; version: number }) {
-  const [versiones, setVersiones] = useState<VersionResumen[] | null>(null);
+function Historial({ cid, version, precargadas }: { cid: string; version: number; precargadas?: VersionResumen[] | null }) {
+  const [cargadas, setVersiones] = useState<VersionResumen[] | null>(null);
+  const versiones = precargadas !== undefined ? (precargadas ? [...precargadas].reverse() : null) : cargadas;
   useEffect(() => {
+    if (precargadas !== undefined) return; // modo asesor de demo: llegan con el expediente
     let vivo = true;
     api
       .versiones(cid)
@@ -424,7 +462,7 @@ function Historial({ cid, version }: { cid: string; version: number }) {
     return () => {
       vivo = false;
     };
-  }, [cid, version]);
+  }, [cid, version, precargadas]);
   return (
     <div className={`${s.tarj} ${s.aparece}`} style={{ padding: 24 }}>
       {versiones === null && <p className="pequena suave">Cargando…</p>}
@@ -502,6 +540,22 @@ function Mcp({ restricciones: r }: { restricciones: Restricciones | null }) {
       </div>
     </div>
   );
+}
+
+/** null mientras el servidor responde; true solo si confirma el modo asesor de demo para este cliente. */
+function useModoAsesor(cid: string): boolean | null {
+  const [modo, setModo] = useState<{ cid: string; activo: boolean } | null>(null);
+  useEffect(() => {
+    let vivo = true;
+    api
+      .modoAsesor()
+      .then((m) => vivo && setModo({ cid, activo: m.enabled && m.clients.includes(cid) }))
+      .catch(() => vivo && setModo({ cid, activo: false }));
+    return () => {
+      vivo = false;
+    };
+  }, [cid]);
+  return modo && modo.cid === cid ? modo.activo : null;
 }
 
 const esSimulado = (p: Perfil) =>

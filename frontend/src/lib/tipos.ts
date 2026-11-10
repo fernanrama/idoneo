@@ -121,3 +121,16 @@ export interface VersionResumen {
   author: string;
   status: EstadoPerfil;
 }
+
+/** Modo asesor de demostración (DATOS SIMULADOS). Lo decide el servidor; el navegador no tiene credencial. */
+export interface ModoAsesor {
+  enabled: boolean;
+  clients: string[];
+  advisor_id?: string;
+}
+
+export interface ExpedienteAsesor {
+  profile: Perfil;
+  constraints: Restricciones;
+  versions: VersionResumen[];
+}

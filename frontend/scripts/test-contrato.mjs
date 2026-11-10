@@ -9,11 +9,11 @@ try {
     "node_modules/typescript/bin/tsc", "--outDir", build, "--module", "commonjs",
     "--moduleResolution", "node", "--target", "ES2020", "--lib", "ES2020,DOM",
     "--esModuleInterop", "--skipLibCheck", "--strict",
-    "src/lib/tipos.ts", "src/lib/credenciales.ts", "src/lib/api.ts", "src/lib/iniciarVoz.ts", "src/lib/servidor/entidad.ts",
+    "src/lib/tipos.ts", "src/lib/credenciales.ts", "src/lib/api.ts", "src/lib/iniciarVoz.ts", "src/lib/servidor/entidad.ts", "src/lib/servidor/asesorDemo.ts",
   ], { stdio: "inherit" });
   if (compilacion.status !== 0) process.exitCode = compilacion.status ?? 1;
   else {
-    const pruebas = spawnSync(process.execPath, ["--test", "tests/contrato-cliente.mjs"], {
+    const pruebas = spawnSync(process.execPath, ["--test", "tests/contrato-cliente.mjs", "tests/asesor-demo.mjs"], {
       stdio: "inherit", env: { ...process.env, IDONEO_CLIENT_BUILD: build },
     });
     process.exitCode = pruebas.status ?? 1;
