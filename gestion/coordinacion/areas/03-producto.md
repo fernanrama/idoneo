@@ -76,3 +76,16 @@ individual pendientes, ADMIN_TOKEN solo de servicio y borrado local con revisió
 Estas condiciones no habilitan producción; faltan permisos reales de entidad, identidad/transporte,
 recuperación/revocación individual y política de retención externa. La evidencia de publicación
 se dejará en la conversación de la PR; no se contacta al equipo por otros canales.
+
+Validación funcional posterior de #21 en 7729a81: Chrome real automatizado con perfil temporal,
+escritorio 1440×1000 y móvil/touch emulado 390×844. Se reprodujeron y corrigieron localmente una
+respuesta antigua de Carmen que sustituía el perfil restaurado y el fin de demo al saltar en pausa.
+La corrección del sondeo se probó también con latencia superior a su intervalo, sin solapamientos.
+Resultado: 9 recorridos de navegador, 18 tests de contrato y 474 backend correctos (28 omitidos,
+1 deseleccionado); lint y build correctos. Capturas inspeccionadas; cero errores JavaScript y
+solo respuesta HTTP 412 intencional en consola/red. Informe en
+[VALIDACION_FUNCIONAL_PR21.md](../../../docs/VALIDACION_FUNCIONAL_PR21.md).
+Solo datos ficticios y servicios locales; sin Supabase, migraciones ni APIs de pago. El usuario
+ha revisado y autorizado publicar estas dos correcciones, sus tests y la documentación mediante
+push normal a #21, sin merge a main. Pendiente revisión final y probar dispositivo físico,
+Safari/iOS y voz/modelos/webhook reales cuando se autoricen. La demo 8000/3000 permanece intacta.

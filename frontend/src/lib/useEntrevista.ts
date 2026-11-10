@@ -208,12 +208,13 @@ export function useEntrevista() {
 
   // Reproduce el turno actual de la demo y pasa al siguiente al acabar (con voz o por tiempo de lectura).
   useEffect(() => {
-    if (modo !== "guion" || estado !== "activa" || pausa) return;
+    if (modo !== "guion" || estado !== "activa") return;
     if (paso >= GUION_CARMEN.length) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- fin natural de la demo
       setEstado("terminada");
       return;
     }
+    if (pausa) return;
     const turno = GUION_CARMEN[paso];
     let vivo = true;
     let espera: ReturnType<typeof setTimeout> | undefined;

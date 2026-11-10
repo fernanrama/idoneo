@@ -79,3 +79,9 @@ solo metadatos. No hay recuperación por ID, renovación ni revocación individu
 Después del build, `IDONEO_PYTHON=/ruta/al/python-instalado npm run test:integracion` inicia
 Next y uvicorn propios en puertos efímeros, solo con datos y claves ficticios. Comprueba render de
 servidor y contrato HTTP, sin navegador ni proveedores. No utiliza ni detiene la demo en 3000/8000.
+
+La prueba `npm run test:navegador` utiliza Chromium/Playwright existentes contra frontend/backend
+aislados, con `IDONEO_FRONT_URL`, `IDONEO_API_URL` y, si es necesario, las rutas
+`IDONEO_PLAYWRIGHT_MODULE` e `IDONEO_BROWSER_EXECUTABLE`. Incluye navegación real en escritorio y
+móvil emulado, demo, memoria, conflictos y permisos. Requisitos, defectos reproducidos y límites:
+[validación funcional de #21](../docs/VALIDACION_FUNCIONAL_PR21.md).
