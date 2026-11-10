@@ -8,7 +8,8 @@ import { FAMILIAS, mostrarValor } from "@/lib/bloques";
 import { useOnboarding } from "@/lib/onboarding";
 import type { Alerta, Fact, Perfil } from "@/lib/tipos";
 import { usePerfil } from "@/lib/usePerfil";
-import s from "./perfil.module.css";
+import { BarraCliente } from "@/components/BarraCliente";
+import s from "@/components/cliente.module.css";
 
 const QUE_SIGNIFICA: Record<string, string> = {
   CONSERVADOR: "Prefieres no ver caer tus ahorros, aunque eso suponga ganar menos.",
@@ -60,23 +61,7 @@ export default function MiPerfil() {
 
   return (
     <div ref={ref} className={s.raiz} onPointerMove={mover}>
-      <header className={s.barra}>
-        <div className={s.barraCaja}>
-          <Link href="/" className={s.marca}>
-            <span className={s.logo} aria-hidden="true" />
-            Idóneo
-          </Link>
-          <ol className={s.pasos} aria-label="Pasos">
-            <li className={s.hecho} data-n="1">
-              Conversación
-            </li>
-            <li className={s.actual} data-n="2" aria-current="step">
-              Tu perfil
-            </li>
-            <li data-n="3">Productos</li>
-          </ol>
-        </div>
-      </header>
+      <BarraCliente paso={2} />
 
       <main className={s.caja}>
         {error && (

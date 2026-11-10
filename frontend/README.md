@@ -16,12 +16,13 @@ El backend tiene que estar en marcha (ver README raíz). Para probar en el móvi
 
 | Ruta | Pantalla |
 |---|---|
-| `/` | Inicio de la app (maqueta) con la entrada a la feature |
-| `/onboarding` | Explicación, aviso de IA y consentimiento de grabación |
-| `/onboarding/entrevista` | Entrevista: micrófono, subtítulos, barra de bloques, alerta, respuesta escrita y **demo guiada** |
-| `/onboarding/perfil` | Resumen para el cliente en lenguaje claro |
+| `/` | Portada oscura del producto: el aura lanza preguntas de ejemplo; enlaces a la entrevista, la demo guiada y la vista de la entidad |
+| `/onboarding` | Redirige a la entrevista (el aviso de IA y el consentimiento están ahora en su pantalla de inicio) |
+| `/onboarding/entrevista` | Entrevista con el aura: solo la pregunta actual, por voz o **por escrito** (modo texto, necesita la clave de Claude en el backend) y **demo guiada** |
+| `/onboarding/perfil` | Perfil para el cliente, en claro: medidor de riesgo, lo que hemos entendido con la frase de cada dato, avisos y siguiente paso |
 | `/onboarding/productos` | Filtros del perfil. **No consulta el MCP de MyInvestor por código**: sus términos lo prohíben (ver `docs/proyecto/05_MCP_MYINVESTOR.md`) |
-| `/entidad/[cid]` | Vista de la entidad: datos con fuente, confianza y evidencia, restricciones y validación |
+| `/escenario` | Pantalla partida para el pitch: entrevista a la izquierda y lo que recibe la entidad, en directo, a la derecha. `?cliente=<id>` muestra un perfil ya existente |
+| `/entidad/[cid]` | Vista de la entidad con pestañas: resumen, evidencias (frase y audio), historial de versiones y lo que ve su agente por MCP; validación |
 
 ## Validar el perfil con el backend protegido
 
@@ -29,7 +30,10 @@ Si el backend tiene `ADMIN_TOKEN` (obligatorio con URL pública), pon **el mismo
 
 ## Dónde está cada cosa
 
-- `src/tema/tema.css`: **todo el aspecto visual**. Al recibir las pantallas de MyInvestor, cambiar aquí los tokens y, si hace falta, `src/components/ui.module.css`. El flujo no se toca.
+- `src/tema/visual.css`: tokens del tema oscuro (`.tema-noche`), clases `.mono`, `.vidrio` y todas las animaciones (`v-*`). Con «reducir movimiento» activado se apagan.
+- `src/components/visual.tsx`: piezas del tema oscuro (`Noche`, `Aura`, botones, iconos). `Entrevista.tsx` y `PanelVivo.tsx` son la entrevista y el panel en directo; `BarraCliente.tsx` y `cliente.module.css`, las pantallas claras del cliente.
+- `public/visual/`: imágenes 3D (aura, cápsula, cinta) en WebP.
+- `src/tema/tema.css` y `src/components/ui.*`: estilo anterior; ninguna pantalla lo usa ya, se mantiene hasta que Fernán decida si se borra.
 - `src/lib/useEntrevista.ts`: lógica de la entrevista (voz de ElevenLabs o guion), envío de turnos, sondeo del perfil y paso de alertas al agente.
 - `src/lib/guion.ts`: guion de Carmen (**simulado**). Se sustituirá por `backend/eval/carmen.json` de Pablo.
 - `src/lib/api.ts` y `src/lib/tipos.ts`: cliente y tipos del contrato (`docs/CONTRATOS.md`).

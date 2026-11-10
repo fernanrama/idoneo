@@ -132,3 +132,7 @@
 @media (max-width: 900px) {
   .cinta { width: 200px; height: 200px; opacity: 0.5; }
 }
+@media (max-width: 600px) {
+  .pestanas { flex-wrap: nowrap; overflow-x: auto; align-self: stretch; scrollbar-width: none; }
+  .pestana { flex-shrink: 0; }
+}

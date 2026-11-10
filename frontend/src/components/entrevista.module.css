@@ -1,7 +1,7 @@
 .raiz { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
 .compacto { min-height: 100%; height: 100%; }
 
-.cabecera { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 16px 20px; padding: 22px 28px; }
+.cabecera { position: relative; z-index: 2; display: flex; flex-wrap: wrap; align-items: center; gap: 16px 20px; padding: 22px 28px; }
 .cabecera .datos { font-size: 11px; color: var(--n-tenue); }
 .centro {
   position: relative;
@@ -88,7 +88,7 @@
 @media (max-width: 600px) {
   .cabecera { padding: 18px 18px 6px; justify-content: space-between; }
   .cabecera .bloquesCaja { order: 3; width: 100%; }
-  .centro { gap: 20px; padding: 8px 18px 18px; }
+  .centro { gap: 20px; padding: 28px 18px 18px; }
   .zonaPregunta { min-height: 120px; }
   .dock { padding: 0 14px 20px; }
 }
