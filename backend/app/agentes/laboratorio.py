@@ -46,6 +46,8 @@ class Informe:
     comprobados: list[str]  # familias con conocimiento demostrado
     alertas_esperadas: dict[str, bool]
     pendientes: list[str]
+    # Alertas que salieron sin estar en la ficha: no son por fuerza falsas alarmas, pero hay que mirarlas.
+    otras_alertas: list[str] = field(default_factory=list)
 
     @property
     def intervenciones(self) -> int:
@@ -121,6 +123,8 @@ async def entrevistar(
         # Cada alerta esperada es una ruta («knowledge.equity_funds») o un flag («needs_advisor»).
         alertas_esperadas={e: any(a.path == e or a.flag.value == e for a in p.alerts) for e in persona.alertas},
         pendientes=chat.pendientes(p),
+        otras_alertas=[f"{a.flag.value} en {a.path or 'sin dato'}" for a in p.alerts
+                       if a.path not in persona.alertas and a.flag.value not in persona.alertas],
     )
 
 

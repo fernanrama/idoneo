@@ -82,12 +82,11 @@ Resultado para Carmen, calculado por el backend:
 
 ```powershell
 git clone https://github.com/fernanrama/hack-finance-uc3m-2026
-cd hack-finance-uc3m-2026
-copy .env.example .env
-cd backend
+cd hack-finance-uc3m-2026\backend
 python -m venv .venv
 .venv\Scripts\activate        # si falla: Set-ExecutionPolicy -Scope Process Bypass
 pip install -r requirements.txt
+python scripts/preparar_demo.py   # crea .env y frontend/.env.local con secretos locales aleatorios
 uvicorn app.main:app --port 8000
 ```
 </details>
@@ -97,24 +96,22 @@ uvicorn app.main:app --port 8000
 
 ```bash
 git clone https://github.com/fernanrama/hack-finance-uc3m-2026
-cd hack-finance-uc3m-2026
-cp .env.example .env
-cd backend
+cd hack-finance-uc3m-2026/backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+python scripts/preparar_demo.py   # crea .env y frontend/.env.local con secretos locales aleatorios
 uvicorn app.main:app --port 8000
 ```
 </details>
 
-Sin rellenar nada del `.env` funciona todo menos la voz. Al arrancar se carga a Carmen.
+`preparar_demo.py` crea los dos ficheros de configuración, genera los secretos locales que el backend exige para crear clientes (sin mostrarlos ni cambiar los que ya existan) y activa el [modo asesor de demostración](docs/MODO_ASESOR_DEMO.md), que solo funciona en local y con clientes ficticios. Con eso funciona todo el recorrido de abajo. Para una entrevista nueva hacen falta además tus claves, puestas a mano en `.env`: `ANTHROPIC_API_KEY` (entrevista por escrito y extracción del perfil) y las de ElevenLabs (voz). Al arrancar se carga a Carmen (DATOS SIMULADOS).
 
 ### 2. Frontend (otra terminal)
 
 ```bash
 cd frontend
 npm install
-cp .env.example .env.local      # Windows: copy .env.example .env.local
 npm run dev
 ```
 
@@ -125,9 +122,9 @@ npm run dev
 | 1 | http://localhost:3000 | La entrada a la feature dentro de la app |
 | 2 | http://localhost:3000/onboarding/entrevista → **Ver demo guiada** | La entrevista de Carmen turno a turno, con subtítulos y barra de bloques |
 | 3 | http://localhost:3000/entidad/carmen-68 | Cada dato con fuente, confianza y cita; perfil CONSERVADOR; la alerta *declarado ≠ demostrado* |
-| 4 | Botón **Validar perfil** en esa vista (requiere el [modo asesor de demostración](docs/MODO_ASESOR_DEMO.md); apagado, aparece deshabilitado) | El perfil pasa a `active` y ya se puede usar |
-| 5 | http://localhost:8000/api/clients/carmen-68/constraints | Las restricciones en el formato del catálogo de MyInvestor (`usable: true` tras validar) |
-| 6 | http://localhost:8000/api/clients/carmen-68/evidence/knowledge.equity_funds | La prueba: *«Eso no puede pasar, el fondo es del banco.»*, segundos 57–61 |
+| 4 | Botón **Validar perfil** en esa vista (lo habilita el [modo asesor de demostración](docs/MODO_ASESOR_DEMO.md), que `preparar_demo.py` deja activado) | El perfil pasa a `active` y ya se puede usar |
+| 5 | Bloque **Restricciones para el agente** de esa vista | Las restricciones en el formato del catálogo de MyInvestor, utilizables tras validar. La API (`/api/clients/…`) exige la credencial del cliente; sin ella, http://localhost:8000/api/demo/constraints enseña el formato con la Carmen de muestra, sin validar |
+| 6 | En esa vista, el dato **Fondos de renta variable** | La prueba: *«Eso no puede pasar, el fondo es del banco.»*, segundos 57–61 |
 | 7 | http://localhost:8000/docs | Toda la API, para probarla a mano |
 
 Si algo se queda en un estado raro, **Reiniciar la demo** en esa vista (con el modo asesor de demostración) o `POST /api/demo/reset` con `X-Admin-Token` (desde `/docs`) vuelven a cargar a Carmen como versión nueva.
@@ -136,7 +133,7 @@ Si algo se queda en un estado raro, **Reiniciar la demo** en esa vista (con el m
 
 ```bash
 cd backend
-python -m pytest -q        # ~160 tests en verde; los que necesitan Postgres se omiten si no lo hay
+python -m pytest -q        # más de 600 tests en verde, sin claves ni red; los que necesitan Postgres o las dependencias del frontend se omiten si faltan
 ```
 
 ## Usarlo desde Claude con MyInvestor

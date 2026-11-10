@@ -16,6 +16,8 @@ from pathlib import Path
 
 import httpx
 
+import pytest
+
 BACKEND = Path(__file__).resolve().parents[1]
 FRONTEND = BACKEND.parent / "frontend"
 
@@ -102,7 +104,8 @@ async function raw(path, token, method='GET', body, etag) {
 
 def test_cliente_typescript_con_api_local_real(tmp_path):
     node = shutil.which("node")
-    assert node is not None, "Esta integración necesita Node ya instalado, sin descargar dependencias"
+    if node is None or not (FRONTEND / "node_modules" / "typescript" / "bin" / "tsc").is_file():
+        pytest.skip("Necesita Node y las dependencias del frontend: ejecuta `npm install` en frontend/")
     compilado = tmp_path / "cliente"
     fuentes = ["tipos.ts", "credenciales.ts", "api.ts", "iniciarVoz.ts"]
     compilacion = subprocess.run([
