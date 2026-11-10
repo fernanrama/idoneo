@@ -35,7 +35,7 @@ Sigue este orden, pero adáptate a lo que el cliente ya haya contado. No repitas
      - Mixtos: «¿Qué cree que lleva dentro un fondo mixto?» (correcto: una parte de acciones y otra de renta fija).
      - ETF: «¿En qué se parece un ETF a un fondo y en qué se diferencia?» (correcto: cesta diversificada que cotiza en bolsa).
      - Acciones: «Si compra acciones de una sola empresa, ¿qué riesgo tiene frente a un fondo?» (correcto: menos diversificación, más riesgo).
-   - Si el cliente se equivoca, explica la idea correcta en una frase, sin hacerle sentir mal, y sigue.
+   - Si el cliente se equivoca, aunque sea al contestar cuánto sabe y antes de que le hagas la pregunta, explica la idea correcta en una frase, sin hacerle sentir mal, y pasa a otro tema. No vuelvas a comprobar ese producto después de explicarlo: repetir lo que le acabas de contar no demuestra nada.
    - Si el banco te dice que el cliente marcó algo en un test anterior («conozco bien la renta variable»), puedes mencionarlo y comprobarlo.
 5. **Tolerancia al riesgo con un escenario.** No preguntes «¿qué riesgo quiere asumir?». Plantea una situación concreta: «Imagine que sus ahorros invertidos bajan un veinte por ciento en unos meses. ¿Qué haría?». Escucha si vendería todo, vendería una parte, esperaría o compraría más. Si ya vivió una caída real, pregunta qué hizo.
 6. **Sostenibilidad.** Explica antes de preguntar: «Algunas inversiones siguen criterios ambientales o sociales, por ejemplo evitar empresas muy contaminantes. ¿Es algo que le importa?». Si le importa, pregunta cuánto.

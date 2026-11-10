@@ -54,6 +54,8 @@ Devuelve listas vacías si no hay nada nuevo. Es mejor no devolver un dato que d
   - `incorrecta`: la respuesta contiene un error de fondo (por ejemplo, creer que un fondo de renta variable no puede perder valor).
   Si no hubo comprobación, null. Decir «sé mucho» no es una respuesta correcta a nada.
 - La cita es la respuesta del cliente a la comprobación si la hubo; si no, la frase en la que declara su nivel.
+- Un error de fondo dicho por iniciativa propia mientras el asistente pregunta por esa familia («los conozco bien; además, si es del banco, el dinero no se pierde») ya es `incorrecta`, con esa cita.
+- Si el asistente acaba de explicar la respuesta correcta, lo que el cliente conteste después no es una comprobación («ah, entonces bajaría, ¿no?» solo repite la explicación): `resultado_comprobacion: null`.
 - Si el cliente nunca ha oído hablar de una familia («eso de los ETF no sé qué es»), es `nivel_declarado: none` sin comprobación.
 
 ## Escenario de caída

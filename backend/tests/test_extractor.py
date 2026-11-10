@@ -257,3 +257,17 @@ def test_el_perfil_actual_marca_la_confianza_baja():
     estado = ex._estado(perfil)
     assert "- financial.debts_eur = 0 (declared, confianza baja)" in estado
     assert "- financial.liquid_savings_eur = 80000 (declared)" in estado
+
+
+def test_un_fallo_en_la_comprobacion_no_se_borra_tras_la_explicacion():
+    from app.agentes import extractor as ex
+    from app.perfil.modelos import Evidencia, Fact, Fuente, Parche
+
+    ev = lambda sid, tid: [Evidencia(session_id=sid, turn_id=tid, t=[0, 1], quote="x")]  # noqa: E731
+    fallo = Fact(value="none", source=Fuente.demonstrated, confidence=0.85, evidence=ev("s-1", "t-022"),
+                 updated_by="agent:extractor")
+    tras_explicar = Parche(path="knowledge.equity_funds", value="basic", source=Fuente.demonstrated, confidence=0.7,
+                           confidence_basis="b", evidence=ev("s-1", "t-024"), updated_by="agent:extractor")
+    assert ex._protegido(fallo, tras_explicar)
+    otra_entrevista = tras_explicar.model_copy(update={"evidence": ev("s-2", "t-010")})
+    assert not ex._protegido(fallo, otra_entrevista)

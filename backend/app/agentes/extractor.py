@@ -138,6 +138,10 @@ def _protegido(actual: Fact | None, p: Parche) -> bool:
         return True  # lo corrigió una persona de la entidad
     if actual.source == Fuente.demonstrated and p.source == Fuente.declared:
         return True  # lo demostrado manda sobre lo declarado
+    if (p.path.startswith("knowledge.") and actual.source == p.source == Fuente.demonstrated
+            and actual.value == "none" and p.value != "none"
+            and {e.session_id for e in actual.evidence} & {e.session_id for e in p.evidence}):
+        return True  # un fallo en la comprobación no lo borra lo que el cliente repite tras la explicación
     return actual.value == p.value and actual.source == p.source and (actual.confidence or 0) >= (p.confidence or 0)
 
 
