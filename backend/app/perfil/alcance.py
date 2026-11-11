@@ -14,6 +14,7 @@ Todas las tablas son SUPUESTOS v1 del equipo, pendientes de revisión financiera
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from datetime import date, datetime
 from enum import Enum
 from typing import Any
@@ -423,26 +424,33 @@ def es_material(anterior: Perfil, nueva: Perfil) -> list[str]:
 
 # ---------- sesión de revisión ----------
 
-def alcance_revision(servido: Perfil, ultima: Perfil, hoy: date) -> Alcance:
-    """Qué preguntar o confirmar en una microentrevista sobre un perfil ya validado. Determinista, sin modelo.
+def alcance_revision(servido: Perfil, ultima: Perfil, hoy: date, motivos: Iterable[Motivo] = (),
+                     desde: datetime | None = None) -> Alcance:
+    """Único planificador de una microentrevista sobre un perfil ya validado. Determinista, sin modelo.
 
     - `servido`: el último perfil `active` (lo validado y sus evidencias; `store.perfil_para_consumidor`).
     - `ultima`: la última versión (`store.perfil`), con lo que ya haya cambiado o confirmado en la revisión.
+    - `motivos`: lo que el inversor dice que ha cambiado (catálogo cerrado de motivos de rutas fijas,
+      p. ej. `planned_expense`). Opcional.
+    - `desde`: cuándo empezó la revisión (p. ej. al pedirla el cliente). Lo dado o confirmado después cuenta
+      como respondido. Por defecto, la creación de `servido`.
 
-    Une los vencimientos de `ultima`, los datos cambiados desde `servido` (`value_changed`: no se repiten;
-    se confirman sus dependencias) y no vuelve a confirmar lo que el inversor ya dio o confirmó después de
-    `servido`. Los resultados (perfil de riesgo, restricciones) los recalcula después `calculos.recalcular`
-    en cada escritura: aquí no se calcula nada nuevo. `apertura` siempre es True.
+    Combina: los motivos del inversor, los vencimientos de `ultima`, los datos ya cambiados desde `servido`
+    (`value_changed`: no se repiten; se confirman sus dependencias de calculos.py y del verificador) y lo
+    respondido en la revisión (sale de las preguntas y aparece en `respondidas`). Los resultados (perfil de
+    riesgo, restricciones) los recalcula después `calculos.recalcular` en cada escritura: aquí no se calcula
+    nada nuevo. `apertura` siempre es True: la revisión no termina por tener la lista vacía.
     """
     if servido.status != EstadoPerfil.active:
         raise DatoInvalido("Sin un perfil validado no hay revisión: es una entrevista inicial")
     if ultima.client_id != servido.client_id or ultima.version < servido.version:
         raise DatoInvalido("La última versión no corresponde al perfil servido")
-    peticiones = vencimientos(ultima, hoy)
+    peticiones = [Peticion(motivo=Motivo(m)) for m in dict.fromkeys(motivos)]  # sin repetir, en su orden
+    peticiones += vencimientos(ultima, hoy)
     cambios = [r for r in cambiados(servido, ultima) if r in CAMPOS and not r.startswith("disclosures.")]
     if cambios:
         peticiones.append(Peticion(motivo=Motivo.value_changed, rutas=cambios))
-    desde = servido.created_at
+    desde = desde or servido.created_at
     vigentes = frozenset(r for r, f in ultima.mifid.items()
-                         if r not in CALCULADOS and f.value is not None and ultimo_momento(f) > desde)
+                         if r not in CALCULADOS and f.value is not None and ultimo_momento(f) >= desde)
     return planificar(ultima, peticiones, vigentes).model_copy(update={"apertura": True})

@@ -6,7 +6,7 @@ ElevenLabs: las escrituras simulan lo que haría el extractor. Datos simulados (
 
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 import pytest
 
@@ -37,8 +37,8 @@ def extractor(ruta: str, valor, texto: str = "DATOS SIMULADOS"):
     return store.aplicar(C, [parche], "extractor · s-revision", "agent:extractor")
 
 
-def plan(hoy: date = HOY):
-    return alcance_revision(store.perfil_para_consumidor(C), store.perfil(C), hoy)
+def plan(hoy: date = HOY, **kw):
+    return alcance_revision(store.perfil_para_consumidor(C), store.perfil(C), hoy, **kw)
 
 
 def resumen(a) -> list[tuple[str, TipoPregunta]]:
@@ -121,3 +121,59 @@ def test_no_escribe_nada(validada):
     antes = store.versiones(C)
     plan()
     assert store.versiones(C) == antes
+
+
+# ---------- motivos del inversor y momento de apertura (flujo «¿Ha cambiado algo?») ----------
+
+def ahora():
+    return datetime.now(timezone.utc)
+
+
+def test_motivo_del_inversor_sin_respuestas_todavia(validada):
+    a = plan(motivos=[Motivo.planned_expense], desde=ahora())
+    assert resumen(a) == [(LIQUIDEZ, TipoPregunta.repreguntar), (AHORRO, CONF), (PLAZO, CONF)]
+    assert a.respondidas == [] and a.apertura
+
+
+def test_el_progreso_avanza_con_cambios_y_confirmaciones(validada):
+    apertura = ahora()
+    extractor(LIQUIDEZ, "high", "Necesito 6.000 € en tres meses")  # cambio
+    a = plan(motivos=[Motivo.planned_expense], desde=apertura)
+    assert a.respondidas == [LIQUIDEZ] and [q.path for q in a.preguntas] == [AHORRO, PLAZO]
+    extractor(AHORRO, 80000, "Los ahorros siguen en ochenta mil")  # confirmación pura (#45)
+    a = plan(motivos=[Motivo.planned_expense], desde=apertura)
+    assert a.respondidas == [AHORRO, LIQUIDEZ] and [q.path for q in a.preguntas] == [PLAZO]
+
+
+def test_confirmar_lo_que_pedia_repreguntar_tambien_lo_responde(validada):
+    """El caso del fallo de #46: mismo valor en una pregunta de tipo repreguntar."""
+    apertura = ahora()
+    extractor(LIQUIDEZ, "low", "No, sigo sin necesitar el dinero")
+    a = plan(motivos=[Motivo.planned_expense], desde=apertura)
+    assert LIQUIDEZ in a.respondidas and LIQUIDEZ not in [q.path for q in a.preguntas]
+
+
+def test_lo_anterior_a_la_apertura_no_cuenta_como_respondido(validada):
+    extractor(AHORRO, 80000, "Los ahorros siguen en ochenta mil")  # antes de abrir la revisión
+    a = plan(motivos=[Motivo.planned_expense], desde=ahora())
+    assert AHORRO in [q.path for q in a.preguntas] and a.respondidas == []
+
+
+def test_motivos_vencimientos_y_cambios_se_combinan_sin_repetir(validada):
+    apertura = ahora()
+    extractor(INGRESOS, 800, "Me han bajado la pensión a ochocientos")
+    vence = date.fromisoformat(store.perfil(C).review.next_review) + timedelta(days=1)
+    a = plan(vence, motivos=[Motivo.planned_expense, Motivo.planned_expense], desde=apertura)
+    rutas = [q.path for q in a.preguntas] + a.aplazadas
+    assert len(rutas) == len(set(rutas)) and INGRESOS not in rutas  # ya cambiado: no se repite
+    assert GASTOS in rutas and LIQUIDEZ in rutas  # dependencia del cambio y motivo del inversor
+
+
+def test_un_motivo_que_necesita_rutas_no_se_acepta_como_motivo_del_inversor(validada):
+    with pytest.raises(DatoInvalido):
+        plan(motivos=[Motivo.knowledge_not_assessed])
+
+
+def test_sin_motivos_ni_desde_se_comporta_como_antes(validada):
+    extractor(AHORRO, 30000, "Ahora tengo unos treinta mil")
+    assert plan() == plan(motivos=(), desde=None)
