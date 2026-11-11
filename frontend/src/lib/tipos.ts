@@ -196,6 +196,9 @@ export interface ModoAsesor {
   enabled: boolean;
   clients: string[];
   advisor_id?: string;
+  /** Sesión de administración (web publicada): todos los clientes. */
+  all?: boolean;
+  admin?: boolean;
 }
 
 export interface ExpedienteAsesor {

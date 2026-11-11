@@ -186,6 +186,12 @@ function Contenido({ perfil, revision, cambios, recargar }: {
             </span>
           )}
         </div>
+        <p className={s.suave} style={{ flexBasis: "100%", marginTop: 12, fontSize: 14 }}>
+          Tu código de cliente: <code>{perfil.client_id}</code> ·{" "}
+          <a href={`/admin?cliente=${encodeURIComponent(perfil.client_id)}`} target="_blank" rel="noopener">
+            ¿Eres del banco? Abre la vista del asesor
+          </a>
+        </p>
       </Revela>
     </>
   );
