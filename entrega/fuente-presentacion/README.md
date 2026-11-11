@@ -46,7 +46,7 @@ Un solo archivo que se abre con doble clic en cualquier navegador y **funciona s
 | S | Sonido suave al avanzar (apagado por defecto, no hace falta) |
 | Inicio / Fin | Primera / última |
 
-Orden: portada → **parte de Alex**, sencilla y sin jerga (cómo funciona, las tres reglas, memoria, lo vigilamos, lo que mejoró, laboratorio) → las diapositivas de siempre (cada dato con su prueba, lo que recibe el asesor, dentro de la app, lo que hemos medido, cierre). El guion de cada una va en las notas (tecla N). Se puede saltar a una diapositiva con `#número` al final de la URL.
+Orden: portada → **parte de Alex** (cómo funciona, el mapa completo por dentro, harness, memoria, LLMOps, lo que mejoró y laboratorio) → las diapositivas de siempre (cada dato con su prueba, lo que recibe el asesor, dentro de la app, lo que hemos medido, cierre). El guion de cada una va en las notas (tecla N). Se puede saltar a una diapositiva con `#número` al final de la URL.
 
 Las cifras salen de [`docs/evaluacion/`](../../docs/evaluacion/README.md): las del laboratorio (20 entrevistas, 1.280 llamadas a Claude, 165 de 166 datos) son la suma de los dos informes de [`docs/evaluacion/laboratorio/e07/`](../../docs/evaluacion/laboratorio/e07/). Si hay una tirada nueva, se cambian a mano en `html/deck.html`.
 

@@ -243,16 +243,16 @@ svg .f{transform:none}
 .etapa b,.paso4 b,.actor b,.caja3 b{display:block;font-size:40px;font-weight:600;line-height:1.15}
 .etapa span,.paso4 span,.actor span,.caja3 span{display:block;font-size:27px;color:var(--suave);margin-top:12px;line-height:1.35}
 .flecha-v{height:4px;margin-top:95px;background:repeating-linear-gradient(90deg,var(--menta) 0 12px,transparent 12px 22px);background-size:44px 4px;animation:pulso 1s linear infinite}
-.reglas{display:flex;flex-direction:column;gap:34px;margin-top:80px}
-.regla{display:flex;align-items:center;gap:44px;padding:30px 44px;border-radius:30px;background:var(--vidrio);border:1px solid var(--borde)}
-.regla .num{flex:none;width:120px;height:120px;border-radius:50%;display:grid;place-items:center;font-size:64px;font-weight:600;color:var(--noche);background:var(--aurora)}
-.regla b{display:block;font-size:56px;font-weight:600}
+.reglas{display:flex;flex-direction:column;gap:26px;margin-top:44px}
+.regla{display:flex;align-items:center;gap:40px;padding:20px 40px;border-radius:30px;background:var(--vidrio);border:1px solid var(--borde)}
+.regla .num{flex:none;width:96px;height:96px;border-radius:50%;display:grid;place-items:center;font-size:64px;font-weight:600;color:var(--noche);background:var(--aurora)}
+.regla b{display:block;font-size:48px;font-weight:600}
 .regla span{display:block;font-size:32px;color:var(--suave);margin-top:6px}
-.tres{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:140px}
+.tres{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:80px}
 .caja3{padding:50px 40px;border-radius:32px;background:var(--vidrio);border:1px solid var(--borde);text-align:center}
 .caja3.m{border-color:rgba(124,231,196,.6);box-shadow:0 30px 80px -40px rgba(124,231,196,.6)}
 .caja3 .ico,.paso4 .ico{font-size:96px;margin-bottom:22px}
-.ciclo{display:grid;grid-template-columns:1fr 60px 1fr 60px 1fr 60px 1fr;align-items:start;margin-top:160px}
+.ciclo{display:grid;grid-template-columns:1fr 60px 1fr 60px 1fr 60px 1fr;align-items:start;margin-top:80px}
 .paso4 .ico{width:180px;height:180px;margin:0 auto 26px;border-radius:50%;display:grid;place-items:center;font-size:84px;background:var(--vidrio);border:2px solid var(--borde)}
 .paso4.m .ico{border-color:var(--menta)}
 .ciclo .flecha-v{margin-top:90px}
@@ -271,6 +271,8 @@ svg .f{transform:none}
 .cuentas{display:grid;grid-template-columns:repeat(3,1fr);gap:36px;margin-top:60px}
 .cuentas .kpi{text-align:center}
 .cuentas .et{font-size:32px}
+.tec{display:inline-block;margin-top:16px;font-family:"Plex",monospace;font-size:20px;color:var(--menta);padding:6px 16px;border:1px solid rgba(124,231,196,.4);border-radius:30px;line-height:1.3}
+.regla .tec{margin-top:0;flex:none;max-width:520px;text-align:center}
 </style>
 </head>
 <body>
@@ -297,56 +299,72 @@ svg .f{transform:none}
   <div class="seccion entra"><b></b>Cómo funciona</div>
   <h1 class="entra d1">De una charla <span class="grad">a un perfil fiable</span></h1>
   <div class="viaje">
-    <div class="etapa f" data-s="1"><div class="burbu">🗣️</div><b>Hablas</b><span>con la voz o escribiendo</span></div>
+    <div class="etapa f" data-s="1"><div class="burbu">🗣️</div><b>Hablas</b><span>con la voz o escribiendo</span><span class="tec">ElevenLabs · Next.js</span></div>
     <div class="flecha-v f" data-s="2"></div>
-    <div class="etapa f" data-s="2"><div class="burbu m">✦</div><b>Claude escucha</b><span>y apunta cada dato con tu frase exacta</span></div>
+    <div class="etapa f" data-s="2"><div class="burbu m">✦</div><b>Claude escucha</b><span>y apunta cada dato con tu frase exacta</span><span class="tec">Claude · FastAPI</span></div>
     <div class="flecha-v f" data-s="3"></div>
-    <div class="etapa f" data-s="3"><div class="burbu">🧑‍💼</div><b>Una persona lo revisa</b><span>y da el visto bueno</span></div>
+    <div class="etapa f" data-s="3"><div class="burbu">🧑‍💼</div><b>Una persona lo revisa</b><span>y da el visto bueno</span><span class="tec">perfil versionado · Supabase</span></div>
     <div class="flecha-v f" data-s="4"></div>
-    <div class="etapa f" data-s="4"><div class="burbu">🏦</div><b>El asistente del banco</b><span>busca fondos que encajan contigo en MyInvestor</span></div>
+    <div class="etapa f" data-s="4"><div class="burbu">🏦</div><b>El asistente del banco</b><span>busca fondos que encajan contigo en MyInvestor</span><span class="tec">MCP idóneo → MCP MyInvestor</span></div>
   </div>
-  <div class="pie f" data-s="5" style="font-size:30px;color:var(--suave)">Voz de <b class="menta">ElevenLabs</b> · inteligencia de <b class="menta">Claude</b> · catálogo real de <b class="menta">MyInvestor</b></div>
   <div class="notas">(Avanza con la flecha a cada frase.) Así funciona idóneo. Uno: el cliente habla, con la voz o escribiendo. Dos: Claude le escucha y apunta cada dato con la frase exacta que dijo. Tres: una persona del banco lo revisa y da el visto bueno. Y cuatro: el asistente del banco usa ese perfil para buscar fondos que le encajan en MyInvestor. Nosotros no elegimos los fondos: ponemos los límites.</div>
 </section>
 
+<!-- ============ 2 · POR DENTRO: EL MAPA COMPLETO ============ -->
+<section class="slide" data-titulo="Arquitectura" data-arq="general">
+  <div class="seccion entra"><b></b>Por dentro</div>
+  <h2 class="entra d1">Por dentro: <span class="grad">todo idóneo en una imagen</span></h2>
+  <div class="leyenda entra d2" style="margin-top:18px">
+    <span><i class="pild">✦ Claude</i> un modelo interpreta lenguaje</span>
+    <span><i class="pild cod">⚙ código</i> reglas fijas, mismo resultado siempre</span>
+    <span><i class="pild hum">● persona</i> decide una persona</span>
+  </div>
+  <div class="arq arq-grande" data-pasos="5"></div>
+  <div class="notas">Esto es idóneo entero. (1) El cliente habla con la voz de ElevenLabs o escribe en la web en Next.js. (2) Todo llega al backend en FastAPI: el entrevistador, el extractor, las guardas, los cálculos, el verificador y el LLMOps. (3) Cada cambio se guarda como una versión en Postgres, en Supabase. (4) Un asesor valida, y solo entonces el agente de la entidad lee el perfil por nuestro MCP y busca productos en el MCP de MyInvestor. (5) Y aquí está Claude: en el entrevistador, el extractor, el verificador, el juez y el agente de la entidad. Nunca en los cálculos ni en la decisión final.</div>
+</section>
+
+
 <!-- ============ 3 · LAS REGLAS (harness) ============ -->
 <section class="slide" data-titulo="Las reglas">
-  <div class="seccion entra"><b></b>Cómo lo hacemos fiable</div>
-  <h1 class="entra d1">La IA tiene <span class="grad">riendas</span></h1>
+  <div class="seccion entra"><b></b>Harness</div>
+  <h1 class="entra d1">El harness: <span class="grad">las riendas de Claude</span></h1>
+  <p class="sub entra d2" style="margin-top:12px">Todo lo que rodea al modelo para que se comporte igual cada vez: instrucciones, herramientas, comprobaciones y paradas.</p>
   <div class="reglas">
-    <div class="regla f" data-s="1"><div class="num">1</div><div><b>Solo pregunta.</b><span>Nunca recomienda nada.</span></div></div>
-    <div class="regla f" data-s="2"><div class="num">2</div><div><b>Sin prueba, no entra.</b><span>Si el cliente no lo dijo, el dato se tira.</span></div></div>
-    <div class="regla f" data-s="3"><div class="num">3</div><div><b>Sin una persona, no sale.</b><span>Nadie usa el perfil hasta que se revisa.</span></div></div>
+    <div class="regla f" data-s="1"><div class="num">1</div><div style="flex:1"><b>Solo pregunta.</b><span>Nunca recomienda nada.</span></div><span class="tec">prompt versionado · salida estructurada (Pydantic)</span></div>
+    <div class="regla f" data-s="2"><div class="num">2</div><div style="flex:1"><b>Sin prueba, no entra.</b><span>Si el cliente no lo dijo, el dato se tira.</span></div><span class="tec">cita literal comprobada por código · rúbrica de confianza</span></div>
+    <div class="regla f" data-s="3"><div class="num">3</div><div style="flex:1"><b>Sin una persona, no sale.</b><span>Nadie usa el perfil hasta que se revisa.</span></div><span class="tec">usable = false hasta validar · MCP solo lectura</span></div>
   </div>
-  <div class="notas">La IA es muy lista, pero hay que ponerle riendas. Tiene tres reglas que no se salta. Una: solo pregunta, nunca recomienda. Dos: si el cliente no lo dijo, el dato no entra; cada dato lleva su frase. Tres: el perfil no sale hasta que una persona lo revisa.</div>
+  <div class="notas">Un modelo como Claude es muy listo, pero responde con algo de azar. El harness es todo lo que lo rodea para que se comporte igual cada vez. Tiene tres reglas que no se salta. Una: solo pregunta, nunca recomienda. Dos: si el cliente no lo dijo, el dato no entra; cada dato lleva su frase. Tres: el perfil no sale hasta que una persona lo revisa.</div>
 </section>
 
 <!-- ============ 4 · MEMORIA ============ -->
 <section class="slide" data-titulo="Memoria">
   <div class="seccion entra"><b></b>Memoria</div>
   <h1 class="entra d1">Se acuerda de ti, <span class="grad">pero solo de lo que permites</span></h1>
+  <p class="sub entra d2" style="margin-top:12px">Y la memoria de cómo actuar son sus instrucciones: prompts en Markdown, versionados en git.</p>
   <div class="tres">
-    <div class="caja3 f" data-s="1"><div class="ico">📋</div><b>Tu perfil</b><span>lo que exige la ley, con la prueba de cada dato</span></div>
-    <div class="caja3 f" data-s="2"><div class="ico">🕑</div><b>Tu historia</b><span>qué contaste y cuándo; si algo cambia, solo te pregunta eso</span></div>
-    <div class="caja3 m f" data-s="3"><div class="ico">💬</div><b>Tus preferencias</b><span>cómo quieres que te hablen. Solo con tu permiso, y las borras cuando quieras</span></div>
+    <div class="caja3 f" data-s="1"><div class="ico">📋</div><span class="tec" style="margin:0 0 14px">SEMÁNTICA</span><b>Tu perfil</b><span>lo que exige la ley, con la prueba de cada dato</span></div>
+    <div class="caja3 f" data-s="2"><div class="ico">🕑</div><span class="tec" style="margin:0 0 14px">EPISÓDICA</span><b>Tu historia</b><span>qué contaste y cuándo; si algo cambia, solo te pregunta eso</span></div>
+    <div class="caja3 m f" data-s="3"><div class="ico">💬</div><span class="tec" style="margin:0 0 14px">PERSONAL · APARTE</span><b>Tus preferencias</b><span>cómo quieres que te hablen. Solo con tu permiso, y las borras cuando quieras</span></div>
   </div>
   <div class="notas">idóneo tiene memoria, como una persona. Recuerda tu perfil, con la prueba de cada dato. Recuerda tu historia: qué contaste y cuándo, así que si algo cambia solo te pregunta eso. Y tus preferencias, por ejemplo cómo quieres que te hablen, pero solo si das permiso, y las puedes borrar. Lo personal nunca se mezcla con el perfil.</div>
 </section>
 
 <!-- ============ 5 · LLMOPS ============ -->
 <section class="slide" data-titulo="Lo vigilamos">
-  <div class="seccion entra"><b></b>Lo vigilamos siempre</div>
-  <h1 class="entra d1">Si un cambio lo empeora, <span class="grad">no sale</span></h1>
+  <div class="seccion entra"><b></b>LLMOps</div>
+  <h1 class="entra d1">LLMOps: si un cambio lo empeora, <span class="grad">no sale</span></h1>
+  <p class="sub entra d2" style="margin-top:12px">Un agente que hoy funciona puede empeorar mañana por un cambio de prompt o de modelo. Lo vemos antes que el cliente.</p>
   <div class="ciclo">
-    <div class="paso4 f" data-s="1"><div class="ico">📏</div><b>Medimos</b><span>cada respuesta: tiempo y coste</span></div>
+    <div class="paso4 f" data-s="1"><div class="ico">📏</div><b>Trazas</b><span>cada llamada a Claude: tokens, tiempo y coste, sin texto del cliente</span><span class="tec">/operaciones</span></div>
     <div class="flecha-v f" data-s="2"></div>
-    <div class="paso4 f" data-s="2"><div class="ico">🧑‍⚖️</div><b>Un juez la puntúa</b><span>otra IA, comprobada con nuestras notas</span></div>
+    <div class="paso4 f" data-s="2"><div class="ico">🧑‍⚖️</div><b>Juez LLM</b><span>puntúa claridad, neutralidad y empatía; calibrado con notas humanas</span><span class="tec">100 % de acuerdo ±1</span></div>
     <div class="flecha-v f" data-s="3"></div>
-    <div class="paso4 f" data-s="3"><div class="ico">🚦</div><b>¿Llega al mínimo?</b><span>si no, la versión no se publica</span></div>
+    <div class="paso4 f" data-s="3"><div class="ico">🚦</div><b>Umbrales</b><span>0 recomendaciones, 0 datos inventados, nota ≥ 4…</span><span class="tec">umbrales.json</span></div>
     <div class="flecha-v f" data-s="4"></div>
-    <div class="paso4 m f" data-s="4"><div class="ico">🔧</div><b>Lo arreglamos</b><span>y vuelta a empezar</span></div>
+    <div class="paso4 m f" data-s="4"><div class="ico">🔧</div><b>CI de evals</b><span>al cambiar un prompt se repiten las pruebas; si baja, falla</span><span class="tec">GitHub Actions</span></div>
   </div>
-  <div class="notas">Y lo vigilamos siempre. Medimos cada respuesta: cuánto tarda y cuánto cuesta. Otra IA hace de juez y puntúa la conversación; antes comprobamos que puntúa como nosotros. Si una versión no llega al mínimo, no se publica. Y la arreglamos.</div>
+  <div class="notas">Y encima, LLMOps. Cada llamada a Claude deja una traza: tokens, tiempo y coste, sin guardar nada de lo que dice el cliente, y se ve en el panel de operaciones. Un juez, que es otra IA, puntúa cada conversación; antes lo calibramos con nuestras notas y coincide al cien por cien. Hay umbrales escritos: cero recomendaciones, cero datos inventados. Y cuando cambiamos un prompt, la integración continua repite las pruebas con Claude real y, si algo baja, no se publica.</div>
 </section>
 
 <!-- ============ 6 · MEJORAS ============ -->
@@ -367,18 +385,18 @@ svg .f{transform:none}
   <h1 class="entra d1">Lo probamos <span class="grad">con clientes simulados</span></h1>
   <div class="lab">
     <div class="actores f" data-s="1">
-      <div class="actor"><div class="burbu">🎭</div><b>Claude hace de cliente</b><span>con una ficha secreta</span></div>
+      <div class="actor"><div class="burbu">🎭</div><b>Claude hace de cliente</b><span>con una ficha secreta</span><span class="tec">cliente simulado</span></div>
       <div class="vs">⇄</div>
-      <div class="actor"><div class="burbu m">🎙️</div><b>idóneo le entrevista</b><span>sin ver la ficha</span></div>
+      <div class="actor"><div class="burbu m">🎙️</div><b>idóneo le entrevista</b><span>sin ver la ficha</span><span class="tec">entrevistador · extractor · verificador</span></div>
     </div>
     <div class="cuentas">
       <div class="kpi f" data-s="2"><div class="cifra grad" data-cuenta="20">0</div><div class="et">entrevistas completas</div></div>
-      <div class="kpi f" data-s="2"><div class="cifra grad" data-cuenta="1280" data-miles="1">0</div><div class="et">respuestas de Claude</div></div>
+      <div class="kpi f" data-s="2"><div class="cifra grad" data-cuenta="1280" data-miles="1">0</div><div class="et">llamadas a Claude</div></div>
       <div class="kpi f" data-s="2"><div class="cifra grad">165<span style="font-size:.5em">/166</span></div><div class="et">datos correctos</div></div>
     </div>
   </div>
   <div class="pie f" data-s="3" style="font-size:26px">0 recomendaciones · siempre avisa de que es una IA · clientes simulados</div>
-  <div class="notas">¿Cómo sabemos que funciona? Con un laboratorio. Claude hace de cliente con una ficha secreta, y idóneo le entrevista sin verla. Después comparamos. En una sola tanda: 20 entrevistas completas, más de mil respuestas de Claude, y 165 de 166 datos correctos. Sin recomendar nada nunca. Son clientes simulados; el siguiente paso es probarlo con personas.</div>
+  <div class="notas">¿Cómo sabemos que funciona? Con un laboratorio. Claude hace de cliente con una ficha secreta, y idóneo le entrevista sin verla. Después comparamos. En una sola tanda: 20 entrevistas completas, 1.280 llamadas a Claude, todas trazadas, y 165 de 166 datos correctos. Sin recomendar nada nunca. Son clientes simulados; el siguiente paso es probarlo con personas.</div>
 </section>
 
 <!-- ============ 16 · CADA DATO CON SU PRUEBA (se mantiene) ============ -->
@@ -480,6 +498,48 @@ svg .f{transform:none}
 <div id="notas"><small>NOTAS DEL ORADOR · N para ocultar</small><div id="notas-texto"></div></div>
 <div id="ayuda">← → avanzar · F pantalla completa · N notas · S sonido (opcional) · Inicio/Fin</div>
 
+
+<!-- Diagrama de arquitectura (se reutiliza en la vista general y en los detalles) -->
+<template id="plantilla-arq">
+<svg viewBox="0 0 1800 830" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="resplandor" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <marker id="punta" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#B4C6CB"/></marker>
+  </defs>
+  <!-- flechas -->
+  <g data-id="a-cl-el" data-p="1"><path class="flecha" d="M200 345 C230 345 225 120 258 120" marker-end="url(#punta)"/><text class="etq" x="206" y="225">voz</text></g>
+  <g data-id="a-cl-fr" data-p="1"><path class="flecha" d="M200 400 L258 400" marker-end="url(#punta)"/><text class="etq" x="204" y="388">texto</text></g>
+  <g data-id="a-el-be" data-p="2"><path class="flecha" d="M560 115 L618 115" marker-end="url(#punta)"/></g>
+  <g data-id="a-fr-be" data-p="2"><path class="flecha" d="M560 400 L618 400" marker-end="url(#punta)"/></g>
+  <g data-id="a-be-da" data-p="3"><path class="flecha" d="M960 602 L960 638" marker-end="url(#punta)" marker-start="url(#punta)"/></g>
+  <g data-id="a-as-fr" data-p="4"><path class="flecha" d="M200 680 L258 680" marker-end="url(#punta)"/><text class="etq" x="200" y="668">valida</text></g>
+  <g data-id="a-be-mc" data-p="4"><path class="flecha" d="M1302 105 L1368 105" marker-end="url(#punta)"/></g>
+  <g data-id="a-mc-ag" data-p="4"><path class="flecha" d="M1580 172 L1580 228" marker-end="url(#punta)"/><text class="etq" x="1595" y="208">restricciones</text></g>
+  <g data-id="a-ag-my" data-p="4"><path class="flecha" d="M1580 402 L1580 458" marker-end="url(#punta)"/><text class="etq" x="1595" y="438">busca</text></g>
+  <g data-id="a-be-cl" data-p="5"><path class="flecha discont" d="M1302 520 C1340 520 1330 720 1368 720"/><path class="flecha discont" d="M1790 315 C1830 315 1830 725 1792 725"/></g>
+
+  <!-- nodos -->
+  <g data-id="cliente" data-p="1" class="nodo"><rect class="caja" x="0" y="300" width="200" height="150" rx="22"/><text class="t1" x="100" y="370" text-anchor="middle">Cliente</text><g class="chip hum" transform="translate(42 392)"><rect width="116" height="30" rx="15"/><text x="58" y="21" text-anchor="middle">● persona</text></g></g>
+  <g data-id="eleven" data-p="1" class="nodo"><rect class="caja" x="260" y="40" width="300" height="150" rx="22"/><text class="t1" x="410" y="100" text-anchor="middle">ElevenLabs</text><text class="t2" x="410" y="136" text-anchor="middle">escucha y habla</text><text class="t3" x="410" y="168" text-anchor="middle">VOZ</text></g>
+  <g data-id="front" data-p="1" class="nodo"><rect class="caja" x="260" y="240" width="300" height="510" rx="22"/><text class="t1" x="410" y="292" text-anchor="middle">Web · Next.js</text><text class="t3" x="410" y="322" text-anchor="middle">VERCEL</text>
+    <rect x="285" y="350" width="250" height="100" rx="16" fill="rgba(255,255,255,.05)"/><text class="t2" x="410" y="392" text-anchor="middle" style="fill:#F7FBFA">App del cliente</text><text class="t3" x="410" y="422" text-anchor="middle">/onboarding</text>
+    <rect x="285" y="470" width="250" height="100" rx="16" fill="rgba(255,255,255,.05)"/><text class="t2" x="410" y="512" text-anchor="middle" style="fill:#F7FBFA">Vista de la entidad</text><text class="t3" x="410" y="542" text-anchor="middle">/entidad</text>
+    <rect x="285" y="590" width="250" height="100" rx="16" fill="rgba(255,255,255,.05)"/><text class="t2" x="410" y="632" text-anchor="middle" style="fill:#F7FBFA">Calidad y costes</text><text class="t3" x="410" y="662" text-anchor="middle">/operaciones</text></g>
+  <g data-id="backend" data-p="2" class="nodo"><rect class="caja" x="620" y="40" width="680" height="560" rx="26" style="fill:rgba(43,179,192,.06)"/><text class="t1" x="650" y="90">Backend · FastAPI</text><text class="t3" x="1270" y="90" text-anchor="end">RENDER</text></g>
+  <g data-id="b1" data-p="2" class="nodo claude"><rect class="caja" x="645" y="115" width="310" height="140" rx="18"/><text class="t1" x="665" y="165" style="font-size:27px">Entrevistador</text><text class="t2" x="665" y="200">pregunta, no recomienda</text><g class="chip" transform="translate(665 215)"><rect width="104" height="28" rx="14"/><text x="52" y="20" text-anchor="middle">✦ Claude</text></g></g>
+  <g data-id="b2" data-p="2" class="nodo claude"><rect class="caja" x="970" y="115" width="310" height="140" rx="18"/><text class="t1" x="990" y="165" style="font-size:27px">Extractor</text><text class="t2" x="990" y="200">dato + cita literal</text><g class="chip" transform="translate(990 215)"><rect width="104" height="28" rx="14"/><text x="52" y="20" text-anchor="middle">✦ Claude</text></g></g>
+  <g data-id="b3" data-p="2" class="nodo"><rect class="caja" x="645" y="270" width="310" height="140" rx="18"/><text class="t1" x="665" y="320" style="font-size:27px">Guardas y rúbrica</text><text class="t2" x="665" y="355">el código decide</text><g class="chip cod" transform="translate(665 370)"><rect width="104" height="28" rx="14"/><text x="52" y="20" text-anchor="middle">⚙ código</text></g></g>
+  <g data-id="b4" data-p="2" class="nodo"><rect class="caja" x="970" y="270" width="310" height="140" rx="18"/><text class="t1" x="990" y="320" style="font-size:27px">Cálculos MiFID</text><text class="t2" x="990" y="355">riesgo e idoneidad</text><g class="chip cod" transform="translate(990 370)"><rect width="104" height="28" rx="14"/><text x="52" y="20" text-anchor="middle">⚙ código</text></g></g>
+  <g data-id="b5" data-p="2" class="nodo claude"><rect class="caja" x="645" y="425" width="310" height="150" rx="18"/><text class="t1" x="665" y="475" style="font-size:27px">Verificador</text><text class="t2" x="665" y="510">contradicciones</text><g class="chip cod" transform="translate(665 525)"><rect width="104" height="28" rx="14"/><text x="52" y="20" text-anchor="middle">⚙ reglas</text></g><g class="chip" transform="translate(780 525)"><rect width="104" height="28" rx="14"/><text x="52" y="20" text-anchor="middle">✦ Claude</text></g></g>
+  <g data-id="b6" data-p="2" class="nodo claude"><rect class="caja" x="970" y="425" width="310" height="150" rx="18"/><text class="t1" x="990" y="475" style="font-size:27px">LLMOps</text><text class="t2" x="990" y="510">trazas · evals · juez</text><g class="chip" transform="translate(990 525)"><rect width="120" height="28" rx="14"/><text x="60" y="20" text-anchor="middle">✦ juez</text></g></g>
+  <g data-id="datos" data-p="3" class="nodo"><rect class="caja" x="620" y="640" width="680" height="170" rx="22" style="fill:rgba(124,231,196,.05)"/><text class="t1" x="650" y="692">Supabase · Postgres</text><text class="t2" x="650" y="730">perfil versionado · turnos · grabación</text><text class="t2" x="650" y="764">memoria personal en capa aparte</text><text class="t3" x="1270" y="692" text-anchor="end">FUENTE DE VERDAD</text></g>
+  <g data-id="asesor" data-p="4" class="nodo"><rect class="caja" x="0" y="605" width="200" height="150" rx="22"/><text class="t1" x="100" y="672" text-anchor="middle">Asesor</text><g class="chip hum" transform="translate(42 694)"><rect width="116" height="30" rx="15"/><text x="58" y="21" text-anchor="middle">● persona</text></g></g>
+  <g data-id="mcpi" data-p="4" class="nodo"><rect class="caja" x="1370" y="40" width="420" height="132" rx="22" style="stroke:rgba(124,231,196,.6)"/><text class="t1" x="1395" y="92">MCP de idóneo</text><text class="t2" x="1395" y="128">4 herramientas · solo lectura</text><text class="t3" x="1395" y="156">SOLO PERFIL VALIDADO</text></g>
+  <g data-id="agente" data-p="4" class="nodo claude"><rect class="caja" x="1370" y="230" width="420" height="172" rx="22"/><text class="t1" x="1395" y="282">Agente de la entidad</text><text class="t2" x="1395" y="318">GPTadvisor · en la demo, Claude</text><g class="chip" transform="translate(1395 345)"><rect width="104" height="28" rx="14"/><text x="52" y="20" text-anchor="middle">✦ Claude</text></g></g>
+  <g data-id="myi" data-p="4" class="nodo"><rect class="caja" x="1370" y="460" width="420" height="132" rx="22"/><text class="t1" x="1395" y="512">MCP de MyInvestor</text><text class="t2" x="1395" y="548">catálogo real de fondos</text><text class="t3" x="1395" y="576">PÚBLICO</text></g>
+  <g data-id="claudeapi" data-p="5" class="nodo claude"><rect class="caja" x="1370" y="640" width="420" height="170" rx="22" style="fill:rgba(124,231,196,.10)"/><text class="t1" x="1395" y="694" style="fill:#7CE7C4">API de Claude</text><text class="t2" x="1395" y="730">claude-sonnet-5-5 · esfuerzo low</text><text class="t2" x="1395" y="764">salida estructurada · caché</text></g>
+</svg>
+</template>
 
 <script>
 (function(){
