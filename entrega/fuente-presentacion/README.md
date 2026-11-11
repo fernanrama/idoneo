@@ -1,59 +1,54 @@
 # Fuente de la presentación
 
-Genera `../Idoneo_presentacion.pptx`: 8 diapositivas con el estilo «noche» de la web (fondo oscuro, brillos
-azul-violeta-rosa, tarjetas de vidrio y la esfera 3D), notas del orador con el guion y fundido.
-El texto hablado está en las notas del orador de cada diapositiva.
+Genera `../Idoneo_presentacion.pptx`: **7 diapositivas técnicas** con la marca de idóneo (fondo noche, degradado menta → turquesa, tipografía Sora; ver [`docs/marca/`](../../docs/marca/README.md)). Lo que se dice está en las notas del orador de cada diapositiva.
 
-**Regla de diseño: solo el texto necesario.** Cada diapositiva lleva su mensaje (título), la imagen y los rótulos
-que hacen falta para entenderla. Nada de pies de página, números, etiquetas decorativas ni párrafos. Lo que se
-cuenta con detalle va a las notas. Antes de añadir una frase: ¿sin ella se entiende la diapositiva?
+El pitch abre con el **vídeo** (problema, solución y cómo funciona). Estas diapositivas van **después** y cuentan lo que el vídeo no puede:
+
+| # | Mensaje |
+|---|---|
+| 1 | Portada: logo y lema «Invertir empieza por escucharte» |
+| 2 | Cómo funciona por dentro: conversación → extractor → guardas y rúbrica → perfil con pruebas → validación humana → agente de la entidad |
+| 3 | Cada dato, con su prueba: Carmen, declarado frente a demostrado |
+| 4 | Lo que recibe el asesor: perfil conservador, conveniencia y validación |
+| 5 | Dentro de la app de cada entidad: alta, microentrevistas, perfil vivo, sello «Powered by idóneo» y MCP |
+| 6 | Lo que hemos medido, con su límite (clientes simulados) |
+| 7 | Cierre y paso a la demo en vivo |
+
+**Regla de diseño: solo el texto necesario.** Cada diapositiva lleva su mensaje (título), el dibujo y los rótulos justos para entenderla. Lo que se cuenta con detalle va en las notas.
 
 ## Requisitos
 
-Node 18 o superior. Una sola vez: `npm install` (pptxgenjs, sharp, react y react-icons).
-Letras: Segoe UI y Consolas (vienen en Windows). En un Mac PowerPoint las cambia: **presentar desde Windows**
-o exportar a PDF antes.
+- Node 18 o superior. Una sola vez: `npm install` (pptxgenjs, sharp, react y react-icons).
+- Tipografía **Sora** instalada en el equipo que **proyecta** (Google Fonts, gratuita; en Windows: clic derecho en cada `.ttf` → «Instalar»). Si se presenta desde otro equipo sin Sora, exportar antes a PDF desde PowerPoint.
+- El logo y el sello se leen de `docs/marca/` (PNG).
 
 ## Uso
 
 ```bash
-node build.js ../Idoneo_presentacion.pptx --hecho=voz,extractor,mcp            # TRABAJO: notas con avisos «(Pendiente: …)»
-node build.js ../Idoneo_presentacion.pptx --final --hecho=voz,extractor,mcp    # FINAL: notas limpias
+node build.js ../Idoneo_presentacion.pptx            # TRABAJO: notas con avisos «(Pendiente: …)»
+node build.js ../Idoneo_presentacion.pptx --final    # FINAL: notas limpias
 ```
 
-`--hecho=` marca lo que **funciona de verdad** (a 10/11, comprobado en `docs/evaluacion/README.md`):
+**Cierra PowerPoint antes de generar:** Windows bloquea el archivo abierto.
 
-| Clave | Qué significa | Estado 10/11 |
-|---|---|---|
-| `voz` | Entrevista por voz con ElevenLabs de punta a punta | Hecho (E-03, una vez) |
-| `extractor` | Claude rellena el perfil mientras el cliente habla | Hecho (E-04, E-05) |
-| `mcp` | Claude lee el perfil por nuestro MCP | Hecho por túnel temporal el 9/11, antes de la PR 21 (el MCP exige ahora credencial: revisar la conexión) |
-| `audio` | Al pulsar un dato suena su clip | Pendiente |
+En `build.js` se editan a mano `EQUIPO` (solo se dice en voz alta) y las cifras de la diapositiva 6, que salen de [`docs/evaluacion/README.md`](../../docs/evaluacion/README.md).
 
-## Qué se edita a mano en `build.js`
+## Resumen de una cara
 
-- `EQUIPO`: nombre del equipo. No sale en la portada; solo en las notas («Somos …»).
-- `METRICAS`: cifras medidas (de E-04 y E-05) con 2-3 palabras cada una. Si sale el laboratorio de ~20 clientes,
-  cambiarlas aquí **y** la frase de las notas de la diapositiva 6. En pantalla va siempre «Clientes simulados».
+`../Idoneo_una_cara.html` es la fuente de `../Idoneo_una_cara.pdf` (A4, una página). Para regenerar el PDF con Chrome:
+
+```bash
+chrome --headless=new --no-pdf-header-footer --virtual-time-budget=5000 --print-to-pdf=Idoneo_una_cara.pdf "file:///…/entrega/Idoneo_una_cara.html"
+```
 
 ## Recursos (`assets/`)
 
-- `esfera_*.png`: la esfera 3D, pintada con **el mismo shader de la web** (`esfera.html`, copia de
-  `frontend/src/components/Esfera3D.tsx`) con Edge sin ventana:
-  `msedge --headless=new --use-angle=swiftshader --enable-unsafe-swiftshader --default-background-color=00000000 --window-size=1000,1000 --screenshot=esfera.png "file:///…/esfera.html?p=1f3bff,8a5cff,ff7fd1&t=7.3"`
-- `entrevista_movil_noche.jpg`: demo guiada en el móvil (390×844), paso 14 de 19, la frase de Carmen.
-- `entidad_carmen.jpg`: vista de la entidad (`/entidad/carmen-68`), perfil por validar con el aviso.
-
-Si cambia el diseño de la web, **rehacer las capturas** para que el jurado vea lo mismo en la demo.
-
-## Antes de la entrega (miércoles, congelar a las 18:00)
-
-1. Revisar `--hecho=`, `EQUIPO` y `METRICAS`.
-2. **Cerrar PowerPoint** antes de generar: Windows bloquea el archivo abierto.
-3. Generar la versión final, abrirla y pasar las 8 diapositivas: **ninguna** dice algo que no funcione.
+- `entidad_carmen.jpg`: vista de la entidad (`/entidad/carmen-68`), perfil por validar con el aviso. Si cambia el diseño de la web, rehacer la captura para que el jurado vea lo mismo en la demo.
+- `entrevista_movil_noche.jpg`, `esfera_*.png` y `esfera.html`: recursos de la versión anterior (estilo «noche»); se conservan por si se recuperan.
 
 ## Reglas
 
 - No se ponen en pantalla los valores de «confianza» del perfil (son supuestos del equipo).
 - Sin logos de terceros: solo los nombres (ElevenLabs, Claude, MyInvestor, GPTadvisor).
-- Carmen y todos sus datos son **simulados** y así se dice en la presentación.
+- Carmen y todos sus datos son **simulados**, y así se dice.
+- Ningún precio: idóneo se presenta como una función integrada en la app de la entidad.
