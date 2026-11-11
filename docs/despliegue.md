@@ -89,7 +89,8 @@ tras 15 minutos sin uso y tarda cerca de un minuto en despertar; el plan Starter
 |---|---|
 | `https://<proyecto>.vercel.app` | Portada con el aura |
 | `/escenario` → **Ver la demo guiada** | La entrevista de Carmen y su perfil en directo (no gasta créditos) |
-| `/entidad/carmen-68` | El perfil de Carmen, con «Validar perfil» deshabilitado |
+| `/entidad/carmen-68` | Sin sesión de la entidad lleva a `/admin`; con la clave de administración, el expediente de Carmen |
+| `POST https://<servicio>.onrender.com/mcp` con credencial | Las cuatro herramientas del MCP (sin credencial, 401; nunca `421 Invalid Host header`) |
 | `/onboarding/entrevista` → **Escribir** | Una entrevista real por texto con Claude |
 | `/onboarding/entrevista` → **Hablar** | La entrevista por voz con ElevenLabs |
 

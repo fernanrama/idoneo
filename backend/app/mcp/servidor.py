@@ -61,10 +61,16 @@ Los datos de la demo son simulados. Este servidor no recomienda productos: solo 
 
 
 def _seguridad() -> TransportSecuritySettings:
-    """Protección DNS rebinding: localhost siempre; los hosts públicos (túnel, despliegue) por variable."""
+    """Protección DNS rebinding: localhost siempre; los hosts públicos (túnel, despliegue) por variable.
+
+    En Render el nombre público del servicio llega solo en `RENDER_EXTERNAL_HOSTNAME`: se admite sin tener que
+    declararlo (sin él, toda llamada al MCP desplegado acababa en `421 Invalid Host header`)."""
     extra = [h.strip() for h in os.getenv("MCP_ALLOWED_HOSTS", "").split(",") if h.strip()]
     if "*" in extra:  # solo para pruebas rápidas con un túnel cuyo nombre cambia
         return TransportSecuritySettings(enable_dns_rebinding_protection=False)
+    render = os.getenv("RENDER_EXTERNAL_HOSTNAME", "").strip()
+    if render and render not in extra:
+        extra.append(render)
     hosts = ["localhost", "localhost:*", "127.0.0.1", "127.0.0.1:*", *extra]
     origins = ["http://localhost:*", "http://127.0.0.1:*", *(f"https://{h}" for h in extra)]
     return TransportSecuritySettings(
