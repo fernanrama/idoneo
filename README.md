@@ -18,6 +18,8 @@ y lo entrega por API y **MCP** a los agentes de la entidad.
 
 [La demo](#la-demo-en-un-minuto) · [Cómo funciona](#cómo-funciona) · [Capturas](#en-el-móvil-del-cliente) · [Probarlo en 10 minutos](#probarlo-en-10-minutos) · [Claude + MyInvestor](#usarlo-desde-claude-con-myinvestor) · [Evaluación](#evaluación) · [Estado](#estado)
 
+**[Pruébalo online → hack-finance-uc3m-2026.vercel.app](https://hack-finance-uc3m-2026.vercel.app/escenario)**
+
 <sub>Hack Finance UC3M 2026 · Prototipo con datos simulados</sub>
 
 </div>
@@ -96,6 +98,8 @@ Resultado para Carmen, calculado por el backend:
 </table>
 
 ## Probarlo en 10 minutos
+
+> **Sin instalar nada:** la versión desplegada está en <https://hack-finance-uc3m-2026.vercel.app> (empieza por `/escenario` → **Ver la demo guiada**). El backend usa un plan gratuito que se duerme: la primera petición puede tardar cerca de un minuto. «Validar perfil» y el MCP de demostración solo funcionan en local, a propósito ([por qué](docs/despliegue.md#qué-cambia-respecto-a-local)).
 
 **Requisitos:** Python 3.11+ (probado con 3.13 y 3.14), Node.js 20+ solo para el frontend (probado con 22) y Git.
 
@@ -235,7 +239,7 @@ Idóneo no «cumple MiFID» por sí solo: ayuda a la entidad a recoger y documen
 
 ## Configuración
 
-**Producción** (Vercel + Render + Supabase, con topes de gasto): [docs/despliegue.md](docs/despliegue.md).
+**Producción** (Vercel + Render + Supabase, con topes de gasto): [docs/despliegue.md](docs/despliegue.md). Desplegada en <https://hack-finance-uc3m-2026.vercel.app>.
 
 El `.env` va en la raíz del repo (plantilla en `.env.example`) y nunca se sube a Git. Arranca el backend desde `backend/`: las rutas relativas (`DATA_DIR=./data`) se resuelven desde ahí y `backend/data/` está ignorada por Git.
 
