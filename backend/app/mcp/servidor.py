@@ -30,7 +30,7 @@ from mcp.types import ToolAnnotations
 
 from .. import acceso
 from ..agentes import contexto
-from ..perfil import calculos, store
+from ..perfil import store
 from ..perfil.modelos import EstadoPerfil
 
 INSTRUCCIONES = """\
@@ -40,7 +40,9 @@ corregido por el asesor), su confianza y la cita de la entrevista que lo justifi
 
 Cómo usarlo:
 1. Antes de proponer cualquier producto, llama a get_investment_constraints. Si `usable` es false, el
-   perfil aún no lo ha validado un asesor: no recomiendes nada y dilo.
+   perfil aún no lo ha validado un asesor: no recomiendes nada y dilo. Si `pending_review` no es null,
+   esos datos han cambiado y están pendientes de validar: no apoyes ninguna recomendación en ellos y
+   dile al cliente que están en revisión.
 2. Usa `funds_query` y `portfolios_query` como criterios de búsqueda en el catálogo de MyInvestor.
    Si un criterio trae una lista (p. ej. `asset_type: ["Monetario", "Renta Fija"]`) y el catálogo solo
    acepta un valor, haz una búsqueda por cada valor y une los resultados; no quites ninguno.
@@ -116,7 +118,8 @@ def get_client_profile(client_id: str, version: int | None = None) -> dict[str, 
     los resultados de idoneidad y conveniencia y las alertas abiertas.
 
     Sin `version`, devuelve el perfil activo más reciente (o el último, con usable=false, si ninguno
-    está activo). Con `version`, esa versión concreta del historial.
+    está activo) y `pending_review`: qué datos están en revisión en una versión posterior. Con `version`,
+    esa versión concreta del historial.
     """
     try:
         p = _perfil(client_id, version)
@@ -124,6 +127,9 @@ def get_client_profile(client_id: str, version: int | None = None) -> dict[str, 
         return _error(e, client_id)
     datos = p.model_dump(mode="json")
     datos["usable"] = p.status == EstadoPerfil.active
+    if not version:
+        pendiente = store.revision_pendiente(client_id, p)
+        datos["pending_review"] = pendiente.model_dump(mode="json") if pendiente else None
     return datos
 
 
@@ -134,12 +140,14 @@ def get_investment_constraints(client_id: str) -> dict[str, Any]:
     (carteras automatizadas), `post_filters` (comprobaciones sobre cada ficha), `appropriateness`
     (conveniencia por familia de producto), `blocked_searches` (qué no se busca: fondos, carteras, ETF o
     acciones) y `rationale` (por qué). Si `usable` es false, no recomendar.
+    Si `pending_review` no es null, esas rutas están en revisión en una versión posterior aún sin validar:
+    no apoyar ninguna recomendación en ellas hasta que la entidad valide.
     Una lista dentro de `funds_query` (como `asset_type`) significa "cualquiera de estos valores": si el
     buscador solo admite uno, se hace una búsqueda por valor.
     """
     _autorizar(client_id)
     try:
-        return calculos.restricciones(store.perfil_para_consumidor(client_id)).model_dump(mode="json")
+        return store.restricciones_para_consumidor(client_id).model_dump(mode="json")
     except store.NoEncontrado as e:
         return _error(e, client_id)
 
@@ -183,9 +191,11 @@ async def get_client_context(client_id: str) -> dict[str, Any]:
         p = store.perfil_para_consumidor(client_id)
     except store.NoEncontrado as e:
         return _error(e, client_id)
+    pendiente = store.revision_pendiente(client_id, p)
     return {
         "client_id": client_id,
         "profile_version": p.version,
         "usable": p.status == EstadoPerfil.active,
+        "pending_review": pendiente.model_dump(mode="json") if pendiente else None,
         "text": await contexto.resumen(p),
     }

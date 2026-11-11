@@ -170,11 +170,26 @@ class FiltroPosterior(BaseModel):
     why: str
 
 
+class RevisionPendiente(BaseModel):
+    """Datos del perfil servido que han cambiado en una versión posterior aún sin validar.
+
+    Decisión §4.6 de docs/diseno/06-actualizacion-continua.md (opción B): se sigue sirviendo el último
+    `active`, pero el consumidor sabe qué está en revisión y no debe apoyarse en esas rutas para recomendar.
+    """
+
+    since_version: int            # primera versión posterior a la servida
+    latest_version: int
+    latest_status: EstadoPerfil
+    paths: list[str]              # rutas MiFID cuyo valor cambió o con alertas nuevas abiertas
+    opened_at: datetime           # cuándo se creó `since_version`
+
+
 class Restricciones(BaseModel):
     client_id: str
     profile_version: int
     status: EstadoPerfil
     usable: bool  # solo con perfil active
+    pending_review: RevisionPendiente | None = None  # §4.6: qué está en revisión; null si nada
     funds_query: dict[str, Any] = Field(default_factory=dict)       # parámetros de search_funds
     portfolios_query: dict[str, Any] = Field(default_factory=dict)  # parámetros de search_portfolios
     post_filters: list[FiltroPosterior] = Field(default_factory=list)

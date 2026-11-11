@@ -252,16 +252,19 @@ Si la lista está vacía (solo confirmaciones o cambios que no mueven nada), la 
   "usable": true,
   "pending_review": {
     "since_version": 6,
+    "latest_version": 7,
+    "latest_status": "review_due",
     "paths": ["objectives.o1.liquidity_need"],
-    "reason_codes": ["liquidity_change"],
     "opened_at": "2026-11-11T10:20:00Z"
   }
 }
 ```
 
+**Implementado** (`store.revision_pendiente`, `tests/test_pending_review.py`). `reason_codes` se añadirá cuando existan las solicitudes de revisión (PR 2); hasta entonces, las rutas salen solo de comparar versiones.
+
 - Sin revisión abierta, `pending_review` es `null`: el contrato actual no cambia para quien no lo lea.
 - Lo añaden por igual `GET /constraints`, `GET /context` y las herramientas MCP `get_investment_constraints`, `get_client_profile` y `get_client_context`.
-- Las rutas se calculan comparando el último `active` con la última versión, más las de las solicitudes abiertas. Las calcula el código, no el modelo.
+- Las rutas se calculan comparando el último `active` con la última versión: datos cuyo valor o declarado cambió y alertas nuevas abiertas. Se sumarán las de las solicitudes abiertas (PR 2). Los calculados no cuentan, y una confirmación del mismo valor tampoco. Las calcula el código, no el modelo.
 - Así se cierra H1: el consumidor ya no recibe el perfil antiguo **como si estuviera al día**, sino sabiendo qué datos están en revisión.
 
 Opción descartada: **A, bloquear**, que devolvería `usable: false` hasta que valide el asesor. Es más estricta, pero deja a la entidad sin perfil para todo lo demás por un cambio parcial.

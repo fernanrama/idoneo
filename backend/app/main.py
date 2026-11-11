@@ -373,8 +373,9 @@ def validar(client_id: str, body: Validacion):
 
 @app.get("/api/clients/{client_id}/constraints", dependencies=[Depends(acceso.exigir_cliente)], response_model=Restricciones)
 def ver_restricciones(client_id: str):
-    """Para consumidores: perfil activo más reciente; si no hay, el último con usable=false."""
-    return calculos.restricciones(_llamar(store.perfil_para_consumidor, client_id))
+    """Para consumidores: perfil activo más reciente; si no hay, el último con usable=false.
+    `pending_review` dice qué datos están en revisión en una versión posterior (no usarlos para recomendar)."""
+    return _llamar(store.restricciones_para_consumidor, client_id)
 
 
 @app.get("/api/clients/{client_id}/evidence/{path}", dependencies=[Depends(acceso.exigir_cliente)])
@@ -389,7 +390,9 @@ def ver_evidencia(client_id: str, path: str):
 @app.get("/api/clients/{client_id}/context", dependencies=[Depends(acceso.exigir_cliente)])
 async def ver_contexto(client_id: str):
     p = _llamar(store.perfil_para_consumidor, client_id)
-    return {"client_id": client_id, "text": await contexto.resumen(p)}
+    pendiente = store.revision_pendiente(client_id, p)
+    return {"client_id": client_id, "text": await contexto.resumen(p),
+            "pending_review": pendiente.model_dump(mode="json") if pendiente else None}
 
 
 def _perfil_demo_fijo() -> Perfil:
