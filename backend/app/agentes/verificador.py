@@ -42,6 +42,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from ..perfil import calculos
 from ..perfil.modelos import CALCULADOS, CAMPOS, FAMILIAS, Alerta, Evidencia, Fact, Flag, Fuente, Perfil, Turno
 from . import claude
 from .normalizacion import cita_valida, limpiar
@@ -188,6 +189,17 @@ def reglas(perfil: Perfil) -> list[Alerta]:
         alerta("financial.fixed_monthly_costs_eur", Flag.needs_advisor,
                f"Gastos fijos ({_eur(v_gas)}/mes) iguales o mayores que los ingresos ({_eur(v_ing)}/mes).",
                gastos, ingresos)
+
+    ahorro, deudas = m.get("financial.liquid_savings_eur"), m.get("financial.debts_eur")
+    importe = m.get("objectives.o1.amount_eur")
+    v_aho, v_deu, v_imp = _numero(ahorro), _numero(deudas), _numero(importe)
+    if None not in (v_aho, v_gas, v_imp):
+        margen = calculos.capacidad_perdida(v_aho, v_gas, v_deu or 0.0)
+        if v_imp > margen:
+            alerta("objectives.o1.amount_eur", Flag.needs_advisor,
+                   f"Quiere invertir {_eur(v_imp)} y sin tocar un colchón de {calculos.MESES_COLCHON_OBJETIVO} meses "
+                   f"ni sus deudas le quedan {_eur(margen)}: hablarlo con el cliente antes de validar.",
+                   importe, ahorro, gastos)
     return salida
 
 

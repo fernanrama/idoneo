@@ -173,6 +173,12 @@ def idoneidad(perfil: Perfil) -> Idoneidad:
     if cap is not None and ahorro is not None:
         p = _por_capacidad(float(cap), float(ahorro))
         candidatos.append((p, "financial.loss_capacity_eur", f"Capacidad de pérdida {cap:,.0f} € de {ahorro:,.0f} € → {p.value}"))
+    importe = valor(perfil, "objectives.o1.amount_eur")
+    if cap is not None and importe is not None and float(importe) > float(cap):
+        # Invertiría parte del colchón de 6 meses o del dinero de sus deudas: SUPUESTO v1, prudente.
+        candidatos.append((PerfilRiesgo.CONSERVADOR, "objectives.o1.amount_eur",
+                           f"Quiere invertir {float(importe):,.0f} €, más de lo que puede perder sin tocar su colchón "
+                           f"({float(cap):,.0f} €) → {PerfilRiesgo.CONSERVADOR.value}"))
     plazo = valor(perfil, "objectives.o1.horizon_years")
     if plazo is not None:
         p = _por_plazo(float(plazo))
