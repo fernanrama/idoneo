@@ -12,7 +12,7 @@ export class ErrorAPI extends Error {
         : status === 503
           ? "503 El servidor no está preparado para abrir entrevistas (falta su configuración). En local: python backend/scripts/preparar_demo.py y reinicia el backend."
         : status === 429
-          ? "429 Esta demo pública ha llegado a su límite de entrevistas por hoy. Puedes ver la demo guiada o volver mañana."
+          ? "429 Hoy ya se han hecho todas las entrevistas de prueba de esta demo pública: el cupo diario protege el prototipo. La demo guiada de Carmen sigue disponible, y mañana vuelve a haber entrevistas."
           : `${status} No se ha podido completar la petición.`);
     this.name = "ErrorAPI";
   }
