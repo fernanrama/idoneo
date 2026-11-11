@@ -116,6 +116,71 @@ def test_validar_reutiliza_la_validacion_atomica(modo):
     assert r.status_code == 409 and version() == 2
 
 
+# ---------- expected_version (misma regla que POST /validate) ----------
+
+def _review_due() -> int:
+    """Carmen validada y después un cambio de la microentrevista: review_due. Devuelve esa versión."""
+    from app.perfil.modelos import Evidencia
+
+    store.validar(C, "asesor-07", [])
+    ev = [Evidencia(session_id="s-demo", turn_id="t-900", t=(1.0, 2.0), quote="DATOS SIMULADOS: lo necesito ya")]
+    return store.aplicar(C, [Parche(path="objectives.o1.horizon_years", value=1, source="declared", evidence=ev)],
+                         "extractor · s-demo", "agent:extractor").version
+
+
+def test_validar_con_la_version_que_ve_el_asesor(modo):
+    v = _review_due()
+    r = local().post(f"{BASE}/clientes/{C}/validar", headers=asesor(), json={"expected_version": v})
+    assert r.status_code == 200 and r.json()["status"] == "active" and r.json()["version"] == v + 1 == version()
+
+
+def test_validar_con_version_obsoleta_da_409_y_no_escribe(modo):
+    v = _review_due()
+    antes = store.versiones(C)
+    r = local().post(f"{BASE}/clientes/{C}/validar", headers=asesor(), json={"expected_version": v - 1})
+    assert r.status_code == 409 and "ha cambiado" in r.json()["detail"]
+    assert store.versiones(C) == antes and store.perfil(C).status.value == "review_due"
+
+
+def test_validar_sin_version_sigue_como_antes(modo):
+    """Compatibilidad: sin cuerpo (o sin el campo) se valida la última versión, como hasta ahora."""
+    v = _review_due()
+    c = local()
+    assert c.post(f"{BASE}/clientes/{C}/validar", headers=asesor(), json={}).status_code == 200
+    assert version() == v + 1 and store.perfil(C).status.value == "active"
+
+
+def test_el_cuerpo_solo_admite_la_version(modo):
+    v = _review_due()
+    for cuerpo in ({"expected_version": 0}, {"expected_version": "v3"},
+                   {"expected_version": v, "changes": [{"path": "financial.debts_eur", "value": 0}]},
+                   {"advisor_id": "otro"}):
+        r = local().post(f"{BASE}/clientes/{C}/validar", headers=asesor(), json=cuerpo)
+        assert r.status_code == 422, cuerpo
+    assert version() == v  # nada escrito
+
+
+def test_dos_asesores_con_la_misma_version_solo_valida_uno(modo):
+    import threading
+
+    v = _review_due()
+    barrera, codigos = threading.Barrier(2), []
+
+    def validar():
+        c = local()
+        barrera.wait(10)
+        codigos.append(c.post(f"{BASE}/clientes/{C}/validar", headers=asesor(),
+                              json={"expected_version": v}).status_code)
+
+    hilos = [threading.Thread(target=validar) for _ in range(2)]
+    for h in hilos:
+        h.start()
+    for h in hilos:
+        h.join(30)
+    assert sorted(codigos) == [200, 409]
+    assert [h["reason"] for h in store.versiones(C) if h["version"] > v] == ["validated"]
+
+
 def test_perfil_incompleto_no_se_valida_ni_crea_versiones(modo):
     store.aplicar(C, [Parche(path="objectives.o1.goal", value=None, source=Fuente.advisor)],
                   "dato retirado para el test", "advisor:test")
