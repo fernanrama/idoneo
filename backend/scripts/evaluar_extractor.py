@@ -37,6 +37,7 @@ load_dotenv(RAIZ.parent / ".env")
 load_dotenv(RAIZ / ".env")
 
 from app import main  # noqa: E402
+from app.ops import evaluaciones  # noqa: E402
 from app.agentes import claude, evaluacion  # noqa: E402
 from app.perfil import store  # noqa: E402
 
@@ -156,6 +157,15 @@ async def principal(a) -> int:
     print(f"Tokens por llamada: {medias['entrada']:.0f} entrada · {medias['cache']:.0f} desde caché · {medias['salida']:.0f} salida")
     if a.informe:
         informe(a.informe, resultados, r, latencias or [0.0], medias)
+    if a.registrar:
+        filas = evaluaciones.registrar(
+            "extractor",
+            {"cobertura": r["cobertura"], "precision": r["precision"], "prohibidos": r["prohibidos"],
+             "latencia_p50_s": statistics.median(latencias) if latencias else 0.0, "latencia_p95_s": _p95(latencias)},
+            prueba=a.prueba, modelo=claude.modelo("extractor"), casos=len(resultados),
+            detalle=f"{len(todos)} entrevistas × {a.repeticiones} repeticiones")
+        if not evaluaciones.imprimir_comprobaciones("extractor", filas):
+            return 1
     return 1 if r["prohibidos"] else 0
 
 
@@ -164,5 +174,8 @@ if __name__ == "__main__":
     p.add_argument("--caso", help="prefijo del caso (p. ej. 03)")
     p.add_argument("--repeticiones", type=int, default=1)
     p.add_argument("--informe", type=Path, help="escribe un informe en Markdown")
+    p.add_argument("--registrar", action="store_true",
+                   help="guarda el resultado en app/ops/ultimas_evaluaciones.json y falla si no cumple los umbrales")
+    p.add_argument("--prueba", default="manual", help="identificador de la ejecución (p. ej. E-10 o ci-123)")
     p.add_argument("--detalle", action="store_true", help="muestra el log de cada llamada a Claude")
     sys.exit(asyncio.run(principal(p.parse_args())))

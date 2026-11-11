@@ -38,7 +38,8 @@ load_dotenv(RAIZ.parent / ".env")
 load_dotenv(RAIZ / ".env")
 
 from app import main  # noqa: E402
-from app.agentes import claude, evaluacion, laboratorio, variantes  # noqa: E402
+from app.agentes import claude, evaluacion, juez, laboratorio, variantes  # noqa: E402
+from app.ops import evaluaciones, trazas  # noqa: E402
 from app.perfil import store  # noqa: E402
 
 CLIENTE = "laboratorio"
@@ -145,8 +146,10 @@ async def principal(a) -> int:
 
     claude._registrar = medir
     claude.reiniciar_metricas()
+    trazas.reiniciar()
 
     informes = []
+    notas_juez: list[juez.Resultado] = []
     fallidas: list[str] = []
     total = len(elegidas) * a.repeticiones
     for rep in range(a.repeticiones):
@@ -161,6 +164,19 @@ async def principal(a) -> int:
             print(f"\n({len(informes) + 1}/{total})", end="")
             imprimir(i, p.caso.que_prueba + sufijo)
             informes.append(i)
+            if a.juez:
+                try:
+                    nota = await juez.valorar(i.turnos)
+                except Exception as e:  # el juez no debe tirar la tirada: se cuenta como entrevista sin nota
+                    print(f"  Juez: falló ({type(e).__name__})")
+                else:
+                    notas_juez.append(nota)
+                    print(f"  Juez: media {nota.media} · {'aprobada' if nota.aprobada else 'SUSPENSA'} · {nota.notas}")
+                    for c in nota.sin_prueba:
+                        print(f"    nota baja sin cita comprobable en {c}: {nota.motivos.get(c, '')}")
+                    for c, n in nota.notas.items():
+                        if n <= 3:
+                            print(f"    {c} {n}: {nota.motivos.get(c, '')}")
             if not a.transcripciones:
                 continue
             a.transcripciones.mkdir(parents=True, exist_ok=True)
@@ -191,7 +207,28 @@ async def principal(a) -> int:
         print(f"Transcripciones en {a.transcripciones}")
     if a.informe:
         escribir_informe(a.informe, informes, r, latencias, medias)
+    coste = trazas.resumen()["totales"]["coste_usd"]
+    print(f"Coste estimado: {coste:.2f} $ en total · {coste / len(informes):.3f} $ por entrevista")
     graves = r["prohibidos"] + sum(i.recomendaciones for i in informes) + len(fallidas)
+    if notas_juez:
+        rj = juez.resumen(notas_juez)
+        print(f"Juez ({len(notas_juez)} entrevistas): media {rj['nota_media']} · aprobadas {rj['aprobadas']:.0%} · "
+              f"neutralidad mínima {rj['neutralidad_min']} · notas bajas sin cita {rj['sin_prueba']}")
+    if a.registrar:
+        ok = evaluaciones.imprimir_comprobaciones("laboratorio", evaluaciones.registrar(
+            "laboratorio",
+            {"cobertura": r["cobertura"], "precision": r["precision"],
+             "recomendaciones": sum(i.recomendaciones for i in informes),
+             "aviso_ia": sum(i.aviso_ia_al_inicio for i in informes) / len(informes),
+             "coste_medio_usd": coste / len(informes)},
+            prueba=a.prueba, modelo=claude.modelo("entrevistador"), casos=len(informes),
+            detalle=f"{len(elegidas)} clientes simulados × {a.repeticiones} repeticiones"))
+        if notas_juez:
+            ok = evaluaciones.imprimir_comprobaciones("juez", evaluaciones.registrar(
+                "juez", juez.resumen(notas_juez), prueba=a.prueba, modelo=claude.modelo(juez.AGENTE),
+                casos=len(notas_juez), detalle=f"rúbrica {juez.VERSION_RUBRICA} sobre las entrevistas del laboratorio")) and ok
+        if not ok:
+            return 1
     return 1 if graves else 0
 
 
@@ -206,4 +243,8 @@ if __name__ == "__main__":
     p.add_argument("--transcripciones", type=Path, help="carpeta donde guardar cada conversación")
     p.add_argument("--informe", type=Path, help="escribe un informe en Markdown")
     p.add_argument("--detalle", action="store_true", help="muestra el log de cada llamada a Claude")
+    p.add_argument("--juez", action="store_true", help="puntúa cada entrevista con el juez LLM (una llamada más)")
+    p.add_argument("--registrar", action="store_true",
+                   help="guarda el resultado en app/ops/ultimas_evaluaciones.json y falla si no cumple los umbrales")
+    p.add_argument("--prueba", default="manual", help="identificador de la ejecución (p. ej. E-10 o ci-123)")
     sys.exit(asyncio.run(principal(p.parse_args())))
