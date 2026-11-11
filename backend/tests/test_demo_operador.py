@@ -96,7 +96,9 @@ def entrevistar(monkeypatch, c: TestClient) -> dict:
     async def extraer(turnos, perfil, session_id):
         ultimo = [t for t in turnos if t.speaker == "client"][-1]
         datos = dict(ENTREVISTA)[ultimo.text]
-        return [Parche(path=r, value=v, source=Fuente.declared, confidence=0.9, confidence_basis="doble:test",
+        # Conocimientos como si hubiera respondido bien a la comprobación: lo declarado no da conveniencia.
+        return [Parche(path=r, value=v, source=Fuente.demonstrated if r.startswith("knowledge.") else Fuente.declared,
+                       confidence=0.9, confidence_basis="doble:test",
                        evidence=[Evidencia(session_id=session_id, turn_id=ultimo.turn_id, t=(ultimo.t_start, ultimo.t_end), quote=q)])
                 for r, v, q in datos]
 

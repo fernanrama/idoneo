@@ -9,6 +9,7 @@ from __future__ import annotations
 from .modelos import (
     CALCULADOS,
     FAMILIAS,
+    NIVELES,
     OBLIGATORIOS,
     Conveniencia,
     EstadoPerfil,
@@ -192,8 +193,23 @@ def idoneidad(perfil: Perfil) -> Idoneidad:
 
 # ---------- conveniencia ----------
 
+def _fiable(f: Fact | None) -> bool:
+    """Dato sin dudas abiertas: lo corrigió la entidad, o no tiene confianza baja ni incoherencias."""
+    if f is None or f.value is None:
+        return False
+    return f.source == Fuente.advisor or not ({Flag.low_confidence, Flag.inconsistent} & set(f.flags))
+
+
 def conveniencia(perfil: Perfil) -> dict[str, Conveniencia]:
-    """Por familia: conocimiento demostrado suficiente, o experiencia que lo compense."""
+    """Por familia: conocimiento comprobado suficiente, o experiencia que compense uno no comprobado.
+
+    - Lo que el cliente dice saber no basta: el nivel cuenta si lo demostró en una pregunta de
+      comprobación o lo fijó la entidad, y sin dudas abiertas.
+    - La experiencia (OPERACIONES_EXPERIENCIA en 3 años, dato fiable) compensa un conocimiento que dice
+      tener y no se ha comprobado, o uno parcial; nunca una comprobación fallada (`none` demostrado) ni
+      un «no lo conozco».
+    - Depósitos y monetarios: basta con que diga conocerlos (no complejos, riesgo mínimo), sin incoherencias.
+    """
     out: dict[str, Conveniencia] = {}
     for fam in FAMILIAS:
         f = perfil.mifid.get(f"knowledge.{fam}")
@@ -201,11 +217,16 @@ def conveniencia(perfil: Perfil) -> dict[str, Conveniencia]:
             out[fam] = Conveniencia.not_assessed
             continue
         minimo = "high" if fam == "complex_products" else "medium"
-        suficiente = ["none", "basic", "medium", "high"].index(f.value) >= ["none", "basic", "medium", "high"].index(minimo)
-        ops = valor(perfil, f"experience.{fam}.operations_last_3y") or 0
-        if fam == "deposits_money_market" and f.value != "none":
-            suficiente = True  # producto no complejo y de riesgo mínimo
-        out[fam] = Conveniencia.appropriate if (suficiente or ops >= OPERACIONES_EXPERIENCIA) else Conveniencia.not_appropriate
+        comprobado = f.source in (Fuente.demonstrated, Fuente.advisor) and _fiable(f)
+        suficiente = comprobado and NIVELES.index(f.value) >= NIVELES.index(minimo)
+        if fam == "deposits_money_market":
+            suficiente = f.value != "none" and (f.source == Fuente.advisor or Flag.inconsistent not in f.flags)
+        f_ops = perfil.mifid.get(f"experience.{fam}.operations_last_3y")
+        ops = int(f_ops.value) if _fiable(f_ops) else 0
+        # `none` cubre tanto «no lo conozco» como una comprobación fallada: ahí la experiencia no compensa.
+        compensa = (ops >= OPERACIONES_EXPERIENCIA and f.value != "none"
+                    and (f.source == Fuente.advisor or Flag.inconsistent not in f.flags))
+        out[fam] = Conveniencia.appropriate if (suficiente or compensa) else Conveniencia.not_appropriate
     return out
 
 
