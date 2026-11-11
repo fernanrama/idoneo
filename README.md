@@ -1,6 +1,6 @@
 <div align="center">
 
-# Real Betis Balompié 💚
+# Idóneo
 
 **El test MiFID convertido en una conversación que comprueba y deja pruebas.**
 
@@ -12,9 +12,9 @@ y lo entrega por API y **MCP** a los agentes de la entidad.
 ![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)
 ![MCP](https://img.shields.io/badge/MCP-servidor_propio-6E56CF)
 
-[Probarlo en 10 minutos](#probarlo-en-10-minutos) · [Cómo funciona](#cómo-funciona) · [Usarlo desde Claude](#usarlo-desde-claude-con-myinvestor) · [Estado](#estado) · [Configuración](#configuración)
+[Cómo funciona](#cómo-funciona) · [Probarlo en 10 minutos](#probarlo-en-10-minutos) · [Claude + MyInvestor](#usarlo-desde-claude-con-myinvestor) · [Evaluación](#evaluación) · [Marco normativo](#marco-normativo) · [Estado](#estado)
 
-<sub>Hack Finance UC3M 2026 · Nombre provisional, el definitivo está por decidir</sub>
+<sub>Hack Finance UC3M 2026 · Prototipo con datos simulados</sub>
 
 </div>
 
@@ -30,7 +30,7 @@ y lo entrega por API y **MCP** a los agentes de la entidad.
 
 ## El problema
 
-Antes de ofrecer un producto de inversión, la entidad tiene que evaluar si es **idóneo** y **conveniente** para el cliente (MiFID II). Hoy eso es un formulario de casillas basado en lo que el cliente **dice** de sí mismo, y el cliente tiende a sobrevalorarse. No queda constancia de qué entendía de verdad.
+Antes de ofrecer un producto de inversión, la entidad tiene que evaluar si es **idóneo** y **conveniente** para el cliente (MiFID II). Hoy eso es un formulario de casillas basado en lo que el cliente **dice** de sí mismo, y el cliente tiende a sobrevalorarse. No queda constancia de qué entendía de verdad. ESMA lo advierte expresamente: el riesgo de sobrevaloración es mayor en los sistemas automatizados con poca interacción humana ([marco normativo](docs/normativa.md)).
 
 > **Carmen, 68 años** (caso simulado), marca en el test «conozco bien los fondos de renta variable».
 > Hablando con ella sale: *«Eso no puede pasar, el fondo es del banco.»*
@@ -164,10 +164,36 @@ Guía completa: [docs/modo-asesor-demo.md](docs/modo-asesor-demo.md#recorrido-co
 `ADMIN_TOKEN` no se copia al frontend. Para que el botón «Validar perfil» funcione en la presentación local, activa el [modo asesor de demostración](docs/modo-asesor-demo.md); no funciona a través de un túnel ni de un despliegue público.
 </details>
 
-**Probado el 9/11/2026, antes de que la PR #21 protegiera `/mcp`:** Claude recibe por la URL pública el perfil activo de Carmen y encuentra fondos de renta fija y monetarios en EUR con riesgo ≤ 3, ninguno de renta variable. Detalles en [backend/app/mcp/README.md](backend/app/mcp/README.md).
+**Ensayado el 11/11/2026 (E-09):** Claude Code, con los conectores `idoneo` y `myinvestor`, lee las restricciones de Carmen y la evidencia que las justifica, y busca en el catálogo real fondos de renta fija y monetarios en EUR con riesgo ≤ 3, ninguno de renta variable, en unos 16 s. Detalles en [backend/app/mcp/README.md](backend/app/mcp/README.md).
 
 > [!IMPORTANT]
 > Nuestro backend **nunca** llama al MCP de MyInvestor: sus [términos](https://mcp.myinvestor.es/terms) solo permiten usarlo como conector dentro de una conversación.
+
+## Evaluación
+
+Medido con clientes **simulados** y Claude real (`claude-sonnet-5-5`). Detalle, método y límites en [docs/evaluacion/](docs/evaluacion/README.md).
+
+| Qué | Resultado |
+|---|---|
+| Extractor: 7 entrevistas difíciles (correcciones, evasivas, terceros, manipulación) | **100 % de cobertura, 100 % de precisión, 0 datos prohibidos** |
+| 20 entrevistas completas con clientes simulados (4 personas × 2 y 12 generados al azar) | **99–100 % de aciertos**, 0 recomendaciones, aviso de IA siempre y alerta *declarado ≠ demostrado* en todos los casos que la esperaban |
+| Verificador: 8 tramos × 3 repeticiones | **0 falsas alarmas** |
+| Latencia y coste | Unos 2 s por llamada · unos 0,3–0,4 $ por entrevista (estimado a partir de los tokens) |
+| Tests automáticos | Más de 600, sin claves ni red |
+
+**Límites:** muestras pequeñas, casos escritos por el propio equipo y clientes interpretados por Claude, no por personas. Los umbrales de los cálculos son supuestos del equipo, pendientes de revisión experta.
+
+## Marco normativo
+
+Contrastado con el texto oficial (EUR-Lex, BOE y ESMA) en [docs/normativa.md](docs/normativa.md):
+
+- **MiFID II, arts. 25.2 y 25.3:** idoneidad y conveniencia. Idóneo recoge los datos de los dos test.
+- **Reglamento Delegado 2017/565, art. 54.7:** la entidad debe asegurar que la información del cliente es fiable y coherente. Es la base directa de Idóneo.
+- **Directrices de ESMA de 2023 (párr. 46 y 52):** contrastar la autoevaluación con criterios objetivos, sobre todo en los sistemas automatizados.
+- **RGPD, art. 22:** un asesor valida el perfil. Ninguna decisión es solo automatizada.
+- **Ley de IA, art. 50.1:** el aviso de IA se da al empezar la entrevista.
+
+Idóneo no «cumple MiFID» por sí solo: ayuda a la entidad a recoger y documentar la evaluación, y la responsabilidad sigue siendo de la entidad.
 
 ## Estado
 
@@ -175,13 +201,13 @@ Guía completa: [docs/modo-asesor-demo.md](docs/modo-asesor-demo.md#recorrido-co
 |---|---|
 | Perfil versionado, evidencias, validación de la entidad y persistencia (memoria, SQLite o Postgres) | ✅ Hecho, con tests |
 | Idoneidad, conveniencia y restricciones calculadas con código | ✅ Hecho · los umbrales son **supuestos del equipo**, pendientes de revisión |
-| Servidor MCP y conexión con Claude + MyInvestor | ✅ Hecho · desde la PR #21 exige credencial; para la demo, Claude Code en local con `MCP_DEMO_TOKEN` (PR #27, [guía](docs/modo-asesor-demo.md)) · probado por túnel el 9/11, antes de la credencial |
+| Servidor MCP y conexión con Claude + MyInvestor | ✅ Hecho · exige credencial; para la demo, Claude Code en local con `MCP_DEMO_TOKEN` ([guía](docs/modo-asesor-demo.md)) · ensayado el 11/11 (E-09) |
 | Frontend móvil: entrevista, demo guiada, perfil del cliente y vista de la entidad | ✅ Hecho · «Validar perfil» con el modo asesor de demostración (PR #25) · entrevista corta del pitch sobre `carmen-corta` |
 | Extractor (de la conversación al perfil, con Claude) y entrevistador en modo texto | ✅ Hecho, con tests (Claude simulado) · prueba con la API real: `python scripts/probar_extractor.py` · arquitectura en [`backend/app/agentes/`](backend/app/agentes/README.md) |
 | Verificador (incoherencias, datos dudosos y casos para el asesor) | ✅ Reglas fijas + revisión con Claude, con tests (Claude simulado) · evaluación con la API real: `python scripts/evaluar_verificador.py` · el resumen para agentes sigue siendo una plantilla fija |
-| Voz con ElevenLabs | ✅ Probada de punta a punta con cuenta real (E-03) · agente compartido sincronizado con `scripts/sincronizar_voz.py` · audios de la demo guiada pendientes de elegir voces |
+| Voz con ElevenLabs | ✅ Probada de punta a punta con cuenta real (E-03) · prompt del agente sincronizado con `scripts/sincronizar_voz.py` · demo guiada con audios grabados con ElevenLabs |
 | Memoria personal por usuario | ✅ Consentida, versionada, borrable y proyectada a ElevenLabs · falta identidad/login real |
-| Medición de impacto (aciertos, alertas, latencia, coste) | ✅ Con clientes **simulados**: 20 entrevistas completas con 99-100 % de aciertos y 0 datos inventados; verificador con 0 falsas alarmas · [evidencias](gestion/evaluacion/PLAN_Y_EVIDENCIAS.md) |
+| Medición de impacto (aciertos, alertas, latencia, coste) | ✅ Con clientes **simulados**: 20 entrevistas completas con 99–100 % de aciertos y 0 datos inventados; verificador con 0 falsas alarmas · [evaluación](docs/evaluacion/README.md) |
 
 ## Configuración
 
@@ -241,14 +267,18 @@ TEST_POSTGRES_URL=postgresql://usuario@127.0.0.1:5432/perfil_test python -m pyte
 ```
 </details>
 
+## Qué es simulado y qué no
+
+- **Simulado:** Carmen y el resto de clientes, sus cifras y sus entrevistas de prueba; los umbrales de los cálculos (supuestos del equipo); la validación del asesor en la demo (modo asesor de demostración, solo en local).
+- **Real:** Claude como entrevistador, extractor y verificador; la voz con ElevenLabs; el servidor MCP propio; el catálogo de MyInvestor consultado por Claude a través de su conector público.
+
 ## Estructura del repositorio
 
 | Ruta | Contenido |
 |---|---|
 | [`backend/`](backend/) | API FastAPI: perfil versionado (`app/perfil/`), cálculos deterministas (`calculos.py`), agentes (`app/agentes/`), MCP (`app/mcp/`), migraciones y tests |
 | [`frontend/`](frontend/) | Feature móvil Next.js: onboarding por voz ([detalles](frontend/README.md)) |
-| [`docs/`](docs/README.md) | Documentación del producto: arquitectura, diseño, contrato del perfil, modo asesor de demostración y evaluaciones |
+| [`docs/`](docs/README.md) | Documentación: [arquitectura](docs/arquitectura.md), [diseño](docs/diseno/), [contrato del perfil](docs/contratos.md), [evaluación](docs/evaluacion/README.md), [marco normativo](docs/normativa.md) y [modo asesor de demostración](docs/modo-asesor-demo.md) |
 | [`entrega/`](entrega/) | Material entregado: presentación (PowerPoint), resumen de una cara (PDF) y la fuente para regenerarlos |
-| [`gestion/`](gestion/README.md) | Organización interna del equipo: análisis del reto, decisiones, reparto, evidencias y guion del pitch |
 
 <div align="center"><sub>Prototipo para Hack Finance UC3M 2026 · No es un producto oficial de ninguna entidad</sub></div>

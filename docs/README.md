@@ -29,7 +29,7 @@ Orden de lectura recomendado: primero la arquitectura, después el diseño y, al
 | [evaluacion/verificador.md](evaluacion/verificador.md) | Evaluación del verificador (generada por `backend/scripts/evaluar_verificador.py`) |
 | [evaluacion/laboratorio/](evaluacion/laboratorio/) | Entrevistas con clientes simulados y sus informes (generadas por `backend/scripts/laboratorio.py`) |
 
-El registro completo de pruebas y evidencias del equipo está en [`gestion/evaluacion/PLAN_Y_EVIDENCIAS.md`](../gestion/evaluacion/PLAN_Y_EVIDENCIAS.md).
+El resumen de resultados, método y límites está en [evaluacion/README.md](evaluacion/README.md). El marco legal, contrastado con el texto oficial, en [normativa.md](normativa.md).
 
 ## Investigación
 

@@ -30,7 +30,7 @@ const ESTADO = { voz: hechoArg.includes("voz"), extractor: hechoArg.includes("ex
 // Nombre del equipo: NO sale en la diapositiva (regla de poco texto); solo lo dice quien presenta (notas).
 const EQUIPO = "";
 
-// Métricas MEDIDAS. Salen de gestion/evaluacion/PLAN_Y_EVIDENCIAS.md:
+// Métricas MEDIDAS. Salen de docs/evaluacion/README.md:
 //   - E-04 (10/11): extractor sobre 7 entrevistas simuladas, 31 de 31 datos esperados, 0 erróneos.
 //   - E-05 (10/11): Carmen simulada por Claude, 10 de 10 datos y alerta «declarado ≠ demostrado»; mediana 1,8 s.
 // En pantalla: la cifra y 1-3 palabras. Los límites (simulados, una repetición) se dicen en voz alta y la
