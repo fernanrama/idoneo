@@ -21,13 +21,13 @@ y le entrega al asesor un perfil listo para validar. Se integra dentro de la app
 
 **[Pruébalo online → hack-finance-uc3m-2026.vercel.app](https://hack-finance-uc3m-2026.vercel.app)**
 
-[La demo](#la-demo-en-un-minuto) · [El problema](#el-problema) · [Qué hace](#qué-hace) · [Dónde se integra](#dónde-se-integra) · [Cómo funciona](#cómo-funciona) · [Pruébalo](#pruébalo) · [Evaluación](#evaluación)
+[Vídeo](https://youtu.be/pHuOet5q8R0) · [La demo](#la-demo-en-un-minuto) · [El problema](#el-problema) · [Qué hace](#qué-hace) · [Dónde se integra](#dónde-se-integra) · [Cómo funciona](#cómo-funciona) · [Pruébalo](#pruébalo) · [Evaluación](#evaluación)
 
 <sub>Hack Finance UC3M 2026 · Prototipo con datos simulados</sub>
 
 </div>
 
-<!-- VÍDEO DE PRESENTACIÓN: cuando esté listo, poner aquí su enlace o su miniatura enlazada, antes de «La demo en un minuto». -->
+<p align="center"><a href="https://youtu.be/pHuOet5q8R0"><img src="https://img.youtube.com/vi/pHuOet5q8R0/maxresdefault.jpg" width="100%" alt="Vídeo de presentación de idóneo"></a><br><b>▶ <a href="https://youtu.be/pHuOet5q8R0">Ver el vídeo de presentación</a></b></p>
 
 ---
 
