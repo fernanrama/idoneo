@@ -1,0 +1,885 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>idóneo · Pitch</title>
+<meta name="description" content="Presentación de idóneo para Hack Finance UC3M 2026. Del cuestionario a la conversación. Perfiles vivos que cumplen la norma.">
+<link rel="icon" href="data:image/svg+xml;base64,{{ICONO_B64}}">
+<style>
+@font-face{font-family:"Sora";font-style:normal;font-weight:100 800;font-display:block;src:url(data:font/woff2;base64,{{FONT_SORA}}) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:"Sora";font-style:normal;font-weight:100 800;font-display:block;src:url(data:font/woff2;base64,{{FONT_SORA_EXT}}) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+@font-face{font-family:"Plex";font-style:normal;font-weight:400;font-display:block;src:url(data:font/woff2;base64,{{FONT_MONO}}) format("woff2");}
+
+:root{
+  --noche:#0C1A1F; --noche2:#103038; --tinta:#F7FBFA; --suave:#B4C6CB; --tenue:#7E9399;
+  --menta:#7CE7C4; --turquesa:#2BB3C0; --verde:#1F9D6B; --ambar:#D99A1E; --rojo:#D64545;
+  --vidrio:rgba(255,255,255,.055); --borde:rgba(255,255,255,.13);
+  --aurora:linear-gradient(90deg,#7CE7C4,#2BB3C0);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#071114;color:var(--tinta);overflow:hidden;font-family:"Sora",system-ui,sans-serif}
+body{display:grid;place-items:center}
+#escenario{position:relative;width:1920px;height:1080px;transform-origin:center center;overflow:hidden;
+  background:linear-gradient(135deg,var(--noche) 0%,var(--noche2) 100%);flex:none}
+/* Fondo aurora que se mueve despacio */
+.aurora{position:absolute;inset:-20%;pointer-events:none;filter:blur(40px);opacity:.9}
+.aurora i{position:absolute;border-radius:50%;mix-blend-mode:screen}
+.aurora i:nth-child(1){width:900px;height:900px;left:55%;top:5%;background:radial-gradient(circle,rgba(124,231,196,.20),transparent 65%);animation:deriva1 26s ease-in-out infinite alternate}
+.aurora i:nth-child(2){width:1000px;height:1000px;left:0%;top:45%;background:radial-gradient(circle,rgba(43,179,192,.18),transparent 65%);animation:deriva2 32s ease-in-out infinite alternate}
+.aurora i:nth-child(3){width:700px;height:700px;left:30%;top:-10%;background:radial-gradient(circle,rgba(43,179,192,.10),transparent 65%);animation:deriva1 40s ease-in-out infinite alternate-reverse}
+@keyframes deriva1{to{transform:translate(-220px,140px) scale(1.15)}}
+@keyframes deriva2{to{transform:translate(260px,-160px) scale(.9)}}
+.grano{position:absolute;inset:0;pointer-events:none;opacity:.05;background-image:radial-gradient(rgba(255,255,255,.7) 1px,transparent 1px);background-size:4px 4px}
+
+/* Diapositivas */
+.slide{position:absolute;inset:0;padding:84px 110px 90px;opacity:0;visibility:hidden;transform:translateY(24px) scale(.995);
+  transition:opacity .6s ease,transform .8s cubic-bezier(.2,.8,.2,1),visibility 0s linear .6s}
+.slide.activa{opacity:1;visibility:visible;transform:none;transition:opacity .6s ease,transform .8s cubic-bezier(.2,.8,.2,1),visibility 0s}
+.slide.atras{transform:translateY(-24px) scale(.995)}
+.seccion{font-family:"Plex",monospace;font-size:22px;letter-spacing:.18em;text-transform:uppercase;color:var(--menta);display:flex;align-items:center;gap:16px;margin-bottom:18px}
+.seccion b{display:inline-block;width:46px;height:3px;background:var(--aurora);border-radius:3px}
+h1{font-weight:600;font-size:76px;line-height:1.05;letter-spacing:-.02em}
+h2{font-weight:600;font-size:64px;line-height:1.08;letter-spacing:-.015em}
+h3{font-weight:600;font-size:34px;line-height:1.2}
+.sub{font-size:30px;color:var(--suave);margin-top:16px;max-width:1500px;line-height:1.4;font-weight:300}
+.grad{background:var(--aurora);-webkit-background-clip:text;background-clip:text;color:transparent}
+.mono{font-family:"Plex",monospace}
+.tenue{color:var(--tenue)} .suave{color:var(--suave)} .menta{color:var(--menta)} .ambar{color:var(--ambar)} .rojo{color:#ff8a8a} .verdec{color:#4fd39b}
+.vidrio{background:var(--vidrio);border:1px solid var(--borde);border-radius:26px;backdrop-filter:blur(6px)}
+.fila{display:flex;gap:28px}
+.pie{position:absolute;left:110px;right:110px;bottom:56px;font-size:22px;color:var(--tenue);text-align:center}
+
+/* Pasos dentro de una diapositiva */
+.f{opacity:0;transform:translateY(18px);transition:opacity .55s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
+.f.on{opacity:1;transform:none}
+svg .f{transform:none}
+.slide.activa .entra{animation:entra .8s cubic-bezier(.2,.8,.2,1) both}
+@keyframes entra{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+.d1{animation-delay:.12s!important}.d2{animation-delay:.24s!important}.d3{animation-delay:.36s!important}.d4{animation-delay:.48s!important}.d5{animation-delay:.6s!important}.d6{animation-delay:.72s!important}.d7{animation-delay:.84s!important}.d8{animation-delay:.96s!important}
+
+/* Interfaz */
+#barra{position:absolute;left:0;bottom:0;height:5px;background:var(--aurora);transition:width .6s ease;z-index:20}
+#contador{position:absolute;right:40px;bottom:22px;font-family:"Plex",monospace;font-size:18px;color:var(--tenue);z-index:20}
+#marca{position:absolute;left:44px;bottom:20px;width:110px;opacity:.55;z-index:20}
+#sonido{position:absolute;right:40px;top:26px;font-family:"Plex",monospace;font-size:16px;color:var(--tenue);opacity:0;transition:opacity .4s;z-index:20}
+#sonido.visible{opacity:1}
+#notas{position:fixed;left:0;right:0;bottom:0;max-height:34vh;overflow:auto;background:rgba(5,12,14,.94);border-top:2px solid var(--turquesa);
+  color:var(--tinta);font-size:20px;line-height:1.5;padding:18px 28px 22px;display:none;z-index:50;font-family:"Sora",sans-serif}
+#notas.visible{display:block}
+#notas small{display:block;font-family:"Plex",monospace;color:var(--menta);font-size:13px;letter-spacing:.12em;margin-bottom:6px}
+#ayuda{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:rgba(5,12,14,.9);border:1px solid var(--borde);border-radius:14px;
+  padding:10px 18px;font-size:14px;color:var(--suave);z-index:60;transition:opacity .8s;font-family:"Sora",sans-serif}
+#ayuda.oculta{opacity:0;pointer-events:none}
+.notas{display:none}
+
+/* ===== Portada ===== */
+.logo-grande svg{width:900px;height:auto;display:block}
+.onda{transform-box:fill-box;transform-origin:50% 50%;animation:onda 1.6s ease-in-out infinite}
+.onda:nth-of-type(2){animation-delay:.2s}.onda:nth-of-type(3){animation-delay:.4s}.onda:nth-of-type(4){animation-delay:.6s}
+@keyframes onda{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.55)}}
+.ecualizador{display:flex;gap:10px;align-items:center;height:90px}
+.ecualizador i{display:block;width:10px;border-radius:6px;background:var(--aurora);opacity:.75;animation:eq 1.3s ease-in-out infinite}
+@keyframes eq{0%,100%{height:14px}50%{height:var(--h,70px)}}
+
+/* ===== Arquitectura ===== */
+.arq svg{width:100%;height:auto;display:block;overflow:visible}
+.arq .nodo rect.caja{fill:rgba(255,255,255,.05);stroke:rgba(255,255,255,.18);stroke-width:2}
+.arq .nodo.claude rect.caja{stroke:rgba(124,231,196,.55)}
+.arq text{fill:var(--tinta);font-family:"Sora",sans-serif}
+.arq .t1{font-size:30px;font-weight:600}
+.arq .t2{font-size:21px;fill:var(--suave)}
+.arq .t3{font-size:17px;fill:var(--tenue);font-family:"Plex",monospace;letter-spacing:.06em}
+.arq .chip rect{fill:var(--menta)} .arq .chip text{fill:var(--noche);font-size:16px;font-weight:700}
+.arq .chip.cod rect{fill:none;stroke:var(--turquesa);stroke-width:2} .arq .chip.cod text{fill:var(--turquesa)}
+.arq .chip.hum rect{fill:none;stroke:var(--tinta);stroke-width:2} .arq .chip.hum text{fill:var(--tinta)}
+.arq .flecha{fill:none;stroke:rgba(180,198,203,.55);stroke-width:3;stroke-dasharray:9 11;animation:fluye 1.1s linear infinite}
+.arq .flecha.discont{stroke:rgba(124,231,196,.5);stroke-dasharray:4 10}
+.arq .etq{font-size:18px;fill:var(--menta);font-family:"Plex",monospace}
+@keyframes fluye{to{stroke-dashoffset:-40}}
+.arq [data-id]{transition:opacity .6s ease}
+.arq .apagado{opacity:.1}
+.arq.brillo-claude .nodo.claude rect.caja{stroke:var(--menta);stroke-width:4;filter:url(#resplandor);animation:latido 1.8s ease-in-out infinite}
+@keyframes latido{50%{stroke-opacity:.45}}
+.arq-grande{position:absolute;left:170px;right:170px;top:272px}
+.leyenda{display:flex;gap:34px;font-size:22px;color:var(--suave);align-items:center}
+.leyenda span{display:inline-flex;align-items:center;gap:10px}
+.pild{display:inline-block;font-style:normal;font-family:"Plex",monospace;font-size:17px;font-weight:700;padding:3px 12px;border-radius:30px;background:var(--menta);color:var(--noche)}
+.pild.cod{background:none;border:2px solid var(--turquesa);color:var(--turquesa)}
+.pild.hum{background:none;border:2px solid var(--tinta);color:var(--tinta)}
+.mini{width:660px;flex:none}
+.mini svg{width:100%;height:auto}
+.zoom{display:flex;gap:50px;margin-top:40px;align-items:flex-start}
+.zoom .der{flex:1}
+
+/* Tarjetas genéricas */
+.tarjeta{padding:30px 32px;border-radius:26px;background:var(--vidrio);border:1px solid var(--borde)}
+.tarjeta h3{margin-bottom:10px}
+.tarjeta p{font-size:24px;color:var(--suave);line-height:1.45}
+.tarjeta.menta{border-color:rgba(124,231,196,.55);box-shadow:0 0 0 1px rgba(124,231,196,.15),0 20px 60px -30px rgba(124,231,196,.5)}
+.tarjeta.ambar{border-color:rgba(217,154,30,.6)}
+.tarjeta.rojo{border-color:rgba(214,69,69,.6);background:rgba(214,69,69,.08)}
+.lista{list-style:none;display:flex;flex-direction:column;gap:18px}
+.lista li{font-size:27px;line-height:1.4;display:block;position:relative;padding-left:30px;color:var(--tinta)}
+.lista li::before{content:"";position:absolute;left:0;top:14px;width:12px;height:12px;border-radius:50%;background:var(--aurora)}
+.lista li span{color:var(--suave)}
+
+/* Chat animado */
+.chat{display:flex;flex-direction:column;gap:16px}
+.burbuja{max-width:80%;padding:18px 24px;border-radius:24px;font-size:25px;line-height:1.4}
+.burbuja.ia{background:rgba(124,231,196,.10);border:1px solid rgba(124,231,196,.35);border-bottom-left-radius:6px;align-self:flex-start}
+.burbuja.cli{background:rgba(255,255,255,.08);border:1px solid var(--borde);border-bottom-right-radius:6px;align-self:flex-end}
+.burbuja small{display:block;font-family:"Plex",monospace;font-size:15px;color:var(--tenue);letter-spacing:.1em;margin-bottom:4px}
+
+/* Tubería */
+.tuberia{display:flex;align-items:stretch;gap:0}
+.paso{flex:1;position:relative;padding:22px 20px;border-radius:20px;background:var(--vidrio);border:1px solid var(--borde);text-align:center}
+.paso b{display:block;font-size:24px;font-weight:600;margin-bottom:6px}
+.paso span{font-size:19px;color:var(--suave);line-height:1.35;display:block}
+.paso .mono{font-size:16px;color:var(--menta);margin-top:8px}
+.conector{width:46px;flex:none;position:relative}
+.conector::before{content:"";position:absolute;left:4px;right:4px;top:50%;height:3px;background:repeating-linear-gradient(90deg,var(--menta) 0 10px,transparent 10px 18px);background-size:36px 3px;animation:pulso 1s linear infinite}
+@keyframes pulso{to{background-position:36px 0}}
+
+/* Ejemplo extractor */
+.decision{display:grid;grid-template-columns:1fr 70px 1fr 70px 1fr;align-items:center;gap:0}
+.flechita{height:3px;margin:0 10px;background:repeating-linear-gradient(90deg,var(--menta) 0 10px,transparent 10px 18px);background-size:36px 3px;animation:pulso 1s linear infinite}
+.sello{display:inline-flex;align-items:center;gap:10px;font-weight:600;font-size:24px;padding:8px 18px;border-radius:40px}
+.sello.ok{background:rgba(31,157,107,.18);color:#5fe0a8;border:1px solid rgba(31,157,107,.6)}
+.sello.no{background:rgba(214,69,69,.15);color:#ff9a9a;border:1px solid rgba(214,69,69,.6)}
+
+/* Datos: pila de versiones */
+.pila{position:relative;height:420px;width:420px}
+.pila .v{position:absolute;left:0;width:400px;height:96px;border-radius:18px;background:rgba(16,48,56,.95);border:1px solid rgba(124,231,196,.35);
+  display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:22px;opacity:0;transform:translateY(-60px)}
+.slide.activa .pila .v{animation:cae .7s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes cae{to{opacity:1;transform:translateY(0)}}
+.tabla-bd{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.tabla-bd div{padding:18px 20px;border-radius:18px;background:var(--vidrio);border:1px solid var(--borde)}
+.tabla-bd b{font-family:"Plex",monospace;font-size:21px;color:var(--menta);display:block;margin-bottom:6px}
+.tabla-bd span{font-size:20px;color:var(--suave);line-height:1.35;display:block}
+
+/* Bucle (harness y LLMOps) */
+.bucle svg{width:100%;height:auto;overflow:visible}
+.bucle .anillo{fill:none;stroke:rgba(124,231,196,.35);stroke-width:4;stroke-dasharray:14 14;animation:fluye 1.4s linear infinite}
+.bucle .punto{fill:var(--menta);filter:url(#resplandor2)}
+.bucle text{font-family:"Sora",sans-serif;fill:var(--tinta)}
+.bucle .nb{font-size:28px;font-weight:600}
+.bucle .ns{font-size:20px;fill:var(--suave)}
+.bucle .caja{fill:rgba(16,48,56,.92);stroke:rgba(255,255,255,.2);stroke-width:2}
+.bucle .caja.m{stroke:var(--menta)}
+
+/* Memoria */
+.memorias{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:44px}
+.memorias .tarjeta{position:relative;overflow:hidden;min-height:470px}
+.memorias .tipo{font-family:"Plex",monospace;font-size:19px;letter-spacing:.14em;color:var(--menta);text-transform:uppercase}
+.memorias h3{font-size:38px;margin:8px 0 18px}
+.memorias .lista li{font-size:23px}
+.memorias .lista li::before{top:12px;width:10px;height:10px}
+.memorias .icono{position:absolute;right:26px;top:24px;font-size:50px;opacity:.9}
+
+/* Métricas */
+.cifra{font-weight:600;font-size:110px;line-height:1;letter-spacing:-.03em}
+.cifra.media{font-size:78px}
+.kpis{display:grid;gap:26px}
+.kpi{padding:30px 30px 26px;border-radius:26px;background:var(--vidrio);border:1px solid var(--borde)}
+.kpi .et{font-size:24px;font-weight:600;margin-top:12px}
+.kpi .de{font-size:19px;color:var(--tenue);margin-top:6px;font-family:"Plex",monospace;line-height:1.4}
+.barras{display:flex;flex-direction:column;gap:22px}
+.barra-f{display:grid;grid-template-columns:400px 1fr 120px;align-items:center;gap:22px;font-size:23px}
+.barra-f .riel{height:26px;border-radius:14px;background:rgba(255,255,255,.07);position:relative;overflow:visible}
+.barra-f .relleno{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:14px;background:var(--aurora);transition:width 1.4s cubic-bezier(.2,.8,.2,1)}
+.barra-f .umbral{position:absolute;top:-8px;bottom:-8px;width:3px;background:var(--ambar);border-radius:2px}
+.barra-f .umbral::after{content:attr(data-t);position:absolute;bottom:-30px;left:50%;transform:translateX(-50%);font-size:15px;color:var(--ambar);font-family:"Plex",monospace;white-space:nowrap}
+.barra-f .val{font-weight:600;text-align:right;color:var(--menta)}
+
+/* Antes / después */
+.ad{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:40px}
+.ad .tarjeta{padding:26px 28px}
+.ad .que{font-size:24px;font-weight:600;line-height:1.3;min-height:62px}
+.ad .nums{display:flex;align-items:baseline;gap:18px;margin:16px 0 10px}
+.ad .antes{font-size:52px;font-weight:600;color:var(--tenue);text-decoration:line-through;text-decoration-color:rgba(214,69,69,.7);text-decoration-thickness:4px}
+.ad .despues{font-size:68px;font-weight:600}
+.ad .flecha-ad{font-size:40px;color:var(--menta)}
+.ad .por{font-size:18px;color:var(--suave);line-height:1.4}
+.ad .fuente{font-family:"Plex",monospace;font-size:15px;color:var(--tenue);margin-top:10px}
+
+/* Laboratorio */
+.personas{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.persona{padding:32px 30px;border-radius:24px;background:var(--vidrio);border:1px solid var(--borde)}
+.persona .avatar{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;font-size:32px;font-weight:600;color:var(--noche);background:var(--aurora);margin-bottom:14px}
+.persona b{display:block;font-size:32px}
+.persona span{display:block;font-size:23px;color:var(--suave);margin-top:6px;line-height:1.35}
+.persona .res{margin-top:16px;font-family:"Plex",monospace;font-size:20px;color:var(--menta)}
+.variantes{display:flex;flex-wrap:wrap;gap:14px;margin-top:24px}
+.var{padding:12px 20px;border-radius:40px;background:rgba(255,255,255,.06);border:1px solid var(--borde);font-size:20px;display:flex;gap:12px;align-items:center}
+.var i{font-style:normal;font-family:"Plex",monospace;font-size:16px;color:var(--menta)}
+.var.no i{color:var(--ambar)}
+.linea-t{position:relative;display:grid;grid-template-columns:repeat(6,1fr);gap:22px;margin-top:80px}
+.linea-t::before{content:"";position:absolute;left:0;right:0;top:27px;height:3px;background:linear-gradient(90deg,rgba(124,231,196,.1),var(--menta),rgba(43,179,192,.1))}
+.hito{position:relative;padding-top:64px}
+.hito::before{content:"";position:absolute;top:16px;left:0;width:24px;height:24px;border-radius:50%;background:var(--noche);border:4px solid var(--menta)}
+.hito .id{font-family:"Plex",monospace;font-size:18px;color:var(--menta)}
+.hito b{display:block;font-size:28px;margin:6px 0 8px;line-height:1.3}
+.hito .fallo{font-size:22px;color:#ffb0b0;line-height:1.35}
+.hito .arreglo{font-size:22px;color:#7ff0bf;line-height:1.35;margin-top:8px}
+
+/* Diapositivas de los compañeros */
+.pasos6{display:grid;grid-template-columns:repeat(6,1fr);gap:18px;margin-top:50px}
+.cita-carmen{font-size:46px;font-weight:600;font-style:italic;line-height:1.25}
+.captura{border-radius:22px;overflow:hidden;border:1px solid var(--borde);box-shadow:0 40px 90px -40px rgba(0,0,0,.8)}
+.captura img{display:block;width:100%}
+.boton-demo{display:inline-flex;align-items:center;gap:16px;padding:20px 40px;border-radius:60px;background:var(--menta);color:var(--noche);font-weight:600;font-size:28px}
+.boton-demo::before{content:"";width:0;height:0;border-left:20px solid var(--noche);border-top:12px solid transparent;border-bottom:12px solid transparent}
+.cifras4{display:grid;grid-template-columns:repeat(4,1fr);gap:26px;margin-top:60px}
+.cifras4 .kpi{text-align:center}
+</style>
+</head>
+<body>
+<div id="escenario">
+  <div class="aurora"><i></i><i></i><i></i></div>
+  <div class="grano"></div>
+
+<!-- ============ 1 · PORTADA (se mantiene) ============ -->
+<section class="slide" data-titulo="Portada">
+  <div style="position:absolute;left:150px;top:290px">
+    <div class="logo-grande entra">{{LOGO_OSCURO}}</div>
+    <div class="entra d3" style="font-size:62px;font-weight:600;margin-top:58px;letter-spacing:-.01em">Perfiles vivos que cumplen la norma.</div>
+    <div class="entra d4" style="font-size:38px;font-weight:300;color:var(--suave);margin-top:16px">Del cuestionario a la conversación.</div>
+  </div>
+  <div class="ecualizador entra d6" style="position:absolute;right:150px;bottom:150px">
+    <i style="--h:40px;animation-delay:0s"></i><i style="--h:70px;animation-delay:.1s"></i><i style="--h:56px;animation-delay:.2s"></i><i style="--h:84px;animation-delay:.3s"></i><i style="--h:62px;animation-delay:.4s"></i><i style="--h:36px;animation-delay:.5s"></i><i style="--h:74px;animation-delay:.6s"></i><i style="--h:50px;animation-delay:.7s"></i><i style="--h:80px;animation-delay:.8s"></i><i style="--h:44px;animation-delay:.9s"></i><i style="--h:66px;animation-delay:1s"></i><i style="--h:30px;animation-delay:1.1s"></i>
+  </div>
+  <div class="mono entra d7" style="position:absolute;left:150px;bottom:110px;font-size:22px;color:var(--tenue);letter-spacing:.14em">HACK FINANCE UC3M 2026 · RETO MYINVESTOR × GPTADVISOR</div>
+  <div class="notas">Somos [equipo]. Acabáis de ver idóneo desde fuera; ahora, por dentro.</div>
+</section>
+
+<!-- ============ 2 · ARQUITECTURA: VISTA GENERAL ============ -->
+<section class="slide" data-titulo="Arquitectura" data-arq="general">
+  <div class="seccion entra"><b></b>Arquitectura · la vista completa</div>
+  <h2 class="entra d1">Todo idóneo en una imagen</h2>
+  <div class="leyenda entra d2" style="margin-top:18px">
+    <span><i class="pild">✦ Claude</i> un modelo interpreta lenguaje</span>
+    <span><i class="pild cod">⚙ código</i> reglas fijas, mismo resultado siempre</span>
+    <span><i class="pild hum">● persona</i> decide una persona</span>
+  </div>
+  <div class="arq arq-grande" data-pasos="5"></div>
+  <div class="notas">Esto es idóneo entero. (1) El cliente habla con la voz de ElevenLabs o escribe en la web en Next.js. (2) Todo llega al backend en FastAPI: el entrevistador, el extractor, las guardas, los cálculos, el verificador y el LLMOps. (3) Cada cambio se guarda como una versión en Postgres, en Supabase. (4) Un asesor valida, y solo entonces el agente de la entidad lee el perfil por nuestro MCP y busca productos en el MCP de MyInvestor. (5) Y aquí está Claude: en el entrevistador, el extractor, el verificador, el juez y el agente de la entidad. Nunca en los cálculos ni en la decisión final.</div>
+</section>
+
+<!-- ============ 3 · ZOOM 1: CONVERSACIÓN ============ -->
+<section class="slide" data-titulo="Arquitectura · conversación">
+  <div class="seccion entra"><b></b>Arquitectura · 1 de 4</div>
+  <h2 class="entra d1">La conversación: <span class="grad">voz o texto, el mismo cerebro</span></h2>
+  <div class="zoom">
+    <div class="mini entra d2" data-foco="cliente eleven front backend b1 a-cl-el a-cl-fr a-el-be a-fr-be"></div>
+    <div class="der">
+      <div class="chat">
+        <div class="burbuja ia f" data-s="1"><small>ASISTENTE · VOZ DE ELEVENLABS</small>Antes de empezar: soy una inteligencia artificial y esta conversación se graba. ¿Te parece bien?</div>
+        <div class="burbuja cli f" data-s="1"><small>CLIENTE</small>Sí, adelante.</div>
+        <div class="burbuja ia f" data-s="2"><small>ASISTENTE</small>¿Para qué querrías este dinero y para cuándo?</div>
+        <div class="burbuja cli f" data-s="2"><small>CLIENTE</small>Para completar la pensión, dentro de unos diez años.</div>
+      </div>
+      <div class="tuberia f" data-s="3" style="margin-top:34px">
+        <div class="paso"><b>Turno</b><span>se guarda con su segundo de grabación</span><div class="mono">POST /turns</div></div>
+        <div class="conector"></div>
+        <div class="paso"><b>202 al instante</b><span>la voz no espera al análisis</span><div class="mono">en segundo plano</div></div>
+        <div class="conector"></div>
+        <div class="paso"><b>Extractor y verificador</b><span>un candado por sesión: los turnos no se pisan</span></div>
+        <div class="conector"></div>
+        <div class="paso"><b>Perfil v+1</b><span>la web lo relee cada 1,5 s</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="pie f" data-s="4">Un solo prompt de entrevistador para la voz y el chat: <span class="mono menta">sincronizar_voz.py</span> lo lleva a ElevenLabs con sus herramientas <span class="mono menta">datos_pendientes</span> y <span class="mono menta">end_call</span>.</div>
+  <div class="notas">Primera pieza: la conversación. El cliente habla con la voz de ElevenLabs o escribe en la web. Lo primero es el aviso de que es una IA. Cada turno llega al backend, que responde al instante y analiza en segundo plano, así la voz no se queda esperando. El mismo prompt sirve para voz y texto, y la voz pregunta al backend qué datos faltan.</div>
+</section>
+
+<!-- ============ 4 · ZOOM 2: CLAUDE PROPONE, EL CÓDIGO DECIDE ============ -->
+<section class="slide" data-titulo="Arquitectura · agentes">
+  <div class="seccion entra"><b></b>Arquitectura · 2 de 4</div>
+  <h2 class="entra d1">Dónde está Claude: <span class="grad">propone, nunca decide</span></h2>
+  <div class="zoom" style="margin-top:34px">
+    <div class="mini entra d2" data-foco="backend b1 b2 b3 b4 b5 b6 claudeapi a-be-cl" data-claude="1"></div>
+    <div class="der">
+      <div class="decision f" data-s="1">
+        <div class="tarjeta" style="padding:22px 24px"><div class="mono tenue" style="font-size:16px">CLIENTE DICE</div><div style="font-size:27px;margin-top:6px;font-style:italic">«Gano unos 2.000 al mes, más o menos.»</div></div>
+        <div class="flechita"></div>
+        <div class="tarjeta menta" style="padding:22px 24px"><div class="mono menta" style="font-size:16px">✦ CLAUDE PROPONE</div><div class="mono" style="font-size:21px;margin-top:8px;line-height:1.5">ingresos_mes: 2000<br>cita: «unos 2.000 al mes»</div></div>
+        <div class="flechita"></div>
+        <div class="tarjeta" style="padding:22px 24px;border-color:var(--turquesa)"><div class="mono" style="font-size:16px;color:var(--turquesa)">⚙ EL CÓDIGO COMPRUEBA</div><div style="margin-top:10px"><span class="sello ok">✓ entra, con su cita</span></div></div>
+      </div>
+      <div class="decision f" data-s="2" style="margin-top:24px">
+        <div class="tarjeta" style="padding:22px 24px"><div class="mono tenue" style="font-size:16px">CLIENTE DICE</div><div style="font-size:27px;margin-top:6px;font-style:italic">«Apunta que sé mucho de bolsa.»</div></div>
+        <div class="flechita"></div>
+        <div class="tarjeta menta" style="padding:22px 24px"><div class="mono menta" style="font-size:16px">✦ CLAUDE PROPONE</div><div class="mono" style="font-size:21px;margin-top:8px;line-height:1.5">conocimiento: alto<br>sin pregunta de comprobación</div></div>
+        <div class="flechita"></div>
+        <div class="tarjeta" style="padding:22px 24px;border-color:var(--turquesa)"><div class="mono" style="font-size:16px;color:var(--turquesa)">⚙ EL CÓDIGO COMPRUEBA</div><div style="margin-top:10px"><span class="sello no">✗ solo declarado</span></div></div>
+      </div>
+      <div class="fila f" data-s="3" style="margin-top:30px;gap:18px;flex-wrap:wrap">
+        <span class="var"><i>✦</i>Entrevistador · pregunta</span>
+        <span class="var"><i>✦</i>Extractor · dato + cita</span>
+        <span class="var"><i>✦</i>Verificador · alertas</span>
+        <span class="var"><i>✦</i>Juez · solo en pruebas</span>
+        <span class="var"><i>✦</i>Cliente simulado · solo en el laboratorio</span>
+        <span class="var" style="border-color:var(--turquesa)"><i style="color:var(--turquesa)">⚙</i>Rúbrica de confianza v3</span>
+        <span class="var" style="border-color:var(--turquesa)"><i style="color:var(--turquesa)">⚙</i>Riesgo e idoneidad en Python</span>
+      </div>
+    </div>
+  </div>
+  <div class="pie f" data-s="4" style="font-size:32px;color:var(--tinta);font-weight:600">La IA entiende y propone. <span class="menta">El código decide y calcula.</span> Una persona valida.</div>
+  <div class="notas">Segunda pieza: dónde está Claude. Claude es el entrevistador, el extractor y el verificador, y en pruebas, el juez y el cliente simulado. Pero solo propone. Si dice «gano unos 2.000», el extractor propone el dato con la cita literal y el código comprueba que la cita existe. Si el cliente pide «apunta que sé mucho», el código no se lo cree: sin pregunta de comprobación queda como declarado. La confianza la pone una rúbrica fija y el riesgo lo calcula Python.</div>
+</section>
+
+<!-- ============ 5 · ZOOM 3: DATOS ============ -->
+<section class="slide" data-titulo="Arquitectura · datos">
+  <div class="seccion entra"><b></b>Arquitectura · 3 de 4</div>
+  <h2 class="entra d1">Los datos: <span class="grad">cada cambio, una versión con su prueba</span></h2>
+  <div class="zoom">
+    <div style="display:flex;flex-direction:column;gap:30px">
+      <div class="mini entra d2" data-foco="datos backend front a-be-da a-fr-be"></div>
+      <div class="pila">
+        <div class="v" style="top:300px;animation-delay:.5s"><span>v1 · objetivo</span><span class="mono tenue" style="font-size:16px">turno 3 · 0:18</span></div>
+        <div class="v" style="top:200px;animation-delay:.9s"><span>v6 · ahorro</span><span class="mono tenue" style="font-size:16px">turno 9 · 0:41</span></div>
+        <div class="v" style="top:100px;animation-delay:1.3s"><span>v11 · alerta</span><span class="mono ambar" style="font-size:16px">declarado ≠ demostrado</span></div>
+        <div class="v" style="top:0;animation-delay:1.7s;border-color:var(--menta)"><span>v15 · <b class="menta">validado</b></span><span class="mono tenue" style="font-size:16px">asesora · active</span></div>
+      </div>
+    </div>
+    <div class="der">
+      <div class="tarjeta f" data-s="1" style="display:flex;gap:30px;align-items:center">
+        <div style="font-size:64px">🐘</div>
+        <div><h3>Supabase · Postgres</h3><p>Fuente de verdad en producción. Backend en Render (Frankfurt), web en Vercel.</p></div>
+      </div>
+      <div class="tabla-bd f" data-s="2" style="margin-top:24px">
+        <div><b>clients</b><span>el cliente y su credencial propia</span></div>
+        <div><b>profile_versions</b><span>el perfil MiFID: nunca se sobrescribe, se versiona</span></div>
+        <div><b>turns</b><span>cada turno, con su segundo en la grabación</span></div>
+        <div><b>sessions</b><span>entrevistas y microentrevistas</span></div>
+        <div><b>session_audio</b><span>la grabación como prueba</span></div>
+        <div style="border-color:rgba(124,231,196,.5)"><b>personal_versions</b><span>memoria personal: otra capa, con consentimiento</span></div>
+      </div>
+      <div class="tarjeta f" data-s="3" style="margin-top:24px;padding:22px 30px">
+        <p style="color:var(--tinta)">El asesor ve <b class="menta">quién</b> cambió <b class="menta">qué</b>, <b class="menta">cuándo</b> y con <b class="menta">qué frase</b> del cliente. Las trazas de LLMOps no guardan texto del cliente: solo recuentos y tiempos.</p>
+      </div>
+    </div>
+  </div>
+  <div class="notas">Tercera pieza: los datos. Todo vive en Postgres en Supabase. El perfil nunca se sobrescribe: cada cambio es una versión nueva con su autor y la cita del cliente, y cada turno guarda su segundo en la grabación. La memoria personal va en otra tabla, aparte y con consentimiento.</div>
+</section>
+
+<!-- ============ 6 · ZOOM 4: ENTIDAD + MCP ============ -->
+<section class="slide" data-titulo="Arquitectura · entidad">
+  <div class="seccion entra"><b></b>Arquitectura · 4 de 4</div>
+  <h2 class="entra d1">La entidad: <span class="grad">ponemos límites, elige su agente</span></h2>
+  <div class="zoom">
+    <div class="mini entra d2" data-foco="asesor front mcpi agente myi a-as-fr a-be-mc a-mc-ag a-ag-my backend"></div>
+    <div class="der">
+      <div class="tuberia f" data-s="1">
+        <div class="paso" style="border-color:rgba(217,154,30,.6)"><b>Perfil por validar</b><span>usable = false: el agente no puede recomendar nada</span></div>
+        <div class="conector"></div>
+        <div class="paso" style="border-color:var(--tinta)"><b>● Asesor valida</b><span>ve cada dato con su cita y su minuto</span></div>
+        <div class="conector"></div>
+        <div class="paso" style="border-color:var(--menta)"><b>Perfil activo</b><span>el MCP de idóneo ya lo sirve</span></div>
+      </div>
+      <div class="tarjeta f" data-s="2" style="margin-top:28px;font-family:'Plex',monospace;font-size:24px;line-height:1.7;padding:28px 34px">
+        <div class="tenue">✦ agente de la entidad → MCP idóneo</div>
+        <div>get_investment_constraints(<span class="menta">"carmen-68"</span>)</div>
+        <div class="menta">← riesgo máximo 3 de 7 · renta variable: no conveniente</div>
+        <div class="tenue" style="margin-top:14px">✦ agente → MCP MyInvestor</div>
+        <div>busca fondos · riesgo ≤ 3 · euros · sin renta variable</div>
+        <div class="menta">← fondos compatibles del catálogo real, con el porqué</div>
+      </div>
+      <div class="fila f" data-s="3" style="margin-top:28px">
+        <div class="kpi" style="flex:1;text-align:center"><div class="cifra media grad">4</div><div class="et">herramientas MCP</div><div class="de">solo lectura, por cliente autorizado</div></div>
+        <div class="kpi" style="flex:1;text-align:center"><div class="cifra media grad">~16 s</div><div class="et">Claude + idóneo + MyInvestor</div><div class="de">probado con Claude Code (E-09)</div></div>
+        <div class="kpi" style="flex:1;text-align:center"><div class="cifra media grad">0</div><div class="et">productos elegidos por idóneo</div><div class="de">no recomendamos: ponemos límites</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="notas">Cuarta pieza: la entidad. Mientras no lo valida una persona, el perfil no es usable. Cuando el asesor valida, el agente de la entidad, aquí Claude haciendo de GPTadvisor, pide por nuestro MCP las restricciones de Carmen y con esos límites busca en el MCP de MyInvestor. Unos 16 segundos. Nosotros no elegimos fondos: ponemos los límites.</div>
+</section>
+
+<!-- ============ 7 · HARNESS ============ -->
+<section class="slide" data-titulo="Harness">
+  <div class="seccion entra"><b></b>Harness</div>
+  <h2 class="entra d1">El harness: <span class="grad">las riendas de Claude</span></h2>
+  <p class="sub entra d2">Claude sabe mucho, pero no conoce a tu cliente ni tus reglas, y cada respuesta lleva algo de azar. El harness es todo lo que lo rodea para que se comporte igual cada vez.</p>
+  <div style="display:grid;grid-template-columns:860px 1fr;gap:60px;margin-top:30px">
+    <div class="bucle f" data-s="1">
+      <svg viewBox="0 0 860 600">
+        <defs><filter id="resplandor2" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="6"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <path id="orbita-h" class="anillo" d="M430 85 A330 215 0 1 1 429.9 85 Z"/>
+        <g><rect class="caja m" x="285" y="40" width="290" height="100" rx="20"/><text class="nb" x="430" y="84" text-anchor="middle">✦ Pregunta</text><text class="ns" x="430" y="116" text-anchor="middle">una sola, sobre un dato</text></g>
+        <g><rect class="caja" x="580" y="250" width="270" height="100" rx="20"/><text class="nb" x="715" y="294" text-anchor="middle">Responde</text><text class="ns" x="715" y="326" text-anchor="middle">el cliente, voz o texto</text></g>
+        <g><rect class="caja m" x="285" y="460" width="290" height="100" rx="20"/><text class="nb" x="430" y="504" text-anchor="middle">✦ Extrae y verifica</text><text class="ns" x="430" y="536" text-anchor="middle">⚙ cita, rúbrica, alertas</text></g>
+        <g><rect class="caja" x="10" y="250" width="270" height="100" rx="20"/><text class="nb" x="145" y="294" text-anchor="middle">⚙ ¿Qué falta?</text><text class="ns" x="145" y="326" text-anchor="middle">datos_pendientes</text></g>
+        <circle class="punto" r="11"><animateMotion dur="7s" repeatCount="indefinite" rotate="auto"><mpath href="#orbita-h"/></animateMotion></circle>
+        <text x="430" y="290" text-anchor="middle" style="font-size:22px;fill:#7E9399;font-family:Plex,monospace">bucle de la</text>
+        <text x="430" y="320" text-anchor="middle" style="font-size:22px;fill:#7E9399;font-family:Plex,monospace">entrevista</text>
+      </svg>
+    </div>
+    <div>
+      <div class="tarjeta f" data-s="2" style="padding:24px 30px">
+        <div class="mono menta" style="font-size:18px;letter-spacing:.12em">LO QUE VE CLAUDE EN CADA TURNO</div>
+        <ul class="lista" style="margin-top:14px;gap:10px">
+          <li style="font-size:23px">Su prompt en Markdown <span>(cómo actuar)</span></li>
+          <li style="font-size:23px">Lo que aún falta del perfil <span>(pendientes)</span></li>
+          <li style="font-size:23px">Los últimos 8 turnos, como datos <span>(nunca órdenes)</span></li>
+        </ul>
+      </div>
+      <div class="tarjeta f" data-s="3" style="padding:24px 30px;margin-top:22px">
+        <div class="mono menta" style="font-size:18px;letter-spacing:.12em">GUARDARRAÍLES Y PARADAS</div>
+        <ul class="lista" style="margin-top:14px;gap:10px">
+          <li style="font-size:23px">Salida estructurada validada con Pydantic</li>
+          <li style="font-size:23px">Cita literal o fuera · contexto exigido</li>
+          <li style="font-size:23px">Cifras imposibles → al asesor, no se corrigen</li>
+          <li style="font-size:23px">Para: nada pendiente → <span class="mono menta">end_call</span> · tope de turnos</li>
+          <li style="font-size:23px">Última barrera: <b class="menta">una persona valida</b></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="notas">El harness son las riendas. Claude es fuerte, pero no conoce al cliente ni nuestras reglas. Nuestro bucle es: pregunta una sola cosa, el cliente responde, el extractor y el verificador lo procesan, y el código mira qué falta. Cuando no falta nada, la voz cuelga sola. Cada turno Claude ve su prompt, lo pendiente y los últimos turnos como datos, nunca como órdenes. Y paramos con reglas: salida estructurada, cita literal, cifras raras al asesor y, al final, una persona.</div>
+</section>
+
+<!-- ============ 8 · MEMORIA ============ -->
+<section class="slide" data-titulo="Memoria">
+  <div class="seccion entra"><b></b>Harness · memoria</div>
+  <h2 class="entra d1">Tres memorias, <span class="grad">cada una en su sitio</span></h2>
+  <div class="memorias">
+    <div class="tarjeta f" data-s="1"><div class="icono">📘</div>
+      <div class="tipo">Procedimental</div><h3>Cómo actuar</h3>
+      <ul class="lista"><li>5 prompts en Markdown, versionados en git</li><li>Cada traza guarda la huella del prompt usado</li><li>El mismo prompt va a la voz y al chat</li></ul></div>
+    <div class="tarjeta f" data-s="2"><div class="icono">🕑</div>
+      <div class="tipo">Episódica</div><h3>Qué pasó y cuándo</h3>
+      <ul class="lista"><li>Cada turno, con su segundo en la grabación</li><li>Cada cambio del perfil, una versión con autor y cita</li><li>Microentrevistas: solo se pregunta lo que cambió</li></ul></div>
+    <div class="tarjeta menta f" data-s="3"><div class="icono">🧠</div>
+      <div class="tipo">Semántica</div><h3>Quién es el cliente</h3>
+      <ul class="lista"><li><b>Perfil MiFID</b>: la fuente de verdad, con pruebas</li><li><b>Memoria personal</b>: cómo prefiere que le hablen, qué no quiere, qué le preocupa</li><li>Solo con su permiso; puede verla, corregirla y borrarla</li></ul></div>
+  </div>
+  <div class="tarjeta rojo f" data-s="4" style="margin-top:28px;padding:22px 34px;text-align:center">
+    <p style="color:#ffd0d0;font-size:27px;font-weight:600">Límite a propósito: el extractor nunca recibe la memoria personal y la conversación nunca se guarda sola como memoria.</p>
+  </div>
+  <div class="notas">La memoria, en tres tipos. Procedimental: cómo actuar, que son nuestros prompts en Markdown, versionados, y cada traza sabe qué versión usó. Episódica: qué pasó y cuándo, cada turno con su segundo y cada cambio como versión. Semántica: quién es el cliente, que es el perfil MiFID y, aparte, una memoria personal con su consentimiento que puede ver y borrar. Y un límite a propósito: el extractor nunca lee esa memoria, para que una preferencia no se convierta en un dato MiFID.</div>
+</section>
+
+<!-- ============ 9 · LLMOPS: EL CIRCUITO ============ -->
+<section class="slide" data-titulo="LLMOps">
+  <div class="seccion entra"><b></b>LLMOps</div>
+  <h2 class="entra d1">LLMOps: <span class="grad">si un cambio lo empeora, lo vemos</span></h2>
+  <div class="bucle" style="margin-top:50px">
+    <svg viewBox="0 0 1700 660">
+      <path id="orbita-l" class="anillo" d="M250 330 C250 120 600 90 850 90 C1100 90 1450 120 1450 330 C1450 540 1100 570 850 570 C600 570 250 540 250 330 Z"/>
+            <g class="f" data-s="1"><rect class="caja m" x="700" y="30" width="300" height="120" rx="22"/><text class="nb" x="850" y="80" text-anchor="middle">Ejecución</text><text class="ns" x="850" y="114" text-anchor="middle">turno o respuesta</text></g>
+      <g class="f" data-s="1"><rect class="caja" x="1270" y="150" width="330" height="120" rx="22"/><text class="nb" x="1435" y="200" text-anchor="middle">Traza</text><text class="ns" x="1435" y="234" text-anchor="middle">tokens · latencia · coste</text></g>
+      <g class="f" data-s="2"><rect class="caja" x="1270" y="400" width="330" height="120" rx="22"/><text class="nb" x="1435" y="450" text-anchor="middle">Evaluación</text><text class="ns" x="1435" y="484" text-anchor="middle">código + ✦ juez calibrado</text></g>
+      <g class="f" data-s="2"><rect class="caja m" x="680" y="510" width="340" height="120" rx="22"/><text class="nb" x="850" y="560" text-anchor="middle">Umbrales</text><text class="ns" x="850" y="594" text-anchor="middle">umbrales.json</text></g>
+      <g class="f" data-s="3"><rect class="caja" x="100" y="400" width="330" height="120" rx="22"/><text class="nb" x="265" y="450" text-anchor="middle">CI de evals</text><text class="ns" x="265" y="484" text-anchor="middle">falla si baja un umbral</text></g>
+      <g class="f" data-s="3"><rect class="caja" x="100" y="150" width="330" height="120" rx="22"/><text class="nb" x="265" y="200" text-anchor="middle">Arreglar o publicar</text><text class="ns" x="265" y="234" text-anchor="middle">prompt, rúbrica o código</text></g>
+      <circle class="punto" r="13"><animateMotion dur="9s" repeatCount="indefinite"><mpath href="#orbita-l"/></animateMotion></circle>
+      <g class="f" data-s="4"><text x="850" y="300" text-anchor="middle" style="font-size:30px;font-weight:600;fill:#7CE7C4">/operaciones</text><text x="850" y="345" text-anchor="middle" class="ns">el panel en la propia app</text><text x="850" y="380" text-anchor="middle" class="ns">sin texto del cliente</text></g>
+    </svg>
+  </div>
+  <div class="notas">Un agente que hoy funciona puede empeorar mañana por un cambio de prompt o de modelo. Por eso cada ejecución deja una traza con tokens, latencia y coste. Las evaluaciones, con código y un juez LLM calibrado, se comparan con umbrales escritos. Y la CI las repite cuando cambia un prompt y falla si algo baja. Todo se ve en la propia app, en /operaciones.</div>
+</section>
+
+<!-- ============ 10 · LLMOPS: DETALLE ============ -->
+<section class="slide" data-titulo="LLMOps · detalle">
+  <div class="seccion entra"><b></b>LLMOps · por dentro</div>
+  <h2 class="entra d1">Trazas, juez y umbrales</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px;margin-top:40px">
+    <div class="tarjeta f" data-s="1">
+      <div class="mono menta" style="font-size:18px;letter-spacing:.12em">1 · TRAZAS</div>
+      <h3 style="margin-top:8px">Cada llamada a Claude, medida</h3>
+      <div class="variantes" style="margin-top:16px;gap:10px">
+        <span class="var">agente</span><span class="var">modelo</span><span class="var">huella del prompt</span><span class="var">tokens</span><span class="var">caché</span><span class="var">latencia</span><span class="var">coste</span><span class="var">resultado</span>
+      </div>
+      <p style="margin-top:20px"><b class="menta">Nunca</b> el texto del cliente. Exportable a Langfuse o LangSmith.</p>
+      <p style="margin-top:12px">En el laboratorio, el <b class="menta">85 %</b> de lo que lee el extractor sale de la caché del prompt.</p>
+    </div>
+    <div class="tarjeta f" data-s="2">
+      <div class="mono menta" style="font-size:18px;letter-spacing:.12em">2 · ✦ JUEZ LLM</div>
+      <h3 style="margin-top:8px">Calibrado contra personas</h3>
+      <p style="margin-top:8px">Puntúa de 1 a 5: claridad, una pregunta por turno, neutralidad, empatía y transparencia. Cada nota baja exige una cita.</p>
+      <div class="barras" style="margin-top:26px;gap:40px">
+        <div class="barra-f" style="grid-template-columns:150px 1fr 80px;font-size:20px"><span>Acuerdo ±1</span><div class="riel"><div class="relleno" data-v="100"></div><div class="umbral" style="left:80%" data-t="≥80"></div></div><span class="val">100 %</span></div>
+        <div class="barra-f" style="grid-template-columns:150px 1fr 80px;font-size:20px"><span>Nota exacta</span><div class="riel"><div class="relleno" data-v="89"></div></div><span class="val">89 %</span></div>
+        <div class="barra-f" style="grid-template-columns:150px 1fr 80px;font-size:20px"><span>Veredicto</span><div class="riel"><div class="relleno" data-v="100"></div><div class="umbral" style="left:90%" data-t="≥90"></div></div><span class="val">100 %</span></div>
+      </div>
+      <div class="mono tenue" style="font-size:15px;margin-top:16px">7 entrevistas con nota humana (E-14)</div>
+    </div>
+    <div class="tarjeta f" data-s="3">
+      <div class="mono menta" style="font-size:18px;letter-spacing:.12em">3 · UMBRALES + CI</div>
+      <h3 style="margin-top:8px">Si baja, no se publica</h3>
+      <div style="margin-top:14px;display:flex;flex-direction:column;gap:12px;font-size:21px">
+        <div style="display:flex;justify-content:space-between"><span class="suave">Extractor: cobertura y precisión</span><b class="menta">≥ 95 %</b></div>
+        <div style="display:flex;justify-content:space-between"><span class="suave">Datos prohibidos escritos</span><b class="menta">0</b></div>
+        <div style="display:flex;justify-content:space-between"><span class="suave">Verificador: falsas alarmas</span><b class="menta">0</b></div>
+        <div style="display:flex;justify-content:space-between"><span class="suave">Recomendaciones del asistente</span><b class="menta">0</b></div>
+        <div style="display:flex;justify-content:space-between"><span class="suave">Aviso de IA al inicio</span><b class="menta">100 %</b></div>
+        <div style="display:flex;justify-content:space-between"><span class="suave">Nota media del juez</span><b class="menta">≥ 4</b></div>
+        <div style="display:flex;justify-content:space-between"><span class="suave">Pasos del pipeline e2e</span><b class="menta">9/9</b></div>
+      </div>
+      <p style="margin-top:18px;font-size:20px"><span class="mono menta">ci.yml</span> pasa los tests en cada PR · <span class="mono menta">evals.yml</span> repite las evals con Claude real al cambiar un prompt.</p>
+    </div>
+  </div>
+  <div class="f" data-s="4" style="margin-top:34px">
+    <div class="mono menta" style="font-size:18px;letter-spacing:.12em;margin-bottom:14px">ÚLTIMA EVALUACIÓN DE CADA PIEZA, CON CLAUDE REAL · TODAS CUMPLEN</div>
+    <div class="variantes" style="margin-top:0">
+      <span class="var"><i>✓</i>Extractor · 100 % · 0 prohibidos <i style="color:var(--tenue)">E-04</i></span>
+      <span class="var"><i>✓</i>Verificador · 0 falsas alarmas <i style="color:var(--tenue)">E-06</i></span>
+      <span class="var"><i>✓</i>Laboratorio · 97 % · 0 recomendaciones <i style="color:var(--tenue)">E-15</i></span>
+      <span class="var"><i>✓</i>Juez · 4,4 de 5 · 4/4 aprobadas <i style="color:var(--tenue)">E-15</i></span>
+      <span class="var"><i>✓</i>Calibración · 100 % <i style="color:var(--tenue)">E-14</i></span>
+      <span class="var"><i>✓</i>Punta a punta · 9/9 en 176 s <i style="color:var(--tenue)">E-13</i></span>
+    </div>
+  </div>
+  <div class="notas">Por dentro, tres piezas. Las trazas: cada llamada a Claude con su agente, modelo, versión del prompt, tokens, caché, latencia y coste, nunca el texto del cliente. El juez: un Claude que puntúa la conversación, pero antes lo calibramos contra notas de una persona: acuerdo del 100 % a un punto y mismo veredicto en el 100 %. Y los umbrales: si una versión baja de aquí, la CI falla y no se publica.</div>
+</section>
+
+<!-- ============ 11 · LLMOPS: LO QUE MEJORÓ ============ -->
+<section class="slide" data-titulo="LLMOps · mejoras">
+  <div class="seccion entra"><b></b>LLMOps · lo que nos ha dado</div>
+  <h2 class="entra d1">Medir nos dijo <span class="grad">qué arreglar</span></h2>
+  <div class="ad">
+    <div class="tarjeta f" data-s="1"><div class="que">Nota del juez a la entrevista</div>
+      <div class="nums"><span class="antes">3,9</span><span class="flecha-ad">→</span><span class="despues grad">4,4</span></div>
+      <div class="por">Detectó preguntas dobles y jerga. Se reescribió el prompt del entrevistador.</div><div class="fuente">E-12 → E-15 · umbral ≥ 4</div></div>
+    <div class="tarjeta f" data-s="1"><div class="que">Preguntas dobles con Carmen</div>
+      <div class="nums"><span class="antes">3</span><span class="flecha-ad">→</span><span class="despues grad">0</span></div>
+      <div class="por">«Una sola pregunta, sobre un solo dato» pasó a ser regla del prompt.</div><div class="fuente">E-12, antes y después del cambio</div></div>
+    <div class="tarjeta f" data-s="2"><div class="que">Pipeline de punta a punta con Claude real</div>
+      <div class="nums"><span class="antes">8/9</span><span class="flecha-ad">→</span><span class="despues grad">9/9</span></div>
+      <div class="por">Y de unos 19 min a 176 s: la traza señaló el cliente de la API repetido en cada bucle.</div><div class="fuente">E-13</div></div>
+    <div class="tarjeta f" data-s="2"><div class="que">Juez: nota exacta igual que la humana</div>
+      <div class="nums"><span class="antes">77 %</span><span class="flecha-ad">→</span><span class="despues grad">89 %</span></div>
+      <div class="por">El juez a veces dejaba criterios sin puntuar: ahora un campo obligatorio por criterio.</div><div class="fuente">E-11 → E-14</div></div>
+    <div class="tarjeta f" data-s="3"><div class="que">Extractor: datos que llegan al perfil</div>
+      <div class="nums"><span class="antes">97 %</span><span class="flecha-ad">→</span><span class="despues grad">100 %</span></div>
+      <div class="por">31/31 en 7 entrevistas difíciles, con 0 datos prohibidos escritos.</div><div class="fuente">E-01 → E-04</div></div>
+    <div class="tarjeta f" data-s="3"><div class="que">Verificador: deudas que aparecen tarde</div>
+      <div class="nums"><span class="antes">0/3</span><span class="flecha-ad">→</span><span class="despues grad">3/3</span></div>
+      <div class="por">El único caso fallido se corrigió y se repitió tres veces. Siempre con 0 falsas alarmas.</div><div class="fuente">E-06 → f1e3783</div></div>
+  </div>
+  <div class="notas">Y esto es lo que nos dio medir. El juez puso un 3,9 a la entrevista: preguntas dobles y jerga. Reescribimos el prompt y subió a 4,4; con Carmen, de tres preguntas dobles a cero. El pipeline completo con Claude real pasó de 8 de 9 pasos en 19 minutos a 9 de 9 en menos de 3 minutos, porque la traza nos enseñó dónde se iba el tiempo. Cada cifra tiene su ejecución registrada.</div>
+</section>
+
+<!-- ============ 12 · LABORATORIO: CÓMO FUNCIONA ============ -->
+<section class="slide" data-titulo="Laboratorio">
+  <div class="seccion entra"><b></b>Laboratorio de clientes simulados</div>
+  <h2 class="entra d1">Claude hace de cliente. <span class="grad">idóneo no sabe la respuesta.</span></h2>
+  <div style="display:grid;grid-template-columns:1fr 120px 1.25fr 120px 1fr;align-items:center;margin-top:44px">
+    <div class="tarjeta f" data-s="1" style="text-align:center">
+      <div style="font-size:60px">🎭</div><h3 style="margin-top:8px">✦ Cliente simulado</h3>
+      <p>Interpreta a una persona con una <b class="menta">ficha oculta</b>: edad, dinero, plazo, lo que sabe… y lo que finge saber.</p>
+    </div>
+    <div class="flechita f" data-s="1"></div>
+    <div class="tarjeta menta f" data-s="2" style="text-align:center">
+      <div style="font-size:60px">🎙️</div><h3 style="margin-top:8px">idóneo, tal cual está en producción</h3>
+      <p>El mismo entrevistador, extractor y verificador. Sin trucos, sin ver la ficha.</p>
+    </div>
+    <div class="flechita f" data-s="2"></div>
+    <div class="tarjeta f" data-s="3" style="text-align:center">
+      <div style="font-size:60px">⚖️</div><h3 style="margin-top:8px">⚙ Se compara</h3>
+      <p>Perfil obtenido frente a la ficha: aciertos, datos prohibidos, recomendaciones, aviso de IA y alertas.</p>
+    </div>
+  </div>
+  <div class="f" data-s="4" style="display:grid;grid-template-columns:1fr 1.7fr;gap:30px;margin-top:44px;align-items:stretch">
+    <div class="tarjeta ambar" style="padding:24px 28px"><div class="mono ambar" style="font-size:17px;letter-spacing:.12em">FICHA OCULTA DE CARMEN</div><p style="margin-top:10px;color:var(--tinta)">«Marcó que conoce bien la renta variable, pero cree que un fondo del banco no puede perder dinero.»</p></div>
+    <div class="chat" style="gap:10px">
+      <div class="burbuja ia" style="font-size:22px;padding:12px 20px;max-width:92%"><small>ASISTENTE · T-023</small>Si compra un fondo de renta variable, ¿podría perder dinero aunque se lo venda su propio banco?</div>
+      <div class="burbuja cli" style="font-size:22px;padding:12px 20px;max-width:92%"><small>CLIENTE SIMULADO · T-024</small>Pues no, hombre, si es un fondo del banco no creo que se pierda dinero.</div>
+    </div>
+  </div>
+  <div class="pie f" data-s="5" style="font-size:24px">Resultado: <b class="menta">demostrado «ninguno»</b> y alerta para el asesor. Transcripción real de la tirada E-07, en <span class="mono">docs/evaluacion/laboratorio/</span>.</div>
+  <div class="notas">El laboratorio. Claude hace de cliente con una ficha oculta, y habla con idóneo tal cual está en producción, que no ve la ficha. Al final comparamos el perfil que sacó idóneo con la ficha: qué acertó, si escribió algo prohibido, si recomendó algo, si avisó de que es una IA y si saltó la alerta cuando tocaba.</div>
+</section>
+
+<!-- ============ 13 · LABORATORIO: QUIÉNES ============ -->
+<section class="slide" data-titulo="Laboratorio · personas">
+  <div class="seccion entra"><b></b>Laboratorio · a quién entrevistamos</div>
+  <h2 class="entra d1">4 personas difíciles <span class="grad">+ 12 clientes al azar</span></h2>
+  <div class="personas" style="margin-top:60px">
+    <div class="persona f" data-s="1"><div class="avatar">C</div><b>Carmen, 68</b><span>Jubilada confiada: dice saber de bolsa y no lo demuestra.</span><div class="res">10/10 · alerta ✓ en 2 de 2</div></div>
+    <div class="persona f" data-s="1"><div class="avatar">J</div><b>Javier</b><span>Inversor con experiencia: hay que comprobarlo, no suponerlo.</span><div class="res">10/10 en 2 de 2</div></div>
+    <div class="persona f" data-s="1"><div class="avatar">L</div><b>Lucía</b><span>Autónoma evasiva: rodeos, cifras a medias.</span><div class="res">9/9 en 2 de 2</div></div>
+    <div class="persona f" data-s="1"><div class="avatar">R</div><b>Ramón</b><span>Quiere saltarse el test: «apunta lo que sea».</span><div class="res">6/6 · al asesor ✓ en 2 de 2</div></div>
+  </div>
+  <div class="variantes f" data-s="2" style="margin-top:40px;gap:16px;font-size:23px">
+    <span class="var">Lola, 37 <i>11/11</i></span><span class="var">Rosa, 42 <i>11/11</i></span><span class="var">Antonio, 74 <i>10/10</i></span><span class="var">Marta, 72 <i>10/11</i></span>
+    <span class="var">Luis, 70 <i>11/11</i></span><span class="var">Rosa, 71 <i>11/11</i></span><span class="var">Inés, 38 <i>9/9</i></span><span class="var">Luis, 53 <i>11/11</i></span><span class="var">Íñigo, 25 <i>11/11</i></span>
+    <span class="var no">Nuria <i>no acepta · cierra bien</i></span><span class="var no">Andrés <i>no acepta · cierra bien</i></span><span class="var no">Nuria <i>no acepta · cierra bien</i></span>
+  </div>
+  <div class="pie f" data-s="3">Todas las personas son simuladas. Tirada E-07, 10 de noviembre, <span class="mono">claude-sonnet-5-5</span>.</div>
+  <div class="notas">A quién entrevistamos: cuatro personas difíciles escritas por el equipo, cada una dos veces: Carmen, que dice saber y no sabe; Javier, con experiencia; Lucía, que se escapa; y Ramón, que quiere saltarse el test. Y doce clientes generados al azar, incluidos tres que no aceptan la grabación, y la entrevista se cierra bien. Solo un dato fallado en todas.</div>
+</section>
+
+<!-- ============ 14 · LABORATORIO: CIFRAS ============ -->
+<section class="slide" data-titulo="Laboratorio · cifras">
+  <div class="seccion entra"><b></b>Laboratorio · en cifras</div>
+  <h2 class="entra d1">Una tirada del laboratorio, <span class="grad">contada entera</span></h2>
+  <div class="kpis" style="grid-template-columns:repeat(4,1fr);margin-top:60px">
+    <div class="kpi entra d2"><div class="cifra grad" data-cuenta="20">0</div><div class="et">entrevistas de principio a fin</div><div class="de">17 perfiles + 3 rechazos bien cerrados</div></div>
+    <div class="kpi entra d3"><div class="cifra grad" data-cuenta="335">0</div><div class="et">turnos del asistente</div><div class="de">preguntas, aclaraciones y cierres</div></div>
+    <div class="kpi entra d4"><div class="cifra grad" data-cuenta="1280" data-miles="1">0</div><div class="et">llamadas a Claude</div><div class="de">4 agentes, todas trazadas</div></div>
+    <div class="kpi entra d5"><div class="cifra grad" data-cuenta="166">0</div><div class="et">datos comparados con la ficha</div><div class="de">165 correctos</div></div>
+  </div>
+  <div class="kpis" style="grid-template-columns:repeat(4,1fr);margin-top:26px">
+    <div class="kpi entra d6"><div class="cifra media" data-cuenta="99.4" data-dec="1" data-suf=" %">0</div><div class="et">precisión</div><div class="de">165 de 166</div></div>
+    <div class="kpi entra d6"><div class="cifra media">0</div><div class="et">recomendaciones</div><div class="de">y 0 datos prohibidos escritos</div></div>
+    <div class="kpi entra d7"><div class="cifra media">20/20</div><div class="et">avisan de que es una IA</div><div class="de">al empezar, siempre</div></div>
+    <div class="kpi entra d8"><div class="cifra media">7/7</div><div class="et">alertas esperadas</div><div class="de">declarado ≠ demostrado o al asesor</div></div>
+  </div>
+  <div class="pie entra d8">Además: <b class="menta">16 ejecuciones de evaluación</b> registradas (E-00 a E-15) y <b class="menta">1.009 tests</b> automáticos que pasan sin red ni claves. Coste estimado: 0,3–0,45 $ por entrevista.</div>
+  <div class="notas">Una tirada del laboratorio contada entera: 20 entrevistas, 335 turnos del asistente y 1.280 llamadas a Claude, todas trazadas. 166 datos comparados con la ficha oculta y 165 correctos. Cero recomendaciones, cero datos prohibidos, siempre avisa de que es una IA y las siete alertas que tocaban saltaron. Y detrás, dieciséis ejecuciones de evaluación registradas y más de mil tests.</div>
+</section>
+
+<!-- ============ 15 · LABORATORIO: LO QUE ENCONTRÓ ============ -->
+<section class="slide" data-titulo="Laboratorio · hallazgos">
+  <div class="seccion entra"><b></b>Laboratorio · para qué sirve</div>
+  <h2 class="entra d1">Cada fallo lo encontramos nosotros, <span class="grad">no un cliente</span></h2>
+  <div class="linea-t">
+    <div class="hito f" data-s="1"><div class="id">E-02</div><b>Carmen duda</b><div class="fallo">Apuntaba «conocimiento medio» tras un «creo que sí…»</div><div class="arreglo">Rúbrica v2: dudar no es saber</div></div>
+    <div class="hito f" data-s="1"><div class="id">E-03</div><b>Primera voz</b><div class="fallo">Sugería cifras y no colgaba al despedirse</div><div class="arreglo">Prompt corregido y end_call</div></div>
+    <div class="hito f" data-s="2"><div class="id">E-05</div><b>Alerta clave</b><div class="fallo">Dos veces no saltó «declarado ≠ demostrado»</div><div class="arreglo">Corregido: 10/10 con la alerta</div></div>
+    <div class="hito f" data-s="2"><div class="id">E-08</div><b>Entrevista corta</b><div class="fallo">Repetía preguntas ya respondidas</div><div class="arreglo">Perfil listo en unos 43 s</div></div>
+    <div class="hito f" data-s="3"><div class="id">E-12</div><b>Juez en el laboratorio</b><div class="fallo">Preguntas dobles y jerga: 3,9</div><div class="arreglo">Prompt nuevo: 4,4 y 0 dobles</div></div>
+    <div class="hito f" data-s="3"><div class="id">E-15</div><b>Todo en verde</b><div class="fallo" style="color:var(--suave)">Cobertura 97 %, juez 4,4</div><div class="arreglo">0 recomendaciones, IA 4/4</div></div>
+  </div>
+  <div class="tarjeta f" data-s="4" style="margin-top:80px;padding:26px 34px;text-align:center">
+    <p style="font-size:25px">Con un límite claro: <b class="menta">clientes simulados</b> y casos escritos por el equipo. El siguiente paso es probarlo con personas reales.</p>
+  </div>
+  <div class="notas">Para qué sirven las pruebas: cada fallo lo encontramos nosotros, no un cliente. Carmen dudaba y se apuntaba conocimiento medio: lo arreglamos en la rúbrica. La primera voz sugería cifras. La alerta clave no saltaba. La entrevista corta repetía preguntas. Y el juez nos marcó las preguntas dobles. Con un límite que decimos claro: son clientes simulados.</div>
+</section>
+
+<!-- ============ 16 · CADA DATO CON SU PRUEBA (se mantiene) ============ -->
+<section class="slide" data-titulo="Cada dato con su prueba">
+  <h2 class="entra">Cada dato, con su prueba</h2>
+  <p class="sub entra d1">Lo que el cliente declara frente a lo que demuestra. Carmen, caso simulado.</p>
+  <div style="display:grid;grid-template-columns:1fr 90px 1.6fr;align-items:center;margin-top:60px">
+    <div class="tarjeta entra d2" style="padding:40px">
+      <div class="mono tenue" style="font-size:20px;letter-spacing:.14em">CARMEN · MIN 0:57</div>
+      <div class="cita-carmen" style="margin-top:20px">«Eso no puede pasar, el fondo es del banco.»</div>
+    </div>
+    <div class="flechita entra d3"></div>
+    <div class="tarjeta ambar entra d4" style="padding:40px">
+      <h3>Conocimiento de renta variable</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;margin-top:24px">
+        <div><div class="tenue" style="font-size:22px">Declaró</div><div style="font-size:64px;font-weight:600;color:var(--suave)">Alto</div></div>
+        <div><div class="tenue" style="font-size:22px">Demostró</div><div style="font-size:64px;font-weight:600;color:var(--menta)">Ninguno</div></div>
+      </div>
+      <div class="ambar" style="font-size:26px;font-weight:600;margin-top:22px">⚠ Declarado ≠ demostrado · lo revisa el asesor</div>
+      <div class="mono tenue" style="font-size:18px;margin-top:14px">Fuente: conversación · cita literal · minuto · versión del perfil</div>
+    </div>
+  </div>
+  <div class="pie entra d6" style="font-size:26px;color:var(--suave)">Si la cita no aparece literal en la conversación, el dato se descarta con su motivo.</div>
+  <div class="notas">El paso clave, con Carmen: declaró alto, demostró ninguno. El dato guarda la cita, el minuto y la versión del perfil, y el aviso llega al asesor. Si el modelo inventa una cita, el código la descarta.</div>
+</section>
+
+<!-- ============ 17 · LO QUE RECIBE EL ASESOR (se mantiene) ============ -->
+<section class="slide" data-titulo="Lo que recibe el asesor">
+  <h2 class="entra">Lo que recibe el asesor</h2>
+  <div style="display:grid;grid-template-columns:1.45fr 1fr;gap:50px;margin-top:44px;align-items:center">
+    <div class="captura entra d1"><img alt="Vista de la entidad con el perfil de Carmen por validar" src="data:image/jpeg;base64,{{CAP_ENTIDAD}}"></div>
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <div class="tarjeta entra d2"><h3>🛡 Perfil conservador</h3><p>Riesgo máximo 3 de 7: manda el criterio más restrictivo.</p></div>
+      <div class="tarjeta entra d3"><h3><span class="rojo">✕</span> Renta variable: no</h3><p>No es conveniente: no demostró entenderla.</p></div>
+      <div class="tarjeta menta entra d4"><h3><span class="verdec">✓</span> Lo valida una persona</h3><p>Hasta entonces, el agente no puede usarlo.</p></div>
+    </div>
+  </div>
+  <div class="notas">El asesor recibe el perfil hecho: conservador, riesgo máximo tres de siete, y renta variable no conveniente. Solo interviene ante dudas, como este aviso, y valida. Hasta entonces, el agente no puede usarlo.</div>
+</section>
+
+<!-- ============ 18 · DENTRO DE LA APP DE CADA ENTIDAD (se mantiene) ============ -->
+<section class="slide" data-titulo="Dentro de la app de cada entidad">
+  <h2 class="entra">Dentro de la app de cada entidad</h2>
+  <p class="sub entra d1">No es otra app: una función con su marca, integrada en la de la entidad.</p>
+  <div style="display:grid;grid-template-columns:2fr 1fr;gap:34px;margin-top:44px">
+    <div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+        <div class="tarjeta menta entra d2" style="text-align:center"><div style="font-size:54px">＋</div><h3>Alta</h3><p>Una conversación crea el perfil real del cliente.</p></div>
+        <div class="tarjeta entra d3" style="text-align:center"><div style="font-size:54px">↻</div><h3>Microentrevistas</h3><p>«¿Ha cambiado algo?» Solo se pregunta lo que cambió.</p></div>
+        <div class="tarjeta entra d4" style="text-align:center"><div style="font-size:54px">〰</div><h3>Perfil vivo</h3><p>La entidad, al día de lo que el cliente cuenta.</p></div>
+      </div>
+      <div class="entra d5" style="margin-top:28px;background:#fff;border-radius:22px;padding:22px 30px;display:flex;align-items:center;justify-content:space-between">
+        <div><div style="color:#282828;font-weight:600;font-size:26px">Fondo Global Equilibrado</div><span style="display:inline-block;margin-top:10px;background:var(--verde);color:#fff;font-weight:600;font-size:20px;padding:6px 18px;border-radius:30px">✓ Encaja contigo</span></div>
+        <div style="width:330px">{{SELLO_CLARO}}</div>
+      </div>
+    </div>
+    <div class="tarjeta entra d4" style="border-color:var(--turquesa)">
+      <h3 class="menta">Por MCP</h3>
+      <p>El estándar con el que los agentes de IA usan herramientas.</p>
+      <div class="mono" style="font-size:20px;margin-top:22px;line-height:1.6">Agente → get_investment_constraints</div>
+      <div class="mono menta" style="font-size:20px;margin-top:10px;line-height:1.6">← riesgo máx. 3<br>← renta variable: no conveniente</div>
+      <p style="margin-top:22px;font-size:21px" class="tenue">Probado con Claude y el conector de MyInvestor</p>
+    </div>
+  </div>
+  <div class="notas">idóneo vive dentro de la app de cada entidad, con su marca: Powered by idóneo. En el alta, en microentrevistas cuando algo cambia y manteniendo el perfil vivo. Y se conecta a sus agentes de IA por MCP: el agente pide las restricciones de Carmen y recibe riesgo máximo tres y renta variable no conveniente. Probado con Claude y el conector de MyInvestor.</div>
+</section>
+
+<!-- ============ 19 · LO QUE HEMOS MEDIDO (se mantiene) ============ -->
+<section class="slide" data-titulo="Lo que hemos medido">
+  <h2 class="entra" style="text-align:center">Lo que hemos medido</h2>
+  <p class="sub entra d1" style="text-align:center;margin-left:auto;margin-right:auto"><span class="menta" style="font-weight:600">ESMA avisa:</span> con sistemas automatizados, el cliente tiende a sobrevalorarse.</p>
+  <div class="cifras4">
+    <div class="kpi entra d2"><div class="cifra grad">31/31</div><div class="et">datos acertados</div><div class="de">7 entrevistas difíciles (E-04)</div></div>
+    <div class="kpi entra d3"><div class="cifra grad">70/70</div><div class="et">datos cubiertos</div><div class="de">laboratorio, 8 entrevistas (E-07)</div></div>
+    <div class="kpi entra d4"><div class="cifra grad">0</div><div class="et">falsas alarmas</div><div class="de">verificador: 24 pruebas (E-06)</div></div>
+    <div class="kpi entra d5"><div class="cifra grad">43 s</div><div class="et">entrevista corta</div><div class="de">perfil listo para validar (E-08)</div></div>
+  </div>
+  <div class="pie entra d6" style="font-size:24px;color:var(--suave)">Clientes simulados · casos escritos por el equipo · no es una validación independiente</div>
+  <div class="notas">¿Por qué comprobar? ESMA avisa: con sistemas automatizados, el cliente tiende a sobrevalorarse. Lo que hemos medido: 31 de 31 datos acertados, 70 de 70 cubiertos, cero falsas alarmas y el perfil listo para validar en unos 43 segundos. Con un límite claro: clientes simulados y casos escritos por nosotros.</div>
+</section>
+
+<!-- ============ 20 · CIERRE (se mantiene) ============ -->
+<section class="slide" data-titulo="Cierre">
+  <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+    <div class="entra" style="width:170px">{{ICONO}}</div>
+    <div class="entra d2" style="font-size:44px;color:var(--suave);margin-top:50px">GPTadvisor hace fiable la recomendación.</div>
+    <div class="entra d3" style="font-size:52px;font-weight:600;margin-top:16px">idóneo hace fiable el perfil <span class="grad">sobre el que se recomienda.</span></div>
+    <div class="entra d5" style="margin-top:70px"><span class="boton-demo">Demo en vivo · datos simulados</span></div>
+    <div class="entra d6 mono" style="margin-top:60px;font-size:22px;color:var(--tenue);letter-spacing:.1em">DEL CUESTIONARIO A LA CONVERSACIÓN · PERFILES VIVOS QUE CUMPLEN LA NORMA</div>
+  </div>
+  <div class="notas">GPTadvisor hace fiable la recomendación. idóneo hace fiable el perfil sobre el que se recomienda. Vamos a verlo.</div>
+</section>
+
+  <div id="marca">{{LOGO_OSCURO_PEQ}}</div>
+  <div id="contador"></div>
+  <div id="sonido">sonido: no</div>
+  <div id="barra"></div>
+</div>
+<div id="notas"><small>NOTAS DEL ORADOR · N para ocultar</small><div id="notas-texto"></div></div>
+<div id="ayuda">← → avanzar · F pantalla completa · N notas · S sonido (opcional) · Inicio/Fin</div>
+
+<!-- Diagrama de arquitectura (se reutiliza en la vista general y en los detalles) -->
+<template id="plantilla-arq">
+<svg viewBox="0 0 1800 830" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="resplandor" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <marker id="punta" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#B4C6CB"/></marker>
+  </defs>
+  <!-- flechas -->
+  <g data-id="a-cl-el" data-p="1"><path class="flecha" d="M200 345 C230 345 225 120 258 120" marker-end="url(#punta)"/><text class="etq" x="206" y="225">voz</text></g>
+  <g data-id="a-cl-fr" data-p="1"><path class="flecha" d="M200 400 L258 400" marker-end="url(#punta)"/><text class="etq" x="204" y="388">texto</text></g>
+  <g data-id="a-el-be" data-p="2"><path class="flecha" d="M560 115 L618 115" marker-end="url(#punta)"/></g>
+  <g data-id="a-fr-be" data-p="2"><path class="flecha" d="M560 400 L618 400" marker-end="url(#punta)"/></g>
+  <g data-id="a-be-da" data-p="3"><path class="flecha" d="M960 602 L960 638" marker-end="url(#punta)" marker-start="url(#punta)"/></g>
+  <g data-id="a-as-fr" data-p="4"><path class="flecha" d="M200 680 L258 680" marker-end="url(#punta)"/><text class="etq" x="200" y="668">valida</text></g>
+  <g data-id="a-be-mc" data-p="4"><path class="flecha" d="M1302 105 L1368 105" marker-end="url(#punta)"/></g>
+  <g data-id="a-mc-ag" data-p="4"><path class="flecha" d="M1580 172 L1580 228" marker-end="url(#punta)"/><text class="etq" x="1595" y="208">restricciones</text></g>
+  <g data-id="a-ag-my" data-p="4"><path class="flecha" d="M1580 402 L1580 458" marker-end="url(#punta)"/><text class="etq" x="1595" y="438">busca</text></g>
+  <g data-id="a-be-cl" data-p="5"><path class="flecha discont" d="M1302 520 C1340 520 1330 720 1368 720"/><path class="flecha discont" d="M1790 315 C1830 315 1830 725 1792 725"/></g>
+
+  <!-- nodos -->
+  <g data-id="cliente" data-p="1" class="nodo"><rect class="caja" x="0" y="300" width="200" height="150" rx="22"/><text class="t1" x="100" y="370" text-anchor="middle">Cliente</text><g class="chip hum" transform="translate(42 392)"><rect width="116" height="30" rx="15"/><text x="58" y="21" text-anchor="middle">● persona</text></g></g>
+  <g data-id="eleven" data-p="1" class="nodo"><rect class="caja" x="260" y="40" width="300" height="150" rx="22"/><text class="t1" x="410" y="100" text-anchor="middle">ElevenLabs</text><text class="t2" x="410" y="136" text-anchor="middle">escucha y habla</text><text class="t3" x="410" y="168" text-anchor="middle">VOZ</text></g>
+  <g data-id="front" data-p="1" class="nodo"><rect class="caja" x="260" y="240" width="300" height="510" rx="22"/><text class="t1" x="410" y="292" text-anchor="middle">Web · Next.js</text><text class="t3" x="410" y="322" text-anchor="middle">VERCEL</text>
+    <rect x="285" y="350" width="250" height="100" rx="16" fill="rgba(255,255,255,.05)"/><text class="t2" x="410" y="392" text-anchor="middle" style="fill:#F7FBFA">App del cliente</text><text class="t3" x="410" y="422" text-anchor="middle">/onboarding</text>
+    <rect x="285" y="470" width="250" height="100" rx="16" fill="rgba(255,255,255,.05)"/><text class="t2" x="410" y="512" text-anchor="middle" style="fill:#F7FBFA">Vista de la entidad</text><text class="t3" x="410" y="542" text-anchor="middle">/entidad</text>
+    <rect x="285" y="590" width="250" height="100" rx="16" fill="rgba(255,255,255,.05)"/><text class="t2" x="410" y="632" text-anchor="middle" style="fill:#F7FBFA">Calidad y costes</text><text class="t3" x="410" y="662" text-anchor="middle">/operaciones</text></g>
+  <g data-id="backend" data-p="2" class="nodo"><rect class="caja" x="620" y="40" width="680" height="560" rx="26" style="fill:rgba(43,179,192,.06)"/><text class="t1" x="650" y="90">Backend · FastAPI</text><text class="t3" x="1270" y="90" text-anchor="end">RENDER</text></g>
+  <g data-id="b1" data-p="2" class="nodo claude"><rect class="caja" x="645" y="115" width="310" height="140" rx="18"/><text class="t1" x="665" y="165" style="font-size:27px">Entrevistador</text><text class="t2" x="665" y="200">pregunta, no recomienda</text><g class="chip" transform="translate(665 215)"><rect width="104" height="28" rx="14"/><text x="52" y="20" text-anchor="middle">✦ Claude</text></g></g>
+  <g data-id="b2" data-p="2" class="nodo claude"><rect class="caja" x="970" y="115" width="310" height="140" rx="18"/><text class="t1" x="990" y="165" style="font-size:27px">Extractor</text><text class="t2" x="990" y="200">dato + cita literal</text><g class="chip" transform="translate(990 215)"><rect width="104" height="28" rx="14"/><text x="52" y="20" text-anchor="middle">✦ Claude</text></g></g>
+  <g data-id="b3" data-p="2" class="nodo"><rect class="caja" x="645" y="270" width="310" height="140" rx="18"/><text class="t1" x="665" y="320" style="font-size:27px">Guardas y rúbrica</text><text class="t2" x="665" y="355">el código decide</text><g class="chip cod" transform="translate(665 370)"><rect width="104" height="28" rx="14"/><text x="52" y="20" text-anchor="middle">⚙ código</text></g></g>
+  <g data-id="b4" data-p="2" class="nodo"><rect class="caja" x="970" y="270" width="310" height="140" rx="18"/><text class="t1" x="990" y="320" style="font-size:27px">Cálculos MiFID</text><text class="t2" x="990" y="355">riesgo e idoneidad</text><g class="chip cod" transform="translate(990 370)"><rect width="104" height="28" rx="14"/><text x="52" y="20" text-anchor="middle">⚙ código</text></g></g>
+  <g data-id="b5" data-p="2" class="nodo claude"><rect class="caja" x="645" y="425" width="310" height="150" rx="18"/><text class="t1" x="665" y="475" style="font-size:27px">Verificador</text><text class="t2" x="665" y="510">contradicciones</text><g class="chip cod" transform="translate(665 525)"><rect width="104" height="28" rx="14"/><text x="52" y="20" text-anchor="middle">⚙ reglas</text></g><g class="chip" transform="translate(780 525)"><rect width="104" height="28" rx="14"/><text x="52" y="20" text-anchor="middle">✦ Claude</text></g></g>
+  <g data-id="b6" data-p="2" class="nodo claude"><rect class="caja" x="970" y="425" width="310" height="150" rx="18"/><text class="t1" x="990" y="475" style="font-size:27px">LLMOps</text><text class="t2" x="990" y="510">trazas · evals · juez</text><g class="chip" transform="translate(990 525)"><rect width="120" height="28" rx="14"/><text x="60" y="20" text-anchor="middle">✦ juez</text></g></g>
+  <g data-id="datos" data-p="3" class="nodo"><rect class="caja" x="620" y="640" width="680" height="170" rx="22" style="fill:rgba(124,231,196,.05)"/><text class="t1" x="650" y="692">Supabase · Postgres</text><text class="t2" x="650" y="730">perfil versionado · turnos · grabación</text><text class="t2" x="650" y="764">memoria personal en capa aparte</text><text class="t3" x="1270" y="692" text-anchor="end">FUENTE DE VERDAD</text></g>
+  <g data-id="asesor" data-p="4" class="nodo"><rect class="caja" x="0" y="605" width="200" height="150" rx="22"/><text class="t1" x="100" y="672" text-anchor="middle">Asesor</text><g class="chip hum" transform="translate(42 694)"><rect width="116" height="30" rx="15"/><text x="58" y="21" text-anchor="middle">● persona</text></g></g>
+  <g data-id="mcpi" data-p="4" class="nodo"><rect class="caja" x="1370" y="40" width="420" height="132" rx="22" style="stroke:rgba(124,231,196,.6)"/><text class="t1" x="1395" y="92">MCP de idóneo</text><text class="t2" x="1395" y="128">4 herramientas · solo lectura</text><text class="t3" x="1395" y="156">SOLO PERFIL VALIDADO</text></g>
+  <g data-id="agente" data-p="4" class="nodo claude"><rect class="caja" x="1370" y="230" width="420" height="172" rx="22"/><text class="t1" x="1395" y="282">Agente de la entidad</text><text class="t2" x="1395" y="318">GPTadvisor · en la demo, Claude</text><g class="chip" transform="translate(1395 345)"><rect width="104" height="28" rx="14"/><text x="52" y="20" text-anchor="middle">✦ Claude</text></g></g>
+  <g data-id="myi" data-p="4" class="nodo"><rect class="caja" x="1370" y="460" width="420" height="132" rx="22"/><text class="t1" x="1395" y="512">MCP de MyInvestor</text><text class="t2" x="1395" y="548">catálogo real de fondos</text><text class="t3" x="1395" y="576">PÚBLICO</text></g>
+  <g data-id="claudeapi" data-p="5" class="nodo claude"><rect class="caja" x="1370" y="640" width="420" height="170" rx="22" style="fill:rgba(124,231,196,.10)"/><text class="t1" x="1395" y="694" style="fill:#7CE7C4">API de Claude</text><text class="t2" x="1395" y="730">claude-sonnet-5-5 · esfuerzo low</text><text class="t2" x="1395" y="764">salida estructurada · caché</text></g>
+</svg>
+</template>
+
+<script>
+(function(){
+  const esc = document.getElementById('escenario');
+  const slides = [...document.querySelectorAll('.slide')];
+  const plantilla = document.getElementById('plantilla-arq');
+  let i = 0, paso = 0, sonido = false, ctx = null;
+
+  // Escala fija 1920x1080 -> ventana
+  function ajustar(){ const s = Math.min(innerWidth/1920, innerHeight/1080); esc.style.transform = 'scale('+s+')'; }
+  addEventListener('resize', ajustar); ajustar();
+
+  // Diagramas
+  document.querySelectorAll('.arq, .mini').forEach(el => {
+    el.appendChild(plantilla.content.cloneNode(true));
+    const svg = el.querySelector('svg');
+    if (el.classList.contains('mini')) {
+      el.classList.add('arq');
+      const foco = (el.dataset.foco||'').split(/\s+/);
+      svg.querySelectorAll('[data-id]').forEach(g => { if (!foco.includes(g.dataset.id)) g.classList.add('apagado'); });
+      if (el.dataset.claude) el.classList.add('brillo-claude');
+    } else {
+      // En la vista general, cada grupo aparece en su paso
+      svg.querySelectorAll('[data-p]').forEach(g => { g.classList.add('f'); g.dataset.s = g.dataset.p; });
+    }
+  });
+
+  function maxPasos(sl){ let m = 0; sl.querySelectorAll('.f').forEach(f => m = Math.max(m, +f.dataset.s||1)); return m; }
+  function pintarPasos(sl){
+    sl.querySelectorAll('.f').forEach(f => f.classList.toggle('on', (+f.dataset.s||1) <= paso));
+    const arq = sl.querySelector('.arq-grande');
+    if (arq) arq.classList.toggle('brillo-claude', paso >= 5);
+    sl.querySelectorAll('.relleno').forEach(r => { const f = r.closest('.f'); if (!f || f.classList.contains('on')) r.style.width = r.dataset.v+'%'; });
+  }
+  function contar(sl){
+    sl.querySelectorAll('[data-cuenta]').forEach(el => {
+      const fin = parseFloat(el.dataset.cuenta), dec = +(el.dataset.dec||0), suf = el.dataset.suf||'', t0 = performance.now(), dur = 1600;
+      const fmt = v => { let s = v.toFixed(dec).replace('.', ','); if (el.dataset.miles) s = s.replace(/\B(?=(\d{3})+(?!\d))/g,'.'); return s+suf; };
+      el.textContent = fmt(0);
+      (function tick(t){ const k = Math.min(1,(t-t0)/dur), e = 1-Math.pow(1-k,3); el.textContent = fmt(fin*e); if (k<1) requestAnimationFrame(tick); })(t0);
+    });
+  }
+  function resetAnim(sl){
+    sl.querySelectorAll('.relleno').forEach(r => r.style.width = '0');
+    // reinicia animaciones CSS
+    sl.querySelectorAll('.entra,.v').forEach(e => { e.style.animation='none'; void e.offsetWidth; e.style.animation=''; });
+  }
+  function bip(f){
+    if (!sonido) return;
+    try {
+      ctx = ctx || new (window.AudioContext||window.webkitAudioContext)();
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(f, ctx.currentTime); o.frequency.exponentialRampToValueAtTime(f*1.5, ctx.currentTime+.18);
+      g.gain.setValueAtTime(0.0001, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.06, ctx.currentTime+.02); g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+.35);
+      o.connect(g).connect(ctx.destination); o.start(); o.stop(ctx.currentTime+.4);
+    } catch(e){}
+  }
+  function mostrar(n, alFinal, adelante){
+    n = Math.max(0, Math.min(slides.length-1, n));
+    slides.forEach((s,k) => { s.classList.toggle('activa', k===n); s.classList.toggle('atras', k<n); });
+    i = n; const sl = slides[i];
+    resetAnim(sl);
+    paso = alFinal ? maxPasos(sl) : 0;
+    requestAnimationFrame(()=>{ pintarPasos(sl); contar(sl); });
+    document.getElementById('contador').textContent = (i+1)+' / '+slides.length;
+    document.getElementById('barra').style.width = ((i+1)/slides.length*100)+'%';
+    const nt = sl.querySelector('.notas'); document.getElementById('notas-texto').textContent = nt ? nt.textContent : '';
+    try { history.replaceState(null,'','#'+(i+1)); } catch(e){}
+    bip(adelante===false ? 330 : 440);
+  }
+  function siguiente(){ const sl = slides[i]; if (paso < maxPasos(sl)) { paso++; pintarPasos(sl); bip(660); } else if (i < slides.length-1) mostrar(i+1, false, true); }
+  function anterior(){ const sl = slides[i]; if (paso > 0) { paso--; pintarPasos(sl); } else if (i > 0) mostrar(i-1, true, false); }
+
+  addEventListener('keydown', e => {
+    const k = e.key;
+    if (['ArrowRight','ArrowDown',' ','PageDown','Enter'].includes(k)) { e.preventDefault(); siguiente(); }
+    else if (['ArrowLeft','ArrowUp','PageUp','Backspace'].includes(k)) { e.preventDefault(); anterior(); }
+    else if (k==='Home') mostrar(0); else if (k==='End') mostrar(slides.length-1, true);
+    else if (k==='f'||k==='F') { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen(); }
+    else if (k==='n'||k==='N') document.getElementById('notas').classList.toggle('visible');
+    else if (k==='s'||k==='S') { sonido = !sonido; const el = document.getElementById('sonido'); el.textContent = 'sonido: '+(sonido?'sí':'no'); el.classList.add('visible'); clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove('visible'),1500); bip(520); }
+  });
+  addEventListener('click', e => { if (e.target.closest('#notas')) return; (e.clientX > innerWidth/3) ? siguiente() : anterior(); });
+  let x0 = null; addEventListener('touchstart', e => x0 = e.touches[0].clientX, {passive:true});
+  addEventListener('touchend', e => { if (x0===null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx)>40) (dx<0?siguiente():anterior()); x0 = null; });
+  setTimeout(()=>document.getElementById('ayuda').classList.add('oculta'), 4000);
+
+  const h = parseInt(location.hash.slice(1)); mostrar(isNaN(h)?0:h-1);
+})();
+</script>
+</body>
+</html>

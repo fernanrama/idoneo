@@ -33,6 +33,29 @@ node build.js ../Idoneo_presentacion.pptx --final    # FINAL: notas limpias
 
 En `build.js` se editan a mano `EQUIPO` (solo se dice en voz alta) y las cifras de la diapositiva 6, que salen de [`docs/evaluacion/README.md`](../../docs/evaluacion/README.md).
 
+## Versión HTML animada (`../Idoneo_presentacion.html`)
+
+Un solo archivo que se abre con doble clic en cualquier navegador y **funciona sin internet**: lleva dentro las fuentes (Sora e IBM Plex Mono, licencia OFL), el logo, el sello y la captura. Pensado para proyector: el lienzo es 1920 × 1080 y se escala a la pantalla.
+
+| Tecla | Qué hace |
+|---|---|
+| → · espacio · clic | Siguiente paso o diapositiva (muchas se construyen por pasos) |
+| ← | Paso o diapositiva anterior |
+| F | Pantalla completa |
+| N | Notas del orador abajo |
+| S | Sonido suave al avanzar (apagado por defecto, no hace falta) |
+| Inicio / Fin | Primera / última |
+
+Orden: portada → **bloque técnico de Alex** (arquitectura vista completa y 4 detalles, harness, memoria, LLMOps en 3 diapositivas, laboratorio en 4) → las diapositivas de siempre (cada dato con su prueba, lo que recibe el asesor, dentro de la app, lo que hemos medido, cierre). Se puede saltar a una diapositiva con `#número` al final de la URL.
+
+Todas las cifras salen de [`docs/evaluacion/`](../../docs/evaluacion/README.md) y de `backend/app/ops/ultimas_evaluaciones.json`; las de la tirada E-07 (20 entrevistas, 335 turnos, 1.280 llamadas a Claude, 166 datos) son la suma de los dos informes de [`docs/evaluacion/laboratorio/e07/`](../../docs/evaluacion/laboratorio/e07/). Si hay una tirada nueva, se cambian a mano en `html/deck.html`.
+
+Regenerar tras editar `html/deck.html`:
+
+```bash
+python entrega/fuente-presentacion/html/generar.py   # desde la raíz del repo
+```
+
 ## Resumen de una cara
 
 `../Idoneo_una_cara.html` es la fuente de `../Idoneo_una_cara.pdf` (A4, una página). Para regenerar el PDF con Chrome:
