@@ -57,11 +57,16 @@ Visión: [evolución hacia un perfil continuo](docs/diseno/05-perfil-continuo.md
 
 ```mermaid
 flowchart LR
-    A["📱 Cliente<br/>voz o texto"] -->|turnos| B["Agentes con Claude<br/>extractor · verificador"]
-    B -->|datos con cita| C[("Perfil versionado<br/>evidencias · alertas")]
+    A["📱 Cliente<br/>voz o texto"] -->|alta| I["Entrevistador<br/>ElevenLabs (voz) · Claude (texto)"]
+    A -->|"«¿Ha cambiado algo?»"| R["Planificador determinista<br/>solo lo afectado · máx. 6 preguntas"]
+    R -->|microentrevista| I
+    I -->|turnos| B["Agentes con Claude<br/>extractor · verificador"]
+    B -->|datos con cita| C[("Perfil versionado<br/>evidencias · audio · alertas")]
     C --> D["Cálculos deterministas<br/>idoneidad · conveniencia"]
-    D --> E{"Asesor<br/>valida"}
+    D -.->|lo que falta| I
+    D --> E{"Asesor valida<br/>antes / después"}
     E -->|perfil activo| F["API REST + servidor MCP"]
+    C -.->|"datos en revisión<br/>(pending_review)"| F
     F --> G["Agente de la entidad<br/>GPTadvisor · Claude"]
     G -.->|conector en la conversación| H["Catálogo de MyInvestor"]
 ```
@@ -101,6 +106,8 @@ Resultado para Carmen, calculado por el backend:
 ## Cuando algo cambia
 
 Un perfil MiFID caduca con la vida del cliente. En Idóneo no hay que repetir la entrevista: desde **Mi perfil**, el cliente pulsa **¿Ha cambiado algo en tu vida?**, elige qué ha pasado y ve al momento qué le vamos a preguntar y cuánto tardará.
+
+> **Solo sobre un perfil validado.** La microentrevista revisa un perfil que la entidad ya ha validado. Antes de eso no hay nada que revisar: el cliente termina su entrevista y la entidad valida el perfil (en local, con el modo asesor de demostración; en la web, desde `/admin`). Si no, el backend rechaza la revisión.
 
 <p align="center"><img src="docs/img/cliente-cambio.png" width="100%" alt="Pantalla «¿Ha cambiado algo en tu vida?»: motivos a la izquierda y, a la derecha, las seis preguntas que se harán"></p>
 
