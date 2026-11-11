@@ -193,10 +193,31 @@ def test_cambio_de_horizonte_confirma_la_liquidez(carmen):
     assert resumen(planificar(carmen, [cambio(PLAZO)])) == [(LIQUIDEZ, C)]
 
 
-def test_cambio_de_ingresos_no_arrastra_nada(carmen):
-    """calculos.py no usa los ingresos en ningún resultado: no hay dependencias que confirmar."""
-    a = planificar(carmen, [cambio(INGRESOS)])
-    assert a.preguntas == [] and a.aplazadas == [] and not a.reevaluacion_completa
+def test_caida_de_ingresos_pide_confirmar_los_gastos_fijos(carmen):
+    """Única dependencia justificada hoy: la regla del verificador gastos fijos >= ingresos."""
+    a = planificar(cambiar(carmen, INGRESOS, 800), [cambio(INGRESOS)])
+    assert resumen(a) == [(GASTOS, C)] and a.preguntas[0].valor_vigente == 900
+    assert not a.reevaluacion_completa
+
+
+def test_caida_de_ingresos_no_cambia_el_perfil_de_riesgo_ni_las_restricciones(carmen):
+    """Se actualiza el hecho financiero, pero calculos.py no usa los ingresos: no hay recálculo nuevo."""
+    nueva = cambiar(carmen, INGRESOS, 800)
+    assert alcance.cambiados(carmen, nueva) == [INGRESOS]  # el hecho sí cambia (y se avisaría)
+    assert es_material(carmen, nueva) == []  # pero no mueve ningún resultado
+    assert nueva.assessments == carmen.assessments
+
+
+def test_si_los_ingresos_caen_por_debajo_de_los_gastos_lo_detecta_el_verificador(carmen):
+    from app.agentes import verificador  # reglas deterministas, sin Claude
+
+    alertas = [(a.path, a.flag) for a in verificador.reglas(cambiar(carmen, INGRESOS, 800))]
+    assert (GASTOS, Flag.needs_advisor) in alertas
+    assert not [a for a in verificador.reglas(carmen) if a.path == GASTOS]
+
+
+def test_la_dependencia_ingresos_gastos_es_simetrica():
+    assert GASTOS in DEPENDENCIAS[INGRESOS] and INGRESOS in DEPENDENCIAS[GASTOS]
 
 
 def test_un_dato_cambiado_que_queda_dudoso_se_repregunta(carmen):

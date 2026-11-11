@@ -118,14 +118,19 @@ VARIABLES: dict[Motivo, tuple[tuple[str, ...], TipoPregunta]] = {
 
 
 def _dependencias() -> dict[str, list[str]]:
-    """Si cambia la clave, hay que confirmar también los valores. Sale de calculos.py; un test lo vigila.
+    """Si cambia la clave, hay que confirmar también los valores. Sale de calculos.py y de las reglas
+    deterministas del verificador (agentes/verificador.reglas); unos tests lo vigilan. No añade fórmulas.
 
     Un solo nivel: las dependencias de una confirmación no se añaden (si no cambia, no arrastra nada).
     """
     d: dict[str, list[str]] = {
         # colchón y capacidad de pérdida → perfil por capacidad → SRI máximo
         f"{_F}liquid_savings_eur": [f"{_F}fixed_monthly_costs_eur", f"{_F}debts_eur"],
-        f"{_F}fixed_monthly_costs_eur": [f"{_F}liquid_savings_eur", f"{_F}debts_eur"],
+        f"{_F}fixed_monthly_costs_eur": [f"{_F}liquid_savings_eur", f"{_F}debts_eur",
+                                          f"{_F}net_monthly_income_eur"],
+        # ingresos: NO entran en ningún cálculo de riesgo; solo en la regla del verificador «gastos fijos
+        # iguales o mayores que los ingresos» (alerta needs_advisor, que impide validar sin revisión)
+        f"{_F}net_monthly_income_eur": [f"{_F}fixed_monthly_costs_eur"],
         f"{_F}debts_eur": [f"{_F}liquid_savings_eur", f"{_F}fixed_monthly_costs_eur"],
         # tolerancia por escenarios → perfil por tolerancia
         f"{_R}scenario_score": [f"{_R}max_drawdown_accepted_pct"],
