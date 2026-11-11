@@ -139,10 +139,8 @@ def test_postgres_sin_migraciones_falla_con_un_mensaje_claro():
     if not POSTGRES_TEST:
         pytest.skip("requiere TEST_POSTGRES_URL")
     from app.perfil.persistencia import db
-    motor = db.crear_motor(url_de_prueba(POSTGRES_TEST))
-    with motor.begin() as c:
-        c.execute(text("drop schema public cascade"))
-        c.execute(text("create schema public"))
+    from tests.soporte_bd import postgres_vacio
+    motor = db.crear_motor(postgres_vacio())
     with pytest.raises(RuntimeError, match="migraciones"):
         db.preparar(motor)
     motor.dispose()

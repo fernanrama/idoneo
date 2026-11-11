@@ -1,27 +1,39 @@
 """Configuración común de los tests.
 
-- Ningún test puede llegar a Supabase: se vacía DATABASE_URL antes de importar la app (load_dotenv no
-  sobrescribe variables existentes) y todo almacén de base de datos se crea con una URL explícita.
+- Sin credenciales reales ni red externa (tests/aislamiento/sitecustomize.py): las claves de Anthropic y
+  ElevenLabs quedan definidas y vacías ANTES de importar la app (load_dotenv no sobrescribe variables que
+  ya existen), y solo se permiten conexiones a esta máquina, también en los subprocesos de los tests.
+- Ningún test puede llegar a Supabase: se vacía DATABASE_URL antes de importar la app y todo almacén de
+  base de datos se crea con una URL explícita.
 - Los tests de contrato (los de la PR #7 y test_store_contrato.py) se repiten con cada almacén:
   memoria, SQLite y, si existe TEST_POSTGRES_URL, un Postgres LOCAL de pruebas con las migraciones
-  reales. Esa base se vacía en cada test: se exige 'test' en el nombre y nunca Supabase.
+  reales. Esa base se vacía en cada test: local, con 'test' en el nombre y marcada como desechable.
 """
 
 from __future__ import annotations
 
+import importlib.util
 import os
+from pathlib import Path
+
+_AISLAMIENTO = Path(__file__).resolve().parent / "aislamiento"
+_spec = importlib.util.spec_from_file_location("aislamiento_tests", _AISLAMIENTO / "sitecustomize.py")
+aislamiento = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(aislamiento)  # activa el aislamiento en este proceso
+# ...y en cada subproceso Python que lancen los tests (Python ejecuta sitecustomize al arrancar).
+os.environ["PYTHONPATH"] = os.pathsep.join([str(_AISLAMIENTO), *filter(None, [os.environ.get("PYTHONPATH")])])
 
 os.environ["DATABASE_URL"] = ""
 os.environ["PERFIL_ALMACEN"] = "memoria"
 os.environ["DATA_PERSIST"] = "0"
 os.environ.pop("ADMIN_TOKEN", None)
+os.environ.pop("VERIFICADOR_CLAUDE", None)
 
 import pytest  # noqa: E402
 
 from app.perfil import store  # noqa: E402
-from app.perfil.almacenes.bd import url_de_prueba  # noqa: E402
+from tests.soporte_bd import POSTGRES_TEST, postgres_recien_migrado, postgres_vacio  # noqa: E402,F401
 
-POSTGRES_TEST = os.getenv("TEST_POSTGRES_URL", "").strip()
 ALMACENES = ["memoria", "bd-sqlite"] + (["bd-postgres"] if POSTGRES_TEST else [])
 MODULOS_CONTRATO = {"test_api", "test_mcp", "test_store_contrato", "test_procesamiento_turnos", "test_asesor_demo",
                     "test_pending_review"}
@@ -29,7 +41,14 @@ MODULOS_CONTRATO = {"test_api", "test_mcp", "test_store_contrato", "test_procesa
 
 @pytest.fixture(autouse=True)
 def credenciales_sinteticas(monkeypatch):
-    """Solo material ficticio y una credencial de servicio explícita en tests autorizados."""
+    """Solo material ficticio y una credencial de servicio explícita en tests autorizados.
+
+    Cada test empieza sin claves de proveedores (aunque el .env se cargara al importar la app) y con
+    VERIFICADOR_CLAUDE en su valor por defecto: los tests que simulan a Claude ponen una clave ficticia.
+    """
+    for clave in aislamiento.CLAVES_DE_PAGO:
+        monkeypatch.setenv(clave, "")
+    monkeypatch.delenv("VERIFICADOR_CLAUDE", raising=False)
     monkeypatch.setenv("CLIENT_ACCESS_SECRET", "secreto-sintetico-local-de-pruebas-32-bytes-minimo")
     monkeypatch.setenv("ADMIN_TOKEN", "servicio-sintetico-de-pruebas")
     monkeypatch.setenv("CLIENT_ACCESS_TTL_S", "28800")
@@ -47,32 +66,6 @@ def mcp_servicio(monkeypatch):
     request = Request({"type": "http", "headers": [(b"x-admin-token", os.environ["ADMIN_TOKEN"].encode())]})
     monkeypatch.setattr(mcp, "get_context", lambda: SimpleNamespace(
         request_context=SimpleNamespace(request=request)))
-
-
-def postgres_vacio() -> str:
-    """Deja el Postgres local de pruebas sin ningún objeto en public (sin migrar). Devuelve su URL."""
-    from sqlalchemy import text
-
-    from app.perfil.persistencia import db
-
-    url = url_de_prueba(POSTGRES_TEST)
-    motor = db.crear_motor(url)
-    with motor.begin() as c:
-        c.execute(text("drop schema public cascade"))
-        c.execute(text("create schema public"))
-    motor.dispose()
-    return url
-
-
-def postgres_recien_migrado() -> str:
-    """Vacía el Postgres local de pruebas y aplica las migraciones reales. Devuelve su URL."""
-    from app.perfil.persistencia import db, migrar
-
-    url = postgres_vacio()
-    motor = db.crear_motor(url)
-    migrar.aplicar(motor)
-    motor.dispose()
-    return url
 
 
 def configurar_almacen(nombre: str) -> None:

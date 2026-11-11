@@ -1,6 +1,7 @@
 """Atomicidad de la validación del asesor, por la API y sin servidores externos.
 
-Cada caso usa memoria nueva o SQLite en un fichero temporal. Los rechazos deben
+Cada caso usa memoria nueva, SQLite en un fichero temporal o, con TEST_POSTGRES_URL, el Postgres local
+desechable recién migrado. Los rechazos deben
 conservar el perfil y su historial; los éxitos mantienen las versiones actuales.
 """
 
@@ -13,6 +14,7 @@ from contextlib import closing
 
 import pytest
 from tests.soporte_acceso import cliente_autorizado
+from tests.soporte_bd import ALMACENES_SQL, url_sql
 from sqlalchemy import event, text
 from sqlalchemy.exc import IntegrityError, OperationalError
 
@@ -29,11 +31,11 @@ RUTA = f"/api/clients/{CLIENTE}"
 ASESOR = "asesor-atomicidad"
 
 
-@pytest.fixture(params=["memoria", "sqlite"])
+@pytest.fixture(params=["memoria", *ALMACENES_SQL])
 def api_perfil(almacen, request, tmp_path):
     # Depender de `almacen` asegura que conftest haya limpiado el store antes.
-    if request.param == "sqlite":
-        store.configurar("bd", f"sqlite:///{tmp_path / 'validacion_test.db'}")
+    if request.param != "memoria":
+        store.configurar("bd", url_sql(request.param, tmp_path, "validacion_test.db"))
     store.cargar_fixture(CLIENTE)
     cliente = cliente_autorizado()
     yield cliente
@@ -296,14 +298,22 @@ def test_dos_asesores_simultaneos_solo_validan_una_vez(api_perfil):
         "advisor_correction", "validated"]
 
 
-def test_sqlite_deshace_el_primer_insert_si_falla_el_segundo(eventos, api_perfil):
+def test_sql_deshace_el_primer_insert_si_falla_el_segundo(eventos, api_perfil):
     almacen = store._a()
     if not isinstance(almacen, AlmacenBD):
-        pytest.skip("fallo transaccional propio de SQLite")
+        pytest.skip("fallo transaccional del almacén SQL")
     antes = instantanea(api_perfil)
     with almacen.motor.begin() as c:
-        c.execute(text("CREATE TRIGGER fallo_validated BEFORE INSERT ON profile_versions "
-                       "WHEN NEW.reason = 'validated' BEGIN SELECT RAISE(ABORT, 'fallo de prueba'); END"))
+        if almacen.motor.dialect.name == "sqlite":
+            c.execute(text("CREATE TRIGGER fallo_validated BEFORE INSERT ON profile_versions "
+                           "WHEN NEW.reason = 'validated' BEGIN SELECT RAISE(ABORT, 'fallo de prueba'); END"))
+        else:  # Postgres local desechable: mismo fallo, como violación de integridad (23514)
+            c.execute(text("CREATE FUNCTION fallo_validated() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN "
+                           "IF NEW.reason = 'validated' THEN "
+                           "RAISE EXCEPTION 'fallo de prueba' USING ERRCODE = '23514'; END IF; "
+                           "RETURN NEW; END $$"))
+            c.execute(text("CREATE TRIGGER fallo_validated BEFORE INSERT ON profile_versions "
+                           "FOR EACH ROW EXECUTE FUNCTION fallo_validated()"))
     with pytest.raises(IntegrityError, match="fallo de prueba"):
         api_perfil.post(f"{RUTA}/validate", json={
             "advisor_id": ASESOR, "changes": [correccion("financial.debts_eur", 1000)],
@@ -320,7 +330,8 @@ def test_sqlite_deshace_el_primer_insert_si_falla_el_segundo(eventos, api_perfil
 
 def test_sqlite_ocupado_da_409_sin_modificar_el_perfil(api_perfil, eventos):
     almacen = store._a()
-    if not isinstance(almacen, AlmacenBD):
+    if not isinstance(almacen, AlmacenBD) or almacen.motor.dialect.name != "sqlite":
+        # En Postgres no hay equivalente sin un lock_timeout en la app: la escritura esperaría al rival.
         pytest.skip("bloqueo de escritura propio de SQLite")
     antes = instantanea(api_perfil)
 

@@ -1,7 +1,7 @@
 """Regresiones de los defectos reproducidos primero sobre #21.
 
 Las peticiones ahora llevan revisión esperada y consentimiento explícito.
-Solo datos sintéticos, memoria y SQLite temporal; no se llama a agentes ni a la demo.
+Solo datos sintéticos, memoria, SQLite temporal y, si lo hay, el Postgres local desechable; no se llama a agentes ni a la demo.
 """
 
 from __future__ import annotations
@@ -20,15 +20,16 @@ from app.main import app
 from app.perfil import store
 from app.perfil.modelos import ahora
 from app.perfil.persistencia.tablas import personal_versions
+from tests.soporte_bd import ALMACENES_SQL, url_sql
 
 C = "memoria-personal-prueba"
 AUTOR = "agent:memory"
 
 
-@pytest.fixture(params=["memoria", "sqlite"])
+@pytest.fixture(params=["memoria", *ALMACENES_SQL])
 def personal_almacen(request, tmp_path):
-    if request.param == "sqlite":
-        store.configurar("bd", f"sqlite:///{tmp_path / 'personal_test.db'}")
+    if request.param != "memoria":
+        store.configurar("bd", url_sql(request.param, tmp_path, "personal_test.db"))
     else:
         store.configurar("memoria")
     store.crear(C)
@@ -36,12 +37,12 @@ def personal_almacen(request, tmp_path):
     store.configurar("memoria")
 
 
-@pytest.fixture(params=["json", "sqlite"])
+@pytest.fixture(params=["json", *ALMACENES_SQL])
 def personal_legado(request, tmp_path, monkeypatch):
     """Representa un registro que el modelo anterior a #21 admitía sin conversión."""
     monkeypatch.setenv("DATA_DIR", str(tmp_path))
     monkeypatch.setenv("DATA_PERSIST", "1" if request.param == "json" else "0")
-    url = f"sqlite:///{tmp_path / 'legado_test.db'}"
+    url = None if request.param == "json" else url_sql(request.param, tmp_path, "legado_test.db")
     store.configurar("memoria" if request.param == "json" else "bd", None if request.param == "json" else url)
     store.crear(C)
 
@@ -49,7 +50,7 @@ def personal_legado(request, tmp_path, monkeypatch):
         momento = ahora()
         fila = {"client_id": C, "version": 1, "consent_given": True,
                 "consent_at": momento, "data": datos, "author": "system", "created_at": momento}
-        if request.param == "sqlite":
+        if request.param != "json":
             with store._a().motor.begin() as conexion:
                 conexion.execute(insert(personal_versions).values(**fila))
         else:

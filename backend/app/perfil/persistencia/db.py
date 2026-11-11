@@ -83,5 +83,5 @@ def preparar(motor: Engine) -> None:
     if faltan:
         raise RuntimeError(
             f"Faltan tablas en la base de datos: {faltan}. "
-            "Aplica las migraciones de backend/migraciones/ (python -m app.perfil.persistencia.migrar)."
+            "Aplica las migraciones de backend/migraciones/ (python -m app.perfil.persistencia.migrar --destino host:puerto/base)."
         )

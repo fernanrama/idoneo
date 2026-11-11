@@ -15,6 +15,7 @@ from app.main import app
 from app.mcp import servidor
 from app.perfil import store
 from app.perfil.modelos import Parche
+from tests.soporte_bd import ALMACENES_SQL, url_sql
 
 
 @pytest.fixture(scope="session")
@@ -24,10 +25,10 @@ def contexto_api():
         yield cliente
 
 
-@pytest.fixture(params=["memoria", "sqlite"])
+@pytest.fixture(params=["memoria", *ALMACENES_SQL])
 def api(request, tmp_path, contexto_api):
     store.configurar("memoria" if request.param == "memoria" else "bd",
-                     None if request.param == "memoria" else f"sqlite:///{tmp_path / 'acceso_test.db'}")
+                     None if request.param == "memoria" else url_sql(request.param, tmp_path, "acceso_test.db"))
     yield contexto_api
     store.configurar("memoria")
 

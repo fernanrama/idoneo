@@ -1,6 +1,6 @@
 """Regresión de derivados financieros al retirar datos de origen.
 
-Solo memoria aislada y SQLite temporal; no usa servidores, APIs externas ni
+Solo memoria aislada, SQLite temporal y, si lo hay, el Postgres local desechable; no usa servidores, APIs externas ni
 migraciones. Comprueba invalidación, historial, eventos y exportación REST/MCP.
 """
 
@@ -12,6 +12,7 @@ from contextlib import closing
 
 import pytest
 from tests.soporte_acceso import cliente_autorizado
+from tests.soporte_bd import ALMACENES_SQL, url_sql
 
 from app.main import app
 from app.mcp.servidor import mcp
@@ -30,10 +31,10 @@ ORIGENES = [AHORRO, GASTOS, DEUDAS]
 AUTOR = "advisor:asesor-calculos"
 
 
-@pytest.fixture(params=["memoria", "sqlite"])
+@pytest.fixture(params=["memoria", *ALMACENES_SQL])
 def perfil_inicial(almacen, request, tmp_path):
-    if request.param == "sqlite":
-        store.configurar("bd", f"sqlite:///{tmp_path / 'calculos.db'}")
+    if request.param != "memoria":
+        store.configurar("bd", url_sql(request.param, tmp_path, "calculos.db"))
     return store.cargar_fixture(C)
 
 

@@ -18,7 +18,7 @@ pytestmark = pytest.mark.skipif(not POSTGRES_TEST, reason="requiere TEST_POSTGRE
 
 @pytest.fixture
 def motor_vacio():
-    from tests.conftest import postgres_vacio
+    from tests.soporte_bd import postgres_vacio
 
     motor = db.crear_motor(postgres_vacio())
     yield motor
@@ -110,12 +110,16 @@ def test_previo_detecta_migracion_editada(motor_vacio, tmp_path):
 
 
 def test_linea_de_comandos(motor_vacio, monkeypatch, capsys):
+    from app.perfil.persistencia import seguridad
+
     monkeypatch.setenv("DATABASE_URL", POSTGRES_TEST)
-    assert verificar.main(["previo"]) == 0
-    assert verificar.main(["posterior"]) == 1
+    destino = ["--destino", seguridad.describir(POSTGRES_TEST)]
+    assert verificar.main(["previo", *destino]) == 0
+    assert verificar.main(["posterior", *destino]) == 1
     salida = capsys.readouterr().out
     assert "SIN FALLOS" in salida and "FALLO(S)" in salida
     usuario = (motor_vacio.url.username or "").strip()
     assert not usuario or f"{usuario}@" not in salida  # nunca imprime credenciales
+    assert verificar.main(["previo", "--destino", "127.0.0.1:1/otra_base_test"]) == 2  # otro destino
     monkeypatch.setenv("DATABASE_URL", "sqlite://")
-    assert verificar.main(["previo"]) == 2
+    assert verificar.main(["previo", *destino]) == 2
