@@ -129,11 +129,26 @@ def _motivos(codigos: list[str]) -> list[Motivo]:
     return out
 
 
+def _lectura(client_id: str) -> tuple[list[dict], Perfil, Perfil]:
+    """Historial, última versión y perfil servido de un mismo instante.
+
+    Son tres lecturas: si entre ellas se escribe otra versión (p. ej. una confirmación pura, que queda `active`),
+    el perfil servido podría ser más nuevo que la «última» leída. Se reintenta hasta que cuadren.
+    """
+    for _ in range(5):
+        historial = store.versiones(client_id)
+        p = store.perfil(client_id)
+        servido = store.perfil_para_consumidor(client_id)
+        if historial and historial[-1]["version"] == p.version and servido.version <= p.version:
+            return historial, p, servido
+    raise store.Conflicto("El perfil está cambiando ahora mismo: vuelve a intentarlo")
+
+
 def previsualizar(client_id: str, codigos: list[str]) -> RevisionEnCurso:
     """Qué se preguntaría, sin escribir nada."""
     motivos = _motivos(codigos)
-    p = store.perfil(client_id)
-    return _construir(p, motivos, p.created_at, p.version + 1)
+    _, p, servido = _lectura(client_id)
+    return _construir(p, motivos, p.created_at, p.version + 1, servido)
 
 
 def abrir(client_id: str, codigos: list[str]) -> RevisionEnCurso:
@@ -162,7 +177,7 @@ def _peticiones(reason: str) -> list[Motivo]:
 
 def en_curso(client_id: str) -> RevisionEnCurso | None:
     """La revisión abierta desde la última validación (o None). Se reconstruye del historial."""
-    historial = store.versiones(client_id)
+    historial, p, servido = _lectura(client_id)
     motivos: list[Motivo] = []
     abierta: dict | None = None
     for v in reversed(historial):
@@ -173,7 +188,7 @@ def en_curso(client_id: str) -> RevisionEnCurso | None:
             motivos = list(dict.fromkeys(_peticiones(v["reason"]) + motivos))
     if abierta is None or not motivos:
         return None
-    return _construir(store.perfil(client_id), motivos, abierta["created_at"], abierta["version"])
+    return _construir(p, motivos, abierta["created_at"], abierta["version"], servido)
 
 
 def _momento(f) -> datetime:
@@ -181,13 +196,14 @@ def _momento(f) -> datetime:
     return alcance.ultimo_momento(f)
 
 
-def _construir(p: Perfil, motivos: list[Motivo], abierta_en: datetime, desde: int) -> RevisionEnCurso:
+def _construir(p: Perfil, motivos: list[Motivo], abierta_en: datetime, desde: int,
+               servido: Perfil | None = None) -> RevisionEnCurso:
     """Delega en el único planificador de microentrevistas, `alcance.alcance_revision`.
 
     Combina los motivos del cliente, los datos caducados, lo que ya cambió y sus dependencias, y lo que el
     cliente ya dijo o confirmó (con su cita) desde `abierta_en`: eso sale como respondido y no se repite.
     """
-    servido = store.perfil_para_consumidor(p.client_id)
+    servido = servido or store.perfil_para_consumidor(p.client_id)
     hoy = datetime.now(timezone.utc).date()
     a = alcance.alcance_revision(servido, p, hoy, motivos, desde=abierta_en)
     todas = [(q, False) for q in a.preguntas] + [(q, True) for q in a.respondidas]

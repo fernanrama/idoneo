@@ -199,3 +199,22 @@ def test_la_revision_del_cliente_usa_alcance_revision(validada):
     assert [q.path for q in r.pendientes] == [q.path for q in a.preguntas]
     assert {q.path for q in r.preguntas if q.respondida} == {q.path for q in a.respondidas} == {LIQUIDEZ}
     assert GASTOS in [q.path for q in r.pendientes]  # dependencia del cambio de ingresos (verificador)
+
+
+def test_la_revision_no_falla_si_se_escribe_entre_lecturas(validada, monkeypatch):
+    """Regresión (Postgres, hilos): una versión active escrita entre leer la última y leer la servida."""
+    from app.perfil import revision
+
+    revision.abrir(C, ["planned_expense"])
+    extractor(LIQUIDEZ, "high", "Necesito 6.000 € en tres meses")
+    original, hecho = store.perfil, {"ya": False}
+
+    def perfil_con_escritura_concurrente(cid, version=None):
+        p = original(cid, version)
+        if version is None and not hecho["ya"]:
+            hecho["ya"] = True
+            store.validar(C, "asesor-07", [])  # otra petición valida justo ahora
+        return p
+
+    monkeypatch.setattr(store, "perfil", perfil_con_escritura_concurrente)
+    assert revision.en_curso(C) is None  # se relee: ya está validada, sin DatoInvalido
