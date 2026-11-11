@@ -1,7 +1,10 @@
 # Migraciones de Postgres / Supabase
 
 `0001_esquema_inicial.sql` crea el esquema del perfil: `clients`, `profile_versions`,
-`personal_versions`, `sessions` y `turns`. Se aplica con `app.perfil.persistencia.migrar`, que la ejecuta
+`personal_versions`, `sessions` y `turns`. `0002_audio_de_sesion.sql` añade `session_audio`: el audio de cada
+llamada de voz y los tiempos reales de cada turno ([pruebas de audio](../../docs/pruebas-de-audio.md)), de solo
+añadir y con RLS sin políticas, como el resto. Es opcional para arrancar: un Postgres sin la 0002 arranca igual
+y solo desactiva el audio (lo avisa en el log); el procedimiento de abajo es el mismo para aplicarla. Se aplica con `app.perfil.persistencia.migrar`, que la ejecuta
 en una sola transacción, la registra en `schema_migrations` con su huella SHA-256 y no la repite.
 
 Qué garantiza la 0001:
@@ -33,8 +36,8 @@ D="--env-file ../.env --destino aws-0-<región>.pooler.supabase.com:5432/postgre
 |---|---|---|---|
 | 1. Comprobación previa | `python -m app.perfil.persistencia.verificar previo $D` | No (transacción de solo lectura) | `SIN FALLOS`, código 0, `0001` pendiente |
 | 2. Ensayo | `python -m app.perfil.persistencia.verificar ensayo $D` | No: aplica en una transacción y **siempre** hace ROLLBACK | `SIN FALLOS` y `ensayo deshecho` |
-| 3. Plan | `python -m app.perfil.persistencia.migrar $D` | No | `Pendientes: 0001_esquema_inicial.sql` |
-| 4. Aplicar (**con autorización**) | `python -m app.perfil.persistencia.migrar $D --aplicar` | Sí | `Aplicada: 0001_esquema_inicial.sql` |
+| 3. Plan | `python -m app.perfil.persistencia.migrar $D` | No | `Pendientes: 0001_esquema_inicial.sql, 0002_audio_de_sesion.sql` (en una base ya migrada, solo la `0002`) |
+| 4. Aplicar (**con autorización**) | `python -m app.perfil.persistencia.migrar $D --aplicar` | Sí | `Aplicada: …` por cada pendiente |
 | 5. Verificación posterior | `python -m app.perfil.persistencia.verificar posterior $D --prueba-escritura` | No: la prueba de escritura se deshace | `SIN FALLOS`; bloquea UPDATE, DELETE y TRUNCATE |
 | 6. Repetición | `python -m app.perfil.persistencia.migrar $D` | No | `No hay migraciones pendientes` |
 | 7. Arranque de la app | `PERFIL_ALMACEN=bd uvicorn app.main:app --port 8000` | Sí: carga a Carmen (DATOS SIMULADOS) si no existe | `/api/health` ok; `/api/clients/carmen-68/profile` en v1 |

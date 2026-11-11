@@ -86,7 +86,10 @@ identidad real. Sin credencial: 401; recurso de otro cliente: 404. Véase
 | `POST /api/demo/operador/autorizaciones` `{client_id, ficticio: true, ttl_s?}` · `GET` · `DELETE …/{id}` · `DELETE` | Operador de la demo: autoriza un cliente ficticio nuevo para el asesor de demo y le emite un token MCP de lectura propio. Solo con `DEMO_ADVISOR_MODE=1`, en local y con `X-Admin-Token`. Caduca, se revoca y no sobrevive a un reinicio; no cambia el perfil MiFID ([detalle](modo-asesor-demo.md#autorizar-un-cliente-nuevo-operador)) | 201 · 200 · 401 · 403 · 404 · 409 · 422 · 503 |
 | `/mcp` | MCP con las 4 herramientas de solo lectura (`readOnlyHint`), sobre el perfil para consumidores. Credencial de cliente, de servicio o una [credencial MCP de demostración](../backend/app/mcp/README.md#conectarlo-en-claude-pitch) (`MCP_DEMO_TOKEN` o token de operador): solo por cabecera, solo desde local y solo sus clientes ficticios | 200 · 401 · 403 · 404 · 421 |
 | `GET /api/sessions/{id}/stream` (SSE) | Pendiente (Juan). El bus de eventos ya existe; el front sondea cada 1,5 s | — |
-| `GET /api/clients/{id}/dossier.pdf`, clips `.mp3` | Pendiente (Juan) | — |
+| `POST /api/sessions/{id}/audio` `{conversation_id}` | Pruebas de audio: el navegador avisa al colgar y el backend descarga de ElevenLabs, en segundo plano, el audio y la transcripción oficial. Solo acepta la conversación si es de nuestro agente y se creó para esta sesión ([cómo funciona](pruebas-de-audio.md)) | 202 · 404 · 409 · 422 · 503 |
+| `GET /api/sessions/{id}/audio` · `GET …/audio/status` | El audio completo de la sesión (con la credencial de la sesión) y si ya está descargado (`ready`, `pending`, `failed`, `none`) | 200 · 404 |
+| `GET /api/clients/{id}/audio?version=` | Para cada dato, el fragmento `[start, end]` de cada evidencia en el audio de su sesión (`exact`: tiempos de ElevenLabs o aproximados del navegador). `GET /evidence/{path}` y `get_evidence` (MCP) lo incluyen en `audio` | 200 · 404 |
+| `GET /api/clients/{id}/dossier.pdf` | Pendiente | — |
 
 ## Backend integrado: persistencia, validación y versionado
 
@@ -163,7 +166,7 @@ Una escritura con varios parches es **todo o nada**. Excepción: lo que proponen
 - `system__user_id` es solo correlación, no autenticación. `VOICE_USER_ID_SECRET` evita enviar el `client_id`; el fallback fijo solo es aceptable en desarrollo local.
 - El prompt y los placeholders se versionan en el repo y se sincronizan con `python scripts/sincronizar_voz.py --aplicar`, preservando voz, herramientas y ajustes del panel.
 - El webhook exige `ELEVENLABS_WEBHOOK_SECRET`, valida `ElevenLabs-Signature` con una ventana de 30 minutos y limita el cuerpo a 1 MB. Repetir el mismo evento es inocuo; otra conversación sobre la misma sesión devuelve 409.
-- El webhook no convierte la transcripción en memoria personal. En esta iteración solo vincula `conversation_id` y rellena `ended_at`.
+- El webhook no convierte la transcripción en memoria personal: vincula `conversation_id`, rellena `ended_at` y encola la descarga del audio de la llamada ([pruebas de audio](pruebas-de-audio.md)).
 - `ELEVENLABS_SERVER_LOCATION` es opcional. Configurarlo no demuestra por sí solo residencia contractual ni Zero Retention Mode.
 
 ### Rechazos visibles

@@ -67,6 +67,7 @@ export function useEntrevista() {
   const alertasVistas = useRef(new Set<string>());
   const temporizadores = useRef<ReturnType<typeof setTimeout>[]>([]);
   const cuentaDatos = useRef(0);
+  const idConversacion = useRef<string | null>(null);
 
   useEffect(() => {
     sesionRef.current = sesion;
@@ -115,7 +116,18 @@ export function useEntrevista() {
       setError(`Voz: ${mensaje}`);
       setEstado("error");
     },
-    onDisconnect: () => setEstado((e) => (e === "activa" ? "terminada" : e)),
+    onConnect: ({ conversationId }) => {
+      idConversacion.current = conversationId;
+    },
+    onDisconnect: () => {
+      setEstado((e) => (e === "activa" ? "terminada" : e));
+      // Pruebas de audio: el backend descarga de ElevenLabs el audio de esta llamada y comprueba allí que
+      // se creó para esta sesión. Si la voz no está configurada en el backend, no pasa nada.
+      const s = sesionRef.current;
+      const conversacionId = idConversacion.current;
+      idConversacion.current = null;
+      if (s && conversacionId) api.registrarAudio(s.session_id, conversacionId).catch(() => {});
+    },
   });
 
   const nuevaSesion = useCallback(

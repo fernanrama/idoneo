@@ -1,8 +1,8 @@
 """Voz (ElevenLabs): bootstrap privado y webhook post-llamada verificado.
 
 La clave nunca llega al navegador. El bootstrap devuelve una URL firmada de un solo uso y una
-proyección mínima de la memoria consentida. El webhook solo correlaciona/cierra la sesión: no convierte
-automáticamente una transcripción en memoria durable.
+proyección mínima de la memoria consentida. El webhook correlaciona y cierra la sesión y encola la descarga
+del audio de la llamada (pruebas de audio, `app/audio.py`); no convierte una transcripción en memoria durable.
 """
 
 from __future__ import annotations
@@ -15,10 +15,10 @@ import time
 from typing import Any
 
 import httpx
-from fastapi import APIRouter, Header, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Request
 from pydantic import BaseModel
 
-from . import acceso, limites
+from . import acceso, audio, limites
 from .agentes import chat, memoria
 from .perfil import revision, store
 
@@ -143,7 +143,8 @@ async def _cuerpo_acotado(request: Request) -> bytes:
 
 
 @webhook_router.post("/elevenlabs")
-async def webhook_elevenlabs(request: Request, elevenlabs_signature: str | None = Header(default=None)):
+async def webhook_elevenlabs(request: Request, tareas: BackgroundTasks,
+                             elevenlabs_signature: str | None = Header(default=None)):
     secreto = os.getenv("ELEVENLABS_WEBHOOK_SECRET", "").strip()
     if not secreto:
         raise HTTPException(503, "Falta ELEVENLABS_WEBHOOK_SECRET")
@@ -172,4 +173,7 @@ async def webhook_elevenlabs(request: Request, elevenlabs_signature: str | None 
         raise HTTPException(422, str(e)) from e
     except store.Conflicto as e:
         raise HTTPException(409, str(e)) from e
-    return {"processed": procesado, "session_id": session_id, "conversation_id": conversation_id}
+    # Pruebas de audio: descarga el audio y los tiempos reales en segundo plano (app/audio.py).
+    estado_audio = audio.programar(tareas, session_id, conversation_id)
+    return {"processed": procesado, "session_id": session_id, "conversation_id": conversation_id,
+            "audio": estado_audio}

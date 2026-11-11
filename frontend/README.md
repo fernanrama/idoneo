@@ -23,7 +23,7 @@ El backend tiene que estar en marcha (ver README raíz). Para probar en el móvi
 | `/onboarding/perfil` | Perfil para el cliente, en claro: medidor de riesgo, lo que hemos entendido con la frase de cada dato, avisos, «¿Ha cambiado algo?» (o la revisión a medias), «Lo que ha cambiado» y siguiente paso |
 | `/onboarding/productos` | Filtros del perfil en lenguaje claro, qué se busca y qué no (y por qué), la hipoteca y el aviso de datos en revisión. **No consulta el MCP de MyInvestor por código**: sus términos lo prohíben (ver `docs/diseno/04-mcp-myinvestor.md`) |
 | `/escenario` | La demo guiada (y el pitch): entrevista a la izquierda y lo que recibe la entidad, en directo, a la derecha. En el móvil, por pestañas. `?cliente=<id>` muestra un perfil ya existente |
-| `/entidad/[cid]` | Vista de la entidad con pestañas: resumen, evidencias, historial y restricciones. Con cambios sin validar: datos en revisión, progreso de la microentrevista y antes/después. Validación web bloqueada hasta contar con permiso de asesor |
+| `/entidad/[cid]` | Vista de la entidad con pestañas: resumen, evidencias (cada cita suena con su fragmento de audio, ver `docs/pruebas-de-audio.md`), historial y restricciones. Con cambios sin validar: datos en revisión, progreso de la microentrevista y antes/después. Validación web bloqueada hasta contar con permiso de asesor |
 
 ## Validar el perfil con el backend protegido
 

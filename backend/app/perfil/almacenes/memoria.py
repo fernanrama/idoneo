@@ -1,7 +1,7 @@
 """Almacén en memoria (por defecto). Sustituye al store en memoria de la PR #7 con el mismo formato
 de volcado a JSON en DATA_DIR (`perfil_<client_id>.json`), si DATA_PERSIST=1.
 
-Útil para desarrollo, tests y la demo sin base de datos. Las sesiones no se vuelcan a disco.
+Útil para desarrollo, tests y la demo sin base de datos. Las sesiones (y su audio) no se vuelcan a disco.
 """
 
 from __future__ import annotations
@@ -12,13 +12,14 @@ import tempfile
 import threading
 import uuid
 from contextlib import contextmanager
+from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 from ..modelos import EstadoPerfil, Perfil, Turno
 from ..personal import CapaPersonal
-from .base import ConflictoVersion, cliente_del_lote, id_turno
+from .base import AudioSesion, ConflictoVersion, cliente_del_lote, id_turno
 
 DATA_DIR_POR_DEFECTO = Path(__file__).resolve().parents[3] / "data"
 
@@ -33,6 +34,7 @@ class AlmacenMemoria:
         self._personal: dict[str, list[CapaPersonal]] = {}
         self._sesiones: dict[str, dict[str, Any]] = {}
         self._turnos: dict[str, list[Turno]] = {}
+        self._audio: dict[str, tuple[AudioSesion, bytes]] = {}
 
     # ---------- volcado a disco (mismo formato que la PR #7) ----------
 
@@ -214,10 +216,31 @@ class AlmacenMemoria:
         with self._candado:
             return [t.model_copy() for t in self._turnos.get(session_id, [])]
 
+    # ---------- audio de las sesiones (en memoria, como las sesiones) ----------
+
+    def audio_disponible(self) -> bool:
+        return True
+
+    def guardar_audio(self, registro: AudioSesion, datos: bytes, momento: datetime) -> bool:
+        with self._candado:
+            if registro.session_id in self._audio:
+                return False
+            self._audio[registro.session_id] = (replace(registro, created_at=momento), bytes(datos))
+            return True
+
+    def audio(self, session_id: str) -> tuple[AudioSesion, bytes] | None:
+        with self._candado:
+            return self._audio.get(session_id)
+
+    def info_audio(self, session_ids: list[str]) -> dict[str, AudioSesion]:
+        with self._candado:
+            return {s: self._audio[s][0] for s in session_ids if s in self._audio}
+
     # ---------- utilidades ----------
 
     def reiniciar(self) -> None:
         with self._candado:
+            self._audio.clear()
             self._versiones.clear()
             self._personal.clear()
             self._sesiones.clear()

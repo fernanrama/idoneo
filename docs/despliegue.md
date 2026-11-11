@@ -42,6 +42,9 @@ navegador nunca las ve. Ningún secreto se escribe en el repositorio.
    Cada comando lleva el destino explícito, para no tocar nunca otra base por error; con el pooler del equipo:
    `--env-file ../.env --destino aws-1-eu-central-1.pooler.supabase.com:5432/postgres`.
 
+Si Supabase ya tenía la `0001`, el plan solo mostrará la `0002` (audio de las pruebas): se aplica con los
+mismos pasos. Mientras no se aplique, el backend arranca igual, solo sin audio.
+
 ### 2. Render: el backend
 
 1. En Render: **New → Blueprint**, elige el repositorio. Render lee `render.yaml` y propone el servicio `idoneo-backend`.
@@ -72,6 +75,10 @@ tras 15 minutos sin uso y tarda cerca de un minuto en despertar; el plan Starter
 1. En Render, cambia `CORS_ORIGINS` por la URL de Vercel (sin barra final) y guarda: se vuelve a desplegar.
    Así el backend solo acepta peticiones del navegador que vengan de vuestro frontend.
 2. Si el agente de ElevenLabs tiene lista de dominios permitidos, añade el de Vercel.
+3. Pruebas de audio (opcional, el navegador ya avisa al colgar): en ElevenLabs, activa el webhook
+   *post-call transcription* hacia `https://<servicio>.onrender.com/api/webhooks/elevenlabs` y copia su
+   secreto en Render como `ELEVENLABS_WEBHOOK_SECRET`. Así el audio se descarga aunque el cliente cierre la
+   pestaña antes de colgar. Detalle en [pruebas-de-audio.md](pruebas-de-audio.md).
 
 ### 5. Comprobar
 
