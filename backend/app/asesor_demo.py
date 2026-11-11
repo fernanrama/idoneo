@@ -30,7 +30,7 @@ from urllib.parse import urlsplit
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
 
 from . import acceso, demo_autorizaciones
-from .perfil import calculos, store, validacion
+from .perfil import store, validacion
 
 log = logging.getLogger("perfil.asesor_demo")
 
@@ -168,9 +168,8 @@ def estado(conf: Configuracion = Depends(exigir_asesor_demo)) -> dict[str, Any]:
 def expediente(client_id: str, conf: Configuracion = Depends(exigir_asesor_demo)) -> dict[str, Any]:
     """Lo que ve el asesor: última versión, restricciones tal como las sirve el MCP e historial."""
     cid = _cliente_permitido(client_id, conf)
-    consumidor = _llamar(store.perfil_para_consumidor, cid)
     return {"profile": _perfil_para_asesor(cid),
-            "constraints": calculos.restricciones(consumidor).model_dump(mode="json"),
+            "constraints": _llamar(store.restricciones_para_consumidor, cid).model_dump(mode="json"),
             "versions": [{**v, "created_at": v["created_at"].isoformat(), "status": v["status"].value}
                          for v in _llamar(store.versiones, cid)]}
 

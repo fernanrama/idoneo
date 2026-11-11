@@ -9,7 +9,7 @@ Servidor MCP remoto con transporte HTTP ("streamable"), montado en la propia API
 | `get_evidence` | `client_id`, `field` | Cita, segundos y clip del dato; si el campo no existe, la lista de campos válidos |
 | `get_client_context` | `client_id` | Resumen de ≤150 palabras para otro agente |
 
-Reglas: solo lectura; leen el perfil `active` más reciente y, si no hay, el último con `usable: false`; los errores vuelven como JSON legible (`not_found`, `unknown_field`), no como excepción. Las instrucciones del servidor le dicen al agente que no recomiende nada si `usable` es false.
+Reglas: solo lectura; leen el perfil `active` más reciente y, si no hay, el último con `usable: false`; los errores vuelven como JSON legible (`not_found`, `unknown_field`), no como excepción. Las instrucciones del servidor le dicen al agente que no recomiende nada si `usable` es false, y que no se apoye en las rutas de `pending_review` (datos cambiados en una versión posterior aún sin validar; ver `docs/contratos.md`). Lo incluyen `get_investment_constraints`, `get_client_profile` sin `version` y `get_client_context`.
 
 ## Probarlo en local
 

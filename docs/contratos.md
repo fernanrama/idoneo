@@ -123,6 +123,7 @@ Una escritura con varios parches es **todo o nada**. Excepción: lo que proponen
 - Concurrencia optimista: si otra escritura (de este u otro proceso) se adelanta, se relee y reintenta; tras 5 intentos, 409.
 - Las alertas no se duplican: se ignora una alerta con el mismo `flag` y `path` que otra abierta, o con un `id` ya existente. Una alerta solo puede apuntar a una ruta de `CAMPOS` (o a ninguna).
 - **Perfil para consumidores** (restricciones, contexto y MCP): el último `active`; si no hay ninguno, la última versión (`usable: false`). `POST /api/demo/reset` abre una época nueva: añade una versión con `reason: "demo_reset: …"` y desde ese momento no se sirven activos anteriores.
+- **`pending_review`** (decisión §4.6 de [diseno/06](diseno/06-actualizacion-continua.md#46-vigencia-mientras-hay-una-revisión-abierta-decidido-opción-b), opción B). Si se sirve un `active` y hay una versión posterior sin validar con datos distintos, se sigue sirviendo el `active`, pero se avisa de qué cambió: `{since_version, latest_version, latest_status, paths, opened_at}`. Las rutas son las MiFID cuyo valor o declarado cambió, más las de alertas nuevas abiertas. Los calculados no cuentan y una confirmación del mismo valor tampoco. Si no hay revisión abierta, vale `null`. Lo incluyen `GET /constraints`, `GET /context`, `get_investment_constraints`, `get_client_profile` (sin `version`), `get_client_context` y el panel del asesor de demo. El consumidor no debe apoyar recomendaciones en esas rutas (`store.revision_pendiente`).
 
 ### Estados y validación de la entidad
 

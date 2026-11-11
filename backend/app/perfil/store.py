@@ -5,6 +5,7 @@ La API pública es la de la PR #7 y la usan el front (vía main.py), los agentes
     crear_sesion, sesion, anadir_turno, cargar_fixture, reiniciar, NoEncontrado, Conflicto
 Se añaden: DatoInvalido, comprobar_parche, guardar_personal, personal, borrar_personal,
 asegurar_fixture, configurar, tipo_almacen y bus (eventos para el SSE).
+Y revision_pendiente y restricciones_para_consumidor (`pending_review`, §4.6 del diseño 06).
 
 Dónde se guarda lo decide `PERFIL_ALMACEN=memoria|bd` (por defecto memoria; ver almacenes/).
 El algoritmo de escritura está aquí una sola vez, así que ambos almacenes se comportan igual:
@@ -44,6 +45,7 @@ from .almacenes.base import TransaccionPersonal
 from .eventos import BusEventos, Evento
 from .modelos import (
     CALCULADOS,
+    CAMPOS,
     Alerta,
     EstadoAlerta,
     EstadoPerfil,
@@ -52,7 +54,9 @@ from .modelos import (
     Fuente,
     Parche,
     Perfil,
+    Restricciones,
     Revision,
+    RevisionPendiente,
     Turno,
     ahora,
 )
@@ -64,6 +68,7 @@ AUTOR_FIXTURE = "fixture"
 CANALES = ("voice", "text")
 MAX_REINTENTOS = 5
 DIAS_HASTA_REVISION = 365
+_ORDEN_CAMPOS = {ruta: i for i, ruta in enumerate(CAMPOS)}
 _NOMBRE_FIXTURE = re.compile(r"^[a-z0-9][a-z0-9_-]{0,63}$")
 
 
@@ -174,6 +179,49 @@ def perfil_para_consumidor(client_id: str) -> Perfil:
     desde = _a().ultima_de_autor(client_id, AUTOR_FIXTURE) or 1
     activa = _a().ultima_activa(client_id, desde)
     return _con_personal(activa or ultima)
+
+
+def _valor_mifid(p: Perfil, ruta: str) -> tuple[Any, Any] | None:
+    f = p.mifid.get(ruta)
+    return None if f is None else (f.value, f.declared)
+
+
+def revision_pendiente(client_id: str, servido: Perfil | None = None) -> RevisionPendiente | None:
+    """Qué ha cambiado desde el perfil que se sirve a los consumidores (§4.6 del diseño 06, opción B).
+
+    Solo si se sirve un `active` y hay versiones posteriores con datos distintos (valor o declarado; la
+    evidencia sola es una confirmación) o alertas nuevas abiertas. Los calculados no cuentan: cambian
+    porque cambian sus entradas, que ya aparecen. Determinista; no escribe nada.
+    """
+    with _candado(client_id):
+        servido = servido or perfil_para_consumidor(client_id)
+        ultima = _ultima(client_id)
+        if servido.status != EstadoPerfil.active or ultima.version <= servido.version:
+            return None
+        rutas = {r for r in set(servido.mifid) | set(ultima.mifid)
+                 if r not in CALCULADOS and _valor_mifid(servido, r) != _valor_mifid(ultima, r)}
+        previas = {a.id for a in servido.alerts}
+        rutas |= {a.path for a in ultima.alerts
+                  if a.path and a.status == EstadoAlerta.open and a.id not in previas}
+        if not rutas:
+            return None
+        siguiente = _a().version(client_id, servido.version + 1)
+        return RevisionPendiente(
+            since_version=servido.version + 1, latest_version=ultima.version, latest_status=ultima.status,
+            paths=sorted(rutas, key=lambda r: (_ORDEN_CAMPOS.get(r, len(_ORDEN_CAMPOS)), r)),
+            opened_at=(siguiente or ultima).created_at)
+
+
+def restricciones_para_consumidor(client_id: str) -> Restricciones:
+    """Restricciones del perfil servido (último `active`) con lo que está en revisión (`pending_review`).
+
+    Es lo que reciben la API, el MCP y el panel del asesor: todos ven lo mismo.
+    """
+    with _candado(client_id):
+        servido = perfil_para_consumidor(client_id)
+        r = calculos.restricciones(servido)
+        r.pending_review = revision_pendiente(client_id, servido)
+        return r
 
 
 def versiones(client_id: str) -> list[dict[str, Any]]:
