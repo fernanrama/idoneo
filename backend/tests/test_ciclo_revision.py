@@ -189,3 +189,40 @@ def test_10_los_resultados_y_las_restricciones_se_actualizan_al_validar(validada
     assert "fixed_income_term" in filtros(calculos.restricciones(p))  # la versión nueva ya está recalculada
     store.validar(C, "asesor-07", [], version_esperada=p.version)
     assert "fixed_income_term" in filtros(servido()) and servido().pending_review is None
+
+
+# ---------- R6: lo que reciben los consumidores mientras hay un cambio pendiente ----------
+
+def test_r6_un_cambio_material_se_identifica_y_se_avisa(validada):
+    decir(PLAZO, 1, "Lo necesitaré el año que viene")
+    r = servido()
+    assert r.pending_review.material == ["filter:fixed_income_term"]
+    aviso = r.rationale[-1]
+    assert "pueden estar desactualizadas" in aviso and PLAZO in aviso and "filter:fixed_income_term" in aviso
+
+
+def test_r6_un_cambio_no_material_tambien_se_avisa(validada):
+    decir("financial.net_monthly_income_eur", 800, "Me han bajado la pensión a ochocientos")
+    r = servido()
+    assert r.pending_review.material == [] and "no altera estas restricciones" in r.rationale[-1]
+
+
+def test_r6_sin_revision_pendiente_no_hay_aviso(validada):
+    from app.perfil import calculos
+
+    assert servido().rationale == calculos.restricciones(store.perfil_para_consumidor(C)).rationale
+
+
+def test_r6_rest_y_mcp_ven_lo_mismo(validada, mcp_servicio):
+    import asyncio
+    import json
+
+    from app.mcp.servidor import mcp
+    from tests.soporte_acceso import cliente_autorizado
+
+    decir(PLAZO, 1, "Lo necesitaré el año que viene")
+    rest = cliente_autorizado(C).get(f"/api/clients/{C}/constraints").json()
+    res = asyncio.run(mcp.call_tool("get_investment_constraints", {"client_id": C}))
+    por_mcp = json.loads((res[0] if isinstance(res, tuple) else res)[0].text)
+    assert rest["pending_review"]["material"] == por_mcp["pending_review"]["material"] == ["filter:fixed_income_term"]
+    assert rest["rationale"] == por_mcp["rationale"]

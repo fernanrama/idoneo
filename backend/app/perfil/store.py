@@ -204,7 +204,7 @@ def revision_pendiente(client_id: str, servido: Perfil | None = None) -> Revisio
         return RevisionPendiente(
             since_version=servido.version + 1, latest_version=ultima.version, latest_status=ultima.status,
             paths=alcance.orden_guion(rutas),
-            opened_at=(siguiente or ultima).created_at)
+            opened_at=(siguiente or ultima).created_at, material=alcance.es_material(servido, ultima))
 
 
 def restricciones_para_consumidor(client_id: str) -> Restricciones:
@@ -215,7 +215,14 @@ def restricciones_para_consumidor(client_id: str) -> Restricciones:
     with _candado(client_id):
         servido = perfil_para_consumidor(client_id)
         r = calculos.restricciones(servido)
-        r.pending_review = revision_pendiente(client_id, servido)
+        r.pending_review = pendiente = revision_pendiente(client_id, servido)
+        if pendiente is not None:  # R6: no presentarlas como inequívocamente vigentes
+            efecto = (f" El cambio afecta a: {', '.join(pendiente.material)}." if pendiente.material
+                      else " El cambio no altera estas restricciones según las reglas actuales.")
+            r.rationale.append(
+                f"Datos en revisión sin validar (versión {pendiente.latest_version}): {', '.join(pendiente.paths)}. "
+                f"Estas restricciones son las de la versión {servido.version} validada y pueden estar "
+                f"desactualizadas: no apoyar ninguna recomendación en esos datos.{efecto}")
         return r
 
 
