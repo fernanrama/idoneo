@@ -2,7 +2,7 @@
 
 Variables de entorno y persistencia del backend y del frontend. Para arrancar en local basta con `python scripts/preparar_demo.py` ([README](../README.md#pruébalo)); esta página es la referencia completa.
 
-**Producción** (Vercel + Render + Supabase, con topes de gasto): [docs/despliegue.md](despliegue.md). Desplegada en <https://hack-finance-uc3m-2026.vercel.app>.
+**Producción** (Vercel + Render + Supabase, con topes de gasto): [docs/despliegue.md](despliegue.md). Desplegada en <https://idoneo-app.vercel.app>.
 
 El `.env` va en la raíz del repo (plantilla en `.env.example`) y nunca se sube a Git. Arranca el backend desde `backend/`: las rutas relativas (`DATA_DIR=./data`) se resuelven desde ahí y `backend/data/` está ignorada por Git.
 

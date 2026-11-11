@@ -19,7 +19,7 @@ y le entrega al asesor un perfil listo para validar. Se integra dentro de la app
 ![ElevenLabs](https://img.shields.io/badge/ElevenLabs-voz-000000)
 ![MCP](https://img.shields.io/badge/MCP-servidor_propio-6E56CF)
 
-**[Pruébalo online → hack-finance-uc3m-2026.vercel.app](https://hack-finance-uc3m-2026.vercel.app)**
+**[Pruébalo online → idoneo-app.vercel.app](https://idoneo-app.vercel.app)**
 
 [La demo](#la-demo-en-un-minuto) · [El problema](#el-problema) · [Qué hace](#qué-hace) · [Dónde se integra](#dónde-se-integra) · [Cómo funciona](#cómo-funciona) · [Pruébalo](#pruébalo) · [Evaluación](#evaluación)
 
@@ -130,7 +130,7 @@ Más detalle: [arquitectura](docs/arquitectura.md).
 
 ### En la web, sin instalar nada
 
-Abre **<https://hack-finance-uc3m-2026.vercel.app>**. El backend usa un plan gratuito que se duerme: la primera petición puede tardar cerca de un minuto.
+Abre **<https://idoneo-app.vercel.app>**. El backend usa un plan gratuito que se duerme: la primera petición puede tardar cerca de un minuto.
 
 1. **Ver la demo guiada** → **Empezar la demo.** La entrevista de Carmen y, al lado, su perfil construyéndose. No usa IA y está siempre disponible.
 2. **Soy cliente.** Tu propia entrevista, por voz o escribiendo. Usa IA y tiene un cupo diario de pruebas. No introduzcas datos reales.
