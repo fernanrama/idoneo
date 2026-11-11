@@ -37,7 +37,6 @@ def main() -> None:
         "{{FONT_MONO}}": b64(AQUI / "fuentes" / "ibm-plex-mono-latin-400-normal.woff2"),
         "{{LOGO_OSCURO}}": svg("idoneo-logo-sobre-oscuro.svg", onda=True),
         "{{LOGO_OSCURO_PEQ}}": svg("idoneo-logo-sobre-oscuro.svg"),
-        "{{ICONO}}": svg("idoneo-icono-app.svg", onda=True),
         "{{ICONO_B64}}": b64(MARCA / "idoneo-icono-app.svg"),
         "{{SELLO_CLARO}}": svg("powered-by-idoneo-claro.svg"),
         "{{CAP_ENTIDAD}}": b64(AQUI.parent / "assets" / "entidad_carmen.jpg"),
