@@ -470,15 +470,30 @@ def anadir_alertas(client_id: str, alertas: Iterable[Alerta], autor: str = "agen
     return _escribir(client_id, mutar, autor, lambda n: _estado_tras_cambio(n, revisar_si_activo=False))
 
 
-def validar(client_id: str, asesor_id: str, cambios: Iterable[Parche] = ()) -> Perfil:
+VALIDABLES = (EstadoPerfil.draft, EstadoPerfil.pending_validation, EstadoPerfil.review_due)
+
+
+def validar(client_id: str, asesor_id: str, cambios: Iterable[Parche] = (),
+            version_esperada: int | None = None) -> Perfil:
     """La entidad corrige (opcional) y valida: el perfil pasa a 'active'.
-    Solo desde draft o pending_validation (desde review_due hay que reentrevistar).
-    Correcciones y validación se guardan juntas, o no se guarda ninguna."""
+
+    Desde draft, pending_validation o review_due (D2: tras una microentrevista, sin otra entrevista completa).
+    Un perfil ya `active` no se valida otra vez. Correcciones y validación se guardan juntas, o ninguna.
+    `version_esperada`: la versión que ha revisado la entidad; si el perfil ha cambiado desde entonces
+    (p. ej. otra respuesta del extractor), se rechaza para no validar lo que nadie ha visto.
+    """
     autor = validacion.comprobar_autor(f"advisor:{asesor_id}")
 
     def comprobar_estado(n: Perfil) -> None:
-        if n.status not in (EstadoPerfil.draft, EstadoPerfil.pending_validation):
+        if n.status not in VALIDABLES:
             raise Conflicto(f"No se puede validar un perfil en estado '{n.status.value}'")
+
+    def comprobar_vigente(actual: Perfil) -> None:
+        """Sobre la versión guardada (no sobre la candidata que se va a crear)."""
+        comprobar_estado(actual)
+        if version_esperada is not None and actual.version != version_esperada:
+            raise Conflicto(f"El perfil ha cambiado desde la versión {version_esperada} que revisó la entidad "
+                            f"(ahora es la {actual.version}): vuelve a revisarlo antes de validar")
 
     def mutar(n: Perfil) -> str:
         # Regla de la PR #7: la revisión humana cierra las alertas abiertas. Queda registrado quién y cuándo.
@@ -496,12 +511,12 @@ def validar(client_id: str, asesor_id: str, cambios: Iterable[Parche] = ()) -> P
         return EstadoPerfil.active
 
     with _candado(client_id):
-        comprobar_estado(_ultima(client_id))
+        comprobar_vigente(_ultima(client_id))
         normalizados = [comprobar_parche(c.model_copy(update={"source": Fuente.advisor}), autor)
                         for c in cambios]  # no modifica los parches del llamante
         for _ in range(MAX_REINTENTOS):
             actual = _ultima(client_id)
-            comprobar_estado(actual)
+            comprobar_vigente(actual)  # también la versión esperada: otra escritura pudo adelantarse
             candidatos = []
             if normalizados:
                 try:
