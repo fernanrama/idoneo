@@ -72,6 +72,7 @@ identidad real. Sin credencial: 401; recurso de otro cliente: 404. Véase
 | `GET /api/clients/{id}/profile[?version=n]` | Última versión en cualquier estado (o la `n`), con la capa personal vigente unida | 200 · 404 |
 | `GET /api/clients/{id}/versions` | `[{version, created_at, reason, author, status}]` | 200 · 404 |
 | `POST /api/clients/{id}/validate` `{advisor_id, changes[], expected_version?}` | La entidad corrige (opcional) y valida → perfil `active` ([reglas](#estados-y-validación-de-la-entidad)) | 200 · 401 · 404 · 409 · 422 |
+| `POST /api/clients/{id}/review/close` | El **cliente finaliza** su revisión («¿Ha cambiado algo?»). **No valida** el perfil: escribe `review_closed:sin_cambios` (sigue `active`) o `review_closed:pendiente_de_validacion` (sigue `review_due` hasta que valide la entidad), sin tocar datos, evidencias, resultados, alertas ni estado. 409 si quedan preguntas del alcance u obligatorios pendientes (`GET /review` → `can_finish`, `blocking`). Idempotente (`already_closed`) | 200 · 401 · 404 · 409 |
 | `GET /api/clients/{id}/constraints` | Restricciones del [perfil para consumidores](#versionado) | 200 · 404 |
 | `GET /api/clients/{id}/evidence/{path}` | `{path, value, source, evidence}` del dato en la última versión | 200 · 404 (cliente, ruta inexistente o dato sin valor) |
 | `GET /api/clients/{id}/context` | Resumen para otro agente, sobre el perfil para consumidores (plantilla; Pablo lo hará con Claude) | 200 · 404 |
@@ -142,6 +143,7 @@ Una escritura con varios parches es **todo o nada**. Excepción: lo que proponen
 | `active` | `review_due` | Un agente cambia un dato (las correcciones del asesor no lo cambian de estado). Una **confirmación pura** no: la versión nueva sigue `active` (D3) |
 | `review_due` | `draft` | Al abrir una sesión nueva (`POST /api/sessions`) |
 | cualquiera | el mismo | **Abrir una revisión del cliente** («¿Ha cambiado algo?», `POST /api/clients/{id}/review`, R1): versión de trámite `review_requested:<motivos>` con los mismos datos y estado. Abandonarla no cambia nada (R5); una confirmación pura deja `active` (D3); un perfil en revisión no se reactiva |
+| cualquiera | el mismo | **Finalizar la revisión** (`POST /api/clients/{id}/review/close`): versión de trámite `review_closed:<resultado>`. Una revisión sin cerrar queda abierta y se retoma donde se dejó; una cerrada deja de verse «a medias». Validar sigue siendo cosa de la entidad |
 
 `POST /validate` responde **409** si el perfil ya está `active`, si `expected_version` (opcional) no es la versión actual (el perfil cambió desde que la entidad lo revisó; no se escribe nada), si falta algún dato obligatorio o si un cambio intenta escribir un dato calculado; **422** si `advisor_id` o algún cambio no son válidos. Al validar se cierran **todas** las alertas abiertas (regla del contrato v1) y cada una registra `resolved_by` y `resolved_at`; `review.next_review` queda a un año (todavía no vence solo). Añadir alertas a un perfil `active` no cambia su estado.
 

@@ -21,6 +21,9 @@ from .alcance import Motivo, TipoPregunta
 from .modelos import CALCULADOS, EstadoPerfil, Perfil
 
 PREFIJO = "review_requested:"
+# Cierre de la revisión por el inversor (Juan, pendiente de revisión de Alejandro): versión de trámite que no
+# toca datos ni estado. Finalizar la sesión NO es validar el perfil: eso lo sigue haciendo la entidad.
+CIERRE = "review_closed:"
 
 # Lo que el cliente puede elegir en «Ha cambiado algo», en el orden en que se muestra. DATOS DEL PRODUCTO.
 MOTIVOS_CLIENTE: dict[Motivo, dict[str, str]] = {
@@ -83,6 +86,7 @@ class RevisionEnCurso(BaseModel):
     aplazadas: list[str]
     reevaluacion_completa: bool
     razones: list[str]
+    obligatorios_pendientes: list[str] = []  # datos obligatorios del perfil que faltan (impiden finalizar)
 
     @property
     def pendientes(self) -> list[Pregunta]:
@@ -177,8 +181,8 @@ def en_curso(client_id: str) -> RevisionEnCurso | None:
     motivos: list[Motivo] = []
     abierta: dict | None = None
     for v in reversed(historial):
-        if v["reason"] == "validated" or v["reason"].startswith("demo_reset"):
-            break
+        if v["reason"] == "validated" or v["reason"].startswith(("demo_reset", CIERRE)):
+            break  # validada por la entidad, reinicio de demo o finalizada por el cliente
         if v["reason"].startswith(PREFIJO):
             abierta = v  # la más antigua de esta revisión: desde ahí cuentan las respuestas
             motivos = list(dict.fromkeys(_peticiones(v["reason"]) + motivos))
@@ -206,7 +210,8 @@ def _construir(p: Perfil, motivos: list[Motivo], abierta_en: datetime, desde: in
     todas.sort(key=lambda x: (x[0].tipo == TipoPregunta.confirmar, alcance.ORDEN_GUION.get(x[0].path, 999)))
     preguntas = [Pregunta(path=q.path, tipo=q.tipo, valor_vigente=q.valor_vigente, respondida=r) for q, r in todas]
     return RevisionEnCurso(motivos=motivos, abierta_en=abierta_en, desde_version=desde, preguntas=preguntas,
-                           aplazadas=a.aplazadas, reevaluacion_completa=a.reevaluacion_completa, razones=a.razones)
+                           aplazadas=a.aplazadas, reevaluacion_completa=a.reevaluacion_completa, razones=a.razones,
+                           obligatorios_pendientes=list(p.assessments.suitability.missing))
 
 
 def vista(r: RevisionEnCurso | None) -> dict[str, Any]:
@@ -222,7 +227,46 @@ def vista(r: RevisionEnCurso | None) -> dict[str, Any]:
         "deferred": r.aplazadas,
         "full_reassessment": r.reevaluacion_completa,
         "full_reassessment_reasons": r.razones,
+        "can_finish": not bloqueos(r),
+        "blocking": bloqueos(r),
     }
+
+
+def bloqueos(r: RevisionEnCurso) -> list[str]:
+    """Lo que impide finalizar la revisión: preguntas del alcance sin responder y datos obligatorios que
+    faltan. Las aplazadas (por encima del tope de una microentrevista) no bloquean."""
+    return list(dict.fromkeys([q.path for q in r.pendientes] + r.obligatorios_pendientes))
+
+
+def cerrar(client_id: str) -> dict[str, Any]:
+    """Finaliza la revisión del cliente sin validarla. Idempotente.
+
+    - Sin revisión abierta: no escribe nada (`already_closed`).
+    - Con preguntas u obligatorios pendientes: Conflicto (no se da por terminada).
+    - Si no: versión de trámite `review_closed:<resultado>` que conserva datos, evidencias, resultados,
+      alertas y estado. `sin_cambios` si el perfil sigue `active`; `pendiente_de_validacion` si hay cambios
+      que esperan a la entidad (sigue en `review_due`). Validar sigue siendo cosa de la entidad.
+    - Concurrencia: se decide sobre una versión y se escribe solo si nadie se ha adelantado; si alguien lo
+      hizo (otra respuesta u otro cierre), se reevalúa una vez.
+    """
+    for _ in range(2):
+        p = store.perfil(client_id)  # primero el perfil: cualquier escritura posterior invalida el cierre
+        r = en_curso(client_id)
+        if r is None:
+            return {"closed": True, "already_closed": True, "status": p.status.value,
+                    "pending_validation": p.status != EstadoPerfil.active, "version": p.version}
+        falta = bloqueos(r)
+        if falta:
+            raise store.Conflicto("Aún no se puede finalizar la revisión: faltan " + ", ".join(falta))
+        resultado = "sin_cambios" if p.status == EstadoPerfil.active else "pendiente_de_validacion"
+        try:
+            c = store.cerrar_revision(client_id, CIERRE + resultado, p.version)
+        except store.Conflicto:
+            continue
+        return {"closed": True, "already_closed": False, "result": resultado, "status": c.status.value,
+                "pending_validation": c.status != EstadoPerfil.active, "version": c.version,
+                "full_reassessment": r.reevaluacion_completa}
+    raise store.Conflicto("La revisión ha cambiado mientras se finalizaba: vuelve a intentarlo")
 
 
 # ---------- antes y después, para la entidad ----------

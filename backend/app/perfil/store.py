@@ -238,6 +238,23 @@ def pedir_revision(client_id: str, motivo: str) -> Perfil:
     return _escribir(client_id, lambda n: motivo, "system", lambda n: n.status)
 
 
+def cerrar_revision(client_id: str, motivo: str, version_esperada: int) -> Perfil:
+    """Cierra la revisión del cliente: versión de trámite `review_closed:<resultado>` sin tocar datos ni estado.
+
+    Finalizar la sesión del inversor no es validar el perfil: un `active` sigue `active` y un `review_due`
+    sigue esperando a la entidad. `version_esperada` es la versión sobre la que se decidió cerrar (sin
+    preguntas pendientes): si otra escritura se adelanta (p. ej. otra respuesta), Conflicto y no se escribe.
+    """
+    motivo = _motivo(motivo)
+
+    def mutar(n: Perfil) -> str:
+        if n.version - 1 != version_esperada:  # n es la candidata: la vigente es la anterior
+            raise Conflicto(f"La revisión ha cambiado desde la versión {version_esperada}: vuelve a intentarlo")
+        return motivo
+
+    return _escribir(client_id, mutar, "system", lambda n: n.status)
+
+
 def versiones(client_id: str) -> list[dict[str, Any]]:
     h = _a().historial(client_id)
     if not h:

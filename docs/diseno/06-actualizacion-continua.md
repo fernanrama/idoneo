@@ -334,7 +334,7 @@ Qué preguntar lo decide `alcance.alcance_revision`, el único planificador (mot
 
 **Pendiente:**
 - **Frontend (Alejandro/Fernán):** `VistaEntidad.tsx` solo ofrece «Validar» en `draft` y `pending_validation`, así que tiene que incluir `review_due` y enviar `expected_version`.
-- **Cerrar una revisión sin cambios:** botón «Terminar» y endpoint.
+- **Finalizar la revisión:** el backend ya existe (`POST /api/clients/{id}/review/close`; `can_finish` y `blocking` en `GET /review`). Falta el botón «Finalizar revisión» en el frontend.
 - **Revisiones abandonadas:** ¿caducan solas?
 - **`next_review`:** ¿lo renueva una revisión que solo confirma?
 - **`crear_sesion`:** conserva `review_due → draft`; decidir si sigue haciendo falta con D2.
