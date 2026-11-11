@@ -13,6 +13,7 @@ Orden de lectura recomendado: primero la arquitectura, después el diseño y, al
 | [modo-asesor-demo.md](modo-asesor-demo.md) | Modo asesor de demostración (validar en local con clientes ficticios), entrevista corta del pitch y MCP de demo |
 | [memoria-personal-seguridad.md](memoria-personal-seguridad.md) | Memoria personal por usuario: contrato, garantías de seguridad y límites |
 | [marca/README.md](marca/README.md) | Identidad de marca: logo, sello «Powered by idóneo», colores y tipografía |
+| [pitch.md](pitch.md) | Pitch: de dónde sale cada cifra nueva de la presentación, respuestas a las preguntas del jurado, lista del día de la demo y prueba con cinco personas |
 
 ## Diseño (8–9 nov 2026)
 

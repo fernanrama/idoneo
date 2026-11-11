@@ -19,7 +19,7 @@ y le entrega al asesor un perfil listo para validar. Se integra dentro de la app
 ![ElevenLabs](https://img.shields.io/badge/ElevenLabs-voz-000000)
 ![MCP](https://img.shields.io/badge/MCP-servidor_propio-6E56CF)
 
-**[Pruébalo online → hack-finance-uc3m-2026.vercel.app](https://hack-finance-uc3m-2026.vercel.app)**
+**[Pruébalo online → idoneo-app.vercel.app](https://idoneo-app.vercel.app)**
 
 [La demo](#la-demo-en-un-minuto) · [El problema](#el-problema) · [Qué hace](#qué-hace) · [Dónde se integra](#dónde-se-integra) · [Cómo funciona](#cómo-funciona) · [Pruébalo](#pruébalo) · [Evaluación](#evaluación)
 
@@ -130,7 +130,7 @@ Más detalle: [arquitectura](docs/arquitectura.md).
 
 ### En la web, sin instalar nada
 
-Abre **<https://hack-finance-uc3m-2026.vercel.app>**. El backend usa un plan gratuito que se duerme: la primera petición puede tardar cerca de un minuto.
+Abre **<https://idoneo-app.vercel.app>**. El backend usa un plan gratuito que se duerme: la primera petición puede tardar cerca de un minuto.
 
 1. **Ver la demo guiada** → **Empezar la demo.** La entrevista de Carmen y, al lado, su perfil construyéndose. No usa IA y está siempre disponible.
 2. **Soy cliente.** Tu propia entrevista, por voz o escribiendo. Usa IA y tiene un cupo diario de pruebas. No introduzcas datos reales.
@@ -146,8 +146,8 @@ Abre **<https://hack-finance-uc3m-2026.vercel.app>**. El backend usa un plan gra
 Backend, en Windows (PowerShell):
 
 ```powershell
-git clone https://github.com/fernanrama/hack-finance-uc3m-2026
-cd hack-finance-uc3m-2026\backend
+git clone https://github.com/fernanrama/idoneo
+cd idoneo\backend
 python -m venv .venv
 .venv\Scripts\activate        # si falla: Set-ExecutionPolicy -Scope Process Bypass
 pip install -r requirements.txt
@@ -158,8 +158,8 @@ uvicorn app.main:app --port 8000
 Backend, en macOS o Linux:
 
 ```bash
-git clone https://github.com/fernanrama/hack-finance-uc3m-2026
-cd hack-finance-uc3m-2026/backend
+git clone https://github.com/fernanrama/idoneo
+cd idoneo/backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -197,7 +197,8 @@ Medido con clientes **simulados** y Claude real. Método, registro de ejecucione
 | Qué | Resultado |
 |---|---|
 | Extractor, en 7 entrevistas difíciles (correcciones, evasivas, terceros, manipulación) | **31 de 31 datos, 100 % de precisión y 0 datos prohibidos** |
-| 20 entrevistas completas con clientes simulados | **165 de 166 datos**, 0 recomendaciones de producto, aviso de IA siempre y la alerta de lo declarado frente a lo demostrado en los 7 casos que la esperaban |
+| 20 entrevistas completas con clientes simulados | **165 de 166 datos**, 0 recomendaciones de producto, aviso de IA siempre y la alerta esperada en los 7 casos: 5 de lo declarado frente a lo demostrado y 2 de «necesita asesor» |
+| Frente al test de casillas, en las 5 entrevistas en que el cliente se sobrevalora en renta variable | Un test que registra lo que se marca detecta **0 de 5**; idóneo, **5 de 5** |
 | Verificador, 8 tramos × 3 repeticiones | **0 falsas alarmas** |
 | Voz de punta a punta | Probada con una entrevista por voz de 45 turnos: 15 datos con cita y la alerta clave detectada |
 | Latencia y coste | Unos 2 s de mediana por respuesta · entre 0,3 y 0,45 $ por entrevista, estimado a partir de los tokens |

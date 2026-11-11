@@ -11,6 +11,7 @@ Cómo hemos medido que Idóneo funciona: qué se probó, con qué versión, qué
 | **Extractor**: de la conversación al perfil, en 7 entrevistas difíciles (correcciones, evasivas, terceros, manipulación, cifras imposibles) | **100 % de cobertura (31/31), 100 % de precisión, 0 datos prohibidos escritos** | E-04 |
 | **Laboratorio**: entrevistas completas con 4 personas × 2 repeticiones | Cobertura 100 % (70/70), precisión 100 %, 0 recomendaciones, aviso de IA en 8/8, alerta esperada en 4/4 | E-07 |
 | **Laboratorio**: 12 clientes generados al azar | Cobertura 99 % (95/96), precisión 99 %, 0 recomendaciones, 3/3 rechazos cerrados correctamente, alerta *declarado ≠ demostrado* en las 3 que la esperaban | E-07 |
+| **Frente al test de casillas**: las 5 entrevistas de E-07 en que la ficha se sobrevalora en renta variable (Carmen dos veces, v004, v009 y v012) | Un test que registra lo que el cliente marca detecta 0 de 5; idóneo abrió la alerta *declarado ≠ demostrado* en 5 de 5. Es una tasa de detección sobre casos escritos para sobrevalorarse, no una frecuencia | E-07 |
 | **Verificador**: 8 tramos × 3 repeticiones | 21/24 bien, **0 falsas alarmas**. El único caso fallido (05) se corrigió y se repitió 3/3 bien | E-06 |
 | **Voz de punta a punta** (ElevenLabs + backend) | 45 turnos en unos 6 min, 15 datos con cita y la alerta clave detectada. Los fallos encontrados se corrigieron | E-03 |
 | **Entrevista corta del pitch** | Perfil completo y pendiente de validación en unos 43 s (7 turnos), con la alerta abierta | E-08 |
@@ -64,4 +65,4 @@ Además, más de 1000 tests automáticos (`python -m pytest -q`) cubren los cál
 - **Los casos los escribe el mismo equipo que ajusta los prompts**, así que hay riesgo de sobreajuste. Los 12 clientes generados al azar de E-07 lo reducen, pero no lo eliminan.
 - **Clientes simulados por Claude.** No sustituyen a una prueba con personas reales.
 - Los **umbrales** de idoneidad y conveniencia de `backend/app/perfil/calculos.py` son supuestos del equipo, pendientes de revisión por un experto.
-- No hay una comparación medida con el test MiFID tradicional de casillas.
+- La comparación con el test de casillas es **por construcción**: se supone un test que registra lo que el cliente marca. No se ha medido contra el test real de ninguna entidad, y uno con preguntas de control detectaría una parte.
