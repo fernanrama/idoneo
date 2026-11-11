@@ -8,8 +8,10 @@ versión; la segunda recibe ConflictoVersion y `store` relee y reintenta.
 
 from __future__ import annotations
 
+import random
 import sqlite3
 import threading
+import time
 import uuid
 from contextlib import contextmanager, nullcontext
 from datetime import datetime, timezone
@@ -21,7 +23,14 @@ from sqlalchemy.exc import IntegrityError, OperationalError
 
 from ..modelos import EstadoPerfil, Perfil, Turno
 from ..persistencia import db, migrar, seguridad
-from ..persistencia.tablas import clients, metadata, personal_versions, profile_versions, sessions, turns
+from ..persistencia.tablas import (
+    clients,
+    metadata,
+    personal_versions,
+    profile_versions,
+    sessions,
+    turns,
+)
 from ..personal import CapaPersonal
 from .base import ConflictoVersion, cliente_del_lote, id_turno
 
@@ -31,6 +40,9 @@ def _utc(momento: datetime | None) -> datetime | None:
     if momento is not None and momento.tzinfo is None:
         return momento.replace(tzinfo=timezone.utc)
     return momento
+
+
+MAX_REINTENTOS_TURNO = 8
 
 
 class AlmacenBD:
@@ -230,9 +242,13 @@ class AlmacenBD:
 
     def insertar_turno(self, session_id: str, turno: Turno, momento: datetime) -> tuple[Turno, bool]:
         t = turns.c
-        for _ in range(5):
+        for intento in range(MAX_REINTENTOS_TURNO):
             try:
                 with self._transaccion() as c:
+                    # Bloquea la fila de la sesión (Postgres; SQLite ya serializa escrituras): sin esto, dos
+                    # procesos cuentan el mismo índice a la vez y chocan en cada reintento.
+                    c.execute(select(sessions.c.session_id).where(sessions.c.session_id == session_id)
+                              .with_for_update())
                     if turno.turn_id:
                         previo = c.execute(select(t.turn_id, t.speaker, t.text, t.t_start, t.t_end).where(
                             t.session_id == session_id, t.turn_id == turno.turn_id)).first()
@@ -252,7 +268,9 @@ class AlmacenBD:
                         text=nuevo.text, t_start=nuevo.t_start, t_end=nuevo.t_end, created_at=momento))
                     return nuevo, True
             except IntegrityError:
-                continue  # otro turno tomó el mismo índice a la vez: se reintenta
+                # Otro proceso tomó el mismo índice a la vez (en SQLite no hay bloqueo de fila): se reintenta
+                # tras una espera aleatoria corta, para no volver a chocar en el mismo instante.
+                time.sleep(random.uniform(0.005, 0.02) * (intento + 1))
         raise ConflictoVersion(f"No se pudo guardar el turno en {session_id}")
 
     def turnos(self, session_id: str) -> list[Turno]:
