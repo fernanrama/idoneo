@@ -177,3 +177,10 @@ def test_un_motivo_que_necesita_rutas_no_se_acepta_como_motivo_del_inversor(vali
 def test_sin_motivos_ni_desde_se_comporta_como_antes(validada):
     extractor(AHORRO, 30000, "Ahora tengo unos treinta mil")
     assert plan() == plan(motivos=(), desde=None)
+
+
+def test_una_correccion_del_asesor_sin_cita_no_cuenta_como_respuesta_del_inversor(validada):
+    apertura = ahora()
+    store.aplicar(C, [Parche(path=AHORRO, value=80000, source="advisor")], "corrige la entidad", "advisor:asesor-07")
+    a = plan(motivos=[Motivo.planned_expense], desde=apertura)
+    assert AHORRO in [q.path for q in a.preguntas] and a.respondidas == []

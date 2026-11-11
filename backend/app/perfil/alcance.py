@@ -457,6 +457,9 @@ def alcance_revision(servido: Perfil, ultima: Perfil, hoy: date, motivos: Iterab
     if cambios:
         peticiones.append(Peticion(motivo=Motivo.value_changed, rutas=cambios))
     desde = desde or servido.created_at
+    # Respondido = el inversor lo dijo (con su cita) desde que empezó la revisión; una corrección del asesor
+    # sin cita no cuenta como respuesta suya.
     vigentes = frozenset(r for r, f in ultima.mifid.items()
-                         if r not in CALCULADOS and f.value is not None and ultimo_momento(f) >= desde)
+                         if r not in CALCULADOS and f.value is not None and f.evidence
+                         and ultimo_momento(f) >= desde)
     return planificar(ultima, peticiones, vigentes).model_copy(update={"apertura": True})
