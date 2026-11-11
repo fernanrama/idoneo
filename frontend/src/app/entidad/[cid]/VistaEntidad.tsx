@@ -13,7 +13,8 @@ import {
   FUENTES,
   mostrarValor,
 } from "@/lib/bloques";
-import type { Fact, Perfil, Restricciones, VersionResumen } from "@/lib/tipos";
+import type { Comparacion, Fact, Perfil, Restricciones, Revision, VersionResumen } from "@/lib/tipos";
+import { AntesDespues, Busquedas, EnRevision } from "@/components/PerfilCambios";
 import { usePerfil } from "@/lib/usePerfil";
 import { OrbePerfil, PALETA_ENTIDAD } from "@/components/Formas";
 import s from "./entidad.module.css";
@@ -45,7 +46,7 @@ export default function VistaEntidad({
   // Modo asesor de demo: lo confirma el servidor; mientras tanto no se carga ninguna fuente.
   const modo = useModoAsesor(cid);
   const asesor = modo === null ? null : modo.permitido;
-  const { perfil, restricciones, versiones, error, recargar } = usePerfil(cid, SONDEO_MS, {
+  const { perfil, restricciones, versiones, revision, cambios, error, recargar } = usePerfil(cid, SONDEO_MS, {
     asesor: asesor === true,
     esperar: asesor === null,
   });
@@ -102,19 +103,21 @@ export default function VistaEntidad({
             <h1>
               <span className={s.grad}>{cid},</span>
               <br />
-              {perfil ? TITULO[perfil.status] : "cargando…"}
+              {perfil ? (revision?.open || restricciones?.pending_review ? "cambios por validar" : TITULO[perfil.status]) : "cargando…"}
             </h1>
             {perfil && (
               <>
                 <p>
                   {perfil.status === "active"
                     ? `Versión ${perfil.version}, validada. El agente de la entidad ya puede usarla por MCP.`
-                    : `Versión ${perfil.version}. Revisa las evidencias y los avisos y valídalo: hasta entonces, el agente de la entidad no puede usarlo.`}
+                    : restricciones?.pending_review
+                      ? `El cliente ha contado que algo ha cambiado. La versión ${perfil.version} recoge sus respuestas; el agente sigue usando la ${restricciones.profile_version} hasta que valides.`
+                      : `Versión ${perfil.version}. Revisa las evidencias y los avisos y valídalo: hasta entonces, el agente de la entidad no puede usarlo.`}
                   {(esSimulado(perfil) || asesor) && (
                     <span className={s.simulado}>Datos simulados</span>
                   )}
                 </p>
-                <Recorrido estado={perfil.status} />
+                <Recorrido estado={restricciones?.pending_review && perfil.status !== "active" ? "pending_validation" : perfil.status} />
               </>
             )}
             {asesor === true && (
@@ -148,7 +151,7 @@ export default function VistaEntidad({
                   title={asesor === true ? undefined : "Requiere un permiso independiente de asesor"}
                   onClick={asesor === true ? () => ejecutar(() => api.validarComoAsesor(cid)) : undefined}
                 >
-                  {accion.enCurso ? "Validando…" : "Validar perfil"}{" "}
+                  {accion.enCurso ? "Validando…" : restricciones?.pending_review ? "Validar los cambios" : "Validar perfil"}{" "}
                   <span aria-hidden="true">→</span>
                 </button>
               )}
@@ -224,6 +227,9 @@ export default function VistaEntidad({
         {perfil && pestana === "Resumen" && (
           <Resumen
             perfil={perfil}
+            restricciones={restricciones}
+            revision={revision}
+            cambios={cambios}
             alVerEvidencia={(ruta) => {
               setPestana("Evidencias");
               setAbierto(ruta);
@@ -251,9 +257,15 @@ export default function VistaEntidad({
 
 function Resumen({
   perfil,
+  restricciones,
+  revision,
+  cambios,
   alVerEvidencia,
 }: {
   perfil: Perfil;
+  restricciones: Restricciones | null;
+  revision: Revision | null;
+  cambios: Comparacion | null;
   alVerEvidencia: (ruta: string) => void;
 }) {
   const su = perfil.assessments.suitability;
@@ -267,6 +279,8 @@ function Resumen({
   ).length;
   return (
     <div className={s.aparece}>
+      {restricciones?.pending_review && <EnRevision p={restricciones.pending_review} servida={restricciones.profile_version} revision={revision} tono="entidad" />}
+      {cambios && <AntesDespues c={cambios} tono="entidad" />}
       {alertas.map((a) => (
         <div key={a.id} className={`${s.tarj} ${s.alerta}`} role="alert">
           {Icono.aviso}
@@ -350,6 +364,12 @@ function Resumen({
           </p>
         </div>
       </div>
+      {restricciones && (
+        <div className={`${s.tarj} ${s.bloque}`}>
+          <h2>Qué puede buscar el agente en el catálogo · calculado, no lo decide el modelo</h2>
+          <Busquedas r={restricciones} perfil={perfil} tono="entidad" />
+        </div>
+      )}
     </div>
   );
 }
@@ -532,6 +552,7 @@ function Mcp({ restricciones: r }: { restricciones: Restricciones | null }) {
               portfolios_query: r.portfolios_query,
               post_filters: r.post_filters,
               blocked_searches: r.blocked_searches ?? [],
+              ...(r.pending_review ? { pending_review: r.pending_review } : {}),
             },
             null,
             2,
@@ -553,6 +574,10 @@ function Mcp({ restricciones: r }: { restricciones: Restricciones | null }) {
           {r.usable
             ? "Le enseño solo lo que encaja con esos límites."
             : "Hasta que un asesor lo valide, no lo uso para recomendar."}
+          {r.pending_review &&
+            ` Ojo: hay ${r.pending_review.paths.length} ${r.pending_review.paths.length === 1 ? "dato" : "datos"} en revisión; no me apoyo en ellos hasta que se validen.`}
+          {(r.blocked_searches ?? []).length > 0 &&
+            ` No busco ${(r.blocked_searches ?? []).map((b) => BUSQUEDA_NOMBRE[b] ?? b).join(", ")}.`}
         </div>
         <p className="pequena" style={{ margin: 0, color: "#4b4b6b" }}>
           En la demo esto se hace en Claude, con nuestro MCP y el de MyInvestor
@@ -581,6 +606,8 @@ function useModoAsesor(cid: string): { activo: boolean; permitido: boolean } | n
   }, [cid]);
   return modo && modo.cid === cid ? { activo: modo.activo, permitido: modo.permitido } : null;
 }
+
+const BUSQUEDA_NOMBRE: Record<string, string> = { funds: "fondos", portfolios: "carteras", etfs: "ETF", stocks: "acciones" };
 
 const esSimulado = (p: Perfil) =>
   p.author === "fixture" || /simulad/i.test(p.reason ?? "");

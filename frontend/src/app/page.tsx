@@ -156,14 +156,20 @@ export default function Portada() {
               </Revela>
               <Revela como="article" retraso={0.12} className={`${s.carta} vidrio`}>
                 <span className={s.cartaIcono}>{Icono.check}</span>
-                <h3>Versionado y validado</h3>
-                <p>Cada cambio crea una versión nueva con su motivo y su autor. Nada se usa hasta que una persona lo valida.</p>
+                <h3>Un perfil que sigue vivo</h3>
+                <p>
+                  Si algo cambia (un sueldo, un gasto, otra idea), el cliente lo cuenta y solo se le pregunta eso. Cada cambio es una
+                  versión nueva, y hasta que una persona la valida el agente sabe qué datos están en revisión.
+                </p>
                 <ol className={s.versiones}>
                   <li>
                     <b>v1</b> Entrevista inicial
                   </li>
                   <li>
                     <b>v2</b> Validado por la entidad
+                  </li>
+                  <li>
+                    <b>v3</b> «Me han subido el sueldo» · 3 preguntas
                   </li>
                 </ol>
               </Revela>
@@ -196,8 +202,8 @@ export default function Portada() {
             </Revela>
             <div className={s.tres}>
               {[
-                { h: "/onboarding/entrevista", t: "Como cliente", p: "Haz tu propia entrevista, por voz o escribiendo.", i: Icono.micro },
-                { h: "/escenario", t: "La demo guiada", p: "Carmen, 68 años: la entrevista y lo que recibe la entidad, a la vez.", i: Icono.play },
+                { h: "/onboarding/entrevista", t: "Como cliente", p: "Haz tu entrevista, por voz o escribiendo, y actualiza tu perfil cuando algo cambie.", i: Icono.micro },
+                { h: "/escenario", t: "La demo guiada", p: "Carmen, 68 años: la entrevista y lo que recibe la entidad, a la vez. Sin claves ni micrófono.", i: Icono.play },
                 { h: `/entidad/${CLIENTE_DEMO}`, t: "Como entidad", p: "Revisa evidencias y avisos, valida el perfil y mira qué ve el agente.", i: Icono.check },
               ].map((c, n) => (
                 <Revela key={c.h} retraso={n * 0.12}>

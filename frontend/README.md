@@ -18,11 +18,12 @@ El backend tiene que estar en marcha (ver README raíz). Para probar en el móvi
 |---|---|
 | `/` | Portada del producto: barra fija, el problema, «cómo funciona» contado con el scroll, qué recibe la entidad y accesos para probarlo |
 | `/onboarding` | Redirige a la entrevista (el aviso de IA y el consentimiento están ahora en su pantalla de inicio) |
-| `/onboarding/entrevista` | Entrevista con el aura: solo la pregunta actual, por voz o **por escrito** (modo texto, necesita la clave de Claude en el backend) y **demo guiada** |
-| `/onboarding/perfil` | Perfil para el cliente, en claro: medidor de riesgo, lo que hemos entendido con la frase de cada dato, avisos y siguiente paso |
-| `/onboarding/productos` | Filtros del perfil. **No consulta el MCP de MyInvestor por código**: sus términos lo prohíben (ver `docs/diseno/04-mcp-myinvestor.md`) |
-| `/escenario` | Pantalla partida para el pitch: entrevista a la izquierda y lo que recibe la entidad, en directo, a la derecha. `?cliente=<id>` muestra un perfil ya existente |
-| `/entidad/[cid]` | Vista de la entidad con pestañas: resumen, evidencias, historial y restricciones; validación web bloqueada hasta contar con permiso de asesor |
+| `/onboarding/entrevista` | Entrevista con el aura: solo la pregunta actual, por voz o **por escrito** (modo texto, necesita la clave de Claude en el backend). Si el cliente tiene una revisión abierta, es la **microentrevista**: sus motivos, sus preguntas y una barra de progreso. Para mirar sin hacer la entrevista, enlaza a la demo guiada del escenario |
+| `/onboarding/cambio` | «¿Ha cambiado algo en tu vida?»: el cliente elige qué ha pasado y ve, antes de empezar, qué se le va a preguntar (lo calcula el backend). En el móvil, una barra fija resume cuántas preguntas son y lleva al plan |
+| `/onboarding/perfil` | Perfil para el cliente, en claro: medidor de riesgo, lo que hemos entendido con la frase de cada dato, avisos, «¿Ha cambiado algo?» (o la revisión a medias), «Lo que ha cambiado» y siguiente paso |
+| `/onboarding/productos` | Filtros del perfil en lenguaje claro, qué se busca y qué no (y por qué), la hipoteca y el aviso de datos en revisión. **No consulta el MCP de MyInvestor por código**: sus términos lo prohíben (ver `docs/diseno/04-mcp-myinvestor.md`) |
+| `/escenario` | La demo guiada (y el pitch): entrevista a la izquierda y lo que recibe la entidad, en directo, a la derecha. En el móvil, por pestañas. `?cliente=<id>` muestra un perfil ya existente |
+| `/entidad/[cid]` | Vista de la entidad con pestañas: resumen, evidencias, historial y restricciones. Con cambios sin validar: datos en revisión, progreso de la microentrevista y antes/después. Validación web bloqueada hasta contar con permiso de asesor |
 
 ## Validar el perfil con el backend protegido
 
@@ -46,7 +47,7 @@ backend y en consumidores de servicio autorizados, sin copiarlo al entorno del f
 - `src/lib/api.ts` y `src/lib/tipos.ts`: cliente y tipos del contrato (`docs/contratos.md`).
 
 ## Demo guiada
-«Ver la demo guiada» repite la entrevista **simulada** de Carmen (`src/lib/guion.ts`) en un minuto aproximadamente. Las voces son audios grabados una sola vez con ElevenLabs (`public/demo/carmen/`), así que en la demo no se gasta ningún crédito. Si falta el audio de un turno, se usa la voz del navegador como respaldo. Para grabarlos o regrabarlos, desde `backend/`: `python scripts/generar_audios_demo.py --voz-carmen <ID> --aplicar`. La clave necesita el permiso «Text to Speech»; sin `--aplicar` solo cuenta los caracteres. Se ve la pregunta del asistente y la respuesta de Carmen, y su perfil de ejemplo (`carmen-68`, calculado por el backend) se va reconstruyendo dato a dato a medida que se oye la frase que justifica cada uno (`src/lib/demo.ts`). Tiene pausa, salto al siguiente turno, velocidad (1×, 1,5× y 2×) y botón para quitar el sonido. No escribe nada en el backend.
+Está en `/escenario` («Ver la demo guiada»); la entrevista del cliente solo enlaza a ella, para que haya un único sitio donde verla. Repite la entrevista **simulada** de Carmen (`src/lib/guion.ts`) en un minuto aproximadamente. Las voces son audios grabados una sola vez con ElevenLabs (`public/demo/carmen/`), así que en la demo no se gasta ningún crédito. Si falta el audio de un turno, se usa la voz del navegador como respaldo. Para grabarlos o regrabarlos, desde `backend/`: `python scripts/generar_audios_demo.py --voz-carmen <ID> --aplicar`. La clave necesita el permiso «Text to Speech»; sin `--aplicar` solo cuenta los caracteres. Se ve la pregunta del asistente y la respuesta de Carmen, y su perfil de ejemplo (`carmen-68`, calculado por el backend) se va reconstruyendo dato a dato a medida que se oye la frase que justifica cada uno (`src/lib/demo.ts`). Tiene pausa, salto al siguiente turno, velocidad (1×, 1,5× y 2×) y botón para quitar el sonido. No escribe nada en el backend.
 
 ## Voz con ElevenLabs: lo comprobado y lo pendiente
 

@@ -2,7 +2,7 @@
 
 import { ConversationProvider } from "@elevenlabs/react";
 import Link from "next/link";
-import { use } from "react";
+import { use, useState } from "react";
 import { Entrevista } from "@/components/Entrevista";
 import { PanelVivo } from "@/components/PanelVivo";
 import { Noche, clasesBoton } from "@/components/visual";
@@ -30,9 +30,20 @@ function Escenario({ cliente }: { cliente: string | null }) {
   const previo = usePerfil(cliente ?? "", cliente ? 3000 : undefined);
   const enMarcha = e.estado === "activa" || e.estado === "conectando";
   const perfil = e.estado === "inactiva" && cliente ? previo.perfil : e.perfil;
+  // En el móvil no caben las dos mitades: se elige cuál ver. En el ordenador se ven a la vez.
+  const [vista, setVista] = useState<"cliente" | "entidad">("cliente");
+  const datos = perfil ? Object.entries(perfil.mifid).filter(([r, f]) => f.value != null && !r.startsWith("disclosures.")).length : 0;
 
   return (
-    <div className={s.raiz}>
+    <div className={`${s.raiz} ${vista === "entidad" ? s.verEntidad : s.verCliente}`}>
+      <div className={s.conmutador} role="tablist" aria-label="Qué mitad ver">
+        <button role="tab" aria-selected={vista === "cliente"} onClick={() => setVista("cliente")}>
+          El cliente
+        </button>
+        <button role="tab" aria-selected={vista === "entidad"} onClick={() => setVista("entidad")}>
+          La entidad{datos > 0 && <b key={datos}>{datos}</b>}
+        </button>
+      </div>
       <Noche className={s.cliente}>
         <Entrevista
           e={e}
