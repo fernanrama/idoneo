@@ -53,7 +53,7 @@ La regla central de diseño es:
 
 > **Los agentes leen la conversación; el código decide qué entra en el perfil.**
 
-Esto evita que el modelo pueda inventar cálculos, asignarse su propia confianza o activar directamente un perfil. Véase [`backend/app/agentes/README.md`](backend/app/agentes/README.md).
+Esto evita que el modelo pueda inventar cálculos, asignarse su propia confianza o activar directamente un perfil. Véase [`backend/app/agentes/README.md`](../backend/app/agentes/README.md).
 
 ---
 
@@ -117,7 +117,7 @@ sequenceDiagram
 /entidad/{client_id}   ← vista paralela para revisión humana
 ```
 
-El cliente frontend de estas operaciones está en [`frontend/src/lib/api.ts`](frontend/src/lib/api.ts). Las acciones administrativas no exponen el token en el navegador: pasan por [`frontend/src/app/api/entidad/`](frontend/src/app/api/entidad/).
+El cliente frontend de estas operaciones está en [`frontend/src/lib/api.ts`](../frontend/src/lib/api.ts). Las acciones administrativas no exponen el token en el navegador: pasan por [`frontend/src/app/api/entidad/`](../frontend/src/app/api/entidad/).
 
 ---
 
@@ -164,7 +164,7 @@ flowchart TD
 6. El store crea una versión nueva y recalcula idoneidad y conveniencia.
 7. El verificador se ejecuta incluso si falló el extractor.
 
-Código principal: [`backend/app/main.py`](backend/app/main.py), funciones `_procesar_turno` y `_procesar_turno_sin_candado`.
+Código principal: [`backend/app/main.py`](../backend/app/main.py), funciones `_procesar_turno` y `_procesar_turno_sin_candado`.
 
 > [!NOTE]
 > El procesamiento es **eventual**: el perfil puede tardar un instante en reflejar el turno. Actualmente el frontend consulta `GET /profile` cada 1,5 segundos. El bus interno de eventos existe, pero el endpoint SSE sigue pendiente.
@@ -193,7 +193,7 @@ No existe un “enjambre” autónomo. **FastAPI es el orquestador** y llama a c
 
 ### Cliente común de Claude
 
-[`backend/app/agentes/claude.py`](backend/app/agentes/claude.py) centraliza:
+[`backend/app/agentes/claude.py`](../backend/app/agentes/claude.py) centraliza:
 
 - cliente asíncrono y perezoso;
 - modelo por agente: `MODEL_EXTRACTOR`, `MODEL_ENTREVISTADOR`, etc.;
@@ -240,7 +240,7 @@ Claude propone:
 - el `turn_id`;
 - una cita del cliente.
 
-Después [`extractor.a_parches`](backend/app/agentes/extractor.py) aplica controles que el modelo no puede saltarse:
+Después [`extractor.a_parches`](../backend/app/agentes/extractor.py) aplica controles que el modelo no puede saltarse:
 
 1. El turno citado debe pertenecer al cliente y estar dentro de la ventana.
 2. La cita debe existir realmente en la transcripción.
@@ -316,7 +316,7 @@ flowchart TB
     AP --> RE
 ```
 
-Después de cada escritura, [`backend/app/perfil/calculos.py`](backend/app/perfil/calculos.py) recalcula:
+Después de cada escritura, [`backend/app/perfil/calculos.py`](../backend/app/perfil/calculos.py) recalcula:
 
 - meses de colchón de emergencia;
 - capacidad económica de pérdida;
@@ -473,19 +473,19 @@ flowchart LR
 
 | Si quieres cambiar… | Archivo principal |
 |---|---|
-| La conversación o sus preguntas | [`backend/app/agentes/prompts/entrevistador.md`](backend/app/agentes/prompts/entrevistador.md) |
-| Qué extrae Claude | [`backend/app/agentes/extractor.py`](backend/app/agentes/extractor.py) |
-| Cómo se entienden cifras y citas | [`backend/app/agentes/normalizacion.py`](backend/app/agentes/normalizacion.py) |
-| Qué contexto previo se exige | [`backend/app/agentes/guardas.py`](backend/app/agentes/guardas.py) |
-| Confianza y conocimiento demostrado | [`backend/app/agentes/rubrica.py`](backend/app/agentes/rubrica.py) |
-| Alertas del verificador | [`backend/app/agentes/verificador.py`](backend/app/agentes/verificador.py) |
-| Campos, fuentes, flags y estados | [`backend/app/perfil/modelos.py`](backend/app/perfil/modelos.py) |
-| Escritura, versionado y validación | [`backend/app/perfil/store.py`](backend/app/perfil/store.py) |
-| Idoneidad y restricciones | [`backend/app/perfil/calculos.py`](backend/app/perfil/calculos.py) |
-| Orquestación y rutas REST | [`backend/app/main.py`](backend/app/main.py) |
-| Herramientas MCP | [`backend/app/mcp/servidor.py`](backend/app/mcp/servidor.py) |
-| Entrevista del frontend | [`frontend/src/lib/useEntrevista.ts`](frontend/src/lib/useEntrevista.ts) |
-| Pantallas y navegación | [`frontend/src/app/`](frontend/src/app/) |
+| La conversación o sus preguntas | [`backend/app/agentes/prompts/entrevistador.md`](../backend/app/agentes/prompts/entrevistador.md) |
+| Qué extrae Claude | [`backend/app/agentes/extractor.py`](../backend/app/agentes/extractor.py) |
+| Cómo se entienden cifras y citas | [`backend/app/agentes/normalizacion.py`](../backend/app/agentes/normalizacion.py) |
+| Qué contexto previo se exige | [`backend/app/agentes/guardas.py`](../backend/app/agentes/guardas.py) |
+| Confianza y conocimiento demostrado | [`backend/app/agentes/rubrica.py`](../backend/app/agentes/rubrica.py) |
+| Alertas del verificador | [`backend/app/agentes/verificador.py`](../backend/app/agentes/verificador.py) |
+| Campos, fuentes, flags y estados | [`backend/app/perfil/modelos.py`](../backend/app/perfil/modelos.py) |
+| Escritura, versionado y validación | [`backend/app/perfil/store.py`](../backend/app/perfil/store.py) |
+| Idoneidad y restricciones | [`backend/app/perfil/calculos.py`](../backend/app/perfil/calculos.py) |
+| Orquestación y rutas REST | [`backend/app/main.py`](../backend/app/main.py) |
+| Herramientas MCP | [`backend/app/mcp/servidor.py`](../backend/app/mcp/servidor.py) |
+| Entrevista del frontend | [`frontend/src/lib/useEntrevista.ts`](../frontend/src/lib/useEntrevista.ts) |
+| Pantallas y navegación | [`frontend/src/app/`](../frontend/src/app/) |
 
 ---
 

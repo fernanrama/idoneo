@@ -1,6 +1,6 @@
 # Idóneo · Diseño del producto (Hack Finance)
 
-Nov 8, 2026 · @Alejandro
+8 nov 2026 · Alejandro (Alex). Documento de diseño original, copiado tal cual salvo unas notas marcadas como **Actualización**. Las decisiones posteriores a este documento están en [02-auditoria-y-decisiones.md](02-auditoria-y-decisiones.md) y prevalecen sobre lo que diga aquí.
 
 ## Resumen
 
@@ -33,7 +33,11 @@ Idóneo cubre la recogida y evaluación de idoneidad que exige MiFID II, siguien
 | Avisar de que es una IA, supervisión humana y responsabilidad de la entidad | [Declaración ESMA sobre IA (2024)](https://cms.law/en/aut/legal-updates/esma-issues-first-formal-guidance-on-use-of-ai-in-retail-financial-services); art. 50 Ley de IA | Aviso al empezar; el asesor valida el perfil antes de usarlo |
 | Datos personales y grabación | RGPD | Consentimiento explícito al empezar; la voz no se usa para identificar al cliente |
 
-La norma española que traspone MiFID II es la Ley 6/2023 de los Mercados de Valores y de los Servicios de Inversión. Quedan fuera del MVP el KYC antiblanqueo, la firma del contrato y el test de conveniencia. Antes del pitch hay que revisar los números de artículo con el texto oficial: aquí están citados de memoria.
+La norma española que traspone MiFID II es la Ley 6/2023 de los Mercados de Valores y de los Servicios de Inversión. Quedan fuera del MVP el KYC antiblanqueo y la firma del contrato. Antes del pitch hay que revisar los números de artículo con el texto oficial: aquí están citados de memoria.
+
+> **Actualización (8 nov):** el producto cubre también el **test de conveniencia** (compra sin asesoramiento de fondos, ETF y acciones en MyInvestor). Sale casi directo del bloque de conocimientos y experiencia. El perfil da dos resultados: idoneidad y conveniencia. Ver [03-contrato-perfil.md](03-contrato-perfil.md).
+>
+> **Actualización (8 nov), matices legales de la auditoría:** la base legal RGPD de la capa MiFID es la obligación legal (art. 6.1.c), no el consentimiento; el consentimiento solo vale para la capa personal. El art. 50 de la Ley de IA aplica desde agosto de 2026 (aviso de IA obligatorio); el perfilado para invertir no está en el Anexo III de alto riesgo. No inferir emociones de la voz. Para el expediente de idoneidad la referencia de registro son los arts. 72–73 del Reg. 2017/565 y el 25.5 MiFID II (el 76 trata de comunicaciones sobre órdenes).
 
 ## Onboarding ampliado
 
@@ -130,7 +134,7 @@ La herramienta 2 es la que une Idóneo con MyInvestor: sus restricciones se trad
 
 La integración con MyInvestor es real desde el primer día: tienen un [servidor MCP público](https://mcp.myinvestor.es/) en `https://mcp.myinvestor.es/mcp`, desarrollado con GPTadvisor y sin necesidad de cuenta. Según su [política de privacidad](https://mcp.myinvestor.es/privacy), solo expone datos públicos de productos (nombre, ISIN, TER, patrimonio, rentabilidad histórica) y ningún dato de clientes. Ese hueco es justo el que llena Idóneo.
 
-&#91;embedded content: flujo de integración · 6 pasos, de la voz del cliente a la propuesta\]
+> Diagrama del flujo: ver [../img/idea-final.png](../img/idea-final.png) (editable en [../img/idea-final.excalidraw](../img/idea-final.excalidraw)).
 
 Cómo funciona la cadena:
 
@@ -139,13 +143,15 @@ Cómo funciona la cadena:
 - **GPTadvisor encaja igual.** Su agente ya se conecta a fuentes externas por API, MCP o ficheros, así que Idóneo es una fuente más. Con el agente de GPTadvisor la integración es la misma; en la demo, Claude hace de agente.
 - **La contratación sigue como hoy:** MyInvestor permite empezarla en el chat y [completarla en su app o web](https://www.fundssociety.com/es/?p=302934), donde el cliente se identifica.
 
+> **Actualización (8 nov):** el MCP de MyInvestor sí expone el riesgo SRRI 1–7 en fondos (`max_risk`), pero sus términos de uso **prohíben llamarlo por programa** desde un backend sin permiso explícito. Su uso como conector dentro de Claude sí está permitido. Detalle en [04-mcp-myinvestor.md](04-mcp-myinvestor.md).
+
 La siguiente fase con ellos, que se cuenta en el pitch como visión y no como algo hecho: que el perfil de Idóneo sustituya al test MiFID del alta de MyInvestor, de modo que quien llega desde un chat ya traiga su perfil verificado.
 
 ## Arquitectura de agentes y stack
 
 El perfil versionado es el centro: los agentes solo escriben en él y todas las salidas solo leen de él. Así el panel, el PDF, el audio y el MCP nunca se contradicen.
 
-&#91;embedded content: arquitectura · conversación, agentes, perfil y salidas\]
+> Diagrama de arquitectura: ver [../img/idea-final.png](../img/idea-final.png).
 
 - **Presupuesto:** los 400 $ de API van íntegros a los agentes del producto; el desarrollo no los consume. Eso permite usar modelos buenos donde importa sin miedo a quedarnos cortos.
 - **Reparto de modelos:** en la conversación manda la latencia, así que va el modelo más capaz que responda en menos de un segundo (Sonnet, o Haiku si hace falta). Sonnet en el extractor, que trabaja en tiempo real. Opus en el verificador y en el resumen para el modelo, que van en segundo plano.
@@ -157,6 +163,8 @@ El perfil versionado es el centro: los agentes solo escriben en él y todas las 
 - **Límite real:** los minutos de voz del plan Creator de ElevenLabs, no el presupuesto de Claude.
 
 ## Demo de 3 minutos
+
+> **Actualización (8 nov):** la demo aún no se toca; este guion es el borrador original. Ojo: en el paso 4 el agente acaba recomendando, y el producto **no** recomienda. Hay que presentarlo claramente como el agente de la entidad.
 
 La demo cuenta una historia completa: Carmen habla con Idóneo desde su móvil, el perfil se construye con pruebas y un agente lo usa para buscar productos reales de MyInvestor que lo respetan.
 

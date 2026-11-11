@@ -1,4 +1,4 @@
-// Espejo en TypeScript de backend/app/perfil/modelos.py (contrato v1, docs/proyecto/04_CONTRATO_PERFIL.md).
+// Espejo en TypeScript de backend/app/perfil/modelos.py (contrato v1, docs/diseno/03-contrato-perfil.md).
 
 export type Fuente = "declared" | "demonstrated" | "calculated" | "advisor";
 export type EstadoPerfil = "draft" | "pending_validation" | "active" | "review_due";

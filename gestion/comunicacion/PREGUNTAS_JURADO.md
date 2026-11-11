@@ -20,7 +20,7 @@ v2 · 10 nov 2026 · Responsable: Rodrigo · Revisión: equipo
 
 ### 2. ¿En qué se diferencia de lo que ya existe (GPTadvisor y otros)?
 - **Respuesta:** GPTadvisor protege lo que su agente **responde**; Idóneo protege lo que su agente **recibe**: un perfil fiable, con prueba de cada dato. Es una pieza que se integra, no un competidor.
-- **Prueba:** `docs/proyecto/02_AUDITORIA_Y_DECISIONES.md` (D1 y D3) y `gestion/estrategia/ANALISIS_INICIAL.md`.
+- **Prueba:** `docs/diseno/02-auditoria-y-decisiones.md` (D1 y D3) y `gestion/estrategia/ANALISIS_INICIAL.md`.
 - **Límite:** **no decir «somos los primeros» ni «nadie lo hace»**. GPTadvisor anuncia memoria de clientes y Aveni analiza comprensión: hay solapamientos parciales.
 
 ### 3. ¿Es viable económicamente? ¿Quién paga?
@@ -41,7 +41,7 @@ v2 · 10 nov 2026 · Responsable: Rodrigo · Revisión: equipo
 ### 6. ¿Qué haríais con los datos personales y la grabación de voz?
 - **Respuesta:** Separamos dos capas: la MiFID (necesaria para la evaluación) y la personal (opcional, con consentimiento aparte, borrable). La voz no se usa para identificar a la persona. Antes de empezar, el cliente marca dos casillas: que sabe que habla con una IA y que acepta que se guarde la conversación.
 - **Estado:** la memoria personal, separada y con su propio consentimiento, ya está en `main` (PR 21, unida el 10/11).
-- **Prueba:** `docs/DISENO.md` (capas) y RGPD arts. 6.1 y 9.
+- **Prueba:** `docs/diseno/01-diseno.md` (capas) y RGPD arts. 6.1 y 9.
 - **Límite:** la base jurídica concreta la decide la **entidad** como responsable del tratamiento. **No decir «la ley exige grabar»**: grabar la entrevista es decisión de diseño, con consentimiento.
 
 ### 7. ¿Y la Ley de IA?
@@ -61,7 +61,7 @@ v2 · 10 nov 2026 · Responsable: Rodrigo · Revisión: equipo
 
 ### 9. ¿Y si el modelo se equivoca o inventa?
 - **Respuesta:** El modelo **propone** y el código **decide**. Riesgo máximo, capacidad de pérdida y conveniencia salen de funciones deterministas. La confianza sale de una rúbrica fija en código, no de la opinión del modelo; por debajo de 0,65 el dato se marca para revisar y el asistente repregunta. Y el perfil queda en borrador hasta que una persona lo valida.
-- **Prueba:** `backend/app/perfil/calculos.py`, `backend/app/agentes/rubrica.py` (v2) y `docs/CONTRATOS.md`. En E-04 el extractor no dio ningún dato erróneo ni prohibido en 31.
+- **Prueba:** `backend/app/perfil/calculos.py`, `backend/app/agentes/rubrica.py` (v2) y `docs/contratos.md`. En E-04 el extractor no dio ningún dato erróneo ni prohibido en 31.
 - **Límite:** los pesos de la rúbrica son **supuestos del equipo**, no están calibrados con datos reales.
 
 ### 10. ¿Cómo medís el impacto?

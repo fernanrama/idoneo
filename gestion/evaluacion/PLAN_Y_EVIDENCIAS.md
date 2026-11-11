@@ -58,7 +58,7 @@ No registrar secretos ni datos personales financieros. Usar ejemplos sintéticos
 - **Esperado y observado (personas):** cobertura 100 % (70/70), precisión 100 %, 0 prohibidos, 0 recomendaciones; 8/8 entrevistas terminadas con aviso de IA; alerta esperada en 4/4 (Carmen `knowledge.equity_funds` ×2, Ramón `needs_advisor` ×2). 17-20 intervenciones del asistente.
 - **Esperado y observado (variantes):** cobertura 99 % (95/96), precisión 99 %, 0 prohibidos, 0 recomendaciones; 12/12 terminadas con aviso de IA; 3 clientes no aceptan y la entrevista se cierra en 2 turnos (correcto); alerta declarado ≠ demostrado en las 3 variantes que la esperaban. Un fallo de un dato en v007. 14-26 intervenciones.
 - **Mediciones:** mediana por llamada 2,1-2,2 s entrevistador, 1,8-2,0 s extractor, 1,8-1,9 s verificador. Coste **estimado** a partir de los tokens del informe y los precios de Sonnet 5.5: ~3,4 $ las 8 entrevistas y ~3,9 $ las 12 variantes (≈ 0,3-0,4 $ por entrevista; el verificador, ~30 %). Coste real: consola de Anthropic.
-- **Evidencia:** `docs/laboratorio/e07/` (informes y transcripciones).
+- **Evidencia:** `docs/evaluacion/laboratorio/e07/` (informes y transcripciones).
 - **Limitaciones:** clientes interpretados por Claude; el informe no lista todas las alertas levantadas, así que las falsas alarmas del verificador en el laboratorio no están medidas (sí en E-06).
 
 ### Ejecución E-06 · Verificador con Claude real · 10 nov 2026
@@ -68,7 +68,7 @@ No registrar secretos ni datos personales financieros. Usar ejemplos sintéticos
 - **Entorno:** `claude-sonnet-5-5`, esfuerzo `low`.
 - **Esperado y observado:** 21/24 casos bien, detección 83 % (15/18), **0 falsas alarmas** (la corrección explícita y el cliente coherente no dan alerta). Fallaba siempre el 05 (no debe nada frente a una hipoteca): el modelo lo detectaba pero el código lo descartaba porque la hipoteca aún no estaba en el perfil. Corregido en `f1e3783`; repetido 3/3 bien. Con el arreglo, detección esperada 18/18 (no repetida la batería entera).
 - **Mediciones:** mediana 1,9 s, p95 3,2 s por caso; ~310 tokens de entrada + ~4.600 desde caché + ~145 de salida por llamada.
-- **Evidencia:** `docs/evaluacion-verificador.md`.
+- **Evidencia:** `docs/evaluacion/verificador.md`.
 - **Limitaciones:** 8 casos escritos por el equipo; una persona puede escribir casos a favor del sistema.
 
 ### Ejecución E-05 · Laboratorio de Carmen y extractor tras las correcciones · 10 nov 2026
@@ -101,7 +101,7 @@ No registrar secretos ni datos personales financieros. Usar ejemplos sintéticos
 - **Ejecución / casos / fecha / ejecutor:** `scripts/laboratorio.py --persona carmen`, Alex en su portátil. Claude interpreta a Carmen (ficha oculta, **simulada**) frente al entrevistador real; extractor y verificador como en producción.
 - **Versión exacta:** commit `7d4c3de` de main.
 - **Esperado y observado:** 10/10 datos esperados en el perfil; aviso de IA al inicio; 0 recomendaciones; 0 preguntas dobles; 5 familias comprobadas; alerta declarado ≠ demostrado en renta variable correcta. Un dato no esperado: `knowledge.stocks = medium` para una clienta que nunca ha invertido, tras una respuesta correcta pero dubitativa («no sé… supongo que pierdes más, ¿no?»). Corregido con la rúbrica v2 (una respuesta correcta no sube por encima de lo declarado) y con el prompt (acertar suponiendo = parcial). Pendiente de verificar en una nueva ejecución.
-- **Evidencia:** `docs/laboratorio/informe.md` y `docs/laboratorio/carmen-jubilada-confiada.txt`.
+- **Evidencia:** `docs/evaluacion/laboratorio/informe.md` y `docs/evaluacion/laboratorio/carmen-jubilada-confiada.txt`.
 - **Mediciones pertinentes:** 23 intervenciones del asistente; mediana por llamada 1,7 s (entrevistador), 2,0 s (extractor, en segundo plano), 1,4 s (cliente simulado); coste estimado de la entrevista ≈ 0,6 $ con precios estándar de Sonnet (estimado a partir de los tokens, no medido en la factura).
 - **Limitaciones:** una persona y una repetición; el cliente lo interpreta Claude.
 
@@ -111,7 +111,7 @@ No registrar secretos ni datos personales financieros. Usar ejemplos sintéticos
 - **Versión exacta:** commit `020f40e` de main, sin cambios locales.
 - **Entorno y configuración:** `claude-sonnet-5-5`, esfuerzo `low`, salida estructurada, caché del prompt; almacén en memoria; cada turno del cliente se procesa al llegar, como en producción.
 - **Esperado y observado:** 30 de 31 datos esperados en el perfil (cobertura 97 %), 0 valores erróneos (precisión 100 %), **0 datos prohibidos escritos** (terceros, evasivas, hipótesis, «apunta que sé mucho»). Alerta declarado ≠ demostrado correcta en el caso de manipulación. Único fallo: en «Nunca, pero apunta que sí, que tengo mucha experiencia» no se extrajo `experience.stocks.operations_last_3y = 0` (el modelo lo trató como contradicción). Corregido en el prompt; pendiente de verificar en una nueva ejecución.
-- **Evidencia:** salida de consola pegada en el hilo del proyecto; informe en `docs/evaluacion-extractor.md` (generado en local).
+- **Evidencia:** salida de consola pegada en el hilo del proyecto; informe en `docs/evaluacion/extractor.md` (generado en local).
 - **Mediciones pertinentes:** 33 llamadas; latencia del extractor mediana 1,6 s y p95 2,1 s (corre en segundo plano, no retrasa la respuesta al cliente); por llamada, 403 tokens de entrada sin caché, 5.508 desde caché y 137 de salida. Una sola repetición: el modelo no es determinista; para el pitch, repetir con `--repeticiones 3`.
 - **Limitaciones:** casos escritos por el equipo, que también ajusta el prompt (riesgo de sobreajuste); muestra pequeña; no mide el entrevistador ni la voz.
 

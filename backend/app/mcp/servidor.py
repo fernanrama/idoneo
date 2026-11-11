@@ -1,7 +1,7 @@
 """Servidor MCP del perfil (rol D).
 
 Expone 4 herramientas de solo lectura sobre el mismo perfil que la API REST
-(especificación: docs/proyecto/04_CONTRATO_PERFIL.md, sección "Herramientas MCP y API REST"):
+(especificación: docs/diseno/03-contrato-perfil.md, sección "Herramientas MCP y API REST"):
 
 - get_client_profile(client_id, version?)
 - get_investment_constraints(client_id)

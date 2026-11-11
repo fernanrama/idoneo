@@ -48,7 +48,7 @@ Cuando llegue el enunciado, extraer restricciones y criterios de éxito; propone
 Por autorización explícita del usuario, se preparó una solución de perfiles, autorización/API y
 adaptación del frontend en el worktree `/private/tmp/idoneo-pr21-perfil-propuesta`, rama
 `fix/perfil-memoria-atomicidad-propuesta`, basada en #21 `b1b182e`. No se publicó ni integró.
-Contrato, archivos, alternativas y límites en [MEMORIA_PERSONAL_SEGURIDAD.md](../../../docs/MEMORIA_PERSONAL_SEGURIDAD.md).
+Contrato, archivos, alternativas y límites en [memoria-personal-seguridad.md](../../../docs/memoria-personal-seguridad.md).
 
 Evidencia: 474 tests backend correctos, 28 omitidos y 1 deseleccionado para evitar invocar migraciones;
 18 tests del cliente, lint y build correctos. Se comprobó también una copia de main `8b698b7`
@@ -84,7 +84,7 @@ La corrección del sondeo se probó también con latencia superior a su interval
 Resultado: 9 recorridos de navegador, 18 tests de contrato y 474 backend correctos (28 omitidos,
 1 deseleccionado); lint y build correctos. Capturas inspeccionadas; cero errores JavaScript y
 solo respuesta HTTP 412 intencional en consola/red. Informe en
-[VALIDACION_FUNCIONAL_PR21.md](../../../docs/VALIDACION_FUNCIONAL_PR21.md).
+la PR #21.
 Solo datos ficticios y servicios locales; sin Supabase, migraciones ni APIs de pago. El usuario
 ha revisado y autorizado publicar estas dos correcciones, sus tests y la documentación mediante
 push normal a #21, sin merge a main. Pendiente revisión final y probar dispositivo físico,

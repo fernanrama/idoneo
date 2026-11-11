@@ -14,7 +14,7 @@ El algoritmo de escritura está aquí una sola vez, así que ambos almacenes se 
   4. insertar la versión nueva; si otra escritura se adelantó, releer y reintentar;
   5. publicar los eventos para el panel en vivo.
 
-Estados (docs/proyecto/04_CONTRATO_PERFIL.md):
+Estados (docs/diseno/03-contrato-perfil.md):
   draft → pending_validation   cuando suitability.complete y sin alertas needs_advisor abiertas
   pending_validation → active  cuando valida la entidad (solo desde draft o pending_validation)
   active → review_due          cuando un agente cambia un dato (o un evento vital)

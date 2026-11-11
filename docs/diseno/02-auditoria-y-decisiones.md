@@ -1,6 +1,6 @@
 # Auditoría de la idea y decisiones del equipo
 
-8 nov 2026. Resumen de la auditoría hecha sobre el [documento de diseño](01_DISENO.md) y de lo que decidió el equipo después. Donde una decisión contradice el diseño, manda la decisión.
+8 nov 2026. Resumen de la auditoría hecha sobre el [documento de diseño](01-diseno.md) y de lo que decidió el equipo después. Donde una decisión contradice el diseño, manda la decisión.
 
 ## Decisiones tomadas
 
@@ -11,8 +11,8 @@
 | D3 | **Somos una funcionalidad para GPTadvisor y MyInvestor, no un producto de venta.** | Alex | La viabilidad económica tiene poco peso. Basta una diapositiva de valor para ellas (ver más abajo), no un modelo de negocio. |
 | D4 | **Equipo de 6 y 5 días: no se recorta alcance por tiempo.** | Alex | Se mantiene el alcance completo del diseño. Lo que cambia es el orden: primero la cadena mínima de punta a punta, luego lo demás. |
 | D5 | **La demo aún no se toca.** | Alex | El guion del diseño queda como borrador. |
-| D6 | **"Idóneo" es un nombre provisional.** | Alex | En la documentación nueva se usa `[NOMBRE]`. El equipo dará el nombre real. |
-| D7 | **El MCP de MyInvestor se usa como conector dentro de Claude**, no llamado desde nuestro backend. | Recomendación tras leer sus términos | Sus términos prohíben el acceso programático sin permiso. Se pide permiso al jurado de MyInvestor por si se puede integrar dentro del producto. Ver [05_MCP_MYINVESTOR.md](05_MCP_MYINVESTOR.md). |
+| D6 | **"Idóneo" es un nombre provisional.** | Alex | Resuelta: el equipo confirmó «Idóneo» (D-008). |
+| D7 | **El MCP de MyInvestor se usa como conector dentro de Claude**, no llamado desde nuestro backend. | Recomendación tras leer sus términos | Sus términos prohíben el acceso programático sin permiso. Se pide permiso al jurado de MyInvestor por si se puede integrar dentro del producto. Ver [04-mcp-myinvestor.md](04-mcp-myinvestor.md). |
 
 ## Quién usa el perfil y para qué
 
@@ -88,4 +88,4 @@ Pregunta abierta: ¿GPTadvisor ya hace perfilado del cliente dentro de su produc
 3. ¿Solo español? Varios idiomas suman accesibilidad y encajan con ElevenLabs.
 4. ¿Alguien ha probado ya el SDK de ElevenLabs en un móvil?
 5. Pedir permiso al jurado de MyInvestor para llamar a su MCP desde código.
-6. Nombre definitivo del producto.
+6. ~~Nombre definitivo del producto.~~ Resuelta: «Idóneo» (D-008).

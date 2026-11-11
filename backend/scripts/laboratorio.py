@@ -4,7 +4,7 @@ Uso (desde backend/, con ANTHROPIC_API_KEY en ../.env o en el entorno):
 
     python scripts/laboratorio.py --persona carmen
     python scripts/laboratorio.py --variantes 20 --semilla 7 --repeticiones 2 --sin-fijas
-    python scripts/laboratorio.py --transcripciones ../docs/laboratorio --informe ../docs/laboratorio/informe.md
+    python scripts/laboratorio.py --transcripciones ../docs/evaluacion/laboratorio --informe ../docs/evaluacion/laboratorio/informe.md
 
 Cada persona (fixtures/laboratorio/*.json) tiene una ficha oculta que solo ve el cliente simulado. Mide el
 sistema entero: lo que el entrevistador pregunta y comprueba, y lo que el extractor apunta. Sin voz

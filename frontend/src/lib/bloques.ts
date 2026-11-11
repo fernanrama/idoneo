@@ -1,7 +1,7 @@
 import type { Perfil } from "./tipos";
 
 // Bloques de la entrevista, en orden. Un bloque está completo cuando todos sus campos tienen valor.
-// Rutas del contrato v1 (docs/proyecto/04_CONTRATO_PERFIL.md).
+// Rutas del contrato v1 (docs/diseno/03-contrato-perfil.md).
 export const BLOQUES = [
   { id: "avisos", nombre: "Avisos", campos: ["disclosures.ai_notice_ack", "disclosures.purpose_ack"] },
   { id: "objetivo", nombre: "Tu objetivo", campos: ["objectives.o1.goal", "objectives.o1.horizon_years"] },

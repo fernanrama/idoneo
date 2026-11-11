@@ -13,7 +13,7 @@ import { usePerfil } from "@/lib/usePerfil";
 /**
  * Productos compatibles con el perfil.
  * IMPORTANTE: los términos del MCP público de MyInvestor prohíben llamarlo por programa, cachear o
- * redistribuir su catálogo (ver docs/proyecto/05_MCP_MYINVESTOR.md). Esta app NO debe consultarlo por código.
+ * redistribuir su catálogo (ver docs/diseno/04-mcp-myinvestor.md). Esta app NO debe consultarlo por código.
  * El filtrado real lo hace el agente de la entidad (Claude con el MCP de MyInvestor como conector, rol D).
  * Mostrar aquí productos reales requiere permiso explícito de MyInvestor; no se inventan productos.
  */

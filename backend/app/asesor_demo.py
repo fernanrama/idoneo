@@ -13,7 +13,7 @@ Recupera el paso «Validar perfil» del pitch sin reabrir la autovalidación que
 - Apagado (`DEMO_ADVISOR_MODE` distinto de `1`), sus rutas responden 404 como si no existieran.
 
 La validación es la misma de siempre (`store.validar`): atómica, sin correcciones y con las mismas
-reglas de estado. Esto no es autenticación de asesores reales: ver docs/MODO_ASESOR_DEMO.md.
+reglas de estado. Esto no es autenticación de asesores reales: ver docs/modo-asesor-demo.md.
 """
 
 from __future__ import annotations

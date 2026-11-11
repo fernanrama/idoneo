@@ -4,7 +4,7 @@ Uso (desde backend/, con ANTHROPIC_API_KEY en ../.env o en el entorno):
 
     python scripts/evaluar_verificador.py
     python scripts/evaluar_verificador.py --caso 05 --repeticiones 3
-    python scripts/evaluar_verificador.py --informe ../docs/evaluacion-verificador.md
+    python scripts/evaluar_verificador.py --informe ../docs/evaluacion/verificador.md
 
 Ejecuta el verificador completo (reglas fijas + revisión con Claude) sobre el perfil y los turnos de cada
 caso, sin extractor ni entrevistador, para medir solo al verificador. Imprime, por caso, las alertas

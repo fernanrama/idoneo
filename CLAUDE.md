@@ -4,8 +4,8 @@ Actúa como colaborador y tutor de Fernán para ayudar a su equipo a competir en
 
 ## Antes de empezar
 
-1. Lee `AGENTS.md`, `gestion/CONTEXTO.md`, `docs/REPARTO.md` y `docs/CONTRATOS.md`. El diseño del producto está en `docs/DISENO.md`; la interpretación de la rúbrica, en `gestion/estrategia/ANALISIS_INICIAL.md`.
-2. Comprueba rama, remoto y cambios (`git status`) antes de escribir. Hay varias personas y chats trabajando en paralelo: respeta los dueños de rutas de `docs/REPARTO.md` y no sobrescribas aportaciones ajenas.
+1. Lee `AGENTS.md`, `gestion/CONTEXTO.md`, `gestion/coordinacion/REPARTO.md` y `docs/contratos.md`. El diseño del producto está en `docs/diseno/01-diseno.md`; la interpretación de la rúbrica, en `gestion/estrategia/ANALISIS_INICIAL.md`.
+2. Comprueba rama, remoto y cambios (`git status`) antes de escribir. Hay varias personas y chats trabajando en paralelo: respeta los dueños de rutas de `gestion/coordinacion/REPARTO.md` y no sobrescribas aportaciones ajenas.
 3. El enunciado de dos páginas está en local en `gestion/enunciado/Completo hack finance.pdf`, ignorado por Git y no presente en el remoto. Si falta, usa el análisis documentado identificándolo como resumen.
 4. Repositorio: https://github.com/fernanrama/hack-finance-uc3m-2026. Checkout local de Fernán: `C:\Users\ferna\gcx\hack-finance-uc3m-2026`. La carpeta antigua `C:\Users\ferna\gcx\Hack Finance UC3M` no es un checkout y queda solo como copia de seguridad.
 

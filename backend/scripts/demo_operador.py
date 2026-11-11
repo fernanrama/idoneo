@@ -1,7 +1,7 @@
 """Operador de la demostración: autoriza, lista y revoca clientes ficticios nuevos (DATOS SIMULADOS).
 
 Se ejecuta en el ordenador del backend. Lee ADMIN_TOKEN del entorno o del .env de la raíz, sin mostrarlo,
-y solo habla con un backend local. Ver docs/MODO_ASESOR_DEMO.md.
+y solo habla con un backend local. Ver docs/modo-asesor-demo.md.
 
     python scripts/demo_operador.py autorizar <client_id> --confirmo-ficticio [--ttl 7200]
     python scripts/demo_operador.py listar

@@ -1,6 +1,6 @@
 # Contrato del perfil de cliente
 
-8 nov 2026 · Alejandro (Alex) · Nombre del producto provisional (`[NOMBRE]`)
+8 nov 2026 · Alejandro (Alex)
 
 > Copia en el repo del documento vivo [Contrato del perfil de cliente](https://claude.ai/artifact/7LmxGm3ECZUbKU1BZMWAHj). Si cambia allí, hay que actualizar esta copia (o al revés). Versión 0.1: borrador para revisar con las piezas de front, agentes y backend.
 
