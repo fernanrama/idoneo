@@ -116,6 +116,9 @@ export const api = {
   expedienteAsesor: (client_id: string) => leerDelFront<ExpedienteAsesor>(`/api/entidad/${id(client_id)}/asesor`),
   validarComoAsesor: (client_id: string) => pedirAlFront<Perfil>(`/api/entidad/${id(client_id)}/validar`, {}),
   reiniciarComoAsesor: () => pedirAlFront<Perfil>("/api/entidad/reset", {}),
+  /** Entrevista corta del pitch (modo asesor): sesión nueva sobre el cliente ficticio casi completo. */
+  entrevistaCorta: async (channel: "voice" | "text"): Promise<Sesion> =>
+    registrarSesion(await pedirAlFront<AltaSesion>(`/api/entidad/corta?channel=${channel}`, {})),
 
   pendientes: (session_id: string) =>
     pedir<{ pending: string[]; text: string }>(`/api/sessions/${id(session_id)}/pending`, { headers: sesion(session_id) }),

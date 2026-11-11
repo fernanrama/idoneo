@@ -71,7 +71,7 @@ def test_solo_clientes_ficticios(activa, monkeypatch, lista):
 
 def test_configuracion_valida(activa):
     conf = demo.configuracion()
-    assert conf and conf.clientes == {C} and demo.es_token(TOKEN) and not demo.es_token(TOKEN + "x")
+    assert conf and conf.clientes == {C, "carmen-corta"} and demo.es_token(TOKEN) and not demo.es_token(TOKEN + "x")
 
 
 # ---------- la credencial no sirve fuera de /mcp ----------
