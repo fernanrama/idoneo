@@ -135,6 +135,13 @@ export const api = {
 
   /** Modo asesor de demo: el servidor Next pone su autorización; el navegador no envía ninguna credencial. */
   modoAsesor: () => leerDelFront<ModoAsesor>("/api/entidad/asesor"),
+  /** Administración de la entidad en la web: la clave viaja una vez; después, solo una cookie HttpOnly. */
+  sesionAdmin: () => leerDelFront<{ enabled: boolean; logged: boolean }>("/api/admin/sesion"),
+  entrarAdmin: (clave: string) => pedirAlFront<{ logged: true }>("/api/admin/sesion", { clave }),
+  salirAdmin: async () => {
+    const r = await fetch("/api/admin/sesion", { method: "DELETE", cache: "no-store" });
+    if (!r.ok) throw new ErrorAPI(r.status);
+  },
   expedienteAsesor: (client_id: string) => leerDelFront<ExpedienteAsesor>(`/api/entidad/${id(client_id)}/asesor`),
   /** `expected_version`: la versión que ve el asesor; si el perfil ha cambiado, el backend responde 409. */
   validarComoAsesor: (client_id: string, expected_version?: number) =>
