@@ -147,7 +147,7 @@ Backend, en Windows (PowerShell):
 
 ```powershell
 git clone https://github.com/fernanrama/idoneo
-cd hack-finance-uc3m-2026\backend
+cd idoneo\backend
 python -m venv .venv
 .venv\Scripts\activate        # si falla: Set-ExecutionPolicy -Scope Process Bypass
 pip install -r requirements.txt
