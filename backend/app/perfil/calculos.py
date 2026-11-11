@@ -176,9 +176,9 @@ def idoneidad(perfil: Perfil) -> Idoneidad:
     importe = valor(perfil, "objectives.o1.amount_eur")
     if cap is not None and importe is not None and float(importe) > float(cap):
         # Invertiría parte del colchón de 6 meses o del dinero de sus deudas: SUPUESTO v1, prudente.
-        candidatos.append((PerfilRiesgo.CONSERVADOR, "objectives.o1.amount_eur",
-                           f"Quiere invertir {float(importe):,.0f} €, más de lo que puede perder sin tocar su colchón "
-                           f"({float(cap):,.0f} €) → {PerfilRiesgo.CONSERVADOR.value}"))
+        motivo = (f"Quiere invertir {float(importe):,.0f} €, más de lo que puede perder sin tocar su colchón "
+                  f"({float(cap):,.0f} €) → {PerfilRiesgo.CONSERVADOR.value}")
+        candidatos.append((PerfilRiesgo.CONSERVADOR, "objectives.o1.amount_eur", motivo))
     plazo = valor(perfil, "objectives.o1.horizon_years")
     if plazo is not None:
         p = _por_plazo(float(plazo))
