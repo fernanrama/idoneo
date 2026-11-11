@@ -27,7 +27,7 @@ from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Re
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from pydantic import BaseModel, ConfigDict, Field, field_validator  # noqa: E402
 
-from . import acceso, asesor_demo, demo_operador, limites, voz  # noqa: E402
+from . import acceso, asesor_demo, demo_operador, entidad, limites, voz  # noqa: E402
 from .agentes import chat as entrevistador  # noqa: E402
 from .agentes import claude, contexto, extractor, verificador  # noqa: E402
 from .mcp import demo as mcp_demo  # noqa: E402
@@ -64,6 +64,7 @@ app.add_middleware(
 app.include_router(voz.router)
 app.include_router(voz.webhook_router)
 app.include_router(asesor_demo.router)  # 404 salvo DEMO_ADVISOR_MODE=1 (docs/modo-asesor-demo.md)
+app.include_router(entidad.router)  # vista de la entidad en la web: solo con X-Admin-Token (servidor Next)
 app.include_router(demo_operador.router)  # ídem; solo local y con X-Admin-Token
 
 
