@@ -7,6 +7,7 @@ Orden de lectura recomendado: primero la arquitectura, después el diseño y, al
 | Documento | Contenido |
 |---|---|
 | [arquitectura.md](arquitectura.md) | Flujo del producto y arquitectura de agentes: entrevista, extractor, verificador, perfil versionado, validación humana y MCP |
+| [configuracion.md](configuracion.md) | Variables de entorno del backend y del frontend, y persistencia del perfil (memoria, SQLite o Postgres) |
 | [contratos.md](contratos.md) | Cómo implementa el código el contrato del perfil: API REST, persistencia, versionado y desviaciones conscientes |
 | [pruebas-de-audio.md](pruebas-de-audio.md) | Pruebas de audio: cómo cada dato suena con el fragmento de la llamada que lo justifica |
 | [modo-asesor-demo.md](modo-asesor-demo.md) | Modo asesor de demostración (validar en local con clientes ficticios), entrevista corta del pitch y MCP de demo |

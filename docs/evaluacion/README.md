@@ -39,7 +39,7 @@ Con `--registrar`, cada script guarda su resultado en `backend/app/ops/ultimas_e
 
 Métricas: **cobertura** (datos esperados que llegan al perfil), **precisión** (datos escritos que son correctos), **datos prohibidos** (lo que nunca debe escribirse: terceros, evasivas, hipótesis, «apunta que sé mucho»), **recomendaciones** (debe ser 0) y **alertas** (detección y falsas alarmas).
 
-Además, más de 600 tests automáticos (`python -m pytest -q`) cubren los cálculos deterministas, el perfil versionado, la API, el MCP y los agentes con Claude simulado, sin claves ni red.
+Además, más de 1000 tests automáticos (`python -m pytest -q`) cubren los cálculos deterministas, el perfil versionado, la API, el MCP y los agentes con Claude simulado, sin claves ni red.
 
 ## Registro de ejecuciones
 
