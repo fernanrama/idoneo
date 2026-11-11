@@ -10,6 +10,7 @@ import { PanelVivo } from "@/components/PanelVivo";
 import { Noche } from "@/components/visual";
 import { useEntrevista } from "@/lib/useEntrevista";
 import { usePerfil } from "@/lib/usePerfil";
+import { AsesorDemo } from "./AsesorDemo";
 import s from "./escenario.module.css";
 
 /**
@@ -37,9 +38,12 @@ function Escenario({ cliente }: { cliente: string | null }) {
   const [terminada, setTerminada] = useState(false);
   // La misma función, con la apariencia de dos entidades distintas: idóneo se integra en la app de cada una.
   const [entidad, setEntidad] = useState<"A" | "B">("A");
+  // Al acabar, la demo enseña también lo que recibe el asesor (sin clave y sin llamar al servidor).
+  const [verAsesor, setVerAsesor] = useState(false);
   if ((e.estado === "terminada") !== terminada) {
     setTerminada(e.estado === "terminada");
     if (e.estado === "terminada") setVista("entidad"); // en el móvil: ahí está «Ver el perfil de Carmen»
+    else setVerAsesor(false);
   }
   const datos = perfil ? Object.entries(perfil.mifid).filter(([r, f]) => f.value != null && !r.startsWith("disclosures.")).length : 0;
 
@@ -85,8 +89,21 @@ function Escenario({ cliente }: { cliente: string | null }) {
             <strong>Lo que recibe la entidad</strong>
             El perfil se construye mientras el cliente habla: cada dato, con su frase exacta.
           </p>
+          {terminada && perfil && !verAsesor && (
+            <button type="button" className={s.pasoAsesor} onClick={() => setVerAsesor(true)}>
+              <span>
+                <strong>Siguiente: lo que recibe el asesor</strong>
+                El perfil hecho, cada frase con su audio, y la validación de una persona.
+              </span>
+              <b aria-hidden="true">→</b>
+            </button>
+          )}
           <div className={s.entidad}>
-            <PanelVivo perfil={perfil} enMarcha={enMarcha} />
+            {terminada && perfil && verAsesor ? (
+              <AsesorDemo perfil={perfil} alVolver={() => setVerAsesor(false)} />
+            ) : (
+              <PanelVivo perfil={perfil} enMarcha={enMarcha} />
+            )}
           </div>
         </div>
       </div>
