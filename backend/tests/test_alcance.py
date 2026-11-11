@@ -65,6 +65,9 @@ def resumen(a: alcance.Alcance) -> list[tuple[str, TipoPregunta]]:
     return [(q.path, q.tipo) for q in a.preguntas]
 
 
+ANUAL = Peticion(motivo=Motivo.next_review_due, rutas=alcance._REVISION_ANUAL)
+
+
 # ---------- catálogo y dependencias ----------
 
 def test_cada_motivo_tiene_una_sola_definicion():
@@ -122,7 +125,7 @@ def test_un_dato_dudoso_no_se_confirma(carmen):
 
 
 def test_peticiones_sobre_la_misma_ruta_se_agrupan(carmen):
-    a = planificar(carmen, [Peticion(motivo=Motivo.next_review_due), Peticion(motivo=Motivo.liquidity_change)])
+    a = planificar(carmen, [ANUAL, Peticion(motivo=Motivo.liquidity_change)])
     rutas = [q.path for q in a.preguntas]
     assert len(rutas) == len(set(rutas)) == 6 and a.aplazadas == []
     liquidez = next(q for q in a.preguntas if q.path == LIQUIDEZ)
@@ -170,6 +173,111 @@ def test_peticiones_invalidas(carmen, peticion):
         planificar(carmen, [Peticion(**peticion)])
 
 
+# ---------- dato cambiado (sesión de revisión) ----------
+
+INGRESOS, DEUDAS = "financial.net_monthly_income_eur", "financial.debts_eur"
+
+
+def cambio(*rutas):
+    return Peticion(motivo=Motivo.value_changed, rutas=list(rutas))
+
+
+def test_cambio_de_ahorro_confirma_gastos_y_deudas_sin_repreguntar_el_ahorro(carmen):
+    a = planificar(carmen, [cambio(AHORRO)])
+    assert resumen(a) == [(GASTOS, C), (DEUDAS, C)]  # entradas de colchón y capacidad de pérdida
+    assert all(q.motivos == [Motivo.value_changed] for q in a.preguntas)
+
+
+def test_cambio_de_liquidez_confirma_el_plazo(carmen):
+    assert resumen(planificar(carmen, [cambio(LIQUIDEZ)])) == [(PLAZO, C)]
+
+
+def test_cambio_de_horizonte_confirma_la_liquidez(carmen):
+    assert resumen(planificar(carmen, [cambio(PLAZO)])) == [(LIQUIDEZ, C)]
+
+
+def test_caida_de_ingresos_pide_confirmar_los_gastos_fijos(carmen):
+    """Única dependencia justificada hoy: la regla del verificador gastos fijos >= ingresos."""
+    a = planificar(cambiar(carmen, INGRESOS, 800), [cambio(INGRESOS)])
+    assert resumen(a) == [(GASTOS, C)] and a.preguntas[0].valor_vigente == 900
+    assert not a.reevaluacion_completa
+
+
+def test_caida_de_ingresos_no_cambia_el_perfil_de_riesgo_ni_las_restricciones(carmen):
+    """Se actualiza el hecho financiero, pero calculos.py no usa los ingresos: no hay recálculo nuevo."""
+    nueva = cambiar(carmen, INGRESOS, 800)
+    assert alcance.cambiados(carmen, nueva) == [INGRESOS]  # el hecho sí cambia (y se avisaría)
+    assert es_material(carmen, nueva) == []  # pero no mueve ningún resultado
+    assert nueva.assessments == carmen.assessments
+
+
+def test_si_los_ingresos_caen_por_debajo_de_los_gastos_lo_detecta_el_verificador(carmen):
+    from app.agentes import verificador  # reglas deterministas, sin Claude
+
+    alertas = [(a.path, a.flag) for a in verificador.reglas(cambiar(carmen, INGRESOS, 800))]
+    assert (GASTOS, Flag.needs_advisor) in alertas
+    assert not [a for a in verificador.reglas(carmen) if a.path == GASTOS]
+
+
+def test_la_dependencia_ingresos_gastos_es_simetrica():
+    assert GASTOS in DEPENDENCIAS[INGRESOS] and INGRESOS in DEPENDENCIAS[GASTOS]
+
+
+def test_un_dato_cambiado_que_queda_dudoso_se_repregunta(carmen):
+    p = cambiar(carmen, AHORRO, 10000, flags=[Flag.low_confidence])
+    assert resumen(planificar(p, [cambio(AHORRO)]))[0] == (AHORRO, R)
+
+
+def test_un_dato_ya_cambiado_no_se_pregunta_aunque_lo_pida_otro_motivo(carmen):
+    a = planificar(carmen, [ANUAL, cambio(LIQUIDEZ, AHORRO)])
+    rutas = [q.path for q in a.preguntas]
+    assert LIQUIDEZ not in rutas and AHORRO not in rutas and PLAZO in rutas
+
+
+def test_cambios_en_tres_bloques_amplian(carmen):
+    a = planificar(carmen, [cambio(AHORRO, PLAZO, "risk_tolerance.scenario_score")])
+    assert a.reevaluacion_completa and "bloques" in a.razones[0]
+
+
+# ---------- respondidas en la revisión ----------
+
+def test_lo_ya_respondido_no_se_pregunta_sea_cual_sea_el_tipo(carmen):
+    """Gasto previsto pide repreguntar la liquidez; si ya la dio (aunque sea el mismo valor), no se repite."""
+    a = planificar(carmen, [Peticion(motivo=Motivo.planned_expense)], vigentes=frozenset({LIQUIDEZ}))
+    assert resumen(a) == [(AHORRO, C), (PLAZO, C)] and [q.path for q in a.respondidas] == [LIQUIDEZ]
+    assert (a.respondidas[0].tipo, a.respondidas[0].valor_vigente) == (R, "low")  # con su tipo, para el progreso
+
+
+def test_lo_respondido_pero_dudoso_se_vuelve_a_preguntar(carmen):
+    p = cambiar(carmen, LIQUIDEZ, flags=[Flag.low_confidence])
+    a = planificar(p, [Peticion(motivo=Motivo.planned_expense)], vigentes=frozenset({LIQUIDEZ}))
+    assert (LIQUIDEZ, R) in resumen(a) and a.respondidas == []
+
+
+def test_un_dato_cambiado_que_pedia_un_motivo_cuenta_como_respondido(carmen):
+    a = planificar(carmen, [Peticion(motivo=Motivo.planned_expense), cambio(LIQUIDEZ)])
+    assert [q.path for q in a.respondidas] == [LIQUIDEZ] and resumen(a) == [(AHORRO, C), (PLAZO, C)]
+
+
+def test_contestar_no_cambia_la_decision_de_ampliar(carmen):
+    peticiones = [Peticion(motivo=Motivo.retirement), Peticion(motivo=Motivo.behaviour_vs_tolerance),
+                  Peticion(motivo=Motivo.knowledge_not_assessed, rutas=["knowledge.etfs"])]
+    antes = planificar(carmen, peticiones)
+    todo = frozenset(q.path for q in antes.preguntas) | frozenset(antes.aplazadas)
+    despues = planificar(carmen, peticiones, vigentes=todo)
+    assert antes.reevaluacion_completa and despues.reevaluacion_completa
+
+
+def test_sin_vigentes_no_hay_respondidas(carmen):
+    assert planificar(carmen, [Peticion(motivo=Motivo.liquidity_change)]).respondidas == []
+
+
+@pytest.mark.parametrize("rutas", [[], ["financial.loss_capacity_eur"], ["disclosures.purpose_ack"]])
+def test_dato_cambiado_invalido(carmen, rutas):
+    with pytest.raises(DatoInvalido):
+        planificar(carmen, [cambio(*rutas)])
+
+
 def test_el_catalogo_de_motivos_es_cerrado():
     with pytest.raises(ValidationError):
         Peticion(motivo="compruebalo_todo")
@@ -177,7 +285,7 @@ def test_el_catalogo_de_motivos_es_cerrado():
 
 def test_no_modifica_el_perfil(carmen):
     antes = carmen.model_dump()
-    planificar(carmen, [Peticion(motivo=Motivo.next_review_due), Peticion(motivo=Motivo.liquidity_change)])
+    planificar(carmen, [ANUAL, Peticion(motivo=Motivo.liquidity_change)])
     vencimientos(carmen, HOY + timedelta(days=4000))
     assert carmen.model_dump() == antes
 
@@ -189,10 +297,40 @@ def test_perfil_reciente_sin_vencimientos(carmen):
 
 
 def test_next_review_vencido(carmen):
+    for ruta, f in carmen.mifid.items():  # datos dados antes de que venciera la revisión
+        carmen.mifid[ruta] = f.model_copy(update={"updated_at": _hace(30)})
     carmen.review.next_review = "2026-11-01"
-    assert vencimientos(carmen, HOY) == [Peticion(motivo=Motivo.next_review_due)]
+    assert vencimientos(carmen, HOY) == [ANUAL]
     carmen.review.next_review = "2027-11-11"
     assert vencimientos(carmen, HOY) == []
+
+
+def test_la_revision_anual_no_repite_lo_confirmado_tras_el_vencimiento(carmen):
+    for ruta, f in carmen.mifid.items():
+        carmen.mifid[ruta] = f.model_copy(update={"updated_at": _hace(30)})
+    carmen.review.next_review = "2026-11-01"
+    # En esta misma sesión confirma gastos y ahorro: ya no se le vuelven a pedir.
+    for ruta in (GASTOS, AHORRO):
+        carmen.mifid[ruta] = carmen.mifid[ruta].model_copy(update={"confirmed_at": _hace(0)})
+    [anual] = vencimientos(carmen, HOY)
+    assert GASTOS not in anual.rutas and AHORRO not in anual.rutas and len(anual.rutas) == 4
+
+
+def test_la_revision_anual_desaparece_si_todo_esta_confirmado(carmen):
+    for ruta, f in carmen.mifid.items():
+        carmen.mifid[ruta] = f.model_copy(update={"updated_at": _hace(30), "confirmed_at": _hace(1)})
+    carmen.review.next_review = "2026-11-01"
+    assert vencimientos(carmen, HOY) == []
+
+
+def test_la_revision_anual_pregunta_lo_que_falta(carmen):
+    for ruta, f in carmen.mifid.items():
+        carmen.mifid[ruta] = f.model_copy(update={"updated_at": _hace(0)})
+    del carmen.mifid[LIQUIDEZ]
+    carmen.review.next_review = "2026-11-01"
+    [anual] = vencimientos(carmen, HOY)
+    assert anual.rutas == [LIQUIDEZ]
+    assert resumen(planificar(carmen, [anual])) == [(LIQUIDEZ, R)]  # lo que falta se pregunta, no se confirma
 
 
 def test_bloque_caducado(carmen):
@@ -228,6 +366,24 @@ def test_plazo_que_envejece(carmen, dias, vence):
     carmen.mifid[PLAZO] = carmen.mifid[PLAZO].model_copy(update={"updated_at": _hace(dias)})
     motivos = [p.motivo for p in vencimientos(carmen, HOY)]
     assert (Motivo.horizon_elapsed in motivos) is vence
+
+
+# ---------- cambios entre versiones ----------
+
+def test_cambiados_valor_declarado_y_flags_en_orden_del_guion(carmen):
+    nueva = cambiar(cambiar(carmen, LIQUIDEZ, "high"), AHORRO, flags=[Flag.low_confidence])
+    nueva = cambiar(nueva, "knowledge.equity_funds", declared="medium")  # el fixture declara "high"
+    assert alcance.cambiados(carmen, nueva) == ["knowledge.equity_funds", AHORRO, LIQUIDEZ]
+
+
+def test_una_confirmacion_no_es_un_cambio(carmen):
+    cita = Evidencia(session_id="s-2", turn_id="t-001", t=(0, 1), quote="Sí, sigo igual")
+    nueva = cambiar(carmen, GASTOS, evidence=[cita], confidence=0.99, confirmed_at=_hace(0))
+    assert alcance.cambiados(carmen, nueva) == []
+
+
+def test_los_calculados_no_son_cambios_propios(carmen):
+    assert alcance.cambiados(carmen, cambiar(carmen, AHORRO, 10000)) == [AHORRO]
 
 
 # ---------- materialidad ----------

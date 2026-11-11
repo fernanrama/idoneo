@@ -27,8 +27,9 @@ persistencia/     tablas, motor (Postgres/SQLite) y aplicador de migraciones
   la demo añade una versión (no borra el historial) y el consumidor deja de servir activos anteriores.
 - **Validación estricta.** Rutas de `modelos.CAMPOS` con su tipo (422 si no); nadie escribe datos
   calculados (409); solo la entidad escribe `source=advisor`; un dato de un agente lleva evidencia.
-- **Estados.** Solo se valida desde `draft` o `pending_validation`; desde `review_due` hay que
-  reentrevistar. Al validar se cierran las alertas abiertas (regla de la PR #7) y queda quién lo hizo.
+- **Estados.** Se valida desde `draft`, `pending_validation` o `review_due` (D2: tras una microentrevista, sin
+  otra entrevista completa); con `version_esperada`, solo si nadie ha escrito desde que la entidad lo revisó.
+  Abrir una revisión del cliente no cambia el estado (R1). Al validar se cierran las alertas abiertas (regla de la PR #7) y queda quién lo hizo.
 - **Capa personal aparte.** Se une al perfil al leerlo; sin consentimiento no se guarda nada; se puede
   borrar sin tocar el registro MiFID.
 - **Concurrencia optimista**: si otra escritura (de este u otro proceso) se adelanta, se relee y reintenta.

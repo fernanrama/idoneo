@@ -319,6 +319,26 @@ Guion ilustrativo para Carmen (datos simulados): (1) «¿Esos 6.000 € son para
 
 ---
 
+### 4.10 Ciclo de la microentrevista [Decidido el 11/11: R1–R6 y D2]
+
+| Partida | Qué pasa | Resultado |
+|---|---|---|
+| `active` | El cliente abre «¿Ha cambiado algo?» (`store.pedir_revision`) | Sigue `active`: versión de trámite `review_requested:<motivos>`, mismos datos (R1) |
+| `active` | Abandona sin responder | Sin cambios; la revisión queda abierta (R5) |
+| `active` | Confirma con una cita nueva | Sigue `active`, sin `pending_review` (R2, D3) |
+| `active` | Cambia un dato | `review_due`, recalculado con `calculos.recalcular`; `pending_review` con `material` y aviso en `rationale` (R3, R6) |
+| `review_due` | Confirma o vuelve a abrir la revisión | Sigue `review_due`; el cambio sigue avisado (R6) |
+| `review_due` | La entidad valida (con `expected_version`) | `active`; la revisión se cierra (R4, D2) |
+
+Qué preguntar lo decide `alcance.alcance_revision`, el único planificador (motivos del cliente, caducados, cambios y sus dependencias, y lo ya respondido).
+
+**Pendiente:**
+- **Frontend (Alejandro/Fernán):** `VistaEntidad.tsx` solo ofrece «Validar» en `draft` y `pending_validation`, así que tiene que incluir `review_due` y enviar `expected_version`.
+- **Cerrar una revisión sin cambios:** botón «Terminar» y endpoint.
+- **Revisiones abandonadas:** ¿caducan solas?
+- **`next_review`:** ¿lo renueva una revisión que solo confirma?
+- **`crear_sesion`:** conserva `review_due → draft`; decidir si sigue haciendo falta con D2.
+
 ## 5. Recorrido de ejemplo: alerta de GPTadvisor sobre Carmen
 
 **Escenario simulado, no disponible hoy.**

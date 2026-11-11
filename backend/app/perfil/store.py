@@ -18,8 +18,10 @@ El algoritmo de escritura está aquí una sola vez, así que ambos almacenes se 
 Estados (docs/diseno/03-contrato-perfil.md):
   draft → pending_validation   cuando suitability.complete y sin alertas needs_advisor abiertas
   pending_validation → active  cuando valida la entidad (solo desde draft o pending_validation)
-  active → review_due          cuando un agente cambia un dato (o un evento vital)
+  active → review_due          cuando un agente cambia un dato (no por una confirmación pura, D3)
+  review_due → active          cuando valida la entidad (D2), sin otra entrevista
   review_due → draft           al empezar una entrevista nueva
+  (abrir una revisión del cliente no cambia el estado: pedir_revision)
 
 La capa personal se guarda aparte (personal.py) y se une al perfil al leerlo.
 """
@@ -39,13 +41,12 @@ from typing import Any, Literal, TypeVar
 
 from pydantic import BaseModel, Field, ValidationError
 
-from . import calculos, personal as personal_mod, validacion
+from . import alcance, calculos, personal as personal_mod, validacion
 from .almacenes import Almacen, ConflictoVersion, crear_almacen
 from .almacenes.base import TransaccionPersonal
 from .eventos import BusEventos, Evento
 from .modelos import (
     CALCULADOS,
-    CAMPOS,
     Alerta,
     EstadoAlerta,
     EstadoPerfil,
@@ -69,7 +70,6 @@ AUTOR_FIXTURE = "fixture"
 CANALES = ("voice", "text")
 MAX_REINTENTOS = 5
 DIAS_HASTA_REVISION = 365
-_ORDEN_CAMPOS = {ruta: i for i, ruta in enumerate(CAMPOS)}
 _NOMBRE_FIXTURE = re.compile(r"^[a-z0-9][a-z0-9_-]{0,63}$")
 
 
@@ -182,26 +182,19 @@ def perfil_para_consumidor(client_id: str) -> Perfil:
     return _con_personal(activa or ultima)
 
 
-def _valor_mifid(p: Perfil, ruta: str) -> tuple[Any, Any, tuple[str, ...]] | None:
-    """Lo que cuenta como cambio para `pending_review`: valor, declarado y flags (no evidencia ni confianza)."""
-    f = p.mifid.get(ruta)
-    return None if f is None else (f.value, f.declared, tuple(sorted(x.value for x in f.flags)))
-
-
 def revision_pendiente(client_id: str, servido: Perfil | None = None) -> RevisionPendiente | None:
     """Qué ha cambiado desde el perfil que se sirve a los consumidores (§4.6 del diseño 06, opción B).
 
-    Solo si se sirve un `active` y hay versiones posteriores con datos distintos (valor, declarado o flags;
-    la evidencia o la confianza solas son una confirmación) o alertas nuevas abiertas. Los calculados no cuentan: cambian
-    porque cambian sus entradas, que ya aparecen. Determinista; no escribe nada.
+    Solo si se sirve un `active` y hay versiones posteriores con datos cambiados (`alcance.cambiados`: valor,
+    declarado o flags; una confirmación no cuenta) o alertas nuevas abiertas. Los calculados no cuentan:
+    cambian porque cambian sus entradas, que ya aparecen. Determinista; no escribe nada.
     """
     with _candado(client_id):
         servido = servido or perfil_para_consumidor(client_id)
         ultima = _ultima(client_id)
         if servido.status != EstadoPerfil.active or ultima.version <= servido.version:
             return None
-        rutas = {r for r in set(servido.mifid) | set(ultima.mifid)
-                 if r not in CALCULADOS and _valor_mifid(servido, r) != _valor_mifid(ultima, r)}
+        rutas = set(alcance.cambiados(servido, ultima))
         previas = {a.id for a in servido.alerts}
         rutas |= {a.path for a in ultima.alerts
                   if a.path and a.status == EstadoAlerta.open and a.id not in previas}
@@ -210,8 +203,8 @@ def revision_pendiente(client_id: str, servido: Perfil | None = None) -> Revisio
         siguiente = _a().version(client_id, servido.version + 1)
         return RevisionPendiente(
             since_version=servido.version + 1, latest_version=ultima.version, latest_status=ultima.status,
-            paths=sorted(rutas, key=lambda r: (_ORDEN_CAMPOS.get(r, len(_ORDEN_CAMPOS)), r)),
-            opened_at=(siguiente or ultima).created_at)
+            paths=alcance.orden_guion(rutas),
+            opened_at=(siguiente or ultima).created_at, material=alcance.es_material(servido, ultima))
 
 
 def restricciones_para_consumidor(client_id: str) -> Restricciones:
@@ -222,17 +215,27 @@ def restricciones_para_consumidor(client_id: str) -> Restricciones:
     with _candado(client_id):
         servido = perfil_para_consumidor(client_id)
         r = calculos.restricciones(servido)
-        r.pending_review = revision_pendiente(client_id, servido)
+        r.pending_review = pendiente = revision_pendiente(client_id, servido)
+        if pendiente is not None:  # R6: no presentarlas como inequívocamente vigentes
+            efecto = (f" El cambio afecta a: {', '.join(pendiente.material)}." if pendiente.material
+                      else " El cambio no altera estas restricciones según las reglas actuales.")
+            r.rationale.append(
+                f"Datos en revisión sin validar (versión {pendiente.latest_version}): {', '.join(pendiente.paths)}. "
+                f"Estas restricciones son las de la versión {servido.version} validada y pueden estar "
+                f"desactualizadas: no apoyar ninguna recomendación en esos datos.{efecto}")
         return r
 
 
 def pedir_revision(client_id: str, motivo: str) -> Perfil:
-    """Abre una revisión pedida por el cliente: versión nueva, sin tocar datos, en borrador.
+    """Abre (o amplía) una revisión pedida por el cliente SIN cambiar el estado MiFID (R1, R5).
 
-    Los consumidores siguen recibiendo el último `active` (con `pending_review` cuando cambie algo);
-    lo que se pregunte y conteste en la microentrevista lo valida después la entidad."""
+    Escribe una versión de trámite (`review_requested:<motivos>`) con los mismos datos y el mismo estado que
+    la vigente: un perfil `active` sigue `active` y uno en revisión sigue en revisión. Es necesaria para la
+    trazabilidad y para que la revisión abierta sobreviva a un reinicio y la vea la entidad sin una tabla
+    nueva (`revision.en_curso` la reconstruye del historial). Abandonarla no cambia nada. Lo que el cliente
+    cambie después pasa a `review_due` por la regla de siempre; lo que solo confirme no (D3)."""
     motivo = _motivo(motivo)
-    return _escribir(client_id, lambda n: motivo, "system", lambda n: EstadoPerfil.draft)
+    return _escribir(client_id, lambda n: motivo, "system", lambda n: n.status)
 
 
 def versiones(client_id: str) -> list[dict[str, Any]]:
@@ -479,15 +482,30 @@ def anadir_alertas(client_id: str, alertas: Iterable[Alerta], autor: str = "agen
     return _escribir(client_id, mutar, autor, lambda n: _estado_tras_cambio(n, revisar_si_activo=False))
 
 
-def validar(client_id: str, asesor_id: str, cambios: Iterable[Parche] = ()) -> Perfil:
+VALIDABLES = (EstadoPerfil.draft, EstadoPerfil.pending_validation, EstadoPerfil.review_due)
+
+
+def validar(client_id: str, asesor_id: str, cambios: Iterable[Parche] = (),
+            version_esperada: int | None = None) -> Perfil:
     """La entidad corrige (opcional) y valida: el perfil pasa a 'active'.
-    Solo desde draft o pending_validation (desde review_due hay que reentrevistar).
-    Correcciones y validación se guardan juntas, o no se guarda ninguna."""
+
+    Desde draft, pending_validation o review_due (D2: tras una microentrevista, sin otra entrevista completa).
+    Un perfil ya `active` no se valida otra vez. Correcciones y validación se guardan juntas, o ninguna.
+    `version_esperada`: la versión que ha revisado la entidad; si el perfil ha cambiado desde entonces
+    (p. ej. otra respuesta del extractor), se rechaza para no validar lo que nadie ha visto.
+    """
     autor = validacion.comprobar_autor(f"advisor:{asesor_id}")
 
     def comprobar_estado(n: Perfil) -> None:
-        if n.status not in (EstadoPerfil.draft, EstadoPerfil.pending_validation):
+        if n.status not in VALIDABLES:
             raise Conflicto(f"No se puede validar un perfil en estado '{n.status.value}'")
+
+    def comprobar_vigente(actual: Perfil) -> None:
+        """Sobre la versión guardada (no sobre la candidata que se va a crear)."""
+        comprobar_estado(actual)
+        if version_esperada is not None and actual.version != version_esperada:
+            raise Conflicto(f"El perfil ha cambiado desde la versión {version_esperada} que revisó la entidad "
+                            f"(ahora es la {actual.version}): vuelve a revisarlo antes de validar")
 
     def mutar(n: Perfil) -> str:
         # Regla de la PR #7: la revisión humana cierra las alertas abiertas. Queda registrado quién y cuándo.
@@ -505,12 +523,12 @@ def validar(client_id: str, asesor_id: str, cambios: Iterable[Parche] = ()) -> P
         return EstadoPerfil.active
 
     with _candado(client_id):
-        comprobar_estado(_ultima(client_id))
+        comprobar_vigente(_ultima(client_id))
         normalizados = [comprobar_parche(c.model_copy(update={"source": Fuente.advisor}), autor)
                         for c in cambios]  # no modifica los parches del llamante
         for _ in range(MAX_REINTENTOS):
             actual = _ultima(client_id)
-            comprobar_estado(actual)
+            comprobar_vigente(actual)  # también la versión esperada: otra escritura pudo adelantarse
             candidatos = []
             if normalizados:
                 try:

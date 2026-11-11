@@ -14,7 +14,8 @@ Todas las tablas son SUPUESTOS v1 del equipo, pendientes de revisión financiera
 
 from __future__ import annotations
 
-from datetime import date
+from collections.abc import Iterable
+from datetime import date, datetime
 from enum import Enum
 from typing import Any
 
@@ -22,7 +23,7 @@ from pydantic import BaseModel, Field
 
 from . import calculos
 from .calculos import ORDEN_PERFILES, desconocimiento_declarado, valor
-from .modelos import CALCULADOS, CAMPOS, FAMILIAS, EstadoAlerta, Fact, Flag, Perfil
+from .modelos import CALCULADOS, CAMPOS, FAMILIAS, EstadoAlerta, EstadoPerfil, Fact, Flag, Perfil
 from .validacion import DatoInvalido
 
 # ---------- supuestos v1 ----------
@@ -72,6 +73,8 @@ class Motivo(str, Enum):
     # asesor o cliente
     advisor_request = "advisor_request"
     full_reassessment_requested = "full_reassessment_requested"
+    # sesión de revisión: el dato ya cambió (está respondido); solo se confirman sus dependencias
+    value_changed = "value_changed"
 
 
 class TipoPregunta(str, Enum):
@@ -86,7 +89,6 @@ _REVISION_ANUAL = [f"{_F}net_monthly_income_eur", f"{_F}fixed_monthly_costs_eur"
 
 # Motivos con rutas fijas: (lo que hay que repreguntar, lo que basta con confirmar).
 SEMILLAS: dict[Motivo, tuple[list[str], list[str]]] = {
-    Motivo.next_review_due: ([], _REVISION_ANUAL),
     Motivo.stale_profile: ([], _REVISION_ANUAL),
     Motivo.horizon_elapsed: ([f"{_O}horizon_years"], []),
     Motivo.retirement: ([f"{_F}net_monthly_income_eur", f"{_F}income_stability"],
@@ -118,18 +120,25 @@ VARIABLES: dict[Motivo, tuple[tuple[str, ...], TipoPregunta]] = {
     Motivo.knowledge_not_assessed: (_CONOCIMIENTO, TipoPregunta.repreguntar),
     Motivo.new_product_family: (_CONOCIMIENTO, TipoPregunta.repreguntar),
     Motivo.advisor_request: (_TODO, TipoPregunta.repreguntar),
+    Motivo.value_changed: (_TODO, TipoPregunta.confirmar),  # ver planificar: no se pregunta la ruta
+    Motivo.next_review_due: (_TODO, TipoPregunta.confirmar),  # vencimientos: solo lo no confirmado desde el vencimiento
 }
 
 
 def _dependencias() -> dict[str, list[str]]:
-    """Si cambia la clave, hay que confirmar también los valores. Sale de calculos.py; un test lo vigila.
+    """Si cambia la clave, hay que confirmar también los valores. Sale de calculos.py y de las reglas
+    deterministas del verificador (agentes/verificador.reglas); unos tests lo vigilan. No añade fórmulas.
 
     Un solo nivel: las dependencias de una confirmación no se añaden (si no cambia, no arrastra nada).
     """
     d: dict[str, list[str]] = {
         # colchón y capacidad de pérdida → perfil por capacidad → SRI máximo
         f"{_F}liquid_savings_eur": [f"{_F}fixed_monthly_costs_eur", f"{_F}debts_eur"],
-        f"{_F}fixed_monthly_costs_eur": [f"{_F}liquid_savings_eur", f"{_F}debts_eur"],
+        f"{_F}fixed_monthly_costs_eur": [f"{_F}liquid_savings_eur", f"{_F}debts_eur",
+                                          f"{_F}net_monthly_income_eur"],
+        # ingresos: NO entran en ningún cálculo de riesgo; solo en la regla del verificador «gastos fijos
+        # iguales o mayores que los ingresos» (alerta needs_advisor, que impide validar sin revisión)
+        f"{_F}net_monthly_income_eur": [f"{_F}fixed_monthly_costs_eur"],
         f"{_F}debts_eur": [f"{_F}liquid_savings_eur", f"{_F}fixed_monthly_costs_eur"],
         # tolerancia por escenarios → perfil por tolerancia
         f"{_R}scenario_score": [f"{_R}max_drawdown_accepted_pct"],
@@ -173,6 +182,12 @@ class Alcance(BaseModel):
     aplazadas: list[str]               # quedan para otra microentrevista
     reevaluacion_completa: bool        # el llamante abre una entrevista completa; las preguntas, por dónde empezar
     razones: list[str]                 # por qué se amplía (vacío si no)
+    # Sesión de revisión: tras las preguntas (o si no hay ninguna) se pregunta si ha cambiado algo más.
+    # Así una revisión no termina nada más empezar por tener la lista vacía. False en la entrevista inicial.
+    apertura: bool = False
+    # Preguntas del alcance que el inversor ya contestó (dio o confirmó el dato) en esta revisión, con su tipo,
+    # para mostrar el progreso. Orden del guion. No se vuelven a hacer.
+    respondidas: list[Pregunta] = Field(default_factory=list)
 
 
 # ---------- planificación ----------
@@ -205,8 +220,7 @@ def _tipo(perfil: Perfil, ruta: str, base: TipoPregunta) -> TipoPregunta:
     f = perfil.mifid.get(ruta)
     tipo = base
     if tipo == TipoPregunta.confirmar:
-        dudoso = f is not None and (Flag.low_confidence in f.flags or Flag.inconsistent in f.flags)
-        if f is None or f.value is None or dudoso:
+        if f is None or f.value is None or _dudoso(perfil, ruta):
             tipo = TipoPregunta.repreguntar  # no se confirma lo que falta o no es fiable
     if (tipo == TipoPregunta.repreguntar and ruta.startswith("knowledge.")
             and not desconocimiento_declarado(ruta, f)):
@@ -214,10 +228,32 @@ def _tipo(perfil: Perfil, ruta: str, base: TipoPregunta) -> TipoPregunta:
     return tipo
 
 
-def planificar(perfil: Perfil, peticiones: list[Peticion]) -> Alcance:
-    """Une las peticiones, añade dependencias de lo que cambia, ordena y recorta. Determinista."""
+def _dado(perfil: Perfil, ruta: str) -> bool:
+    """Tiene valor y no ha quedado dudoso: se puede dar por respondido."""
+    f = perfil.mifid.get(ruta)
+    return f is not None and f.value is not None and not _dudoso(perfil, ruta)
+
+
+def _dudoso(perfil: Perfil, ruta: str) -> bool:
+    f = perfil.mifid.get(ruta)
+    return f is not None and (Flag.low_confidence in f.flags or Flag.inconsistent in f.flags)
+
+
+def planificar(perfil: Perfil, peticiones: list[Peticion], vigentes: frozenset[str] = frozenset()) -> Alcance:
+    """Une las peticiones, añade dependencias de lo que cambia, ordena y recorta. Determinista.
+
+    `value_changed`: la ruta ya está respondida (cambió en esta revisión), así que no se pregunta otra vez
+    salvo que haya quedado dudosa; sí se confirman sus dependencias de `calculos.py`. Cuenta como cambio
+    para decidir si hay que ampliar a una reevaluación completa.
+
+    `vigentes`: rutas que el inversor ya dio o confirmó en esta revisión. No se vuelven a preguntar, sea
+    cual sea el tipo de pregunta (sí si faltan o han quedado dudosas), y salen en `Alcance.respondidas`.
+    Las reglas para ampliar a una reevaluación completa se evalúan antes de quitarlas, así que contestar
+    no cambia esa decisión.
+    """
     tipos: dict[str, TipoPregunta] = {}
     motivos: dict[str, list[Motivo]] = {}
+    respondidas: set[str] = set()
 
     def anotar(ruta: str, tipo: TipoPregunta, motivo: Motivo) -> None:
         if tipos.get(ruta) != TipoPregunta.repreguntar:  # repreguntar gana a confirmar
@@ -227,6 +263,12 @@ def planificar(perfil: Perfil, peticiones: list[Peticion]) -> Alcance:
 
     for p in peticiones:
         repreguntar, confirmar = _semillas(p)
+        if p.motivo == Motivo.value_changed:
+            respondidas.update(confirmar)
+            for r in confirmar:
+                for dep in DEPENDENCIAS.get(r, []):
+                    anotar(dep, TipoPregunta.confirmar, p.motivo)
+            continue
         for r in repreguntar:
             anotar(r, TipoPregunta.repreguntar, p.motivo)
         for r in confirmar:
@@ -235,28 +277,63 @@ def planificar(perfil: Perfil, peticiones: list[Peticion]) -> Alcance:
             for dep in DEPENDENCIAS.get(r, []):
                 anotar(dep, TipoPregunta.confirmar, p.motivo)
 
+    for r in respondidas:
+        if _dudoso(perfil, r):
+            anotar(r, TipoPregunta.repreguntar, Motivo.value_changed)
     preguntas = [Pregunta(path=r, tipo=_tipo(perfil, r, t), motivos=motivos[r], valor_vigente=valor(perfil, r))
                  for r, t in tipos.items()]
     preguntas.sort(key=lambda q: (q.tipo == TipoPregunta.confirmar, ORDEN_GUION[q.path]))
+    bloques = {q.path.split(".")[0] for q in preguntas if q.tipo != TipoPregunta.confirmar}  # antes de quitar
+    # Ya contestadas en esta revisión: cambiadas (value_changed, salvo dudosas) o dadas o confirmadas (vigentes).
+    hechas = {q.path for q in preguntas
+              if (q.path in respondidas or q.path in vigentes) and _dado(perfil, q.path)}
+    ya = [q for q in preguntas if q.path in hechas]
+    preguntas = [q for q in preguntas if q.path not in hechas]
 
     razones = []
     if any(p.motivo == Motivo.full_reassessment_requested for p in peticiones):
         razones.append("lo pide el cliente o la entidad")
-    bloques = {q.path.split(".")[0] for q in preguntas if q.tipo != TipoPregunta.confirmar}
+    bloques |= {r.split(".")[0] for r in respondidas}
     if len(bloques) >= BLOQUES_AMPLIAR:
         razones.append(f"cambios en {len(bloques)} bloques: {', '.join(sorted(bloques))}")
     if any(a.status == EstadoAlerta.open and a.flag == Flag.needs_advisor for a in perfil.alerts):
         razones.append("hay una alerta abierta que necesita al asesor")
 
     return Alcance(preguntas=preguntas[:MAX_PREGUNTAS], aplazadas=[q.path for q in preguntas[MAX_PREGUNTAS:]],
-                   reevaluacion_completa=bool(razones), razones=razones)
+                   reevaluacion_completa=bool(razones), razones=razones,
+                   respondidas=sorted(ya, key=lambda q: ORDEN_GUION[q.path]))
+
+
+# ---------- cambios entre versiones ----------
+
+def _contenido(f: Fact | None) -> tuple[Any, Any, tuple[str, ...]] | None:
+    """Lo que cuenta como cambio de un dato: valor, declarado y flags (no evidencia, confianza ni fechas)."""
+    return None if f is None else (f.value, f.declared, tuple(sorted(x.value for x in f.flags)))
+
+
+def orden_guion(rutas) -> list[str]:
+    return sorted(set(rutas), key=lambda r: (ORDEN_GUION.get(r, len(ORDEN_GUION)), r))
+
+
+def cambiados(anterior: Perfil, nueva: Perfil) -> list[str]:
+    """Rutas MiFID no calculadas cuyo valor, declarado o flags difieren entre dos versiones (orden del guion).
+
+    Única definición de «dato cambiado»: la usan `store.revision_pendiente` (lo que se avisa a los
+    consumidores) y `alcance_revision` (lo que se pregunta al inversor). Una confirmación no cuenta.
+    """
+    return orden_guion(r for r in set(anterior.mifid) | set(nueva.mifid)
+                       if r not in CALCULADOS and _contenido(anterior.mifid.get(r)) != _contenido(nueva.mifid.get(r)))
 
 
 # ---------- calendario ----------
 
+def ultimo_momento(f: Fact) -> datetime:
+    """Última vez que el cliente dio este dato: al escribirlo o al confirmarlo (§4.3 del diseño)."""
+    return max(f.updated_at, f.confirmed_at or f.updated_at)
+
+
 def ultima_vez(f: Fact) -> date:
-    """Último día en que el cliente dio este dato: al escribirlo o al confirmarlo (§4.3 del diseño)."""
-    return max(f.updated_at, f.confirmed_at or f.updated_at).date()
+    return ultimo_momento(f).date()
 
 
 def plazo_restante(f: Fact, hoy: date) -> float:
@@ -284,7 +361,12 @@ def vencimientos(perfil: Perfil, hoy: date) -> list[Peticion]:
     out: list[Peticion] = []
     nr = perfil.review.next_review
     if nr and date.fromisoformat(nr) <= hoy:
-        out.append(Peticion(motivo=Motivo.next_review_due))
+        vence = date.fromisoformat(nr)
+        # Revisión anual: lo que el inversor ya dio o confirmó después del vencimiento sigue vigente.
+        rutas = [r for r in _REVISION_ANUAL
+                 if (f := perfil.mifid.get(r)) is None or f.value is None or ultima_vez(f) < vence]
+        if rutas:
+            out.append(Peticion(motivo=Motivo.next_review_due, rutas=rutas))
 
     caducados: dict[str, list[str]] = {}
     for ruta, f in perfil.mifid.items():
@@ -344,3 +426,40 @@ def es_material(anterior: Perfil, nueva: Perfil) -> list[str]:
             ca is not None and cn is not None and abs(cn - ca) > VARIACION_CAPACIDAD * abs(ca)):
         out.append("loss_capacity")
     return out
+
+
+# ---------- sesión de revisión ----------
+
+def alcance_revision(servido: Perfil, ultima: Perfil, hoy: date, motivos: Iterable[Motivo] = (),
+                     desde: datetime | None = None) -> Alcance:
+    """Único planificador de una microentrevista sobre un perfil ya validado. Determinista, sin modelo.
+
+    - `servido`: el último perfil `active` (lo validado y sus evidencias; `store.perfil_para_consumidor`).
+    - `ultima`: la última versión (`store.perfil`), con lo que ya haya cambiado o confirmado en la revisión.
+    - `motivos`: lo que el inversor dice que ha cambiado (catálogo cerrado de motivos de rutas fijas,
+      p. ej. `planned_expense`). Opcional.
+    - `desde`: cuándo empezó la revisión (p. ej. al pedirla el cliente). Lo dado o confirmado después cuenta
+      como respondido. Por defecto, la creación de `servido`.
+
+    Combina: los motivos del inversor, los vencimientos de `ultima`, los datos ya cambiados desde `servido`
+    (`value_changed`: no se repiten; se confirman sus dependencias de calculos.py y del verificador) y lo
+    respondido en la revisión (sale de las preguntas y aparece en `respondidas`). Los resultados (perfil de
+    riesgo, restricciones) los recalcula después `calculos.recalcular` en cada escritura: aquí no se calcula
+    nada nuevo. `apertura` siempre es True: la revisión no termina por tener la lista vacía.
+    """
+    if servido.status != EstadoPerfil.active:
+        raise DatoInvalido("Sin un perfil validado no hay revisión: es una entrevista inicial")
+    if ultima.client_id != servido.client_id or ultima.version < servido.version:
+        raise DatoInvalido("La última versión no corresponde al perfil servido")
+    peticiones = [Peticion(motivo=Motivo(m)) for m in dict.fromkeys(motivos)]  # sin repetir, en su orden
+    peticiones += vencimientos(ultima, hoy)
+    cambios = [r for r in cambiados(servido, ultima) if r in CAMPOS and not r.startswith("disclosures.")]
+    if cambios:
+        peticiones.append(Peticion(motivo=Motivo.value_changed, rutas=cambios))
+    desde = desde or servido.created_at
+    # Respondido = el inversor lo dijo (con su cita) desde que empezó la revisión; una corrección del asesor
+    # sin cita no cuenta como respuesta suya.
+    vigentes = frozenset(r for r, f in ultima.mifid.items()
+                         if r not in CALCULADOS and f.value is not None and f.evidence
+                         and ultimo_momento(f) >= desde)
+    return planificar(ultima, peticiones, vigentes).model_copy(update={"apertura": True})

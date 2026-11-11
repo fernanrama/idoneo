@@ -3,20 +3,21 @@
 Diseño: docs/diseno/06-actualizacion-continua.md (§3.2, §3.3 y §4.2). Sin tabla nueva ni migración:
 - Abrir una revisión escribe una versión con motivo `review_requested:<motivos>` (historial inmutable).
 - La revisión en curso se reconstruye leyendo el historial hacia atrás hasta la última validación.
-- Qué preguntar lo decide `alcance.planificar` (determinista). Una pregunta está respondida cuando su dato
-  se ha vuelto a escribir después de abrir la revisión (cambio o confirmación con cita nueva).
+- Qué preguntar lo decide `alcance.alcance_revision` (determinista, el único planificador de microentrevistas).
+  Una pregunta está respondida cuando el cliente ha dado o confirmado su dato, con cita, después de abrir la
+  revisión.
 - `cambios` compara el último perfil validado con el último guardado, para la vista de la entidad.
 """
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from pydantic import BaseModel
 
 from . import alcance, store
-from .alcance import Motivo, Peticion, TipoPregunta
+from .alcance import Motivo, TipoPregunta
 from .modelos import CALCULADOS, EstadoPerfil, Perfil
 
 PREFIJO = "review_requested:"
@@ -124,11 +125,26 @@ def _motivos(codigos: list[str]) -> list[Motivo]:
     return out
 
 
+def _lectura(client_id: str) -> tuple[list[dict], Perfil, Perfil]:
+    """Historial, última versión y perfil servido de un mismo instante.
+
+    Son tres lecturas: si entre ellas se escribe otra versión (p. ej. una confirmación pura, que queda `active`),
+    el perfil servido podría ser más nuevo que la «última» leída. Se reintenta hasta que cuadren.
+    """
+    for _ in range(5):
+        historial = store.versiones(client_id)
+        p = store.perfil(client_id)
+        servido = store.perfil_para_consumidor(client_id)
+        if historial and historial[-1]["version"] == p.version and servido.version <= p.version:
+            return historial, p, servido
+    raise store.Conflicto("El perfil está cambiando ahora mismo: vuelve a intentarlo")
+
+
 def previsualizar(client_id: str, codigos: list[str]) -> RevisionEnCurso:
     """Qué se preguntaría, sin escribir nada."""
     motivos = _motivos(codigos)
-    p = store.perfil(client_id)
-    return _construir(p, motivos, p.created_at, p.version + 1)
+    _, p, servido = _lectura(client_id)
+    return _construir(p, motivos, p.created_at, p.version + 1, servido)
 
 
 def abrir(client_id: str, codigos: list[str]) -> RevisionEnCurso:
@@ -157,7 +173,7 @@ def _peticiones(reason: str) -> list[Motivo]:
 
 def en_curso(client_id: str) -> RevisionEnCurso | None:
     """La revisión abierta desde la última validación (o None). Se reconstruye del historial."""
-    historial = store.versiones(client_id)
+    historial, p, servido = _lectura(client_id)
     motivos: list[Motivo] = []
     abierta: dict | None = None
     for v in reversed(historial):
@@ -168,22 +184,27 @@ def en_curso(client_id: str) -> RevisionEnCurso | None:
             motivos = list(dict.fromkeys(_peticiones(v["reason"]) + motivos))
     if abierta is None or not motivos:
         return None
-    return _construir(store.perfil(client_id), motivos, abierta["created_at"], abierta["version"])
+    return _construir(p, motivos, abierta["created_at"], abierta["version"], servido)
 
 
 def _momento(f) -> datetime:
-    """Última vez que el cliente dio el dato: al escribirlo o al confirmarlo. Una confirmación de mismo
-    valor (#45) conserva `updated_at` y anota `confirmed_at`."""
-    return max(f.updated_at, f.confirmed_at or f.updated_at)
+    """Última vez que el cliente dio el dato: al escribirlo o al confirmarlo (#45)."""
+    return alcance.ultimo_momento(f)
 
 
-def _construir(p: Perfil, motivos: list[Motivo], abierta_en: datetime, desde: int) -> RevisionEnCurso:
-    a = alcance.planificar(p, [Peticion(motivo=m) for m in motivos])
-    preguntas = []
-    for q in a.preguntas:
-        f = p.mifid.get(q.path)
-        hecha = f is not None and _momento(f) >= abierta_en and f.evidence != []
-        preguntas.append(Pregunta(path=q.path, tipo=q.tipo, valor_vigente=q.valor_vigente, respondida=hecha))
+def _construir(p: Perfil, motivos: list[Motivo], abierta_en: datetime, desde: int,
+               servido: Perfil | None = None) -> RevisionEnCurso:
+    """Delega en el único planificador de microentrevistas, `alcance.alcance_revision`.
+
+    Combina los motivos del cliente, los datos caducados, lo que ya cambió y sus dependencias, y lo que el
+    cliente ya dijo o confirmó (con su cita) desde `abierta_en`: eso sale como respondido y no se repite.
+    """
+    servido = servido or store.perfil_para_consumidor(p.client_id)
+    hoy = datetime.now(timezone.utc).date()
+    a = alcance.alcance_revision(servido, p, hoy, motivos, desde=abierta_en)
+    todas = [(q, False) for q in a.preguntas] + [(q, True) for q in a.respondidas]
+    todas.sort(key=lambda x: (x[0].tipo == TipoPregunta.confirmar, alcance.ORDEN_GUION.get(x[0].path, 999)))
+    preguntas = [Pregunta(path=q.path, tipo=q.tipo, valor_vigente=q.valor_vigente, respondida=r) for q, r in todas]
     return RevisionEnCurso(motivos=motivos, abierta_en=abierta_en, desde_version=desde, preguntas=preguntas,
                            aplazadas=a.aplazadas, reevaluacion_completa=a.reevaluacion_completa, razones=a.razones)
 
@@ -207,7 +228,11 @@ def vista(r: RevisionEnCurso | None) -> dict[str, Any]:
 # ---------- antes y después, para la entidad ----------
 
 def _ultima_validada(client_id: str) -> int | None:
-    validadas = [v["version"] for v in store.versiones(client_id) if v["status"] == EstadoPerfil.active]
+    """La última versión que validó la entidad (`reason == "validated"`), no la última `active`: una
+    confirmación pura (#45, D3) o la apertura de una revisión dejan versiones `active` que nadie ha validado.
+    PARCHE DE COMPATIBILIDAD (Juan): pendiente de revisión de Alejandro."""
+    validadas = [v["version"] for v in store.versiones(client_id)
+                 if v["status"] == EstadoPerfil.active and v["reason"] == "validated"]
     return validadas[-1] if validadas else None
 
 

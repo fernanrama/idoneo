@@ -86,13 +86,19 @@ def test_no_se_revalida_un_activo(carmen):
         store.validar(C, "asesor-08", [])
 
 
-def test_review_due_exige_reentrevista(carmen):
+def test_review_due_se_valida_sin_otra_entrevista(carmen):
+    """D2 (11/11/2026): antes desde review_due había que reentrevistar; ahora la entidad valida directamente."""
     store.validar(C, "asesor-07", [])
     p = store.aplicar(C, [parche("financial.debts_eur", 5000)], "nuevo préstamo", "agent:extractor")
     assert p.status == EstadoPerfil.review_due
-    with pytest.raises(store.Conflicto):
-        store.validar(C, "asesor-07", [])
-    store.crear_sesion(C)  # empieza la entrevista corta
+    v = store.validar(C, "asesor-07", [])
+    assert v.status == EstadoPerfil.active and v.reason == "validated" and v.mifid["financial.debts_eur"].value == 5000
+
+
+def test_una_entrevista_nueva_sobre_review_due_vuelve_a_borrador(carmen):
+    store.validar(C, "asesor-07", [])
+    store.aplicar(C, [parche("financial.debts_eur", 5000)], "nuevo préstamo", "agent:extractor")
+    store.crear_sesion(C)  # empieza una entrevista: la transición de siempre se conserva
     p = store.perfil(C)
     assert p.status == EstadoPerfil.draft and p.reason == "reassessment_started"
 
