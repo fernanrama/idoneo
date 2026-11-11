@@ -49,6 +49,15 @@ EFECTOS = {
     "esg_only": "Cambia el criterio de sostenibilidad",
     "loss_capacity": "La capacidad de soportar pérdidas varía más de un 20 %",
 }
+FAMILIAS = {
+    "deposits_money_market": "depósitos y monetarios",
+    "fixed_income_funds": "fondos de renta fija",
+    "mixed_funds": "fondos mixtos",
+    "equity_funds": "fondos de renta variable",
+    "etfs": "ETF",
+    "stocks": "acciones",
+    "complex_products": "productos complejos",
+}
 _FILTROS = {
     "redemption_lag_days": "Cambia el plazo máximo de reembolso (liquidez)",
     "fixed_income_term": "Cambia el filtro de renta fija a corto plazo (plazo)",
@@ -217,7 +226,8 @@ def comparar(client_id: str) -> Comparacion | None:
     efectos = []
     for e in alcance.es_material(antes, ultima):
         if e.startswith("appropriateness:"):
-            efectos.append(f"Cambia la conveniencia de {e.split(':', 1)[1]}")
+            familia = e.split(":", 1)[1]
+            efectos.append(f"Cambia la conveniencia de {FAMILIAS.get(familia, familia)}")
         elif e.startswith("filter:"):
             efectos.append(_FILTROS.get(e.split(":", 1)[1], f"Cambia el filtro {e.split(':', 1)[1]}"))
         else:

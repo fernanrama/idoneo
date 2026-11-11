@@ -4,11 +4,17 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { ETIQUETAS, estadoBloques, mostrarValor } from "@/lib/bloques";
+import { useOnboarding } from "@/lib/onboarding";
+import { minutos, nombreDato } from "@/lib/revision";
+import type { Revision } from "@/lib/tipos";
 import type { useEntrevista } from "@/lib/useEntrevista";
+import { useRevision } from "@/lib/useRevision";
+import { IconoMotivo } from "./IconoMotivo";
 import s from "./entrevista.module.css";
 import { Anotado, Aura, BloquesNoche, BotonNoche, Icono, MarcaNoche, Ondas, clasesBoton } from "./visual";
 
 type HookEntrevista = ReturnType<typeof useEntrevista>;
+type RevisionAbierta = Extract<Revision, { open: true }>;
 
 /**
  * La entrevista tal como la vive el cliente: el aura hace de entrevistador y solo se ve la pregunta
@@ -22,12 +28,17 @@ export function Entrevista({ e, compacto = false, alTerminar }: { e: HookEntrevi
   const bloques = estadoBloques(e.perfil);
   const enCurso = bloques.find((b) => b.estado === "en_curso");
   const enMarcha = e.estado === "activa" || e.estado === "conectando";
+  // «Ha cambiado algo»: si el cliente tiene una revisión abierta, la entrevista es corta y solo pregunta eso.
+  const { clientId } = useOnboarding();
+  const rev = useRevision(clientId, enMarcha || e.estado === "terminada" ? 2000 : undefined);
+  const revision = !compacto && e.modo !== "guion" && rev?.open ? rev : null;
 
   return (
     <div className={`${s.raiz} ${compacto ? s.compacto : ""}`}>
       <header className={s.cabecera}>
         <MarcaNoche />
-        {enMarcha && (
+        {enMarcha && revision && <BarraRevision r={revision} />}
+        {enMarcha && !revision && (
           <div className={s.bloquesCaja} style={{ margin: "0 auto" }}>
             <BloquesNoche bloques={bloques} />
           </div>
@@ -41,8 +52,14 @@ export function Entrevista({ e, compacto = false, alTerminar }: { e: HookEntrevi
         {!compacto && enMarcha && (
           <>
             <div className={`${s.lateral} ${s.lateralIzq} vidrio`}>
-              <span className={`${s.titulo} mono`}>Ahora</span>
-              <p>{enCurso ? enCurso.nombre : "Cerrando la entrevista"}</p>
+              {revision ? (
+                <ProgresoRevision r={revision} onTerminar={e.terminar} />
+              ) : (
+                <>
+                  <span className={`${s.titulo} mono`}>Ahora</span>
+                  <p>{enCurso ? enCurso.nombre : "Cerrando la entrevista"}</p>
+                </>
+              )}
             </div>
             <div className={`${s.lateral} ${s.lateralDer} vidrio`}>
               {e.modo === "guion" ? (
@@ -58,7 +75,7 @@ export function Entrevista({ e, compacto = false, alTerminar }: { e: HookEntrevi
         )}
 
         {(e.estado === "inactiva" || e.estado === "error") && (
-          <Inicio e={e} compacto={compacto} permisos={permisos} setPermisos={setPermisos} />
+          <Inicio e={e} compacto={compacto} permisos={permisos} setPermisos={setPermisos} revision={revision} />
         )}
 
         {enMarcha && (
@@ -102,16 +119,32 @@ export function Entrevista({ e, compacto = false, alTerminar }: { e: HookEntrevi
         {e.estado === "terminada" && (
           <div className={s.fin}>
             <Aura estado="anotado" tam={compacto ? 200 : 300} />
-            <h1>{e.modo === "guion" ? "Listo. El perfil de Carmen está preparado." : "Listo. Tu perfil ya está preparado."}</h1>
+            <h1>
+              {e.modo === "guion"
+                ? "Listo. El perfil de Carmen está preparado."
+                : revision
+                  ? "Listo. Hemos anotado tus cambios."
+                  : "Listo. Tu perfil ya está preparado."}
+            </h1>
             <p className={s.finTexto}>
               {e.modo === "guion"
                 ? "Cada dato lleva su frase y el aviso queda abierto para que la entidad lo revise antes de validar."
-                : "Una persona del banco lo revisará antes de usarlo. Te avisaremos cuando esté listo."}
+                : revision
+                  ? "Una persona del banco revisará lo que ha cambiado. Hasta entonces se sigue usando tu perfil anterior, avisando de qué datos están en revisión."
+                  : "Una persona del banco lo revisará antes de usarlo. Te avisaremos cuando esté listo."}
             </p>
+            {revision && revision.remaining > 0 && (
+              <p className={s.finTexto}>
+                Han quedado {revision.remaining} {revision.remaining === 1 ? "pregunta" : "preguntas"} sin contestar. Puedes
+                retomarlas cuando quieras desde tu perfil.
+              </p>
+            )}
             <div className={s.finAcciones}>
               {alTerminar ?? (
                 <Link href="/onboarding/perfil">
-                  <span className={clasesBoton.luz}>{e.modo === "guion" ? "Ver el perfil de Carmen" : "Ver mi perfil"}</span>
+                  <span className={clasesBoton.luz}>
+                    {e.modo === "guion" ? "Ver el perfil de Carmen" : revision ? "Ver qué ha cambiado" : "Ver mi perfil"}
+                  </span>
                 </Link>
               )}
               {e.modo === "guion" && (
@@ -176,8 +209,8 @@ function LineaEstado({ e }: { e: HookEntrevista }) {
 
 type Permisos = { ia: boolean; grabacion: boolean };
 
-function Inicio({ e, compacto, permisos, setPermisos }: {
-  e: HookEntrevista; compacto: boolean; permisos: Permisos; setPermisos: (p: Permisos) => void;
+function Inicio({ e, compacto, permisos, setPermisos, revision }: {
+  e: HookEntrevista; compacto: boolean; permisos: Permisos; setPermisos: (p: Permisos) => void; revision: RevisionAbierta | null;
 }) {
   const { ia, grabacion } = permisos;
   const setIa = (v: boolean) => setPermisos({ ...permisos, ia: v });
@@ -194,6 +227,77 @@ function Inicio({ e, compacto, permisos, setPermisos }: {
       vivo = false;
     };
   }, []);
+  // Modo elegido en «Ha cambiado algo» (?modo=voz|texto): se resalta ese botón.
+  const [preferido, setPreferido] = useState<string | null>(null);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- se lee una vez de la URL
+    setPreferido(new URLSearchParams(window.location.search).get("modo"));
+  }, []);
+  if (revision) {
+    const n = revision.questions.length;
+    return (
+      <div className={s.inicio}>
+        <Aura estado="reposo" tam={compacto ? 200 : 220} />
+        <h1>
+          Vamos a <span className="texto-degradado">ponerte al día</span>
+        </h1>
+        <p>
+          {revision.remaining < n
+            ? `Ya llevas ${n - revision.remaining} de ${n}. Seguimos donde lo dejaste.`
+            : `Solo ${n === 1 ? "una pregunta" : `${n} preguntas`}, unos ${minutos(n)} min. Lo demás de tu perfil se queda como está.`}
+        </p>
+        <div className={`${s.revInicio} vidrio`}>
+          <span className={`${s.titulo} mono`}>Lo que nos has contado</span>
+          <div className={s.revMotivos}>
+            {revision.reasons.map((m, i) => (
+              <span key={m.code} className={s.revMotivo} style={{ animationDelay: `${i * 0.08}s` }}>
+                <IconoMotivo icono={m.icono} />
+                {m.titulo}
+              </span>
+            ))}
+          </div>
+          <span className={`${s.titulo} mono`} style={{ marginTop: 6 }}>Te preguntaremos por</span>
+          <ul className={s.revLista}>
+            {revision.questions.map((q, i) => (
+              <li key={q.path} className={q.respondida ? s.revHecha : ""} style={{ animationDelay: `${0.2 + i * 0.07}s` }}>
+                {nombreDato(q.path)}
+                {q.respondida && " · hecho"}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className={`${s.permisos} vidrio`}>
+          <label className={s.permiso}>
+            <input type="checkbox" checked={ia} onChange={(ev) => setIa(ev.target.checked)} />
+            <span>Entiendo que hablaré con un asistente de inteligencia artificial y que una persona del banco revisará los cambios.</span>
+          </label>
+          <label className={s.permiso}>
+            <input type="checkbox" checked={grabacion} onChange={(ev) => setGrabacion(ev.target.checked)} />
+            <span>Acepto que se guarde la conversación para justificar los cambios. No se usará mi voz para identificarme.</span>
+          </label>
+        </div>
+        <div className={s.modos}>
+          <BotonNoche onClick={e.iniciarVoz} disabled={!listo} className={preferido === "voz" && listo ? s.revPreferido : undefined}>
+            {Icono.micro}
+            Hablar
+          </BotonNoche>
+          <BotonNoche variante="vidrio" onClick={e.iniciarTexto} disabled={!listo}
+            className={preferido === "texto" && listo ? s.revPreferido : undefined} style={{ minHeight: 52, paddingInline: 24 }}>
+            {Icono.teclado}
+            Escribir
+          </BotonNoche>
+        </div>
+        <p className={s.pista} aria-live="polite">
+          {listo ? "Te leeremos lo que tenemos anotado y nos dices si sigue igual o qué ha cambiado." : "Marca las dos casillas para poder empezar."}
+        </p>
+        {e.error && (
+          <p role="alert" className={s.error}>
+            {e.error}
+          </p>
+        )}
+      </div>
+    );
+  }
   return (
     <div className={s.inicio}>
       <Aura estado="reposo" tam={compacto ? 200 : 260} />
@@ -327,6 +431,39 @@ function ControlesDemo({ e }: { e: HookEntrevista }) {
       <BotonNoche variante="vidrio" redondo onClick={e.demo.alternarVoz} aria-label={e.demo.voz ? "Quitar el sonido" : "Activar el sonido"} aria-pressed={e.demo.voz}>
         {e.demo.voz ? Icono.sonido : Icono.silencio}
       </BotonNoche>
+    </>
+  );
+}
+
+/** Cabecera de la microentrevista: una barrita por pregunta, que se enciende al contestarla. */
+function BarraRevision({ r }: { r: RevisionAbierta }) {
+  const hechas = r.questions.length - r.remaining;
+  return (
+    <div className={`${s.revBarra} vidrio`} role="progressbar" aria-valuemin={0} aria-valuemax={r.questions.length} aria-valuenow={hechas}
+      aria-label="Preguntas de la revisión contestadas">
+      <span className="mono">Revisión</span>
+      <span className={s.revPuntos}>
+        {r.questions.map((q) => <i key={q.path} className={q.respondida ? s.revHecha : ""} />)}
+      </span>
+      <span className="mono">{hechas} de {r.questions.length}</span>
+    </div>
+  );
+}
+
+/** Lateral de la microentrevista: qué toca ahora y, al acabar, el botón para cerrar. */
+function ProgresoRevision({ r, onTerminar }: { r: RevisionAbierta; onTerminar: () => void }) {
+  const siguiente = r.questions.find((q) => !q.respondida);
+  return (
+    <>
+      <span className={`${s.titulo} mono`}>{siguiente ? "Ahora" : "Todo contestado"}</span>
+      <p key={siguiente?.path ?? "fin"} className={s.anotadoNuevo}>
+        {siguiente ? nombreDato(siguiente.path) : "Ya tenemos lo que necesitábamos."}
+      </p>
+      {!siguiente && (
+        <button type="button" className={s.revListo} onClick={onTerminar}>
+          Terminar
+        </button>
+      )}
     </>
   );
 }

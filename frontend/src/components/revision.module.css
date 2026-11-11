@@ -1,0 +1,168 @@
+/* «Ha cambiado algo» y piezas del perfil vivo en las pantallas claras del cliente. */
+
+.hero { min-height: 240px; }
+.pasosMini { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; flex: 0 1 300px; animation: v-sube 0.6s 0.15s both; }
+.pasosMini li { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 16px; background: rgba(255, 255, 255, 0.7); box-shadow: 0 0 0 1px #e3e9f4; color: #6a7086; font-weight: 600; font-size: 15px; transition: background 0.3s, color 0.3s, box-shadow 0.3s; }
+.pasosMini b { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #e6ebf5; font-size: 13px; transition: background 0.3s, color 0.3s; }
+.pasoActual { background: #ffffff !important; color: #0e1020 !important; box-shadow: 0 0 0 2px #0046de, 0 10px 24px rgba(0, 70, 222, 0.14) !important; }
+.pasoActual b { background: #0046de; color: #ffffff; }
+.pasoHecho { color: #0b6b47 !important; }
+.pasoHecho b { background: #e5f6ee; color: #0b6b47; }
+
+.disposicion { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 24px; align-items: start; }
+.titulo { margin: 0 0 4px; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+.ayuda { margin: 0 0 16px; color: #6a7086; font-size: 15px; }
+
+.motivos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.motivo {
+  position: relative; display: flex; align-items: center; gap: 14px; padding: 16px 44px 16px 16px; min-height: 92px;
+  border: 0; border-radius: 20px; background: #ffffff; text-align: left; color: inherit; cursor: pointer;
+  box-shadow: 0 0 0 1px rgba(14, 16, 32, 0.07), 0 10px 28px rgba(0, 70, 222, 0.05);
+  transition: transform 0.25s cubic-bezier(0.3, 1.4, 0.5, 1), box-shadow 0.25s, background 0.25s;
+  animation: v-entra 0.5s both;
+}
+.motivo:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 0 0 1px rgba(0, 70, 222, 0.25), 0 16px 36px rgba(0, 70, 222, 0.12); }
+.motivo:focus-visible { outline: 3px solid #6b4ef0; outline-offset: 3px; }
+.motivo:disabled { cursor: not-allowed; opacity: 0.55; }
+.motivoActivo { background: linear-gradient(135deg, #f2f6ff, #f6f0ff); box-shadow: 0 0 0 2px #0046de, 0 18px 40px rgba(0, 70, 222, 0.18) !important; }
+.motivoIcono { flex-shrink: 0; display: grid; place-items: center; width: 60px; height: 60px; border-radius: 18px; background: #ecf5ff; color: #0046de; transition: background 0.3s, color 0.3s, transform 0.4s; }
+.motivoIcono svg path, .motivoIcono svg rect, .motivoIcono svg circle { stroke-dasharray: 140; stroke-dashoffset: 0; }
+.motivoActivo .motivoIcono { background: linear-gradient(135deg, #0046de, #6b4ef0); color: #ffffff; transform: rotate(-6deg) scale(1.05); }
+.motivoActivo .motivoIcono svg * { animation: dibuja 0.7s ease both; }
+@keyframes dibuja { from { stroke-dashoffset: 140; } to { stroke-dashoffset: 0; } }
+.motivoTexto { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.motivoTexto strong { font-size: 16px; line-height: 1.3; }
+.motivoTexto span { font-size: 13.5px; color: #6a7086; line-height: 1.4; }
+.marca { position: absolute; top: 14px; right: 14px; width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 2px #cfd8ea; transition: background 0.25s, box-shadow 0.25s; }
+.motivoActivo .marca { background: #0046de; box-shadow: none; animation: v-sello 0.4s both; }
+.motivoActivo .marca::after { content: ""; position: absolute; left: 7px; top: 4px; width: 6px; height: 10px; border: solid #ffffff; border-width: 0 2.4px 2.4px 0; transform: rotate(45deg); }
+.motivoCargando { height: 92px; border-radius: 20px; background: linear-gradient(90deg, #eef2fa, #f7f9fd, #eef2fa); background-size: 200% 100%; animation: barrido 1.4s linear infinite; }
+@keyframes barrido { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+.panel { position: sticky; top: 84px; padding: 24px; border-radius: 24px; background: #ffffff; box-shadow: 0 0 0 1px rgba(14, 16, 32, 0.06), 0 18px 48px rgba(0, 70, 222, 0.08); overflow: hidden; }
+.panel::before { content: ""; position: absolute; inset: -40% -30% auto auto; width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle, rgba(107, 78, 240, 0.12), transparent 70%); pointer-events: none; animation: v-deriva 14s ease-in-out infinite; }
+.vacio { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; padding: 26px 8px 10px; color: #6a7086; }
+.vacioOrbe { width: 84px; height: 84px; border-radius: 50%; background: radial-gradient(circle at 32% 30%, #ffffff, #9db8ff 45%, #6b4ef0); box-shadow: 0 16px 40px rgba(107, 78, 240, 0.3); animation: v-respira 3.2s ease-in-out infinite; }
+.contadores { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 16px; }
+.contadores span { display: inline-flex; align-items: baseline; gap: 6px; padding: 8px 12px; border-radius: 14px; background: #f2f6ff; font-size: 14px; color: #1d2b5c; }
+.numero { font-size: 22px; font-weight: 700; color: #0046de; animation: v-sello 0.45s both; }
+.lista { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 8px; counter-reset: q; }
+.pregunta { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 16px; background: #f7f9fd; animation: v-llega 0.45s both; }
+.preguntaTexto { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.preguntaTexto strong { font-size: 15.5px; }
+.preguntaTexto span { font-size: 13.5px; color: #4a5066; }
+.chip { flex-shrink: 0; padding: 5px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.01em; }
+.chip_confirmar { background: #e5f6ee; color: #0b6b47; }
+.chip_repreguntar { background: #ecf0ff; color: #2b3fb8; }
+.chip_comprobar { background: #f4ecff; color: #6a2bb8; }
+.leyenda { margin: 0 0 16px; font-size: 13.5px; color: #6a7086; line-height: 1.5; }
+.volver { margin: 8px 0 0; }
+.volver a { color: #0046de; font-weight: 600; }
+
+/* Tarjeta del perfil: «¿Ha cambiado algo?» y revisión en curso */
+.vivo { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 18px 24px; padding: 24px 26px; border-radius: 24px; color: #ffffff; overflow: hidden; background: linear-gradient(120deg, #0e1020 0%, #1b2a6b 55%, #3b2a8f 100%); box-shadow: 0 20px 50px rgba(14, 16, 32, 0.25); }
+.vivo::after { content: ""; position: absolute; right: -60px; top: -80px; width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.55), rgba(157, 184, 255, 0.35) 40%, transparent 70%); animation: v-flota 6s ease-in-out infinite; pointer-events: none; }
+.vivo h2 { margin: 0 0 6px; color: #ffffff !important; font-size: 21px; }
+.vivo p { margin: 0; color: #d7defa; font-size: 15.5px; line-height: 1.5; }
+.vivoTexto { flex: 1 1 320px; position: relative; z-index: 1; }
+.vivoBoton { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 8px; min-height: 50px; padding: 0 22px; border-radius: 999px; background: #ffffff; color: #0e1020; font-weight: 700; transition: transform 0.2s; }
+.vivoBoton:hover { transform: translateY(-2px); }
+.progreso { display: flex; gap: 6px; margin-top: 12px; }
+.progreso i { width: 34px; height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.22); transition: background 0.4s; }
+.progreso i.hecha { background: #7ef0c8; animation: v-sello 0.4s both; }
+.motivosChips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.motivosChips span { padding: 5px 10px; border-radius: 999px; background: rgba(255, 255, 255, 0.14); font-size: 13px; color: #ffffff; }
+
+/* Productos: qué no se busca y por qué */
+.busquedas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.busqueda { position: relative; padding: 16px; border-radius: 18px; background: #f7f9fd; animation: v-entra 0.5s both; }
+.busqueda strong { display: flex; align-items: center; gap: 8px; font-size: 16px; }
+.busqueda p { margin: 6px 0 0 !important; font-size: 14px !important; color: #4a5066; }
+.si, .no { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; font-size: 13px; font-weight: 800; flex-shrink: 0; }
+.si { background: #e5f6ee; color: #0b6b47; }
+.no { background: #fdecec; color: #b42318; }
+.busquedaNo { background: #fffafa; box-shadow: inset 0 0 0 1px #f6d4d4; }
+
+@media (max-width: 900px) {
+  .disposicion { grid-template-columns: 1fr; }
+  .panel { position: static; }
+  .pasosMini { flex-basis: 100%; }
+}
+@media (max-width: 560px) {
+  .motivos, .busquedas { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .motivo, .pregunta, .busqueda, .numero, .vivo::after, .panel::before, .vacioOrbe, .motivoActivo .motivoIcono svg * { animation: none !important; }
+}
+
+/* Antes y después (cliente y entidad) */
+.ad { --acento: #0046de; --acento2: #6b4ef0; display: flex; flex-direction: column; gap: 18px; padding: 26px; border-radius: 24px; background: #ffffff; box-shadow: 0 0 0 1px rgba(14, 16, 32, 0.06), 0 18px 48px rgba(0, 70, 222, 0.08); animation: v-sube 0.5s both; }
+.tonoEntidad { --acento: #6b4ef0; --acento2: #c2338f; }
+.adCabecera { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.adCabecera h2 { margin: 0 0 4px; font-size: 21px; }
+.adCabecera p { margin: 0; color: #6a7086; font-size: 14.5px; }
+.adVersiones { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; }
+.adVersiones b { padding: 5px 10px; border-radius: 10px; background: #f2f4fa; color: #1d2b5c; }
+.adVersiones b:last-child { background: var(--acento); color: #ffffff; }
+.adVersiones i { width: 30px; height: 2px; background: linear-gradient(90deg, #cfd8ea, var(--acento)); }
+.adPerfil { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 14px; padding: 18px; border-radius: 20px; background: linear-gradient(135deg, #f6f8fd, #f8f4ff); }
+.adLado { display: flex; flex-direction: column; gap: 6px; }
+.adLado span { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #8a90a6; }
+.adLado strong { font-size: 18px; color: #4a5066; }
+.adAhora strong { color: #0e1020; }
+.adAhora span { color: var(--acento); }
+.adFlecha { position: relative; width: 56px; height: 2px; background: #cfd8ea; }
+.adFlecha::after { content: ""; position: absolute; right: -2px; top: -5px; width: 10px; height: 10px; border-top: 2px solid #cfd8ea; border-right: 2px solid #cfd8ea; transform: rotate(45deg); }
+.adFlechaViva { background: linear-gradient(90deg, #cfd8ea, var(--acento)); background-size: 200% 100%; animation: barrido 2.4s linear infinite; }
+.adFlechaViva::after { border-color: var(--acento); }
+.adVeredicto { grid-column: 1 / -1; margin: 0; font-size: 14px; color: #4a5066; }
+.sriMini { display: flex; gap: 3px; max-width: 160px; }
+.sriMini i { flex: 1; height: 8px; border-radius: 4px; background: #e6ebf5; }
+.sriMini i.sriLleno { background: linear-gradient(90deg, var(--acento), var(--acento2)); animation: v-sello 0.4s both; }
+.adFilas { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.adFila { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding: 14px 16px; border-radius: 16px; background: #f7f9fd; animation: v-llega 0.5s both; }
+.adNombre { flex: 1 1 200px; font-weight: 600; font-size: 15px; }
+.adValores { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 15px; }
+.adViejo { color: #8a90a6; text-decoration-thickness: 1.5px; text-decoration-color: rgba(180, 35, 24, 0.5); }
+.adMini { width: 18px; height: 2px; background: var(--acento); position: relative; }
+.adMini::after { content: ""; position: absolute; right: -1px; top: -3px; width: 6px; height: 6px; border-top: 2px solid var(--acento); border-right: 2px solid var(--acento); transform: rotate(45deg); }
+.adNuevo { color: #0e1020; animation: v-sello 0.45s both; }
+.adValores em { font-style: normal; font-size: 11.5px; font-weight: 700; padding: 4px 9px; border-radius: 999px; }
+.adIgual { background: #e5f6ee; color: #0b6b47; }
+.adCambia { background: #ecf0ff; color: #2b3fb8; }
+.adNuevoChip { background: #f4ecff; color: #6a2bb8; }
+.adCita { flex-basis: 100%; font-size: 13.5px; color: #4a5066; font-style: italic; }
+.adCita::before { content: "«"; }
+.adCita::after { content: "»"; }
+.adEfectos { display: flex; flex-direction: column; gap: 8px; }
+.adEfectos > span { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #8a90a6; }
+.adEfectos ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.adEfectos li { padding: 7px 12px; border-radius: 12px; background: linear-gradient(135deg, #fff7ea, #fff1f4); color: #7a3307; font-size: 13.5px; animation: v-sello 0.45s both; }
+.busquedaPorQue { color: #9a3412 !important; }
+.busquedaSi { color: #0b6b47 !important; }
+
+/* Aviso de datos en revisión */
+.enRevision { position: relative; display: flex; flex-wrap: wrap; gap: 14px 18px; align-items: flex-start; padding: 20px 22px; border-radius: 22px; background: linear-gradient(120deg, #fff7ea, #fff 70%); box-shadow: 0 0 0 1px #f6dfb8, 0 14px 34px rgba(154, 52, 18, 0.08); overflow: hidden; animation: v-sube 0.5s both; }
+.enRevision::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 5px; background: linear-gradient(180deg, #f59e0b, #c2338f); }
+.enRevisionIcono { position: relative; flex-shrink: 0; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: #fdebd0; color: #9a3412; font-weight: 800; font-size: 20px; }
+.enRevisionIcono::after { content: ""; position: absolute; inset: 0; border-radius: 50%; animation: pulsoAmbar 2s ease-out infinite; }
+@keyframes pulsoAmbar { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.45); } 100% { box-shadow: 0 0 0 16px rgba(245, 158, 11, 0); } }
+.enRevisionTexto { flex: 1 1 320px; display: flex; flex-direction: column; gap: 8px; }
+.enRevisionTexto h3 { margin: 0; font-size: 17px; color: #5e2a06; }
+.enRevisionTexto p { margin: 0; font-size: 14.5px; color: #5e2a06; line-height: 1.5; }
+.rutas { display: flex; flex-wrap: wrap; gap: 6px; }
+.rutas span { padding: 5px 10px; border-radius: 999px; background: #ffffff; box-shadow: inset 0 0 0 1px #f2c98a; color: #7a3307; font-size: 13px; animation: v-sello 0.4s both; }
+.revEnCurso { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 14px; color: #4a5066; }
+.revEnCurso .progreso { margin: 0; }
+.revEnCurso .progreso i { background: #e6ebf5; }
+.revEnCurso .progreso i.hecha { background: #12a36b; }
+
+@media (max-width: 560px) {
+  .adPerfil { grid-template-columns: 1fr; }
+  .adFlecha { transform: rotate(90deg); margin: 8px 0 8px 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ad, .adFila, .adNuevo, .adEfectos li, .sriMini i, .adFlechaViva, .enRevision, .enRevisionIcono::after, .rutas span { animation: none !important; }
+}
+.iconoChip { width: 18px; height: 18px; }
+.notaHipoteca { margin-top: 14px; animation: v-sube 0.5s 0.3s both; }
