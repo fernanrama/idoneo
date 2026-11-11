@@ -114,8 +114,8 @@ async function main() {
   // ===== 1 · Portada =====
   let s = nueva(BG.portada);
   img(s, LOGO, 0.75, 1.35, 4.6, 4.6 * 635 / 2000, "Logotipo idóneo");
-  texto(s, "Invertir empieza por escucharte.", { x: 0.75, y: 3.1, w: 7.5, h: 0.6, fontFace: F.tit, fontSize: 28, valign: "middle", objectName: "Lema" });
-  texto(s, "Tu perfil inversor, en una conversación.", { x: 0.75, y: 3.7, w: 7.5, h: 0.45, fontFace: F.fina, fontSize: 18, color: K.suave, valign: "middle", objectName: "Subtítulo" });
+  texto(s, "Perfiles vivos que cumplen la norma.", { x: 0.75, y: 3.1, w: 7.5, h: 0.6, fontFace: F.tit, fontSize: 28, valign: "middle", objectName: "Lema" });
+  texto(s, "Del cuestionario a la conversación.", { x: 0.75, y: 3.7, w: 7.5, h: 0.45, fontFace: F.fina, fontSize: 18, color: K.suave, valign: "middle", objectName: "Subtítulo" });
   s.addNotes(`Somos ${EQUIPO}. Acabáis de ver idóneo desde fuera; ahora, por dentro.` +
     nota("\n(Pendiente: decidir quién presenta esta parte.)"));
 
@@ -243,7 +243,7 @@ async function main() {
   img(s, IC.play, 3.6, 4.22, 0.2, 0.2, "Play");
   texto(s, "Demo en vivo · datos simulados", { x: 3.88, y: 4.05, w: 2.82, h: 0.55, fontFace: F.tit, fontSize: 11.5, color: K.noche, valign: "middle" });
   s.addNotes("GPTadvisor hace fiable la recomendación. idóneo hace fiable el perfil sobre el que se recomienda. Vamos a verlo." +
-    nota("\n(Si no da tiempo a la demo en directo: cerrar aquí con el lema «Invertir empieza por escucharte».)"));
+    nota("\n(Si no da tiempo a la demo en directo: cerrar aquí con el lema «Perfiles vivos que cumplen la norma».)"));
 
   await pres.writeFile({ fileName: OUT });
   console.log("Escrito", OUT, FINAL ? "(final)" : "(trabajo)");
