@@ -1,0 +1,107 @@
+{
+  "_nota": "DATOS SIMULADOS. Entidad y catálogo ficticios: no son productos reales ni de MyInvestor. El agente de la entidad lee las restricciones por MCP y filtra su propio catálogo con ellas.",
+  "entidad": "Banco Ejemplo (ficticio)",
+  "asesor_id": "asesora-ejemplo",
+  "catalogo": [
+    {
+      "id": "BE-MON",
+      "nombre": "Fondo Monetario Ejemplo",
+      "tipo": "funds",
+      "familia": "deposits_money_market",
+      "asset_type": "Monetario",
+      "sri": 1,
+      "currency": "EUR",
+      "sfdr_article": 8,
+      "min_initial": 1
+    },
+    {
+      "id": "BE-RFC",
+      "nombre": "Fondo Renta Fija Corto Plazo Ejemplo",
+      "tipo": "funds",
+      "familia": "fixed_income_funds",
+      "asset_type": "Renta Fija",
+      "sri": 2,
+      "currency": "EUR",
+      "sfdr_article": 8,
+      "min_initial": 1000
+    },
+    {
+      "id": "BE-RFV",
+      "nombre": "Fondo Renta Fija Verde Ejemplo",
+      "tipo": "funds",
+      "familia": "fixed_income_funds",
+      "asset_type": "Renta Fija",
+      "sri": 2,
+      "currency": "EUR",
+      "sfdr_article": 9,
+      "min_initial": 500
+    },
+    {
+      "id": "BE-RFP",
+      "nombre": "Fondo Renta Fija Institucional Ejemplo",
+      "tipo": "funds",
+      "familia": "fixed_income_funds",
+      "asset_type": "Renta Fija",
+      "sri": 2,
+      "currency": "EUR",
+      "sfdr_article": 8,
+      "min_initial": 50000
+    },
+    {
+      "id": "BE-MIX",
+      "nombre": "Fondo Mixto Moderado Ejemplo",
+      "tipo": "funds",
+      "familia": "mixed_funds",
+      "asset_type": "Mixto",
+      "sri": 3,
+      "currency": "EUR",
+      "sfdr_article": 8,
+      "min_initial": 100
+    },
+    {
+      "id": "BE-RVG",
+      "nombre": "Fondo Renta Variable Global Ejemplo",
+      "tipo": "funds",
+      "familia": "equity_funds",
+      "asset_type": "Renta Variable",
+      "sri": 5,
+      "currency": "EUR",
+      "sfdr_article": 6,
+      "min_initial": 100
+    },
+    {
+      "id": "BE-ETF",
+      "nombre": "ETF Índice Europa Ejemplo",
+      "tipo": "etfs",
+      "familia": "etfs",
+      "asset_type": "Renta Variable",
+      "sri": 5,
+      "currency": "EUR",
+      "sfdr_article": 8,
+      "min_initial": 1
+    },
+    {
+      "id": "BE-USD",
+      "nombre": "Fondo Renta Fija Dólar Ejemplo",
+      "tipo": "funds",
+      "familia": "fixed_income_funds",
+      "asset_type": "Renta Fija",
+      "sri": 3,
+      "currency": "USD",
+      "sfdr_article": 8,
+      "min_initial": 1000
+    }
+  ],
+  "esperado": {
+    "admitidos_incluyen": [
+      "BE-RFC",
+      "BE-RFV"
+    ],
+    "descartados_incluyen": [
+      "BE-RVG",
+      "BE-ETF",
+      "BE-USD",
+      "BE-RFP"
+    ]
+  }
+}

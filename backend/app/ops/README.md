@@ -44,7 +44,24 @@ Con `--registrar` (y `--prueba E-10`, por ejemplo) cada script escribe su result
 
 Mide lo que una regla fija no ve bien: **claridad**, **una pregunta por turno**, **neutralidad**, **empatía** y **transparencia**, de 1 a 5 con una rúbrica escrita (`../agentes/prompts/juez.md`, v1). Mismo principio que el resto de agentes: el modelo solo pone notas y, para cada nota baja, una cita literal de un turno del asistente; el código comprueba la cita y decide el veredicto. Antes de usar sus notas se calibra contra 7 entrevistas puntuadas por una persona del equipo; si el acuerdo baja, se cambia la rúbrica, no el umbral.
 
+## Pipeline de punta a punta (`e2e.py`)
+
+`python scripts/e2e.py` recorre el producto entero con un cliente y una entidad de ejemplo, en el mismo proceso y con un almacén en memoria:
+
+1. Alta del cliente (Lucía, ficticia: `fixtures/e2e/cliente-lucia.json`).
+2. Entrevista: cada turno pasa por el extractor y el verificador.
+3. Perfil completo, con cada dato citado literalmente de un turno del cliente.
+4. Alertas: dice saber mucho de renta variable y falla la comprobación.
+5. Restricciones antes de validar: `usable=false`.
+6. Validación por la entidad (Banco Ejemplo, ficticio: `fixtures/e2e/entidad-banco-ejemplo.json`).
+7. Agente de la entidad por MCP: lee las restricciones y filtra su catálogo de 8 productos ficticios con cada regla (SRI, conveniencia, búsquedas bloqueadas, divisa, importe mínimo).
+8. Trazas de la sesión: una por turno, sin texto del cliente.
+9. Métricas y evaluaciones: el panel responde y las evaluaciones cumplen sus umbrales.
+
+- **Simulado** (por defecto, sin clave): la entrevista es un guion y las respuestas de Claude están grabadas en el fixture. Lo demás es el código real (guardas, rúbrica, validación, cálculos, MCP). Corre en cada PR.
+- **Real** (`--real`, con `ANTHROPIC_API_KEY`): el entrevistador real habla con un cliente simulado por Claude a partir de la ficha, y el extractor y el verificador son Claude. Corre en la CI de evals.
+
 ## CI
 
-- `.github/workflows/ci.yml`: tests del backend y lint y build del front en cada push a `main` y en cada pull request. Sin claves.
+- `.github/workflows/ci.yml`: tests del backend, pipeline de punta a punta simulado (con su informe en el resumen de la ejecución) y lint y build del front en cada push a `main` y en cada pull request. Sin claves.
 - `.github/workflows/evals.yml`: las evaluaciones con la API real. Se lanza a mano o en un pull request que toque `app/agentes/` o `fixtures/` con la etiqueta `evals`. Necesita el secreto `ANTHROPIC_API_KEY` y falla si algo baja de su umbral. Sube los informes y el JSON como artefacto.

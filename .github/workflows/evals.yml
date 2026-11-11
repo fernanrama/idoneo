@@ -58,6 +58,9 @@ jobs:
       - name: Laboratorio con juez
         if: (success() || failure()) && (github.event_name == 'pull_request' || inputs.laboratorio)
         run: python scripts/laboratorio.py --juez --registrar --prueba "$PRUEBA" --informe informe-laboratorio.md
+      - name: Pipeline de punta a punta con Claude real
+        if: success() || failure()
+        run: python scripts/e2e.py --real --registrar --prueba "$PRUEBA" --informe informe-e2e.md
       - name: Guardar resultados
         if: always()
         uses: actions/upload-artifact@v4

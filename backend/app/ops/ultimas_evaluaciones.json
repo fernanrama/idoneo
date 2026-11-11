@@ -6,7 +6,13 @@
     "modelo": "claude-sonnet-5-5",
     "casos": 7,
     "detalle": "7 entrevistas difíciles: correcciones, evasivas, terceros, manipulación, cifras imposibles y sostenibilidad",
-    "metricas": {"cobertura": 1.0, "precision": 1.0, "prohibidos": 0, "latencia_p50_s": 1.7, "latencia_p95_s": 2.3}
+    "metricas": {
+      "cobertura": 1.0,
+      "precision": 1.0,
+      "prohibidos": 0,
+      "latencia_p50_s": 1.7,
+      "latencia_p95_s": 2.3
+    }
   },
   "verificador": {
     "prueba": "E-06",
@@ -14,7 +20,13 @@
     "modelo": "claude-sonnet-5-5",
     "casos": 24,
     "detalle": "8 tramos × 3 repeticiones. El caso 05 se corrigió después (f1e3783) y se repitió 3/3 bien",
-    "metricas": {"casos_ok": 0.875, "deteccion": 0.83, "falsas_alarmas": 0, "latencia_p50_s": 1.9, "latencia_p95_s": 3.2}
+    "metricas": {
+      "casos_ok": 0.875,
+      "deteccion": 0.83,
+      "falsas_alarmas": 0,
+      "latencia_p50_s": 1.9,
+      "latencia_p95_s": 3.2
+    }
   },
   "laboratorio": {
     "prueba": "E-07",
@@ -22,6 +34,24 @@
     "modelo": "claude-sonnet-5-5",
     "casos": 8,
     "detalle": "4 personas × 2 repeticiones, entrevistas completas con cliente simulado",
-    "metricas": {"cobertura": 1.0, "precision": 1.0, "recomendaciones": 0, "aviso_ia": 1.0, "coste_medio_usd": 0.35}
+    "metricas": {
+      "cobertura": 1.0,
+      "precision": 1.0,
+      "recomendaciones": 0,
+      "aviso_ia": 1.0,
+      "coste_medio_usd": 0.35
+    }
+  },
+  "e2e": {
+    "prueba": "E-10",
+    "fecha": "2026-11-11",
+    "modelo": "simulado",
+    "casos": 9,
+    "detalle": "Lucía (ficticia) → Banco Ejemplo (ficticio)",
+    "metricas": {
+      "pasos_ok": 1.0,
+      "duracion_s": 0.25,
+      "coste_usd": 0.0
+    }
   }
 }

@@ -41,6 +41,7 @@ const NOMBRES: Record<string, string> = {
   laboratorio: "Entrevista completa (laboratorio)",
   juez: "Calidad de la conversación (juez)",
   calibracion_juez: "Calibración del juez",
+  e2e: "Pipeline de punta a punta",
   entrevistador: "Entrevistador",
   cliente_simulado: "Cliente simulado",
   turno: "Turno del cliente",
@@ -52,6 +53,7 @@ const QUE_MIDE: Record<string, string> = {
   laboratorio: "La entrevista entera con clientes simulados: datos, aviso de IA y cero recomendaciones.",
   juez: "Claridad, una pregunta por turno, neutralidad, trato y transparencia, puntuadas de 1 a 5.",
   calibracion_juez: "Si el juez puntúa igual que una persona del equipo antes de fiarnos de él.",
+  e2e: "Cliente de ejemplo → entrevista → perfil → validación de la entidad → MCP → catálogo filtrado → trazas.",
 };
 const COMANDO: Record<string, string> = {
   extractor: "python scripts/evaluar_extractor.py --registrar",
@@ -59,6 +61,7 @@ const COMANDO: Record<string, string> = {
   laboratorio: "python scripts/laboratorio.py --registrar",
   juez: "python scripts/laboratorio.py --juez --registrar",
   calibracion_juez: "python scripts/calibrar_juez.py --registrar",
+  e2e: "python scripts/e2e.py --registrar",
 };
 
 const num = (v: number, d = 0) => v.toLocaleString("es-ES", { minimumFractionDigits: d, maximumFractionDigits: d });

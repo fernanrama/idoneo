@@ -1,0 +1,298 @@
+{
+  "_nota": "DATOS SIMULADOS. Cliente ficticio para el pipeline de punta a punta (scripts/e2e.py). En modo simulado, `extraccion` es lo que devolvería Claude en cada turno del cliente (el código sigue aplicando guardas, rúbrica y validación); en modo real se ignora y la entrevista la hacen Claude y un cliente simulado con la `ficha`.",
+  "client_name": "Lucía (ficticia)",
+  "ficha": "Lucía, 31 años, administrativa con nómina fija de 1.800 euros netos al mes. Gastos fijos de unos 900 euros. Tiene 12.000 euros ahorrados y ninguna deuda. Quiere invertir 5.000 euros para ir juntando la entrada de un piso, que necesitará en unos cinco años. Entiende bien la renta fija (sabe que si suben los tipos bajan los bonos). Dice saber mucho de renta variable, pero cree que el banco garantiza recuperar lo invertido aunque un fondo pierda un 30 %. Si su dinero bajara un 20 %, vendería una parte. La sostenibilidad le importa bastante. Acepta la grabación y el aviso de IA.",
+  "turnos": [
+    {
+      "speaker": "agent",
+      "text": "Hola, soy el asistente del banco y soy una inteligencia artificial. Le haré unas preguntas para preparar su perfil inversor, porque la ley obliga al banco a conocerle antes de ofrecerle productos de inversión. No le voy a recomendar nada: una persona del banco revisará todo. ¿Está de acuerdo en seguir y en que grabemos la conversación?"
+    },
+    {
+      "speaker": "client",
+      "text": "Sí, de acuerdo, puede grabar.",
+      "extraccion": {
+        "datos": [
+          {
+            "campo": "disclosures.ai_notice_ack",
+            "valor": "true",
+            "periodo": null,
+            "certeza": "explicita",
+            "cita": "Sí, de acuerdo"
+          },
+          {
+            "campo": "disclosures.purpose_ack",
+            "valor": "true",
+            "periodo": null,
+            "certeza": "explicita",
+            "cita": "Sí, de acuerdo"
+          }
+        ],
+        "conocimientos": [],
+        "escenario": null
+      }
+    },
+    {
+      "speaker": "agent",
+      "text": "Gracias. ¿Para qué le gustaría usar el dinero que quiere invertir?"
+    },
+    {
+      "speaker": "client",
+      "text": "Quiero invertir 5.000 euros para ir juntando la entrada de un piso.",
+      "extraccion": {
+        "datos": [
+          {
+            "campo": "objectives.o1.goal",
+            "valor": "entrada de un piso",
+            "periodo": null,
+            "certeza": "explicita",
+            "cita": "la entrada de un piso"
+          },
+          {
+            "campo": "objectives.o1.amount_eur",
+            "valor": "5000",
+            "periodo": null,
+            "certeza": "explicita",
+            "cita": "invertir 5.000 euros"
+          }
+        ],
+        "conocimientos": [],
+        "escenario": null
+      }
+    },
+    {
+      "speaker": "agent",
+      "text": "Entendido. ¿Dentro de cuántos años, más o menos, necesitará ese dinero?"
+    },
+    {
+      "speaker": "client",
+      "text": "Dentro de unos cinco años.",
+      "extraccion": {
+        "datos": [
+          {
+            "campo": "objectives.o1.horizon_years",
+            "valor": "5",
+            "periodo": null,
+            "certeza": "aproximada",
+            "cita": "unos cinco años"
+          }
+        ],
+        "conocimientos": [],
+        "escenario": null
+      }
+    },
+    {
+      "speaker": "agent",
+      "text": "Perfecto. ¿Cuánto cobra al mes, una vez quitados los impuestos?"
+    },
+    {
+      "speaker": "client",
+      "text": "Cobro 1.800 euros netos al mes, con nómina fija.",
+      "extraccion": {
+        "datos": [
+          {
+            "campo": "financial.net_monthly_income_eur",
+            "valor": "1800",
+            "periodo": "mensual",
+            "certeza": "explicita",
+            "cita": "1.800 euros netos al mes"
+          },
+          {
+            "campo": "financial.income_stability",
+            "valor": "stable",
+            "periodo": null,
+            "certeza": "explicita",
+            "cita": "nómina fija"
+          }
+        ],
+        "conocimientos": [],
+        "escenario": null
+      }
+    },
+    {
+      "speaker": "agent",
+      "text": "Gracias. ¿Y cuánto se le va cada mes en gastos fijos, como alquiler, facturas o comida?"
+    },
+    {
+      "speaker": "client",
+      "text": "Unos 900 euros al mes.",
+      "extraccion": {
+        "datos": [
+          {
+            "campo": "financial.fixed_monthly_costs_eur",
+            "valor": "900",
+            "periodo": "mensual",
+            "certeza": "aproximada",
+            "cita": "Unos 900 euros al mes"
+          }
+        ],
+        "conocimientos": [],
+        "escenario": null
+      }
+    },
+    {
+      "speaker": "agent",
+      "text": "¿Cuánto tiene ahorrado ahora mismo en cuentas o depósitos?"
+    },
+    {
+      "speaker": "client",
+      "text": "Tengo 12.000 euros en la cuenta de ahorro.",
+      "extraccion": {
+        "datos": [
+          {
+            "campo": "financial.liquid_savings_eur",
+            "valor": "12000",
+            "periodo": null,
+            "certeza": "explicita",
+            "cita": "12.000 euros en la cuenta de ahorro"
+          }
+        ],
+        "conocimientos": [],
+        "escenario": null
+      }
+    },
+    {
+      "speaker": "agent",
+      "text": "¿Tiene alguna deuda o préstamo pendiente?"
+    },
+    {
+      "speaker": "client",
+      "text": "No, ninguna deuda.",
+      "extraccion": {
+        "datos": [
+          {
+            "campo": "financial.debts_eur",
+            "valor": "0",
+            "periodo": null,
+            "certeza": "explicita",
+            "cita": "ninguna deuda"
+          }
+        ],
+        "conocimientos": [],
+        "escenario": null
+      }
+    },
+    {
+      "speaker": "agent",
+      "text": "Ahora unas preguntas sobre lo que conoce. Un fondo de renta fija invierte sobre todo en deuda de empresas o de estados. Si suben los tipos de interés, ¿qué suele pasar con el valor de esos fondos?"
+    },
+    {
+      "speaker": "client",
+      "text": "Creo que baja un poco, porque los bonos que ya tiene valen menos.",
+      "extraccion": {
+        "datos": [],
+        "conocimientos": [
+          {
+            "familia": "fixed_income_funds",
+            "nivel_declarado": null,
+            "resultado_comprobacion": "correcta",
+            "cita": "baja un poco, porque los bonos que ya tiene valen menos"
+          }
+        ],
+        "escenario": null
+      }
+    },
+    {
+      "speaker": "agent",
+      "text": "Muy bien. ¿Y cuánto diría que sabe de fondos de renta variable, los que invierten en acciones?"
+    },
+    {
+      "speaker": "client",
+      "text": "De eso sé mucho, nivel alto, mi cuñado me lo explica todo.",
+      "extraccion": {
+        "datos": [],
+        "conocimientos": [
+          {
+            "familia": "equity_funds",
+            "nivel_declarado": "high",
+            "resultado_comprobacion": null,
+            "cita": "De eso sé mucho, nivel alto"
+          }
+        ],
+        "escenario": null
+      }
+    },
+    {
+      "speaker": "agent",
+      "text": "Le hago una pregunta para comprobarlo. Si un fondo de renta variable pierde un 30 % en un año, ¿puede el banco garantizarle que recuperará lo invertido?"
+    },
+    {
+      "speaker": "client",
+      "text": "Sí, claro, el banco siempre lo garantiza.",
+      "extraccion": {
+        "datos": [],
+        "conocimientos": [
+          {
+            "familia": "equity_funds",
+            "nivel_declarado": "high",
+            "resultado_comprobacion": "incorrecta",
+            "cita": "el banco siempre lo garantiza"
+          }
+        ],
+        "escenario": null
+      }
+    },
+    {
+      "speaker": "agent",
+      "text": "Gracias por contestar. Imagine que lo que ha invertido cae un 20 % en unos meses: de cada 100 euros le quedan 80. ¿Qué haría?"
+    },
+    {
+      "speaker": "client",
+      "text": "Vendería una parte para no perder más.",
+      "extraccion": {
+        "datos": [],
+        "conocimientos": [],
+        "escenario": {
+          "reaccion": "vender_parte",
+          "certeza": "explicita",
+          "puntuacion_declarada": null,
+          "cita": "Vendería una parte para no perder más"
+        }
+      }
+    },
+    {
+      "speaker": "agent",
+      "text": "Entendido. Algunas inversiones siguen criterios sostenibles: ambientales, sociales y de buen gobierno. ¿Le importa que su dinero tenga en cuenta esos criterios?"
+    },
+    {
+      "speaker": "client",
+      "text": "Sí, me importa bastante, no quiero que vaya a empresas que contaminan.",
+      "extraccion": {
+        "datos": [
+          {
+            "campo": "sustainability.preference",
+            "valor": "strong",
+            "periodo": null,
+            "certeza": "explicita",
+            "cita": "me importa bastante, no quiero que vaya a empresas que contaminan"
+          }
+        ],
+        "conocimientos": [],
+        "escenario": null
+      }
+    },
+    {
+      "speaker": "agent",
+      "text": "Muchas gracias. Con esto ya tengo lo necesario. Una persona del banco revisará su perfil y se pondrá en contacto con usted. Que tenga buen día."
+    }
+  ],
+  "esperado": {
+    "status": "pending_validation",
+    "valores": {
+      "financial.net_monthly_income_eur": 1800,
+      "financial.fixed_monthly_costs_eur": 900,
+      "financial.liquid_savings_eur": 12000,
+      "financial.debts_eur": 0,
+      "objectives.o1.horizon_years": 5,
+      "knowledge.equity_funds": "none",
+      "knowledge.fixed_income_funds": "medium",
+      "sustainability.preference": "strong"
+    },
+    "alertas": [
+      "knowledge.equity_funds"
+    ],
+    "conveniencia": {
+      "equity_funds": "not_appropriate",
+      "fixed_income_funds": "appropriate"
+    }
+  }
+}

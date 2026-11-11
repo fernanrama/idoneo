@@ -26,6 +26,8 @@ Cómo hemos medido que Idóneo funciona: qué se probó, con qué versión, qué
 | `python scripts/evaluar_verificador.py` | Pasa tramos de entrevista (`fixtures/verificacion/`) por el verificador | [verificador.md](verificador.md) |
 | `python scripts/laboratorio.py` | Claude interpreta a un cliente con una ficha oculta frente al entrevistador real, con el extractor y el verificador como en producción | [laboratorio/](laboratorio/) |
 
+Pipeline de punta a punta: `python scripts/e2e.py` (simulado, sin clave) o `--real` (con Claude). Recorre cliente de ejemplo → entrevista → perfil → alertas → validación de la entidad → MCP → catálogo filtrado → trazas → evaluaciones. Último informe: [e2e.md](e2e.md).
+
 Juez y umbrales:
 
 | Script (desde `backend/`) | Qué hace |
