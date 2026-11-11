@@ -4,7 +4,9 @@ Una sola puerta de entrada a la API de Anthropic, para que todos los agentes com
 - configuración por variables de entorno (`ANTHROPIC_API_KEY`, `MODEL_<AGENTE>`, `EFFORT_<AGENTE>`);
 - salida estructurada validada con Pydantic (`messages.parse`): el modelo no puede devolver JSON roto;
 - reintentos y tiempo máximo por llamada (los gestiona el SDK);
-- métricas de uso por agente (llamadas, tokens, latencia) para la medición de coste y latencia de B2.
+- métricas de uso por agente (llamadas, tokens, latencia) para la medición de coste y latencia de B2;
+- una traza por llamada (`app/ops/trazas.py`): versión del prompt, tokens, coste estimado y resultado,
+  también cuando la llamada falla.
 
 Los tests nunca llaman a la API: sustituyen `estructurado` con monkeypatch.
 """
@@ -19,6 +21,8 @@ from dataclasses import dataclass
 from typing import TypeVar
 
 from pydantic import BaseModel
+
+from ..ops import trazas
 
 log = logging.getLogger("perfil.claude")
 
@@ -44,6 +48,7 @@ class Uso:
     tokens_salida: int
     latencia_s: float
     tokens_cache_leidos: int = 0  # entrada servida desde la caché del prompt (cuesta ~10 %)
+    tokens_cache_escritos: int = 0  # entrada escrita en la caché (primera llamada; cuesta 1,25×)
 
 
 def disponible() -> bool:
@@ -130,15 +135,22 @@ async def estructurado(
     """
     cliente = _cliente_async()
     nombre_modelo = modelo(agente)
+    version = trazas.version_prompt(sistema)
+    inicio_iso = trazas._ahora()
     inicio = time.perf_counter()
-    respuesta = await cliente.messages.parse(
-        model=nombre_modelo,
-        max_tokens=max_tokens,
-        system=[{"type": "text", "text": sistema, "cache_control": {"type": "ephemeral"}}],
-        messages=[{"role": "user", "content": mensaje}],
-        output_format=esquema,
-        output_config={"effort": esfuerzo(agente, esfuerzo_por_defecto)},
-    )
+    try:
+        respuesta = await cliente.messages.parse(
+            model=nombre_modelo,
+            max_tokens=max_tokens,
+            system=[{"type": "text", "text": sistema, "cache_control": {"type": "ephemeral"}}],
+            messages=[{"role": "user", "content": mensaje}],
+            output_format=esquema,
+            output_config={"effort": esfuerzo(agente, esfuerzo_por_defecto)},
+        )
+    except Exception:
+        trazas.registrar_llamada(trazas.Llamada(agente=agente, modelo=nombre_modelo, prompt=version, inicio=inicio_iso,
+                                                latencia_s=round(time.perf_counter() - inicio, 3), resultado="error"))
+        raise
     uso = Uso(
         agente=agente,
         modelo=nombre_modelo,
@@ -146,13 +158,24 @@ async def estructurado(
         tokens_salida=getattr(respuesta.usage, "output_tokens", 0) or 0,
         latencia_s=round(time.perf_counter() - inicio, 3),
         tokens_cache_leidos=getattr(respuesta.usage, "cache_read_input_tokens", 0) or 0,
+        tokens_cache_escritos=getattr(respuesta.usage, "cache_creation_input_tokens", 0) or 0,
     )
     _registrar(uso)
-    if respuesta.stop_reason == "refusal":
-        raise RespuestaNoUtil(f"{agente}: el modelo rechazó la petición")
-    if respuesta.stop_reason == "max_tokens":
-        raise RespuestaNoUtil(f"{agente}: respuesta cortada por max_tokens")
     salida = respuesta.parsed_output
+    resultado = ("rechazo" if respuesta.stop_reason == "refusal" else "cortada" if respuesta.stop_reason == "max_tokens"
+                 else "sin_salida" if salida is None else "ok")
+    trazas.registrar_llamada(trazas.Llamada(
+        agente=agente, modelo=nombre_modelo, prompt=version, inicio=inicio_iso, latencia_s=uso.latencia_s,
+        tokens_entrada=uso.tokens_entrada, tokens_cache_leidos=uso.tokens_cache_leidos,
+        tokens_cache_escritos=uso.tokens_cache_escritos, tokens_salida=uso.tokens_salida,
+        coste_usd=trazas.coste_usd(nombre_modelo, uso.tokens_entrada, uso.tokens_cache_leidos,
+                                   uso.tokens_cache_escritos, uso.tokens_salida),
+        resultado=resultado,
+    ))
+    if resultado == "rechazo":
+        raise RespuestaNoUtil(f"{agente}: el modelo rechazó la petición")
+    if resultado == "cortada":
+        raise RespuestaNoUtil(f"{agente}: respuesta cortada por max_tokens")
     if salida is None:
         raise RespuestaNoUtil(f"{agente}: sin salida estructurada")
     return salida, uso

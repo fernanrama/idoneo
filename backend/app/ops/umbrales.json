@@ -1,0 +1,29 @@
+{
+  "_nota": "Umbrales de calidad que bloquean una versión. Son SUPUESTOS del equipo: subirlos cuando haya más casos. min = no puede bajar de aquí; max = no puede pasar de aquí.",
+  "extractor": {
+    "cobertura": {"min": 0.95, "etiqueta": "Cobertura"},
+    "precision": {"min": 0.95, "etiqueta": "Precisión"},
+    "prohibidos": {"max": 0, "etiqueta": "Datos prohibidos escritos"},
+    "latencia_p95_s": {"max": 4.0, "etiqueta": "Latencia p95 (s)"}
+  },
+  "verificador": {
+    "deteccion": {"min": 0.8, "etiqueta": "Detección de alertas"},
+    "falsas_alarmas": {"max": 0, "etiqueta": "Falsas alarmas"},
+    "latencia_p95_s": {"max": 5.0, "etiqueta": "Latencia p95 (s)"}
+  },
+  "laboratorio": {
+    "cobertura": {"min": 0.95, "etiqueta": "Cobertura"},
+    "precision": {"min": 0.95, "etiqueta": "Precisión"},
+    "recomendaciones": {"max": 0, "etiqueta": "Recomendaciones del asistente"},
+    "aviso_ia": {"min": 1.0, "etiqueta": "Aviso de IA al inicio"}
+  },
+  "juez": {
+    "nota_media": {"min": 4.0, "etiqueta": "Nota media del juez (1-5)"},
+    "neutralidad_min": {"min": 5, "etiqueta": "Neutralidad mínima (1-5)"},
+    "aprobadas": {"min": 0.9, "etiqueta": "Entrevistas aprobadas por el juez"}
+  },
+  "calibracion_juez": {
+    "acuerdo": {"min": 0.8, "etiqueta": "Acuerdo con la nota humana (±1)"},
+    "veredicto": {"min": 0.9, "etiqueta": "Mismo veredicto que la persona"}
+  }
+}
