@@ -197,7 +197,8 @@ Medido con clientes **simulados** y Claude real. Método, registro de ejecucione
 | Qué | Resultado |
 |---|---|
 | Extractor, en 7 entrevistas difíciles (correcciones, evasivas, terceros, manipulación) | **31 de 31 datos, 100 % de precisión y 0 datos prohibidos** |
-| 20 entrevistas completas con clientes simulados | **165 de 166 datos**, 0 recomendaciones de producto, aviso de IA siempre y la alerta de lo declarado frente a lo demostrado en los 7 casos que la esperaban |
+| 20 entrevistas completas con clientes simulados | **165 de 166 datos**, 0 recomendaciones de producto, aviso de IA siempre y la alerta esperada en los 7 casos: 5 de lo declarado frente a lo demostrado y 2 de «necesita asesor» |
+| Frente al test de casillas, en las 5 entrevistas en que el cliente se sobrevalora en renta variable | Un test que registra lo que se marca detecta **0 de 5**; idóneo, **5 de 5** |
 | Verificador, 8 tramos × 3 repeticiones | **0 falsas alarmas** |
 | Voz de punta a punta | Probada con una entrevista por voz de 45 turnos: 15 datos con cita y la alerta clave detectada |
 | Latencia y coste | Unos 2 s de mediana por respuesta · entre 0,3 y 0,45 $ por entrevista, estimado a partir de los tokens |
