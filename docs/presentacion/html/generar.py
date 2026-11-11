@@ -3,7 +3,7 @@
 Mete dentro las fuentes (Sora e IBM Plex Mono, licencia OFL), el logo, el icono, el sello y la captura
 de la entidad, para que funcione sin internet en el portátil que proyecta.
 
-Uso (desde la raíz del repo):  python entrega/fuente-presentacion/html/generar.py
+Uso (desde la raíz del repo):  python docs/presentacion/html/generar.py
 Las diapositivas se editan en deck.html, junto a este script.
 """
 import base64

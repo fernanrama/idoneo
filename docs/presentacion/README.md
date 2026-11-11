@@ -1,6 +1,6 @@
-# Fuente de la presentación
+# Fuente de la presentación y del resumen de una cara
 
-Genera `../Idoneo_presentacion.pptx`: **7 diapositivas técnicas** con la marca de idóneo (fondo noche, degradado menta → turquesa, tipografía Sora; ver [`docs/marca/`](../../docs/marca/README.md)). Lo que se dice está en las notas del orador de cada diapositiva.
+Genera `Idoneo_presentacion.pptx` (en esta carpeta): **7 diapositivas técnicas** con la marca de idóneo (fondo noche, degradado menta → turquesa, tipografía Sora; ver [`docs/marca/`](../../docs/marca/README.md)). Lo que se dice está en las notas del orador de cada diapositiva.
 
 El pitch abre con el **vídeo** (problema, solución y cómo funciona). Estas diapositivas van **después** y cuentan lo que el vídeo no puede:
 
@@ -25,15 +25,15 @@ El pitch abre con el **vídeo** (problema, solución y cómo funciona). Estas di
 ## Uso
 
 ```bash
-node build.js ../Idoneo_presentacion.pptx            # TRABAJO: notas con avisos «(Pendiente: …)»
-node build.js ../Idoneo_presentacion.pptx --final    # FINAL: notas limpias
+node build.js Idoneo_presentacion.pptx            # TRABAJO: notas con avisos «(Pendiente: …)»
+node build.js Idoneo_presentacion.pptx --final    # FINAL: notas limpias
 ```
 
 **Cierra PowerPoint antes de generar:** Windows bloquea el archivo abierto.
 
 En `build.js` se editan a mano `EQUIPO` (solo se dice en voz alta) y las cifras de la diapositiva 6, que salen de [`docs/evaluacion/README.md`](../../docs/evaluacion/README.md).
 
-## Versión HTML animada (`../Idoneo_presentacion.html`)
+## Versión HTML animada (`entrega/Idoneo_presentacion.html`)
 
 Un solo archivo que se abre con doble clic en cualquier navegador y **funciona sin internet**: lleva dentro las fuentes (Sora e IBM Plex Mono, licencia OFL), el logo, el sello y la captura. Pensado para proyector: el lienzo es 1920 × 1080 y se escala a la pantalla.
 
@@ -53,15 +53,15 @@ Las cifras salen de [`docs/evaluacion/`](../../docs/evaluacion/README.md): las d
 Regenerar tras editar `html/deck.html`:
 
 ```bash
-python entrega/fuente-presentacion/html/generar.py   # desde la raíz del repo
+python docs/presentacion/html/generar.py   # desde la raíz del repo
 ```
 
 ## Resumen de una cara
 
-`../Idoneo_una_cara.html` es la fuente de `../Idoneo_una_cara.pdf` (A4, una página). Para regenerar el PDF con Chrome:
+`Idoneo_una_cara.html` es la fuente de `entrega/Idoneo_una_cara.pdf` (A4, una página). Para regenerar el PDF con Chrome:
 
 ```bash
-chrome --headless=new --no-pdf-header-footer --virtual-time-budget=5000 --print-to-pdf=Idoneo_una_cara.pdf "file:///…/entrega/Idoneo_una_cara.html"
+chrome --headless=new --no-pdf-header-footer --virtual-time-budget=5000 --print-to-pdf=../../entrega/Idoneo_una_cara.pdf "file:///…/docs/presentacion/Idoneo_una_cara.html"
 ```
 
 ## Recursos (`assets/`)

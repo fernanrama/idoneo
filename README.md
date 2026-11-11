@@ -235,6 +235,6 @@ idóneo **recoge y documenta lo que MiFID exige, cada dato con su prueba, y lo v
 | [`backend/`](backend/) | API FastAPI: perfil versionado, cálculos deterministas, agentes, servidor MCP, migraciones y tests |
 | [`frontend/`](frontend/) | La función en el móvil y la vista de la entidad, con Next.js ([detalles](frontend/README.md)) |
 | [`docs/`](docs/README.md) | [Arquitectura](docs/arquitectura.md), [configuración](docs/configuracion.md), [despliegue](docs/despliegue.md), [evaluación](docs/evaluacion/README.md), [marco normativo](docs/normativa.md), [agente y MCP](docs/modo-asesor-demo.md) y [marca](docs/marca/README.md) |
-| [`entrega/`](entrega/) | Presentación, resumen de una cara y su fuente |
+| [`entrega/`](entrega/) | Presentación (HTML, se abre sin internet) y resumen de una cara (PDF). Sus fuentes, en [`docs/presentacion/`](docs/presentacion/) |
 
 <div align="center"><sub>Prototipo para Hack Finance UC3M 2026 · No es un producto oficial de ninguna entidad</sub></div>

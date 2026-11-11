@@ -4,27 +4,28 @@
 <meta charset="utf-8">
 <title>idóneo · Hack Finance UC3M 2026 · Resumen de una cara</title>
 <!-- Marca: docs/marca/README.md (Aurora: noche, menta y turquesa; Sora). Mensaje: el mismo del vídeo, la web y las diapositivas.
-     Cifras: docs/evaluacion/README.md. PDF: Chrome sin interfaz, --print-to-pdf (ver entrega/fuente-presentacion/README.md). -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+     Cifras: docs/evaluacion/README.md. PDF: Chrome sin interfaz, --print-to-pdf (ver docs/presentacion/README.md). -->
+<!-- Fuentes locales (OFL) para que el PDF salga igual sin internet -->
 <style>
+  @font-face { font-family: Sora; font-weight: 100 800; src: url(html/fuentes/sora-latin-wght-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+2000-206F, U+20AC, U+2190-2193, U+2212, U+2260; }
+  @font-face { font-family: Sora; font-weight: 100 800; src: url(html/fuentes/sora-latin-ext-wght-normal.woff2) format("woff2"); unicode-range: U+0100-024F; }
+  @font-face { font-family: "IBM Plex Mono"; font-weight: 400 500; src: url(html/fuentes/ibm-plex-mono-latin-400-normal.woff2) format("woff2"); }
   @page { size: A4; margin: 0; }
   * { box-sizing: border-box; }
   html, body { margin: 0; }
-  body { font-family: Sora, "Segoe UI", sans-serif; color: #0C1A1F; background: #F7FBFA; font-size: 7.9pt; line-height: 1.38;
+  body { font-family: Sora, "Segoe UI", sans-serif; color: #0C1A1F; background: #F7FBFA; font-size: 7.4pt; line-height: 1.32;
          -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .hoja { width: 210mm; height: 297mm; overflow: hidden; display: flex; flex-direction: column; }
   header { background: radial-gradient(120% 140% at 85% 10%, rgba(124,231,196,.22), transparent 55%), linear-gradient(135deg, #0C1A1F, #103038);
-           color: #F7FBFA; padding: 6mm 12mm 5mm; display: grid; grid-template-columns: 1fr auto; gap: 8mm; align-items: end; }
+           color: #F7FBFA; padding: 5mm 12mm 4mm; display: grid; grid-template-columns: 1fr auto; gap: 8mm; align-items: end; }
   header img { height: 12mm; display: block; }
   .lema { font-size: 15pt; font-weight: 600; margin: 3mm 0 .8mm; letter-spacing: -.01em; }
   .sub { font-size: 10pt; font-weight: 300; color: #B4C6CB; margin: 0; }
   .meta { text-align: right; font: 7pt "IBM Plex Mono", monospace; letter-spacing: .12em; text-transform: uppercase; color: #7CE7C4; line-height: 1.8; }
   .meta span { color: #7E9399; }
-  main { padding: 4mm 12mm 0; flex: 1; display: flex; flex-direction: column; gap: 3mm; }
+  main { padding: 3.5mm 12mm 0; flex: 1; display: flex; flex-direction: column; gap: 2.1mm; }
   .eti { font: 500 6.8pt "IBM Plex Mono", monospace; letter-spacing: .16em; text-transform: uppercase; color: #1C8C97; margin: 0 0 1mm; }
-  h2 { font-size: 11pt; font-weight: 600; margin: 0 0 2mm; letter-spacing: -.01em; }
+  h2 { font-size: 10.5pt; font-weight: 600; margin: 0 0 1.6mm; letter-spacing: -.01em; }
   p { margin: 0 0 1.6mm; }
   .dos { display: grid; grid-template-columns: 1.05fr 1fr; gap: 6mm; }
   .tarjeta { background: #fff; border: 1px solid #DDE7E9; border-radius: 3mm; padding: 3.2mm 3.8mm; }
@@ -53,7 +54,7 @@
   .valor { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; }
   .valor div { background: #fff; border: 1px solid #DDE7E9; border-radius: 3mm; padding: 2.2mm 3mm; }
   .valor b { display: block; font-size: 9pt; margin-bottom: .6mm; color: #1C8C97; }
-  .cifras { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; }
+  .cifras { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2.5mm; }
   .cifras div { text-align: center; background: #0C1A1F; color: #F7FBFA; border-radius: 3mm; padding: 1.8mm 2mm; }
   .cifras b { display: block; font-size: 13.5pt; color: #7CE7C4; font-weight: 600; }
   .cifras span { font-size: 7pt; color: #B4C6CB; }
@@ -62,14 +63,21 @@
   td { padding: .9mm 0; border-bottom: 1px solid #E6EDEF; }
   td:last-child { text-align: right; font-weight: 600; }
   .si { color: #1F9D6B; } .no { color: #D64545; }
-  footer { margin-top: auto; padding: 2.5mm 12mm 4mm; display: flex; justify-content: space-between; font-size: 7pt; color: #7E9399; border-top: 1px solid #DDE7E9; }
+  .fiable { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; }
+  .fiable div { background: #fff; border: 1px solid #DDE7E9; border-top: 2.5px solid #2BB3C0; border-radius: 3mm; padding: 2.2mm 3mm; }
+  .fiable b { display: block; font-size: 8.6pt; margin-bottom: .8mm; }
+  .arq { display: flex; flex-wrap: wrap; align-items: center; gap: 1.4mm; margin-top: 2.2mm; font: 6.9pt "IBM Plex Mono", monospace; }
+  .arq span { background: #0C1A1F; color: #F7FBFA; border-radius: 99px; padding: .7mm 2.4mm; }
+  .arq span.c { background: linear-gradient(90deg, #7CE7C4, #2BB3C0); color: #0C1A1F; font-weight: 500; }
+  .arq i { color: #1C8C97; font-style: normal; }
+  footer { margin-top: auto; padding: 2mm 12mm 3mm; display: flex; justify-content: space-between; font-size: 6.6pt; color: #7E9399; border-top: 1px solid #DDE7E9; white-space: nowrap; }
 </style>
 </head>
 <body><div class="hoja">
 
 <header>
   <div>
-    <img src="../frontend/public/marca/idoneo-logo-sobre-oscuro.svg" alt="idóneo">
+    <img src="../../frontend/public/marca/idoneo-logo-sobre-oscuro.svg" alt="idóneo">
     <p class="lema">Perfiles vivos que cumplen la norma.</p>
     <p class="sub">Del cuestionario a la conversación, dentro de la app de cada entidad: <b style="color:#F7FBFA;font-weight:600">Powered by idóneo</b>.</p>
   </div>
@@ -81,7 +89,7 @@
     <div>
       <p class="eti">01 · El problema</p>
       <h2>El test se fía de lo que el cliente declara</h2>
-      <p>Antes de ofrecer una inversión, la entidad tiene que comprobar que encaja con el cliente: es la evaluación de idoneidad de MiFID II. Hoy es un formulario de casillas: el cliente marca lo que cree saber y nadie comprueba si de verdad lo entiende. Y el asesor no tiene tiempo de conocer en persona a cada cliente.</p>
+      <p>Antes de ofrecer una inversión, la entidad tiene que comprobar que encaja con el cliente: es la evaluación de idoneidad de MiFID II. Hoy es un formulario de casillas: el cliente marca lo que cree saber y nadie comprueba si de verdad lo entiende.</p>
       <p>La norma pide que la información sea fiable (Reglamento Delegado 2017/565, art. 54.7), y ESMA avisa: con sistemas automatizados, el cliente tiende más a sobrevalorarse (directrices de 2023, párr. 52).</p>
     </div>
     <div class="tarjeta carmen">
@@ -100,37 +108,32 @@
       <div class="paso"><div class="n">1</div><b>Habla</b>El cliente contesta por voz o por escrito, desde el móvil, con sus palabras.</div>
       <div class="paso"><div class="n">2</div><b>Comprueba</b>Plantea escenarios y contrasta lo que dice con lo que demuestra.</div>
       <div class="paso"><div class="n">3</div><b>Deja pruebas</b>Cada dato, con su frase, fuente y minuto. Los números, por código.</div>
-      <div class="paso humano"><div class="n">✓</div><b>Valida una persona</b>El asesor recibe el perfil hecho e interviene solo ante dudas.</div>
-    </div>
-  </section>
-
-  <section class="dos" style="grid-template-columns:1.2fr 1fr">
-    <div>
-      <p class="eti">03 · Dónde vive</p>
-      <h2>No es otra app: vive dentro de la de la entidad</h2>
-      <div class="momentos">
-        <div><b>Alta</b>Crea el perfil real del cliente (el momento clave).</div>
-        <div><b>Microentrevistas</b>«¿Ha cambiado algo?»: solo se pregunta lo que cambió.</div>
-        <div><b>Perfil vivo</b>La entidad, al día de lo que el cliente cuenta.</div>
-      </div>
-      <div class="integra" style="margin-top:2.4mm">
-        <div class="app"><div class="hb">App de la entidad</div><div class="bd"><div><b style="white-space:nowrap">Fondo Global Equilibrado</b><br><span class="ok">✓ Encaja contigo</span></div><img src="../frontend/public/marca/powered-by-idoneo-claro.svg" alt="Powered by idóneo"></div></div>
-        <div class="mcp">Agente de la entidad → <em>get_investment_constraints</em><br>← riesgo máx. <em>3 de 7</em><br>← renta variable: <em>no conveniente</em><br><span style="color:#7E9399">por MCP · probado con Claude y MyInvestor</span></div>
-      </div>
-    </div>
-    <div class="tarjeta">
-      <p class="eti">Carmen · lo calculan reglas fijas</p>
-      <p style="margin-bottom:1mm"><b>Perfil conservador:</b> riesgo hasta 3 de 7. Manda el criterio más prudente entre tolerancia, capacidad de pérdida y plazo.</p>
-      <table>
-        <tr><td>Depósitos y monetarios</td><td class="si">Conveniente</td></tr>
-        <tr><td>Fondos de renta fija</td><td class="si">Conveniente</td></tr>
-        <tr><td>Fondos de renta variable</td><td class="no">No conveniente</td></tr>
-      </table>
+      <div class="paso humano"><div class="n">✓</div><b>Valida la entidad</b>Su asesor recibe el perfil hecho e interviene solo ante dudas.</div>
     </div>
   </section>
 
   <section>
-    <p class="eti">04 · Qué aporta</p>
+    <p class="eti">03 · Dónde vive</p>
+    <h2>No es otra app: vive dentro de la de la entidad, con su sello <span style="color:#1C8C97">Powered by idóneo</span></h2>
+    <div class="momentos">
+      <div><b>Alta</b>Crea el perfil real del cliente (el momento clave).</div>
+      <div><b>Microentrevistas</b>«¿Ha cambiado algo?»: solo se pregunta lo que cambió.</div>
+      <div><b>Perfil vivo</b>Carmen queda en riesgo máx. 3 de 7 y renta variable no conveniente, y el agente de la entidad lo lee por MCP.</div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eti">04 · Por dentro: cómo lo hacemos fiable</p>
+    <div class="fiable">
+      <div><b>Harness: Claude propone, el código decide</b>Claude entrevista, extrae y verifica con salida estructurada. El código exige la cita literal, aplica una rúbrica de confianza y calcula el riesgo. Sin validación, el perfil no se usa.</div>
+      <div><b>LLMOps: si un cambio lo empeora, no sale</b>Cada llamada a Claude deja una traza (tokens, tiempo, coste; sin texto del cliente). Juez LLM calibrado con notas humanas (100 % de acuerdo ±1) y umbrales que la CI repite al cambiar un prompt.</div>
+      <div><b>Laboratorio: Claude hace de cliente</b>Con una ficha oculta, frente a idóneo tal cual está en producción. En una tirada: 20 entrevistas, 1.280 llamadas a Claude, 165 de 166 datos correctos y 0 recomendaciones.</div>
+    </div>
+    <div class="arq"><span>Cliente</span><i>→</i><span>ElevenLabs · Next.js</span><i>→</i><span class="c">FastAPI + Claude</span><i>→</i><span>Supabase</span><i>→</i><span>Valida la entidad</span><i>→</i><span class="c">MCP idóneo → MCP MyInvestor</span></div>
+  </section>
+
+  <section>
+    <p class="eti">05 · Qué aporta</p>
     <div class="valor">
       <div><b>A la entidad</b>Perfiles fieles a la realidad: recomendaciones que encajan y menos reclamaciones. Documenta lo que MiFID exige.</div>
       <div><b>Al asesor</b>El perfil, hecho y comprobado. Conoce al cliente de forma personal y solo interviene ante dudas.</div>
@@ -139,17 +142,18 @@
   </section>
 
   <section>
-    <p class="eti">05 · Lo medido</p>
+    <p class="eti">06 · Lo medido con Claude real</p>
     <div class="cifras">
       <div><b>31/31</b><span>datos acertados en 7 entrevistas difíciles</span></div>
-      <div><b>70/70</b><span>datos cubiertos en el laboratorio (8 entrevistas)</span></div>
+      <div><b>165/166</b><span>datos correctos en 20 entrevistas simuladas</span></div>
       <div><b>0</b><span>falsas alarmas del verificador (24 pruebas)</span></div>
+      <div><b>4,4/5</b><span>nota del juez a la conversación (umbral 4)</span></div>
       <div><b>~43 s</b><span>entrevista corta hasta el perfil por validar</span></div>
     </div>
     <p class="limite">Clientes simulados: no es una validación independiente. idóneo no recomienda productos ni sustituye al asesor. Umbrales de riesgo y pesos de confianza: supuestos del equipo.</p>
   </section>
 </main>
 
-<footer><span>Next.js · FastAPI · ElevenLabs · Claude · MCP</span><span>hack-finance-uc3m-2026.vercel.app · github.com/fernanrama/hack-finance-uc3m-2026</span></footer>
+<footer><span>Next.js · FastAPI · Supabase · ElevenLabs · Claude · MCP · 1.009 tests</span><span>hack-finance-uc3m-2026.vercel.app · github.com/fernanrama/idoneo</span></footer>
 </div></body>
 </html>
