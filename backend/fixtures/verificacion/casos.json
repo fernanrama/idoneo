@@ -65,7 +65,7 @@
         {"turn_id": "t-003", "speaker": "agent", "text": "¿Cuánto paga al mes en gastos fijos?", "t_start": 2, "t_end": 3},
         {"turn_id": "t-004", "speaker": "client", "text": "Unos 1.400, que solo la hipoteca ya son 800.", "t_start": 3, "t_end": 4}
       ],
-      "esperadas": [{"flag": "inconsistent", "rutas": ["financial.debts_eur", "financial.fixed_monthly_costs_eur"]}],
+      "esperadas": [{"flag": "inconsistent", "rutas": ["financial.debts_eur", "financial.mortgage_eur", "financial.fixed_monthly_costs_eur"]}],
       "ninguna_mas": true
     },
     {

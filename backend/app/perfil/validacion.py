@@ -41,6 +41,7 @@ TIPOS: dict[str, tuple[str, tuple]] = {
     "financial.liquid_savings_eur": ("eur", ()),
     "financial.other_assets_eur": ("eur", ()),
     "financial.debts_eur": ("eur", ()),
+    "financial.mortgage_eur": ("eur", ()),
     "financial.emergency_fund_months": ("calculado", ()),
     "financial.loss_capacity_eur": ("calculado", ()),
     "objectives.o1.goal": ("texto", ()),

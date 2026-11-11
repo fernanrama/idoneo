@@ -46,7 +46,9 @@ Cómo usarlo:
    acepta un valor, haz una búsqueda por cada valor y une los resultados; no quites ninguno.
    Aplica después `post_filters` a cada ficha. En `min_initial` la ficha da texto ("1000.00 EUR" o
    "0.001 participaciones"): compara el importe en euros; si viene en participaciones, no hay mínimo.
-   Respeta `appropriateness`: no ofrezcas familias marcadas como `not_appropriate` sin avisar al cliente.
+   No busques ni propongas lo que aparece en `blocked_searches` ("funds" fondos, "portfolios" carteras,
+   "etfs", "stocks" acciones); `rationale` dice por qué. Un `asset_type` vacío significa ningún tipo de
+   fondo, nunca «cualquiera». Respeta `appropriateness`: no ofrezcas familias `not_appropriate`.
    Estas restricciones son límites, no una selección: qué productos proponer y en qué orden lo decide
    la entidad con su propio criterio.
 3. Para justificar una decisión ante el cliente o el asesor, usa get_evidence con el campo concreto.
@@ -130,7 +132,8 @@ def get_investment_constraints(client_id: str) -> dict[str, Any]:
     """Reglas que cualquier propuesta de inversión debe cumplir para este cliente, ya expresadas como
     criterios del catálogo de MyInvestor: `funds_query` (búsqueda de fondos), `portfolios_query`
     (carteras automatizadas), `post_filters` (comprobaciones sobre cada ficha), `appropriateness`
-    (conveniencia por familia de producto) y `rationale` (por qué). Si `usable` es false, no recomendar.
+    (conveniencia por familia de producto), `blocked_searches` (qué no se busca: fondos, carteras, ETF o
+    acciones) y `rationale` (por qué). Si `usable` es false, no recomendar.
     Una lista dentro de `funds_query` (como `asset_type`) significa "cualquiera de estos valores": si el
     buscador solo admite uno, se hace una búsqueda por valor.
     """

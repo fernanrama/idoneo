@@ -118,10 +118,14 @@ def _persona(azar: random.Random, numero: int) -> Persona:
     esperado.update({"financial.fixed_monthly_costs_eur": gastos, "financial.liquid_savings_eur": ahorro})
     if azar.random() < 0.4:
         deuda = _redondo(azar.uniform(3000, 180000), 1000)
-        lineas.append(f"- Debe {_euros(deuda)} euros ({'de hipoteca' if deuda > 50000 else 'de un préstamo'}).")
-        esperado["financial.debts_eur"] = deuda
+        if deuda > 50000:
+            lineas.append(f"- Le quedan {_euros(deuda)} euros de hipoteca de su casa. No tiene otras deudas.")
+            esperado.update({"financial.mortgage_eur": deuda, "financial.debts_eur": 0})
+        else:
+            lineas.append(f"- Debe {_euros(deuda)} euros de un préstamo. No tiene hipoteca.")
+            esperado["financial.debts_eur"] = deuda
     else:
-        lineas.append("- No tiene deudas.")
+        lineas.append("- No tiene deudas ni hipoteca.")
         esperado["financial.debts_eur"] = 0
 
     # Conocimientos: lo que sabe de verdad, no lo que dice.

@@ -69,6 +69,7 @@ export interface Restricciones {
   portfolios_query: Record<string, unknown>;
   post_filters: { field: string; op: string; value: unknown; why: string }[];
   appropriateness: Record<string, Conveniencia>;
+  blocked_searches?: string[];
   evidence_refs: string[];
   rationale: string[];
 }

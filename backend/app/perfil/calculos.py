@@ -9,6 +9,7 @@ from __future__ import annotations
 from .modelos import (
     CALCULADOS,
     FAMILIAS,
+    NIVELES,
     OBLIGATORIOS,
     Conveniencia,
     EstadoPerfil,
@@ -51,6 +52,8 @@ ASSET_TYPE = {
 }
 # [ABIERTO] Operaciones en 3 años que compensan un conocimiento bajo, para la conveniencia.
 OPERACIONES_EXPERIENCIA = 5
+# [ABIERTO] SRI mínimo del perfil para buscar acciones sueltas: una acción suele estar en SRI 6–7.
+SRI_MIN_ACCIONES = 6
 # Plazo de reembolso máximo según la necesidad de liquidez.
 REEMBOLSO_MAX_DIAS = {"high": 3, "medium": 7}
 
@@ -74,7 +77,11 @@ def meses_colchon(ahorro_liquido: float, gastos_fijos: float) -> float:
 
 
 def capacidad_perdida(ahorro_liquido: float, gastos_fijos: float, deudas: float) -> float:
-    """Lo que podría perder sin tocar un colchón de 6 meses de gastos ni dejar deudas sin cubrir."""
+    """Lo que podría perder sin tocar un colchón de 6 meses de gastos ni dejar deudas sin cubrir.
+
+    `deudas` no incluye la hipoteca de la vivienda (`financial.mortgage_eur`): es deuda a largo plazo
+    respaldada por la casa y su cuota ya va en los gastos fijos. Restar su capital del ahorro dejaba a
+    cualquiera con hipoteca en CONSERVADOR aunque le sobrara colchón. SUPUESTO v1."""
     return round(max(0.0, ahorro_liquido - MESES_COLCHON_OBJETIVO * gastos_fijos - deudas), 2)
 
 
@@ -166,6 +173,12 @@ def idoneidad(perfil: Perfil) -> Idoneidad:
     if cap is not None and ahorro is not None:
         p = _por_capacidad(float(cap), float(ahorro))
         candidatos.append((p, "financial.loss_capacity_eur", f"Capacidad de pérdida {cap:,.0f} € de {ahorro:,.0f} € → {p.value}"))
+    importe = valor(perfil, "objectives.o1.amount_eur")
+    if cap is not None and importe is not None and float(importe) > float(cap):
+        # Invertiría parte del colchón de 6 meses o del dinero de sus deudas: SUPUESTO v1, prudente.
+        motivo = (f"Quiere invertir {float(importe):,.0f} €, más de lo que puede perder sin tocar su colchón "
+                  f"({float(cap):,.0f} €) → {PerfilRiesgo.CONSERVADOR.value}")
+        candidatos.append((PerfilRiesgo.CONSERVADOR, "objectives.o1.amount_eur", motivo))
     plazo = valor(perfil, "objectives.o1.horizon_years")
     if plazo is not None:
         p = _por_plazo(float(plazo))
@@ -188,8 +201,23 @@ def idoneidad(perfil: Perfil) -> Idoneidad:
 
 # ---------- conveniencia ----------
 
+def _fiable(f: Fact | None) -> bool:
+    """Dato sin dudas abiertas: lo corrigió la entidad, o no tiene confianza baja ni incoherencias."""
+    if f is None or f.value is None:
+        return False
+    return f.source == Fuente.advisor or not ({Flag.low_confidence, Flag.inconsistent} & set(f.flags))
+
+
 def conveniencia(perfil: Perfil) -> dict[str, Conveniencia]:
-    """Por familia: conocimiento demostrado suficiente, o experiencia que lo compense."""
+    """Por familia: conocimiento comprobado suficiente, o experiencia que compense uno no comprobado.
+
+    - Lo que el cliente dice saber no basta: el nivel cuenta si lo demostró en una pregunta de
+      comprobación o lo fijó la entidad, y sin dudas abiertas.
+    - La experiencia (OPERACIONES_EXPERIENCIA en 3 años, dato fiable) compensa un conocimiento que dice
+      tener y no se ha comprobado, o uno parcial; nunca una comprobación fallada (`none` demostrado) ni
+      un «no lo conozco».
+    - Depósitos y monetarios: basta con que diga conocerlos (no complejos, riesgo mínimo), sin incoherencias.
+    """
     out: dict[str, Conveniencia] = {}
     for fam in FAMILIAS:
         f = perfil.mifid.get(f"knowledge.{fam}")
@@ -197,11 +225,16 @@ def conveniencia(perfil: Perfil) -> dict[str, Conveniencia]:
             out[fam] = Conveniencia.not_assessed
             continue
         minimo = "high" if fam == "complex_products" else "medium"
-        suficiente = ["none", "basic", "medium", "high"].index(f.value) >= ["none", "basic", "medium", "high"].index(minimo)
-        ops = valor(perfil, f"experience.{fam}.operations_last_3y") or 0
-        if fam == "deposits_money_market" and f.value != "none":
-            suficiente = True  # producto no complejo y de riesgo mínimo
-        out[fam] = Conveniencia.appropriate if (suficiente or ops >= OPERACIONES_EXPERIENCIA) else Conveniencia.not_appropriate
+        comprobado = f.source in (Fuente.demonstrated, Fuente.advisor) and _fiable(f)
+        suficiente = comprobado and NIVELES.index(f.value) >= NIVELES.index(minimo)
+        if fam == "deposits_money_market":
+            suficiente = f.value != "none" and (f.source == Fuente.advisor or Flag.inconsistent not in f.flags)
+        f_ops = perfil.mifid.get(f"experience.{fam}.operations_last_3y")
+        ops = int(f_ops.value) if _fiable(f_ops) else 0
+        # `none` cubre tanto «no lo conozco» como una comprobación fallada: ahí la experiencia no compensa.
+        compensa = (ops >= OPERACIONES_EXPERIENCIA and f.value != "none"
+                    and (f.source == Fuente.advisor or Flag.inconsistent not in f.flags))
+        out[fam] = Conveniencia.appropriate if (suficiente or compensa) else Conveniencia.not_appropriate
     return out
 
 
@@ -219,9 +252,30 @@ def restricciones(perfil: Perfil) -> Restricciones:
     if s.risk_profile:
         funds["max_risk"] = s.max_sri
         portfolios = {"profile": s.risk_profile.value, "risk_max": RISK_MAX_CARTERAS[s.risk_profile]}
-    tipos = [ASSET_TYPE[f] for f in ASSET_TYPE if conv.get(f) == Conveniencia.appropriate]
-    if tipos:
-        funds["asset_type"] = tipos
+    # Lista explícita siempre: [] significa «ningún tipo», nunca «cualquiera».
+    funds["asset_type"] = [ASSET_TYPE[f] for f in ASSET_TYPE if conv.get(f) == Conveniencia.appropriate]
+
+    bloqueadas: list[str] = []
+    if not s.risk_profile:
+        bloqueadas += ["funds", "portfolios", "etfs", "stocks"]
+        motivos.append("Sin perfil de riesgo calculado: no se busca ningún producto")
+    else:
+        if not funds["asset_type"]:
+            bloqueadas.append("funds")
+            motivos.append("Ninguna familia de fondos es conveniente: no se buscan fondos")
+        if conv.get("etfs") != Conveniencia.appropriate:
+            bloqueadas.append("etfs")
+            motivos.append("ETF no convenientes o sin evaluar: no se buscan ETF")
+        else:
+            motivos.append("ETF convenientes, pero el catálogo no da su SRRI: comprobar el riesgo en cada ficha "
+                           f"(máximo {s.max_sri})")
+        if conv.get("stocks") != Conveniencia.appropriate:
+            bloqueadas.append("stocks")
+            motivos.append("Acciones no convenientes o sin evaluar: no se buscan acciones")
+        elif s.max_sri < SRI_MIN_ACCIONES:
+            bloqueadas.append("stocks")
+            motivos.append(f"Perfil {s.risk_profile.value} (SRI máximo {s.max_sri}): una acción suelta suele "
+                           f"tener SRI {SRI_MIN_ACCIONES}–7, no se buscan acciones")
 
     pref = valor(perfil, "sustainability.preference")
     art = valor(perfil, "sustainability.min_sfdr_article")
@@ -250,6 +304,7 @@ def restricciones(perfil: Perfil) -> Restricciones:
         client_id=perfil.client_id, profile_version=perfil.version, status=perfil.status, usable=usable,
         funds_query=funds, portfolios_query=portfolios, post_filters=post,
         appropriateness={f: v for f, v in conv.items() if v != Conveniencia.not_assessed},
+        blocked_searches=bloqueadas,
         evidence_refs=refs, rationale=motivos,
     )
 

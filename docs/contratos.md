@@ -14,7 +14,7 @@ Estado (8/11, `main`): contrato v1 (PR #9), MCP (PR #7) y persistencia, validaci
 | Flags | Libres | `declared_vs_demonstrated`, `inconsistent`, `low_confidence`, `needs_advisor` | Alex |
 | Estados | `draft/validated/active/review_pending` | `draft → pending_validation → active → review_due` (transiciones en `store.py`) | Alex |
 | Campos | Lista propia | Rutas de Alex: `knowledge.<familia>` (7 familias), `financial.*`, `objectives.o1.*`, `risk_tolerance.*`, `sustainability.*`, `disclosures.*` | Alex |
-| Restricciones | SRI máximo propio | Formato de MyInvestor: `funds_query`, `portfolios_query`, `post_filters`, `appropriateness`, `usable` | Alex + hallazgos del MCP |
+| Restricciones | SRI máximo propio | Formato de MyInvestor: `funds_query`, `portfolios_query`, `post_filters`, `appropriateness`, `blocked_searches`, `usable` | Alex + hallazgos del MCP |
 | Lectura para consumidores | Último perfil | Último **activo**; si nunca hubo uno, el último con `usable: false` | Alex |
 | Números | Python | Python, igual. Ahora también el perfil de riesgo y la conveniencia | Ambos |
 | Prefijo de rutas | `/api` | Se mantiene `/api` (ver desviaciones) | Código |
