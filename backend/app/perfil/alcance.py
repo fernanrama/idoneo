@@ -14,7 +14,7 @@ Todas las tablas son SUPUESTOS v1 del equipo, pendientes de revisión financiera
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 from enum import Enum
 from typing import Any
 
@@ -22,7 +22,7 @@ from pydantic import BaseModel, Field
 
 from . import calculos
 from .calculos import ORDEN_PERFILES, desconocimiento_declarado, valor
-from .modelos import CALCULADOS, CAMPOS, FAMILIAS, EstadoAlerta, Fact, Flag, Perfil
+from .modelos import CALCULADOS, CAMPOS, FAMILIAS, EstadoAlerta, EstadoPerfil, Fact, Flag, Perfil
 from .validacion import DatoInvalido
 
 # ---------- supuestos v1 ----------
@@ -174,6 +174,9 @@ class Alcance(BaseModel):
     aplazadas: list[str]               # quedan para otra microentrevista
     reevaluacion_completa: bool        # el llamante abre una entrevista completa; las preguntas, por dónde empezar
     razones: list[str]                 # por qué se amplía (vacío si no)
+    # Sesión de revisión: tras las preguntas (o si no hay ninguna) se pregunta si ha cambiado algo más.
+    # Así una revisión no termina nada más empezar por tener la lista vacía. False en la entrevista inicial.
+    apertura: bool = False
 
 
 # ---------- planificación ----------
@@ -219,12 +222,15 @@ def _dudoso(perfil: Perfil, ruta: str) -> bool:
     return f is not None and (Flag.low_confidence in f.flags or Flag.inconsistent in f.flags)
 
 
-def planificar(perfil: Perfil, peticiones: list[Peticion]) -> Alcance:
+def planificar(perfil: Perfil, peticiones: list[Peticion], vigentes: frozenset[str] = frozenset()) -> Alcance:
     """Une las peticiones, añade dependencias de lo que cambia, ordena y recorta. Determinista.
 
     `value_changed`: la ruta ya está respondida (cambió en esta revisión), así que no se pregunta otra vez
     salvo que haya quedado dudosa; sí se confirman sus dependencias de `calculos.py`. Cuenta como cambio
     para decidir si hay que ampliar a una reevaluación completa.
+
+    `vigentes`: rutas que el inversor ya dio o confirmó en esta revisión. No se vuelven a confirmar (sí se
+    repreguntan si faltan o son dudosas).
     """
     tipos: dict[str, TipoPregunta] = {}
     motivos: dict[str, list[Motivo]] = {}
@@ -259,6 +265,7 @@ def planificar(perfil: Perfil, peticiones: list[Peticion]) -> Alcance:
             tipos.pop(r, None)  # ya respondida en esta revisión: no se vuelve a preguntar
     preguntas = [Pregunta(path=r, tipo=_tipo(perfil, r, t), motivos=motivos[r], valor_vigente=valor(perfil, r))
                  for r, t in tipos.items()]
+    preguntas = [q for q in preguntas if not (q.tipo == TipoPregunta.confirmar and q.path in vigentes)]
     preguntas.sort(key=lambda q: (q.tipo == TipoPregunta.confirmar, ORDEN_GUION[q.path]))
 
     razones = []
@@ -298,9 +305,13 @@ def cambiados(anterior: Perfil, nueva: Perfil) -> list[str]:
 
 # ---------- calendario ----------
 
+def ultimo_momento(f: Fact) -> datetime:
+    """Última vez que el cliente dio este dato: al escribirlo o al confirmarlo (§4.3 del diseño)."""
+    return max(f.updated_at, f.confirmed_at or f.updated_at)
+
+
 def ultima_vez(f: Fact) -> date:
-    """Último día en que el cliente dio este dato: al escribirlo o al confirmarlo (§4.3 del diseño)."""
-    return max(f.updated_at, f.confirmed_at or f.updated_at).date()
+    return ultimo_momento(f).date()
 
 
 def plazo_restante(f: Fact, hoy: date) -> float:
@@ -393,3 +404,30 @@ def es_material(anterior: Perfil, nueva: Perfil) -> list[str]:
             ca is not None and cn is not None and abs(cn - ca) > VARIACION_CAPACIDAD * abs(ca)):
         out.append("loss_capacity")
     return out
+
+
+# ---------- sesión de revisión ----------
+
+def alcance_revision(servido: Perfil, ultima: Perfil, hoy: date) -> Alcance:
+    """Qué preguntar o confirmar en una microentrevista sobre un perfil ya validado. Determinista, sin modelo.
+
+    - `servido`: el último perfil `active` (lo validado y sus evidencias; `store.perfil_para_consumidor`).
+    - `ultima`: la última versión (`store.perfil`), con lo que ya haya cambiado o confirmado en la revisión.
+
+    Une los vencimientos de `ultima`, los datos cambiados desde `servido` (`value_changed`: no se repiten;
+    se confirman sus dependencias) y no vuelve a confirmar lo que el inversor ya dio o confirmó después de
+    `servido`. Los resultados (perfil de riesgo, restricciones) los recalcula después `calculos.recalcular`
+    en cada escritura: aquí no se calcula nada nuevo. `apertura` siempre es True.
+    """
+    if servido.status != EstadoPerfil.active:
+        raise DatoInvalido("Sin un perfil validado no hay revisión: es una entrevista inicial")
+    if ultima.client_id != servido.client_id or ultima.version < servido.version:
+        raise DatoInvalido("La última versión no corresponde al perfil servido")
+    peticiones = vencimientos(ultima, hoy)
+    cambios = [r for r in cambiados(servido, ultima) if r in CAMPOS and not r.startswith("disclosures.")]
+    if cambios:
+        peticiones.append(Peticion(motivo=Motivo.value_changed, rutas=cambios))
+    desde = servido.created_at
+    vigentes = frozenset(r for r, f in ultima.mifid.items()
+                         if r not in CALCULADOS and f.value is not None and ultimo_momento(f) > desde)
+    return planificar(ultima, peticiones, vigentes).model_copy(update={"apertura": True})
