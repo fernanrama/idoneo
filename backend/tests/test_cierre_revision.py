@@ -66,3 +66,135 @@ def test_cerrar_con_version_obsoleta_no_escribe(validada):
 def test_cerrar_exige_motivo(validada):
     with pytest.raises(store.DatoInvalido):
         store.cerrar_revision(C, " ", validada.version)
+
+
+# ---------- revision.cerrar: finalizar la sesión del inversor ----------
+
+LIQUIDEZ = "objectives.o1.liquidity_need"
+
+
+def abrir():
+    from app.perfil import revision
+
+    return revision.abrir(C, ["planned_expense"])  # pregunta liquidez, confirma ahorro y plazo
+
+
+def responder_todo(liquidez="low"):
+    decir(LIQUIDEZ, liquidez, "Sobre la liquidez")
+    decir(AHORRO, 80000, "Los ahorros siguen en ochenta mil")
+    decir(PLAZO, 10, "Sigue siendo a diez años")
+
+
+def test_solo_confirmaciones_se_finaliza_y_sigue_active(validada):
+    from app.perfil import revision
+
+    abrir()
+    responder_todo()
+    antes = store.perfil(C)
+    assert antes.status == EstadoPerfil.active and revision.vista(revision.en_curso(C))["can_finish"] is True
+    r = revision.cerrar(C)
+    assert r["result"] == "sin_cambios" and r["status"] == "active" and r["pending_validation"] is False
+    assert revision.en_curso(C) is None and huella(store.perfil(C)) == huella(antes)  # «Mi perfil» ya no la ve a medias
+
+
+def test_con_cambios_se_finaliza_pero_espera_a_la_entidad(validada):
+    from app.perfil import revision
+
+    abrir()
+    responder_todo(liquidez="high")
+    r = revision.cerrar(C)
+    assert r["result"] == "pendiente_de_validacion" and r["status"] == "review_due" and r["pending_validation"]
+    assert revision.en_curso(C) is None
+    assert store.revision_pendiente(C).paths == [LIQUIDEZ]  # GPTadvisor sigue avisado
+    assert [x.path for x in revision.comparar(C).cambios if x.antes != x.ahora] == [LIQUIDEZ]  # la entidad lo ve
+    assert store.validar(C, "asesor-07", []).status == EstadoPerfil.active  # y lo valida después (D2)
+
+
+def test_no_se_finaliza_con_preguntas_pendientes(validada):
+    from app.perfil import revision
+
+    abrir()
+    decir(LIQUIDEZ, "high", "Necesito 6.000 € en tres meses")  # faltan ahorro y plazo
+    v = revision.vista(revision.en_curso(C))
+    assert v["can_finish"] is False and v["blocking"] == [AHORRO, PLAZO]
+    antes = store.versiones(C)
+    with pytest.raises(store.Conflicto, match="faltan"):
+        revision.cerrar(C)
+    assert store.versiones(C) == antes and revision.en_curso(C) is not None
+
+
+def test_una_revision_abandonada_se_retoma(validada):
+    from app.perfil import revision
+
+    abrir()
+    decir(LIQUIDEZ, "low", "No, sigo sin necesitar el dinero")  # y se va
+    r = revision.en_curso(C)
+    assert r is not None and [q.path for q in r.pendientes] == [AHORRO, PLAZO]  # al volver, sigue donde lo dejó
+    decir(AHORRO, 80000, "Los ahorros siguen en ochenta mil")
+    decir(PLAZO, 10, "Sigue siendo a diez años")
+    assert revision.cerrar(C)["result"] == "sin_cambios"
+
+
+def test_finalizar_es_idempotente(validada):
+    from app.perfil import revision
+
+    abrir()
+    responder_todo()
+    primera = revision.cerrar(C)
+    versiones = store.versiones(C)
+    segunda = revision.cerrar(C)
+    assert segunda["already_closed"] is True and segunda["version"] == primera["version"]
+    assert store.versiones(C) == versiones  # no escribe otra vez
+
+
+def test_sin_revision_abierta_no_escribe(validada):
+    from app.perfil import revision
+
+    r = revision.cerrar(C)
+    assert r["already_closed"] is True and store.perfil(C).version == validada.version
+
+
+def test_tras_finalizar_se_puede_abrir_otra(validada):
+    from app.perfil import revision
+
+    abrir()
+    responder_todo()
+    revision.cerrar(C)
+    nueva = revision.abrir(C, ["windfall"])
+    assert nueva.motivos == [revision.Motivo.windfall]  # no arrastra los motivos de la anterior
+
+
+def test_finalizar_no_reactiva_un_perfil_ya_en_revision(validada):
+    from app.perfil import revision
+
+    decir(PLAZO, 3, "Lo quiero para dentro de tres años")  # cambio previo: review_due
+    abrir()
+    decir(LIQUIDEZ, "low", "No, sigo sin necesitar el dinero")
+    decir(AHORRO, 80000, "Los ahorros siguen en ochenta mil")
+    decir(PLAZO, 3, "Sí, a tres años")  # confirma el plazo ya cambiado
+    r = revision.cerrar(C)
+    assert r["result"] == "pendiente_de_validacion" and r["status"] == "review_due"
+    assert store.revision_pendiente(C).paths == [PLAZO]  # el cambio previo sigue avisado
+
+
+def test_dos_cierres_a_la_vez_escriben_un_solo_cierre(validada):
+    import threading
+
+    from app.perfil import revision
+
+    abrir()
+    responder_todo()
+    barrera, resultados = threading.Barrier(2), []
+
+    def cerrar():
+        barrera.wait(10)
+        resultados.append(revision.cerrar(C))
+
+    hilos = [threading.Thread(target=cerrar) for _ in range(2)]
+    for h in hilos:
+        h.start()
+    for h in hilos:
+        h.join(30)
+    assert len(resultados) == 2 and all(r["closed"] for r in resultados)
+    cierres = [v for v in store.versiones(C) if v["reason"].startswith("review_closed:")]
+    assert len(cierres) == 1
