@@ -29,17 +29,17 @@
     }
   },
   "laboratorio": {
-    "prueba": "E-12",
+    "prueba": "E-15",
     "fecha": "2026-11-11",
     "modelo": "claude-sonnet-5-5",
     "casos": 4,
     "detalle": "4 clientes simulados × 1 repeticiones",
     "metricas": {
-      "cobertura": 1.0,
-      "precision": 1.0,
+      "cobertura": 0.9722,
+      "precision": 0.9722,
       "recomendaciones": 0,
       "aviso_ia": 1.0,
-      "coste_medio_usd": 0.3742
+      "coste_medio_usd": 0.4469
     }
   },
   "e2e": {
@@ -55,32 +55,33 @@
     }
   },
   "calibracion_juez": {
-    "prueba": "E-11",
+    "prueba": "E-14",
     "fecha": "2026-11-11",
     "modelo": "claude-sonnet-5-5",
     "casos": 7,
     "detalle": "rúbrica v1, notas humanas del equipo",
     "metricas": {
       "acuerdo": 1.0,
-      "exacto": 0.7714,
+      "exacto": 0.8857,
       "veredicto": 1.0
     }
   },
   "juez": {
-    "prueba": "E-12",
+    "prueba": "E-15",
     "fecha": "2026-11-11",
     "modelo": "claude-sonnet-5-5",
     "casos": 4,
     "detalle": "rúbrica v1 sobre las entrevistas del laboratorio",
     "metricas": {
-      "nota_media": 4.38,
-      "neutralidad_min": 0,
-      "aprobadas": 0.75,
-      "sin_prueba": 2,
-      "media_claridad": 4.25,
+      "nota_media": 4.4,
+      "neutralidad_min": 5,
+      "aprobadas": 1.0,
+      "sin_prueba": 0,
+      "incompletas": 0,
+      "media_claridad": 4,
       "media_una_pregunta": 4,
       "media_neutralidad": 5,
-      "media_empatia": 3.67,
+      "media_empatia": 4,
       "media_transparencia": 5
     }
   }
