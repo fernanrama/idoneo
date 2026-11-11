@@ -24,6 +24,10 @@
 .rotulo strong { display: block; font-size: 16px; font-weight: 600; color: #f7fbfa; }
 .entidad { border-radius: 24px; overflow: hidden; display: flex; flex-direction: column; min-height: min(800px, 100dvh - 160px); }
 .entidad > section { flex: 1; }
+.pasoAsesor { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; padding: 16px 22px; border: 0; border-radius: 18px; background: linear-gradient(90deg, #7ce7c4, #2bb3c0); color: #0c1a1f; font-family: inherit; font-size: 14px; text-align: left; box-shadow: 0 12px 40px rgba(43, 179, 192, 0.35); animation: v-entra 0.6s both; }
+.pasoAsesor strong { display: block; font-size: 18px; font-weight: 600; }
+.pasoAsesor b { font-size: 24px; }
+.pasoAsesor:focus-visible { outline: 3px solid #f7fbfa; outline-offset: 3px; }
 
 /* El módulo de la entrevista, dentro del móvil */
 .raiz .cliente { flex: 1; min-height: 0; height: 100%; overflow-x: hidden; overflow-y: auto; }
@@ -59,6 +63,7 @@
   .colCliente { position: static; }
   .rotulo { display: none; }
   .entidad { border-radius: 0; min-height: 100dvh; }
+  .pasoAsesor { border-radius: 0; }
   .conmutador { position: sticky; top: 0; z-index: 20; display: flex; justify-content: center; gap: 4px; padding: 8px 12px; background: rgba(12, 26, 31, 0.92); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
   .conmutador button { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: #c9d6d8; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; flex: 0 1 auto; }
   .conmutador button[aria-selected="true"] { background: #f7fbfa; color: #0c1a1f; }

@@ -119,7 +119,7 @@ Un perfil MiFID caduca con la vida del cliente. En Idóneo no hay que repetir la
 
 ## Probarlo en 10 minutos
 
-> **Sin instalar nada:** la versión desplegada está en <https://hack-finance-uc3m-2026.vercel.app> (empieza por `/escenario` → **Ver la demo guiada**). El backend usa un plan gratuito que se duerme: la primera petición puede tardar cerca de un minuto. «Validar perfil» y el MCP de demostración solo funcionan en local, a propósito ([por qué](docs/despliegue.md#qué-cambia-respecto-a-local)).
+> **Sin instalar nada:** la versión desplegada está en <https://hack-finance-uc3m-2026.vercel.app> (empieza por **Mira cómo funciona**, que abre la demo guiada en `/escenario`). El backend usa un plan gratuito que se duerme: la primera petición puede tardar cerca de un minuto. «Validar perfil» y el MCP de demostración solo funcionan en local, a propósito ([por qué](docs/despliegue.md#qué-cambia-respecto-a-local)).
 
 **Requisitos:** Python 3.11+ (probado con 3.13 y 3.14), Node.js 20+ solo para el frontend (probado con 22) y Git.
 
@@ -167,8 +167,8 @@ npm run dev
 
 | # | Abre | Qué verás |
 |:-:|---|---|
-| 1 | http://localhost:3000 | La entrada a la feature dentro de la app |
-| 2 | http://localhost:3000/escenario → **Ver la demo guiada** | La entrevista de Carmen y, al lado, su perfil construyéndose en directo (la demo de arriba) |
+| 1 | http://localhost:3000 | La portada: qué es idóneo, cómo funciona y dónde se integra |
+| 2 | http://localhost:3000/escenario → **Empezar la demo** | La entrevista de Carmen dentro del móvil de la entidad y, al lado, su perfil construyéndose en directo. Al acabar, **Siguiente: lo que recibe el asesor** enseña cada frase con su audio y una validación simulada |
 | 3 | http://localhost:3000/entidad/carmen-68 | Cada dato con fuente, confianza y cita; perfil CONSERVADOR; la alerta *declarado ≠ demostrado* |
 | 4 | Botón **Validar perfil** en esa vista (lo habilita el [modo asesor de demostración](docs/modo-asesor-demo.md), que `preparar_demo.py` deja activado) | El perfil pasa a `active` y ya se puede usar |
 | 5 | Bloque **Restricciones para el agente** de esa vista | Las restricciones en el formato del catálogo de MyInvestor, utilizables tras validar. La API (`/api/clients/…`) exige la credencial del cliente; sin ella, http://localhost:8000/api/demo/constraints enseña el formato con la Carmen de muestra, sin validar |

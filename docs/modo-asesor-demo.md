@@ -68,9 +68,9 @@ Recupera el paso «Validar perfil» del recorrido de Carmen sin reabrir la autov
 
 Una entrevista real completa dura unos ocho minutos y, si falta un dato obligatorio, «Validar» responde 409. Para enseñar la voz real en el pitch sin ese riesgo existe `carmen-corta` (`backend/fixtures/carmen-corta.json`, DATOS SIMULADOS). Es Carmen con casi todo el perfil hecho; **solo faltan** el conocimiento de renta variable y el escenario de caída. La sostenibilidad ya viene contada: una respuesta ambigua hacía que el asistente repreguntara y que el verificador dejara el dato pendiente. Es justo el momento «declarado ≠ demostrado».
 
-1. Con el modo asesor activo, en `http://localhost:3000/onboarding/entrevista` («Soy cliente» en la portada) aparece la casilla **«Entrevista corta del pitch»**. Desde #64, `/escenario` solo reproduce la demo guiada. Márcala, marca las dos de consentimiento y pulsa **Hablar** o **Escribir**.
+1. Con el modo asesor activo, en `http://localhost:3000/onboarding/entrevista` («Pruébalo» en la portada) aparece la casilla **«Entrevista corta del pitch»**. Desde #64, `/escenario` solo reproduce la demo guiada. Márcala, marca las dos de consentimiento y pulsa **Hablar** o **Escribir**.
 2. El asistente solo pregunta lo que falta: la lista de pendientes sale de `OBLIGATORIOS`. Respuesta sugerida: dice que conoce bien los fondos de renta variable y, ante la comprobación, «eso no puede pasar, el fondo es del banco»; ante una caída del 20 %, «lo saco todo».
-3. Al terminar, «Mi perfil» enlaza a «Validarlo como entidad», que abre `/admin?cliente=carmen-corta` (pide la clave del equipo, `ADMIN_LOGIN_CLAVE`). Con el modo asesor también se puede ir directo a `/entidad/carmen-corta` → **Validar perfil** (un solo clic).
+3. Al terminar, «Mi perfil» enlaza al pie a «¿Eres del banco? Abre la vista del asesor», que abre `/admin?cliente=carmen-corta` (pide la clave del equipo, `ADMIN_LOGIN_CLAVE`). Con el modo asesor también se puede ir directo a `/entidad/carmen-corta` → **Validar perfil** (un solo clic).
 4. Claude Code lee `carmen-corta` con `MCP_DEMO_TOKEN`: por defecto `MCP_DEMO_CLIENTS` incluye `carmen-68,carmen-corta`.
 
 Cada nueva entrevista corta recarga el fixture como versión nueva (no borra el historial), así que se puede ensayar cuantas veces haga falta. Por defecto, `DEMO_ADVISOR_CLIENTS` y `MCP_DEMO_CLIENTS` son `carmen-68,carmen-corta`.
@@ -114,7 +114,7 @@ Todo en el portátil, sin túneles. DATOS FICTICIOS. La entrevista real consume 
 
 **En directo**
 
-1. **Entrevista:** `http://localhost:3000/onboarding/entrevista` → responder por escrito o por voz con el cliente ficticio. Al terminar, «Mi perfil» (`/onboarding/perfil`) enlaza a «Validarlo como entidad», que abre `/admin?cliente=<client_id>`; con el modo asesor también vale `/entidad/<client_id>` directamente.
+1. **Entrevista:** `http://localhost:3000/onboarding/entrevista` → responder por escrito o por voz con el cliente ficticio. Al terminar, «Mi perfil» (`/onboarding/perfil`) enlaza al pie a «¿Eres del banco? Abre la vista del asesor», que abre `/admin?cliente=<client_id>`; con el modo asesor también vale `/entidad/<client_id>` directamente.
 2. **Perfil pendiente:** la vista muestra los datos con su frase y el aviso «este cliente aún no está autorizado», con el comando exacto.
 3. **Autorización del operador**, en la terminal del backend. El token se captura en una variable y nunca se ve; el script se niega a escribirlo en la terminal:
    ```bash
