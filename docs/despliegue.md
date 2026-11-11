@@ -68,6 +68,9 @@ tras 15 minutos sin uso y tarda cerca de un minuto en despertar; el plan Starter
      (el mismo valor que en Render). Ninguna lleva `NEXT_PUBLIC_`: solo las lee el servidor de Next. Quien
      entre en `/admin` con esa clave puede validar cualquier perfil como `asesor-web`. Para apagarlo,
      borra `ADMIN_LOGIN_CLAVE` y vuelve a desplegar.
+   - **Trampa del plan gratuito de Vercel:** solo despliega commits de miembros del proyecto. Si fusiona
+     otra persona, el despliegue sale «Deployment was blocked» y la web se queda en la versión anterior
+     (Render sí despliega). Solución: que la última fusión en `main` la haga el dueño del proyecto de Vercel.
 4. **Deploy**. Apunta la URL de producción (`https://<proyecto>.vercel.app`).
 
 ### 4. Conectar las dos piezas
