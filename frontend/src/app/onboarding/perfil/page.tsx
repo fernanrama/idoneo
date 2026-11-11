@@ -377,7 +377,8 @@ function PerfilVivo({ revision, clientId, recargar, validado }: {
     }
   };
   if (!revision.open && !validado) {
-    // Un perfil se actualiza sobre una versión validada: hasta entonces, se explica y se lleva a la entidad.
+    // Un perfil se actualiza sobre una versión validada: hasta entonces, solo se explica.
+    // Validar es cosa de la entidad: su acceso está al pie de la página («¿Eres del banco?»), no aquí.
     return (
       <Revela como="section" className={rv.vivo}>
         <div className={rv.vivoTexto}>
@@ -387,9 +388,6 @@ function PerfilVivo({ revision, clientId, recargar, validado }: {
             para tu dinero) y solo te preguntaremos eso. Esta página se actualiza sola al validarse.
           </p>
         </div>
-        <a href={`/admin?cliente=${encodeURIComponent(clientId)}`} target="_blank" rel="noopener" className={rv.vivoBoton}>
-          Validarlo como entidad <span aria-hidden="true">→</span>
-        </a>
       </Revela>
     );
   }

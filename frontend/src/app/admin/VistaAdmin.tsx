@@ -40,7 +40,7 @@ export default function VistaAdmin() {
   }, []);
   useEffect(cargar, [cargar]);
 
-  // Viene de «Validarlo como entidad» o de otra pantalla de la entidad: con la sesión iniciada, directo allí.
+  // Viene de «¿Eres del banco?» en «Mi perfil» o de otra pantalla de la entidad: con la sesión iniciada, directo allí.
   useEffect(() => {
     if (!estado?.logged) return;
     if (CLIENTE.test(sugerido)) router.replace(`/entidad/${encodeURIComponent(sugerido)}`);
