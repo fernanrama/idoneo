@@ -202,7 +202,7 @@ function Inicio({ e, compacto, permisos, setPermisos }: {
       </h1>
       <p>
         {e.corta
-          ? "Carmen ya ha contado casi todo: faltan tres preguntas. Unos dos minutos."
+          ? "Carmen ya ha contado casi todo: faltan dos preguntas. Alrededor de un minuto."
           : "Una pregunta cada vez, sobre tus objetivos, tu situación y lo que sabes de inversión. Unos ocho minutos."}
       </p>
       <div className={`${s.permisos} vidrio`}>
@@ -220,7 +220,7 @@ function Inicio({ e, compacto, permisos, setPermisos }: {
           <input type="checkbox" checked={e.corta} onChange={(ev) => e.setCorta(ev.target.checked)} />
           <span>
             <strong>Entrevista corta del pitch.</strong> Carmen (datos simulados) ya tiene casi todo el perfil; en
-            directo solo se comprueban sus conocimientos, la reacción ante una caída y la sostenibilidad.
+            directo solo se comprueban sus conocimientos de renta variable y su reacción ante una caída.
           </span>
         </label>
       )}

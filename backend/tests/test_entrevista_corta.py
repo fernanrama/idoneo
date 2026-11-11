@@ -1,6 +1,6 @@
 """Entrevista corta del pitch: fixture ficticio `carmen-corta`, casi completo, que se termina en directo.
 
-Sin proveedores: la parte de Claude se simula escribiendo los tres datos que faltan como lo haría el
+Sin proveedores: la parte de Claude se simula escribiendo los dos datos que faltan como lo haría el
 extractor (con su cita). Se comprueba que el recorrido llega a validar y que el MCP lo sirve como usable.
 """
 from __future__ import annotations
@@ -24,7 +24,7 @@ C = "carmen-corta"
 BASE = "/api/demo/asesor"
 TOKEN = "asesor-demo-sintetico-solo-para-tests-0123456789"
 MCP_TOKEN = "mcp-demo-sintetico-solo-para-tests-0123456789abcdef"
-FALTAN = ["knowledge.equity_funds", "risk_tolerance.scenario_score", "sustainability.preference"]
+FALTAN = ["knowledge.equity_funds", "risk_tolerance.scenario_score"]
 
 
 @pytest.fixture
@@ -53,7 +53,7 @@ def test_el_fixture_es_ficticio_y_solo_faltan_los_tres_datos_del_directo():
     assert calculos.faltan(perfil) == FALTAN
     assert perfil.status == EstadoPerfil.draft and not perfil.alerts
     # El entrevistador solo tiene que preguntar eso (lo obligatorio primero).
-    assert chat.pendientes(perfil)[:3] == FALTAN
+    assert chat.pendientes(perfil)[:2] == FALTAN
 
 
 def test_apagado_por_defecto_no_existe(monkeypatch):
@@ -93,8 +93,6 @@ def test_recorrido_completo_entrevista_validar_y_mcp(modo, monkeypatch):
                evidence=ev("Eso no puede pasar, el fondo es del banco.")),
         Parche(path="risk_tolerance.scenario_score", value=1, source=Fuente.demonstrated, confidence=0.85,
                confidence_basis="rubric:risk_tolerance.scenarios:v2", evidence=ev("Lo saco todo.")),
-        Parche(path="sustainability.preference", value="some", source=Fuente.declared, confidence=0.9,
-               confidence_basis="rubric:certeza.explicita:v2", evidence=ev("Me importa algo, sí.")),
     ], "entrevista corta simulada", "agent:extractor")
     assert store.perfil(C).status == EstadoPerfil.pending_validation
 
