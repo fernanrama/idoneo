@@ -32,6 +32,7 @@ LIMITES: dict[str, float] = {
     "financial.liquid_savings_eur": 50_000_000,
     "financial.other_assets_eur": 500_000_000,
     "financial.debts_eur": 50_000_000,
+    "financial.mortgage_eur": 50_000_000,
     "objectives.o1.amount_eur": 50_000_000,
     "objectives.o1.horizon_years": 60,
 }

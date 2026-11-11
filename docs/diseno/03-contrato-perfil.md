@@ -87,7 +87,8 @@ El perfil tiene cuatro bloques: la capa MiFID (datos de entrada), los resultados
     "financial": {
       "net_monthly_income_eur": "Fact", "income_stability": "Fact",
       "fixed_monthly_costs_eur": "Fact", "liquid_savings_eur": "Fact",
-      "other_assets_eur": "Fact", "debts_eur": "Fact",
+      "other_assets_eur": "Fact", "debts_eur": "Fact",  // debts_eur: sin la hipoteca de la vivienda
+      "mortgage_eur": "Fact",  // opcional: hipoteca pendiente; no resta en loss_capacity_eur
       "emergency_fund_months": "Fact", "loss_capacity_eur": "Fact"
     },
     "objectives": [

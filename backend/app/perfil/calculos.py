@@ -74,7 +74,11 @@ def meses_colchon(ahorro_liquido: float, gastos_fijos: float) -> float:
 
 
 def capacidad_perdida(ahorro_liquido: float, gastos_fijos: float, deudas: float) -> float:
-    """Lo que podría perder sin tocar un colchón de 6 meses de gastos ni dejar deudas sin cubrir."""
+    """Lo que podría perder sin tocar un colchón de 6 meses de gastos ni dejar deudas sin cubrir.
+
+    `deudas` no incluye la hipoteca de la vivienda (`financial.mortgage_eur`): es deuda a largo plazo
+    respaldada por la casa y su cuota ya va en los gastos fijos. Restar su capital del ahorro dejaba a
+    cualquiera con hipoteca en CONSERVADOR aunque le sobrara colchón. SUPUESTO v1."""
     return round(max(0.0, ahorro_liquido - MESES_COLCHON_OBJETIVO * gastos_fijos - deudas), 2)
 
 
