@@ -1,4 +1,5 @@
-"""Confirmar un dato (diseño 06, §4.3; decisión D1): mismo valor, declarado y fuente acumula la evidencia.
+"""Confirmar un dato (diseño 06, §4.3; decisiones D1 y D3): mismo valor, declarado y fuente acumula la
+evidencia; una confirmación pura sobre un perfil active lo deja active.
 
 Contrato: se ejecuta con cada almacén (memoria, SQLite y, si existe, Postgres local). Datos simulados.
 """
@@ -6,7 +7,7 @@ Contrato: se ejecuta con cada almacén (memoria, SQLite y, si existe, Postgres l
 from __future__ import annotations
 
 from app.perfil import store
-from app.perfil.modelos import Evidencia, Flag, Fuente, Parche
+from app.perfil.modelos import EstadoPerfil, Evidencia, Flag, Fuente, Parche
 
 C = "carmen-68"
 GASTOS = "financial.fixed_monthly_costs_eur"
@@ -107,3 +108,63 @@ def test_la_confirmacion_se_conserva_al_releer_y_no_abre_revision(carmen):
     leido = store.perfil(C, p.version).mifid[GASTOS]
     assert leido.confirmed_at == p.created_at and leido.evidence[-1] == CITA
     assert store.restricciones_para_consumidor(C).pending_review is None  # mismo valor: nada en revisión
+
+
+# ---------- estado del perfil (decisión D3) ----------
+
+LIQUIDEZ = "objectives.o1.liquidity_need"
+ESTABILIDAD = "financial.income_stability"
+
+
+def servidas() -> dict:
+    """Lo que recibiría GPTadvisor, sin el número de versión."""
+    return store.restricciones_para_consumidor(C).model_dump(mode="json", exclude={"profile_version"})
+
+
+def test_confirmacion_pura_sobre_active_sigue_active_sin_tocar_riesgo_ni_restricciones(carmen):
+    v = store.validar(C, "asesor-07", [])
+    antes = servidas()
+    p = store.aplicar(C, [como_estaba(GASTOS, confidence=0.4, evidence=[CITA])], "revisión", EXTRACTOR)
+    assert p.status == EstadoPerfil.active and p.version == v.version + 1  # versión de trazabilidad
+    assert p.review.validated_by == "asesor-07"  # sigue siendo lo que validó la entidad
+    assert p.assessments == v.assessments  # mismo perfil de riesgo, SRI, conveniencia
+    assert servidas() == antes and antes["pending_review"] is None
+    assert store.perfil_para_consumidor(C).version == p.version
+
+
+def test_una_confirmacion_no_quita_una_revision_pendiente(carmen):
+    store.validar(C, "asesor-07", [])
+    cambio = store.aplicar(C, [Parche(path=LIQUIDEZ, value="high", source="declared", evidence=[CITA])],
+                           "cambio real", EXTRACTOR)
+    assert cambio.status == EstadoPerfil.review_due
+    otra = CITA.model_copy(update={"turn_id": "t-005"})
+    p = store.aplicar(C, [como_estaba(GASTOS, evidence=[otra])], "revisión", EXTRACTOR)
+    assert p.status == EstadoPerfil.review_due  # no reactiva
+    assert store.revision_pendiente(C).paths == [LIQUIDEZ]  # el cambio real sigue avisado
+
+
+def test_un_cambio_real_pasa_a_review_due_y_se_avisa(carmen):
+    store.validar(C, "asesor-07", [])
+    p = store.aplicar(C, [como_estaba(GASTOS, value=1200, evidence=[CITA])], "gasta más", EXTRACTOR)
+    assert p.status == EstadoPerfil.review_due and store.revision_pendiente(C).paths == [GASTOS]
+
+
+def test_si_cambian_los_flags_no_es_pura_y_se_avisa(carmen):
+    """Mismo valor, pero ahora con una duda: la entidad debe revisarlo y GPTadvisor saberlo."""
+    store.validar(C, "asesor-07", [])
+    p = store.aplicar(C, [como_estaba(ESTABILIDAD, flags=[Flag.low_confidence], evidence=[CITA])],
+                      "duda", EXTRACTOR)
+    assert p.status == EstadoPerfil.review_due
+    assert store.revision_pendiente(C).paths == [ESTABILIDAD]
+
+
+def test_si_la_duda_afecta_a_la_idoneidad_tampoco_es_pura(carmen):
+    store.validar(C, "asesor-07", [])
+    p = store.aplicar(C, [como_estaba(GASTOS, flags=[Flag.low_confidence], evidence=[CITA])], "duda", EXTRACTOR)
+    assert p.status == EstadoPerfil.review_due and not p.assessments.suitability.complete
+
+
+def test_una_confirmacion_no_activa_un_perfil_sin_validar(carmen):
+    assert carmen.status == EstadoPerfil.pending_validation
+    p = store.aplicar(C, [como_estaba(GASTOS, evidence=[CITA])], "revisión", EXTRACTOR)
+    assert p.status == EstadoPerfil.pending_validation

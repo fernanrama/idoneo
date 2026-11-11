@@ -182,16 +182,17 @@ def perfil_para_consumidor(client_id: str) -> Perfil:
     return _con_personal(activa or ultima)
 
 
-def _valor_mifid(p: Perfil, ruta: str) -> tuple[Any, Any] | None:
+def _valor_mifid(p: Perfil, ruta: str) -> tuple[Any, Any, tuple[str, ...]] | None:
+    """Lo que cuenta como cambio para `pending_review`: valor, declarado y flags (no evidencia ni confianza)."""
     f = p.mifid.get(ruta)
-    return None if f is None else (f.value, f.declared)
+    return None if f is None else (f.value, f.declared, tuple(sorted(x.value for x in f.flags)))
 
 
 def revision_pendiente(client_id: str, servido: Perfil | None = None) -> RevisionPendiente | None:
     """Qué ha cambiado desde el perfil que se sirve a los consumidores (§4.6 del diseño 06, opción B).
 
-    Solo si se sirve un `active` y hay versiones posteriores con datos distintos (valor o declarado; la
-    evidencia sola es una confirmación) o alertas nuevas abiertas. Los calculados no cuentan: cambian
+    Solo si se sirve un `active` y hay versiones posteriores con datos distintos (valor, declarado o flags;
+    la evidencia o la confianza solas son una confirmación) o alertas nuevas abiertas. Los calculados no cuentan: cambian
     porque cambian sus entradas, que ya aparecen. Determinista; no escribe nada.
     """
     with _candado(client_id):
@@ -398,8 +399,50 @@ def aplicar(client_id: str, parches: Iterable[Parche], motivo: str, autor: str) 
     motivo = _motivo(motivo)
     normalizados = [comprobar_parche(p, autor) for p in parches]
     revisar = not autor.startswith("advisor:")
-    return _escribir(client_id, lambda n: _aplicar_parches(n, normalizados, motivo, autor), autor,
-                     lambda n: _estado_tras_cambio(n, revisar_si_activo=revisar))
+    antes: dict[str, Perfil] = {}
+
+    def mutar(n: Perfil) -> str:
+        antes["perfil"] = n.model_copy(deep=True)  # la versión vigente, ya calculada, antes de escribir
+        return _aplicar_parches(n, normalizados, motivo, autor)
+
+    def estado(n: Perfil) -> EstadoPerfil:
+        if revisar and n.status == EstadoPerfil.active and _solo_confirmaciones(antes["perfil"], n):
+            return EstadoPerfil.active  # D3: confirmación pura, versión de trazabilidad
+        return _estado_tras_cambio(n, revisar_si_activo=revisar)
+
+    return _escribir(client_id, mutar, autor, estado)
+
+
+_RESTRICCIONES_VOLATILES = {"client_id", "profile_version", "status", "usable", "pending_review"}
+
+
+def _solo_confirmaciones(antes: Perfil, despues: Perfil) -> bool:
+    """D3: la escritura solo confirma datos y no cambia nada de lo que se usa para decidir.
+
+    Se exige todo a la vez, comparando el perfil completo (no solo los parches):
+    - cada dato MiFID es el mismo valor, declarado y fuente, con los mismos flags (solo cambian evidencia,
+      confianza y fechas de confirmación);
+    - los calculados, la idoneidad (incluido el perfil de riesgo), la conveniencia y las restricciones
+      que se servirían son idénticos;
+    - las alertas no cambian.
+    Solo se llama sobre un perfil `active`: una confirmación nunca reactiva un perfil en revisión.
+    """
+    for ruta in set(antes.mifid) | set(despues.mifid):
+        a, d = antes.mifid.get(ruta), despues.mifid.get(ruta)
+        if a is None or d is None:
+            return False
+        if ruta in CALCULADOS:
+            if a.value != d.value:
+                return False
+        elif not _es_confirmacion(a, d) or set(a.flags) != set(d.flags):
+            return False
+    if antes.assessments.model_dump() != despues.assessments.model_dump():
+        return False
+    if [(x.id, x.status) for x in antes.alerts] != [(x.id, x.status) for x in despues.alerts]:
+        return False
+    ra = calculos.restricciones(antes).model_dump(exclude=_RESTRICCIONES_VOLATILES)
+    rd = calculos.restricciones(despues).model_dump(exclude=_RESTRICCIONES_VOLATILES)
+    return ra == rd
 
 
 def anadir_alertas(client_id: str, alertas: Iterable[Alerta], autor: str = "agent:verifier") -> Perfil:
