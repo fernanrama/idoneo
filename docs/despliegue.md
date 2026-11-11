@@ -59,7 +59,12 @@ tras 15 minutos sin uso y tarda cerca de un minuto en despertar; el plan Starter
 1. En Vercel: **Add New → Project**, importa el repositorio.
 2. **Root Directory**: `frontend`. Vercel detecta Next.js solo.
 3. Variable de entorno: `NEXT_PUBLIC_API_URL` = `https://<servicio>.onrender.com` (sin barra final).
-   No añadas `DEMO_ADVISOR_MODE`, `DEMO_ADVISOR_TOKEN` ni ninguna clave.
+   No añadas `DEMO_ADVISOR_MODE`, `DEMO_ADVISOR_TOKEN` ni ninguna clave de proveedor.
+   - **Opcional, administración de la entidad** (`/admin`): para validar perfiles desde la web, añade
+     `ADMIN_LOGIN_CLAVE` (clave del equipo, 12 caracteres o más, distinta de `ADMIN_TOKEN`) y `ADMIN_TOKEN`
+     (el mismo valor que en Render). Ninguna lleva `NEXT_PUBLIC_`: solo las lee el servidor de Next. Quien
+     entre en `/admin` con esa clave puede validar cualquier perfil como `asesor-web`. Para apagarlo,
+     borra `ADMIN_LOGIN_CLAVE` y vuelve a desplegar.
 4. **Deploy**. Apunta la URL de producción (`https://<proyecto>.vercel.app`).
 
 ### 4. Conectar las dos piezas
