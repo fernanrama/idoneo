@@ -178,8 +178,9 @@ class Alcance(BaseModel):
     # Sesión de revisión: tras las preguntas (o si no hay ninguna) se pregunta si ha cambiado algo más.
     # Así una revisión no termina nada más empezar por tener la lista vacía. False en la entrevista inicial.
     apertura: bool = False
-    # Rutas del alcance que el inversor ya dio o confirmó en esta revisión (para el progreso). Orden del guion.
-    respondidas: list[str] = Field(default_factory=list)
+    # Preguntas del alcance que el inversor ya contestó (dio o confirmó el dato) en esta revisión, con su tipo,
+    # para mostrar el progreso. Orden del guion. No se vuelven a hacer.
+    respondidas: list[Pregunta] = Field(default_factory=list)
 
 
 # ---------- planificación ----------
@@ -269,20 +270,17 @@ def planificar(perfil: Perfil, peticiones: list[Peticion], vigentes: frozenset[s
             for dep in DEPENDENCIAS.get(r, []):
                 anotar(dep, TipoPregunta.confirmar, p.motivo)
 
-    ya: list[str] = []
     for r in respondidas:
         if _dudoso(perfil, r):
             anotar(r, TipoPregunta.repreguntar, Motivo.value_changed)
-        else:
-            if r in tipos:
-                ya.append(r)  # otro motivo la pedía, pero ya está respondida en esta revisión
-            tipos.pop(r, None)
     preguntas = [Pregunta(path=r, tipo=_tipo(perfil, r, t), motivos=motivos[r], valor_vigente=valor(perfil, r))
                  for r, t in tipos.items()]
     preguntas.sort(key=lambda q: (q.tipo == TipoPregunta.confirmar, ORDEN_GUION[q.path]))
-    bloques = {q.path.split(".")[0] for q in preguntas if q.tipo != TipoPregunta.confirmar}  # antes de filtrar
-    hechas = {q.path for q in preguntas if q.path in vigentes and _dado(perfil, q.path)}
-    ya += hechas
+    bloques = {q.path.split(".")[0] for q in preguntas if q.tipo != TipoPregunta.confirmar}  # antes de quitar
+    # Ya contestadas en esta revisión: cambiadas (value_changed, salvo dudosas) o dadas o confirmadas (vigentes).
+    hechas = {q.path for q in preguntas
+              if (q.path in respondidas or q.path in vigentes) and _dado(perfil, q.path)}
+    ya = [q for q in preguntas if q.path in hechas]
     preguntas = [q for q in preguntas if q.path not in hechas]
 
     razones = []
@@ -295,7 +293,8 @@ def planificar(perfil: Perfil, peticiones: list[Peticion], vigentes: frozenset[s
         razones.append("hay una alerta abierta que necesita al asesor")
 
     return Alcance(preguntas=preguntas[:MAX_PREGUNTAS], aplazadas=[q.path for q in preguntas[MAX_PREGUNTAS:]],
-                   reevaluacion_completa=bool(razones), razones=razones, respondidas=orden_guion(ya))
+                   reevaluacion_completa=bool(razones), razones=razones,
+                   respondidas=sorted(ya, key=lambda q: ORDEN_GUION[q.path]))
 
 
 # ---------- cambios entre versiones ----------

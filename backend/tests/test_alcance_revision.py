@@ -139,10 +139,10 @@ def test_el_progreso_avanza_con_cambios_y_confirmaciones(validada):
     apertura = ahora()
     extractor(LIQUIDEZ, "high", "Necesito 6.000 € en tres meses")  # cambio
     a = plan(motivos=[Motivo.planned_expense], desde=apertura)
-    assert a.respondidas == [LIQUIDEZ] and [q.path for q in a.preguntas] == [AHORRO, PLAZO]
+    assert [q.path for q in a.respondidas] == [LIQUIDEZ] and [q.path for q in a.preguntas] == [AHORRO, PLAZO]
     extractor(AHORRO, 80000, "Los ahorros siguen en ochenta mil")  # confirmación pura (#45)
     a = plan(motivos=[Motivo.planned_expense], desde=apertura)
-    assert a.respondidas == [AHORRO, LIQUIDEZ] and [q.path for q in a.preguntas] == [PLAZO]
+    assert [q.path for q in a.respondidas] == [AHORRO, LIQUIDEZ] and [q.path for q in a.preguntas] == [PLAZO]
 
 
 def test_confirmar_lo_que_pedia_repreguntar_tambien_lo_responde(validada):
@@ -150,7 +150,7 @@ def test_confirmar_lo_que_pedia_repreguntar_tambien_lo_responde(validada):
     apertura = ahora()
     extractor(LIQUIDEZ, "low", "No, sigo sin necesitar el dinero")
     a = plan(motivos=[Motivo.planned_expense], desde=apertura)
-    assert LIQUIDEZ in a.respondidas and LIQUIDEZ not in [q.path for q in a.preguntas]
+    assert LIQUIDEZ in [q.path for q in a.respondidas] and LIQUIDEZ not in [q.path for q in a.preguntas]
 
 
 def test_lo_anterior_a_la_apertura_no_cuenta_como_respondido(validada):

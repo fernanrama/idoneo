@@ -244,7 +244,8 @@ def test_cambios_en_tres_bloques_amplian(carmen):
 def test_lo_ya_respondido_no_se_pregunta_sea_cual_sea_el_tipo(carmen):
     """Gasto previsto pide repreguntar la liquidez; si ya la dio (aunque sea el mismo valor), no se repite."""
     a = planificar(carmen, [Peticion(motivo=Motivo.planned_expense)], vigentes=frozenset({LIQUIDEZ}))
-    assert resumen(a) == [(AHORRO, C), (PLAZO, C)] and a.respondidas == [LIQUIDEZ]
+    assert resumen(a) == [(AHORRO, C), (PLAZO, C)] and [q.path for q in a.respondidas] == [LIQUIDEZ]
+    assert (a.respondidas[0].tipo, a.respondidas[0].valor_vigente) == (R, "low")  # con su tipo, para el progreso
 
 
 def test_lo_respondido_pero_dudoso_se_vuelve_a_preguntar(carmen):
@@ -255,7 +256,7 @@ def test_lo_respondido_pero_dudoso_se_vuelve_a_preguntar(carmen):
 
 def test_un_dato_cambiado_que_pedia_un_motivo_cuenta_como_respondido(carmen):
     a = planificar(carmen, [Peticion(motivo=Motivo.planned_expense), cambio(LIQUIDEZ)])
-    assert a.respondidas == [LIQUIDEZ] and resumen(a) == [(AHORRO, C), (PLAZO, C)]
+    assert [q.path for q in a.respondidas] == [LIQUIDEZ] and resumen(a) == [(AHORRO, C), (PLAZO, C)]
 
 
 def test_contestar_no_cambia_la_decision_de_ampliar(carmen):
