@@ -79,6 +79,27 @@ class Servidor:
         return json.loads(resultado["content"][0]["text"])
 
 
+def _historial_estable(servidor: Servidor, session_id: str, quietud_s: float = 1.0,
+                       limite_s: float = 20.0) -> list[dict]:
+    """Historial de versiones cuando el procesamiento en segundo plano del turno ha terminado.
+
+    `/pending` espera a que acabe el procesamiento en curso de la sesión; como la tarea puede no haber
+    empezado aún, además se exige que el historial no cambie durante `quietud_s`.
+    """
+    servidor.api("GET", f"/api/sessions/{session_id}/pending")
+    fin = time.monotonic() + limite_s
+    ultimo = servidor.api("GET", f"/api/clients/{C}/versions").json()
+    estable_desde = time.monotonic()
+    while time.monotonic() < fin:
+        time.sleep(0.1)
+        actual = servidor.api("GET", f"/api/clients/{C}/versions").json()
+        if actual != ultimo:
+            ultimo, estable_desde = actual, time.monotonic()
+        elif time.monotonic() - estable_desde >= quietud_s:
+            return actual
+    raise AssertionError(f"El historial de {C} no se estabilizó en {limite_s} s")
+
+
 @pytest.fixture(params=MOTORES)
 def servidor(request, tmp_path):
     if request.param == "sqlite":
@@ -103,9 +124,9 @@ def test_lo_validado_sobrevive_al_reinicio_y_el_mcp_lo_sirve(servidor):
                      json={"speaker": "client", "text": "Hola", "t_start": 0, "t_end": 1})
     assert t.status_code == 202
     # El turno del cliente dispara extractor y verificador en segundo plano; puede añadir una versión
-    # (p. ej. una alerta). Se compara el historial completo antes y después del reinicio.
-    time.sleep(0.5)
-    antes = servidor.api("GET", f"/api/clients/{C}/versions").json()
+    # (p. ej. una alerta). Se compara el historial completo antes y después del reinicio, así que hay
+    # que esperar a que ese procesamiento termine: un tiempo fijo no basta en máquinas lentas.
+    antes = _historial_estable(servidor, s["session_id"])
     assert [v["reason"] for v in antes][:2] == [
         "DATOS SIMULADOS: perfil de ejemplo para desarrollo y demo de respaldo", "validated"]
 
