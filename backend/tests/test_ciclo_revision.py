@@ -43,6 +43,15 @@ def test_la_comparacion_parte_de_la_ultima_validacion_de_la_entidad(validada):
     assert {x.path for x in c.cambios} == {GASTOS, PLAZO}  # la confirmación y el cambio, frente a lo validado
 
 
+def test_tras_reiniciar_la_demo_no_se_compara_con_lo_validado_antes(validada):
+    store.cargar_fixture(C)  # época nueva: lo validado antes ya no se sirve
+    assert revision.comparar(C) is None  # antes salían todos los datos como «confirmados»
+    v = store.validar(C, "asesor-07", [])
+    decir(PLAZO, 1, "Lo necesitaré el año que viene")
+    c = revision.comparar(C)
+    assert c.desde_version == v.version and [x.path for x in c.cambios] == [PLAZO]
+
+
 # ---------- D2: la entidad valida desde review_due ----------
 
 def test_review_due_se_valida_sin_otra_entrevista_y_recalcula(validada):

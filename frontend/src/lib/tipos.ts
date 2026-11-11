@@ -67,6 +67,8 @@ export interface RevisionPendiente {
   latest_status: EstadoPerfil;
   paths: string[];
   opened_at: string;
+  /** Efectos de `alcance.es_material` (perfil de riesgo, conveniencia, filtros…); vacío si no cambian las restricciones. */
+  material: string[];
 }
 
 export interface MotivoRevision {
