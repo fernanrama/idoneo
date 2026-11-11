@@ -77,6 +77,30 @@ test("el puente al backend solo lleva el token de asesor y no reenvía nada del 
   assert.equal(llamadas[0].init.body, undefined);
 });
 
+test("validar reenvía solo expected_version entero y nada más del navegador", async () => {
+  assert.equal(demo.versionEsperada({ expected_version: 7 }), 7);
+  for (const malo of [null, undefined, {}, { expected_version: 0 }, { expected_version: -1 }, { expected_version: 1.5 },
+    { expected_version: "7" }, { expected_version: Number.MAX_SAFE_INTEGER + 1 }]) {
+    assert.equal(demo.versionEsperada(malo), undefined);
+  }
+  mock(() => respuesta({ status: "active" }));
+  const r = await demo.llamarBackend(demo.configAsesorDemo(ENV), "/clientes/carmen-68/validar", "POST", { expected_version: 7 });
+  assert.equal(r.status, 200);
+  assert.deepEqual(JSON.parse(llamadas[0].init.body), { expected_version: 7 });
+  assert.deepEqual(Object.keys(llamadas[0].init.headers).sort(), ["Content-Type", "X-Demo-Advisor-Token"]);
+});
+
+test("el navegador envía la versión que ve el asesor al validar", async () => {
+  mock(() => respuesta({ status: "active" }));
+  await api.validarComoAsesor("carmen-68", 4);
+  assert.deepEqual(JSON.parse(llamadas[0].init.body), { expected_version: 4 });
+});
+
+test("un 409 al validar llega como ErrorAPI con su estado, para recargar el perfil", async () => {
+  mock(() => respuesta({ detail: "conflicto" }, 409));
+  await assert.rejects(api.validarComoAsesor("carmen-68", 4), (e) => e.status === 409);
+});
+
 test("el estado visible para el navegador nunca contiene el token y depende del backend", async () => {
   mock(() => respuesta({ enabled: true, simulated: true, clients: ["carmen-68", "../x"], advisor_id: "asesor-demo" }));
   const ok = await demo.estadoAsesorDemo(peticion("GET"), ENV);

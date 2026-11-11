@@ -1,4 +1,4 @@
-import type { Perfil } from "./tipos";
+import type { CierreRevision, Perfil } from "./tipos";
 
 /**
  * ¿Debe ofrecerse al asesor el botón «Validar perfil»?
@@ -19,4 +19,23 @@ export function esValidable(perfil: Pick<Perfil, "status" | "assessments"> | nul
     return perfil.assessments.suitability.complete;
   }
   return false;
+}
+
+/** Un 409 al validar: alguien ha cambiado el perfil mientras el asesor lo revisaba (expected_version). */
+export const esConflictoDeVersion = (e: unknown): boolean =>
+  typeof e === "object" && e !== null && (e as { status?: unknown }).status === 409;
+
+/** Texto para el asesor. En un conflicto la vista recarga el perfil, así que se le pide revisar la versión nueva. */
+export function mensajeErrorValidacion(e: unknown): string {
+  if (esConflictoDeVersion(e)) {
+    return "El perfil ha cambiado mientras lo revisabas. Hemos cargado la versión nueva: revísala antes de validar.";
+  }
+  return e instanceof Error ? e.message : String(e);
+}
+
+/** Qué se le dice al cliente al finalizar su revisión. Finalizar no valida: los cambios esperan al banco. */
+export function mensajeCierre(c: Pick<CierreRevision, "pending_validation">): string {
+  return c.pending_validation
+    ? "Revisión finalizada. Una persona del banco revisará tus cambios; mientras, se sigue usando tu perfil anterior."
+    : "Revisión finalizada: todo sigue igual y tu perfil sigue vigente. No hace falta nada más.";
 }

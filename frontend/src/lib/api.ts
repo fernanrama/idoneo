@@ -1,5 +1,5 @@
 import { CLIENTE_DEMO, registrarSesion, tokenCliente, tokenSesion } from "./credenciales";
-import type { AltaSesion, BootstrapVoz, Comparacion, ContextoVoz, ExpedienteAsesor, MemoriaPersonal, ModoAsesor, MotivoRevision, Perfil, Restricciones, Revision, Sesion, Turno, VersionResumen } from "./tipos";
+import type { AltaSesion, BootstrapVoz, CierreRevision, Comparacion, ContextoVoz, ExpedienteAsesor, MemoriaPersonal, ModoAsesor, MotivoRevision, Perfil, Restricciones, Revision, Sesion, Turno, VersionResumen } from "./tipos";
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -121,6 +121,9 @@ export const api = {
     pedir<Revision>(`/api/clients/${id(client_id)}/review`, {
       method: "POST", headers: cliente(client_id), body: JSON.stringify({ reasons }),
     }),
+  /** El cliente finaliza su revisión. 409 si aún faltan respuestas. No valida: eso es cosa de la entidad. */
+  cerrarRevision: (client_id: string) =>
+    pedir<CierreRevision>(`/api/clients/${id(client_id)}/review/close`, { method: "POST", headers: cliente(client_id) }),
   cambios: (client_id: string) => client_id === CLIENTE_DEMO && !tokenCliente(client_id)
     ? Promise.resolve<Comparacion | null>(null)
     : pedir<Comparacion | null>(`/api/clients/${id(client_id)}/changes`, { headers: cliente(client_id) }),
@@ -133,7 +136,9 @@ export const api = {
   /** Modo asesor de demo: el servidor Next pone su autorización; el navegador no envía ninguna credencial. */
   modoAsesor: () => leerDelFront<ModoAsesor>("/api/entidad/asesor"),
   expedienteAsesor: (client_id: string) => leerDelFront<ExpedienteAsesor>(`/api/entidad/${id(client_id)}/asesor`),
-  validarComoAsesor: (client_id: string) => pedirAlFront<Perfil>(`/api/entidad/${id(client_id)}/validar`, {}),
+  /** `expected_version`: la versión que ve el asesor; si el perfil ha cambiado, el backend responde 409. */
+  validarComoAsesor: (client_id: string, expected_version?: number) =>
+    pedirAlFront<Perfil>(`/api/entidad/${id(client_id)}/validar`, expected_version ? { expected_version } : {}),
   reiniciarComoAsesor: () => pedirAlFront<Perfil>("/api/entidad/reset", {}),
   /** Entrevista corta del pitch (modo asesor): sesión nueva sobre el cliente ficticio casi completo. */
   entrevistaCorta: async (channel: "voice" | "text"): Promise<Sesion> =>
