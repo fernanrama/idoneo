@@ -65,6 +65,9 @@ def resumen(a: alcance.Alcance) -> list[tuple[str, TipoPregunta]]:
     return [(q.path, q.tipo) for q in a.preguntas]
 
 
+ANUAL = Peticion(motivo=Motivo.next_review_due, rutas=alcance._REVISION_ANUAL)
+
+
 # ---------- catálogo y dependencias ----------
 
 def test_cada_motivo_tiene_una_sola_definicion():
@@ -122,7 +125,7 @@ def test_un_dato_dudoso_no_se_confirma(carmen):
 
 
 def test_peticiones_sobre_la_misma_ruta_se_agrupan(carmen):
-    a = planificar(carmen, [Peticion(motivo=Motivo.next_review_due), Peticion(motivo=Motivo.liquidity_change)])
+    a = planificar(carmen, [ANUAL, Peticion(motivo=Motivo.liquidity_change)])
     rutas = [q.path for q in a.preguntas]
     assert len(rutas) == len(set(rutas)) == 6 and a.aplazadas == []
     liquidez = next(q for q in a.preguntas if q.path == LIQUIDEZ)
@@ -226,7 +229,7 @@ def test_un_dato_cambiado_que_queda_dudoso_se_repregunta(carmen):
 
 
 def test_un_dato_ya_cambiado_no_se_pregunta_aunque_lo_pida_otro_motivo(carmen):
-    a = planificar(carmen, [Peticion(motivo=Motivo.next_review_due), cambio(LIQUIDEZ, AHORRO)])
+    a = planificar(carmen, [ANUAL, cambio(LIQUIDEZ, AHORRO)])
     rutas = [q.path for q in a.preguntas]
     assert LIQUIDEZ not in rutas and AHORRO not in rutas and PLAZO in rutas
 
@@ -249,7 +252,7 @@ def test_el_catalogo_de_motivos_es_cerrado():
 
 def test_no_modifica_el_perfil(carmen):
     antes = carmen.model_dump()
-    planificar(carmen, [Peticion(motivo=Motivo.next_review_due), Peticion(motivo=Motivo.liquidity_change)])
+    planificar(carmen, [ANUAL, Peticion(motivo=Motivo.liquidity_change)])
     vencimientos(carmen, HOY + timedelta(days=4000))
     assert carmen.model_dump() == antes
 
@@ -261,10 +264,40 @@ def test_perfil_reciente_sin_vencimientos(carmen):
 
 
 def test_next_review_vencido(carmen):
+    for ruta, f in carmen.mifid.items():  # datos dados antes de que venciera la revisión
+        carmen.mifid[ruta] = f.model_copy(update={"updated_at": _hace(30)})
     carmen.review.next_review = "2026-11-01"
-    assert vencimientos(carmen, HOY) == [Peticion(motivo=Motivo.next_review_due)]
+    assert vencimientos(carmen, HOY) == [ANUAL]
     carmen.review.next_review = "2027-11-11"
     assert vencimientos(carmen, HOY) == []
+
+
+def test_la_revision_anual_no_repite_lo_confirmado_tras_el_vencimiento(carmen):
+    for ruta, f in carmen.mifid.items():
+        carmen.mifid[ruta] = f.model_copy(update={"updated_at": _hace(30)})
+    carmen.review.next_review = "2026-11-01"
+    # En esta misma sesión confirma gastos y ahorro: ya no se le vuelven a pedir.
+    for ruta in (GASTOS, AHORRO):
+        carmen.mifid[ruta] = carmen.mifid[ruta].model_copy(update={"confirmed_at": _hace(0)})
+    [anual] = vencimientos(carmen, HOY)
+    assert GASTOS not in anual.rutas and AHORRO not in anual.rutas and len(anual.rutas) == 4
+
+
+def test_la_revision_anual_desaparece_si_todo_esta_confirmado(carmen):
+    for ruta, f in carmen.mifid.items():
+        carmen.mifid[ruta] = f.model_copy(update={"updated_at": _hace(30), "confirmed_at": _hace(1)})
+    carmen.review.next_review = "2026-11-01"
+    assert vencimientos(carmen, HOY) == []
+
+
+def test_la_revision_anual_pregunta_lo_que_falta(carmen):
+    for ruta, f in carmen.mifid.items():
+        carmen.mifid[ruta] = f.model_copy(update={"updated_at": _hace(0)})
+    del carmen.mifid[LIQUIDEZ]
+    carmen.review.next_review = "2026-11-01"
+    [anual] = vencimientos(carmen, HOY)
+    assert anual.rutas == [LIQUIDEZ]
+    assert resumen(planificar(carmen, [anual])) == [(LIQUIDEZ, R)]  # lo que falta se pregunta, no se confirma
 
 
 def test_bloque_caducado(carmen):

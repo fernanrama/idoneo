@@ -86,7 +86,6 @@ _REVISION_ANUAL = [f"{_F}net_monthly_income_eur", f"{_F}fixed_monthly_costs_eur"
 
 # Motivos con rutas fijas: (lo que hay que repreguntar, lo que basta con confirmar).
 SEMILLAS: dict[Motivo, tuple[list[str], list[str]]] = {
-    Motivo.next_review_due: ([], _REVISION_ANUAL),
     Motivo.stale_profile: ([], _REVISION_ANUAL),
     Motivo.horizon_elapsed: ([f"{_O}horizon_years"], []),
     Motivo.retirement: ([f"{_F}net_monthly_income_eur", f"{_F}income_stability"],
@@ -114,6 +113,7 @@ VARIABLES: dict[Motivo, tuple[tuple[str, ...], TipoPregunta]] = {
     Motivo.new_product_family: (_CONOCIMIENTO, TipoPregunta.repreguntar),
     Motivo.advisor_request: (_TODO, TipoPregunta.repreguntar),
     Motivo.value_changed: (_TODO, TipoPregunta.confirmar),  # ver planificar: no se pregunta la ruta
+    Motivo.next_review_due: (_TODO, TipoPregunta.confirmar),  # vencimientos: solo lo no confirmado desde el vencimiento
 }
 
 
@@ -328,7 +328,12 @@ def vencimientos(perfil: Perfil, hoy: date) -> list[Peticion]:
     out: list[Peticion] = []
     nr = perfil.review.next_review
     if nr and date.fromisoformat(nr) <= hoy:
-        out.append(Peticion(motivo=Motivo.next_review_due))
+        vence = date.fromisoformat(nr)
+        # Revisión anual: lo que el inversor ya dio o confirmó después del vencimiento sigue vigente.
+        rutas = [r for r in _REVISION_ANUAL
+                 if (f := perfil.mifid.get(r)) is None or f.value is None or ultima_vez(f) < vence]
+        if rutas:
+            out.append(Peticion(motivo=Motivo.next_review_due, rutas=rutas))
 
     caducados: dict[str, list[str]] = {}
     for ruta, f in perfil.mifid.items():
