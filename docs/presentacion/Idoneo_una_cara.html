@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>idóneo · Hack Finance UC3M 2026 · Resumen de una cara</title>
+<!-- Resumen de una cara: problema, solución y valor diferencial. Marca: docs/marca/README.md.
+     PDF: ver docs/presentacion/README.md. Fuentes locales (OFL) para que salga igual sin internet. -->
+<style>
+  @font-face { font-family: Sora; font-weight: 100 800; src: url(html/fuentes/sora-latin-wght-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+2000-206F, U+20AC, U+2190-2193, U+2212, U+2260; }
+  @font-face { font-family: Sora; font-weight: 100 800; src: url(html/fuentes/sora-latin-ext-wght-normal.woff2) format("woff2"); unicode-range: U+0100-024F; }
+  @font-face { font-family: "IBM Plex Mono"; font-weight: 400 500; src: url(html/fuentes/ibm-plex-mono-latin-400-normal.woff2) format("woff2"); }
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { font-family: Sora, "Segoe UI", sans-serif; color: #0C1A1F; background: #F7FBFA; font-size: 7.6pt; line-height: 1.33;
+         -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .hoja { width: 210mm; height: 297mm; overflow: hidden; display: flex; flex-direction: column; }
+  header { background: radial-gradient(110% 150% at 88% 0%, rgba(124,231,196,.28), transparent 55%), linear-gradient(135deg, #0C1A1F, #103038);
+           color: #F7FBFA; padding: 6mm 13mm 5mm; display: grid; grid-template-columns: 1fr auto; gap: 8mm; align-items: end; }
+  header img { height: 13mm; display: block; }
+  .lema { font-size: 17pt; font-weight: 600; margin: 3mm 0 .6mm; letter-spacing: -.015em; line-height: 1.15; }
+  .sub { font-size: 11pt; font-weight: 300; color: #B4C6CB; margin: 0; }
+  .meta { text-align: right; font: 7pt "IBM Plex Mono", monospace; letter-spacing: .12em; text-transform: uppercase; color: #7CE7C4; line-height: 1.9; }
+  .meta span { color: #7E9399; }
+  main { padding: 4.5mm 13mm 0; flex: 1; display: flex; flex-direction: column; gap: 3.6mm; }
+  .eti { font: 500 7.4pt "IBM Plex Mono", monospace; letter-spacing: .18em; text-transform: uppercase; color: #1C8C97; margin: 0 0 1.2mm; display: flex; align-items: center; gap: 2.5mm; }
+  .eti::before { content: ""; width: 7mm; height: 1.2mm; border-radius: 1mm; background: linear-gradient(90deg, #7CE7C4, #2BB3C0); }
+  h2 { font-size: 12pt; font-weight: 600; margin: 0 0 1.8mm; letter-spacing: -.015em; line-height: 1.2; }
+  h2 em { font-style: normal; color: #1C8C97; }
+  p { margin: 0 0 2mm; }
+  .tarjeta { background: #fff; border: 1px solid #DDE7E9; border-radius: 3.5mm; }
+
+  /* 1 · Problema */
+  .problema { display: grid; grid-template-columns: 1.15fr 1fr; gap: 6mm; align-items: stretch; }
+  .dolores { display: grid; gap: 1.4mm; margin-top: 1.6mm; }
+  .dolor { display: grid; grid-template-columns: 7mm 1fr; gap: 2.5mm; align-items: start; }
+  .dolor .x { width: 7mm; height: 7mm; border-radius: 2mm; background: #FBE9E9; color: #C03B3B; font-weight: 700; display: grid; place-items: center; font-size: 9pt; }
+  .dolor b { display: block; font-size: 9pt; }
+  .carmen { padding: 4mm 4.5mm; display: flex; flex-direction: column; }
+  .carmen .q { font-size: 8pt; color: #4a5a60; }
+  .carmen .cita { font-size: 11.5pt; font-weight: 600; font-style: italic; margin: 2mm 0 2.5mm; line-height: 1.25; }
+  .carmen .vs { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5mm; }
+  .carmen .vs div { border-radius: 2.5mm; padding: 2mm 3mm; background: #F2F6F7; font-size: 7.6pt; color: #55666c; }
+  .carmen .vs b { display: block; font-size: 12pt; color: #0C1A1F; }
+  .aviso { margin-top: auto; padding-top: 2.5mm; color: #9A6A0F; font-weight: 600; font-size: 8.2pt; }
+  .norma { font-size: 7.4pt; color: #55666c; margin-top: 2mm; }
+
+  /* 2 · Solución */
+  .pasos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; margin-top: 1mm; }
+  .paso { padding: 2.6mm 3mm; position: relative; }
+  .paso .n { width: 6.5mm; height: 6.5mm; border-radius: 2.4mm; background: linear-gradient(135deg, #7CE7C4, #2BB3C0); color: #0C1A1F; font-weight: 700; display: grid; place-items: center; font-size: 9.5pt; margin-bottom: 1.4mm; }
+  .paso b { display: block; font-size: 9.4pt; margin-bottom: .8mm; }
+  .paso.ent { border-color: #2BB3C0; box-shadow: 0 0 0 1px #2BB3C0 inset; }
+  .paso:not(:last-child)::after { content: "→"; position: absolute; right: -3mm; top: 4.6mm; transform: translateX(50%); color: #2BB3C0; font-weight: 700; font-size: 10pt; }
+  .vive { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; margin-top: 3mm; }
+  .vive div { padding: 2.6mm 3.4mm; border-left: 2.5px solid #2BB3C0; background: #fff; border-radius: 0 3mm 3mm 0; }
+  .vive b { display: block; font-size: 9pt; }
+  .vive img { height: 4.2mm; vertical-align: middle; margin-left: 1mm; }
+
+  /* 3 · Valor diferencial */
+  .tabla { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 8.2pt; overflow: hidden; }
+  .tabla th { text-align: left; font: 500 6.8pt "IBM Plex Mono", monospace; letter-spacing: .12em; text-transform: uppercase; padding: 1.6mm 3.4mm; color: #7E9399; background: #EEF3F4; }
+  .tabla th.id { background: #0C1A1F; color: #7CE7C4; }
+  .tabla td { padding: 1.4mm 3.4mm; border-top: 1px solid #E6EDEF; vertical-align: top; }
+  .tabla td:first-child { font-weight: 600; width: 23%; }
+  .tabla td.antes { color: #7E9399; width: 31%; }
+  .tabla td.idoneo { background: #F1FBF7; font-weight: 500; }
+  .tabla td.idoneo::before { content: "✓ "; color: #1F9D6B; font-weight: 700; }
+  .valor { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin-top: 3mm; }
+  .valor div { padding: 3mm 3.4mm; }
+  .valor b { display: block; font-size: 9.6pt; margin-bottom: .8mm; color: #1C8C97; }
+  .prueba { margin-top: 3mm; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.5mm; }
+  .prueba div { background: #0C1A1F; color: #B4C6CB; border-radius: 3mm; padding: 2.2mm 3mm; font-size: 7.2pt; line-height: 1.3; }
+  .prueba b { display: block; font-size: 12pt; color: #7CE7C4; font-weight: 600; margin-bottom: .4mm; }
+  .limite { font-size: 6.9pt; color: #7E9399; margin-top: 1.6mm; }
+  .medido { margin: 2.6mm 0 0; padding: 2.4mm 3.4mm; background: #0C1A1F; color: #F7FBFA; border-radius: 3mm; font-size: 7.8pt; }
+  .medido b { color: #7CE7C4; }
+  .medido span { display: block; color: #7E9399; font-size: 6.8pt; margin-top: .6mm; }
+  footer { margin-top: auto; padding: 2.6mm 13mm 3.4mm; display: flex; justify-content: space-between; font-size: 6.8pt; color: #7E9399; border-top: 1px solid #DDE7E9; white-space: nowrap; }
+
+  /* Versión texto */
+  .sec { border-top: 1.5px solid #0C1A1F; padding-top: 2mm; }
+  .pr { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6mm 7mm; }
+  .pr div b { display: block; font-size: 8.4pt; margin-bottom: .3mm; }
+  .pr div { padding-left: 3mm; border-left: 2px solid #C03B3B; }
+  .sol div { border-left-color: #1C8C97; }
+  .vd { width: 100%; border-collapse: collapse; font-size: 7.6pt; }
+  .vd th { text-align: left; font: 500 6.8pt "IBM Plex Mono", monospace; letter-spacing: .1em; text-transform: uppercase; color: #55666c; border-bottom: 1px solid #0C1A1F; padding: 1mm 2mm; }
+  .vd td { padding: 1.1mm 2mm; border-bottom: 1px solid #DDE7E9; vertical-align: top; }
+  .vd td:first-child { font-weight: 600; width: 19%; }
+  .vd td:nth-child(2) { color: #6a7a80; width: 30%; }
+  .nota { font-size: 7pt; color: #55666c; }
+</style>
+</head>
+<body><div class="hoja">
+
+<header>
+  <div>
+    <img src="../../frontend/public/marca/idoneo-logo-sobre-oscuro.svg" alt="idóneo">
+    <p class="lema">Perfiles vivos que cumplen la norma.</p>
+    <p class="sub">Del cuestionario a la conversación.</p>
+  </div>
+  <div class="meta">Hack Finance UC3M 2026<br><span>Perfil inversor · MiFID II</span><br><span>Reto MyInvestor × GPTadvisor</span></div>
+</header>
+
+<main>
+  <section class="sec">
+    <p class="eti">01 · El problema que resolvemos</p>
+    <h2>El perfil inversor es la base de toda recomendación, y hoy no es fiable</h2>
+    <p>Antes de ofrecer un producto, la entidad debe evaluar si encaja con el cliente (idoneidad y conveniencia, MiFID II). La norma exige que esa información sea fiable (RD 2017/565, art. 54.7), pero hoy se recoge con un test de casillas:</p>
+    <div class="pr">
+      <div><b>1. Se fía de lo que el cliente declara.</b>Marca lo que cree saber y nadie comprueba si lo entiende. ESMA advierte que en canales automatizados el cliente tiende a sobrevalorar su conocimiento.</div>
+      <div><b>2. Se rellena una vez y caduca.</b>Cambian ingresos, objetivos u horizonte, pero el perfil sigue igual hasta la próxima revisión.</div>
+      <div><b>3. No deja pruebas.</b>Una casilla no dice de dónde sale ni en qué contexto se dijo. Ante una reclamación, la entidad no puede demostrar en qué se basó.</div>
+      <div><b>4. Los agentes de IA recomiendan sobre ese perfil.</b>GPTadvisor y otros agentes ya sugieren productos, pero leen un perfil declarado y sin comprobar, así que amplifican el error.</div>
+      <div><b>5. El asesor no tiene tiempo.</b>Revisar cada test a mano no escala: o se revisa poco, o el alta se vuelve lenta y el cliente abandona.</div>
+      <div><b>6. La experiencia es mala para el cliente.</b>Un formulario largo y técnico, con preguntas que no siempre entiende y que responde por salir del paso.</div>
+    </div>
+    <p class="nota" style="margin-top:1.8mm"><b>Ejemplo (caso simulado):</b> Carmen, 68 años, marca «conozco bien los fondos de renta variable». Al preguntarle si un fondo puede perder dinero responde «eso no puede pasar, el fondo es del banco». El test la habría dado por experta.</p>
+  </section>
+
+  <section class="sec">
+    <p class="eti">02 · La solución: idóneo</p>
+    <h2>Una entrevista conversacional que crea el perfil MiFID, lo comprueba y lo justifica</h2>
+    <p>idóneo solo crea perfiles: no recomienda productos. Se integra en la app de la entidad («Powered by idóneo») y responde, punto por punto, a cada problema:</p>
+    <div class="pr sol">
+      <div><b>1 → Comprueba, no solo pregunta.</b>Plantea preguntas de comprobación y escenarios. Guarda por separado lo declarado y lo demostrado, y avisa al asesor cuando no coinciden.</div>
+      <div><b>2 → Perfil vivo.</b>Microentrevistas periódicas o ante un cambio («¿Ha cambiado algo?»): solo se pregunta lo que cambió, y cada cambio crea una versión nueva.</div>
+      <div><b>3 → Cada dato con su prueba.</b>Cada respuesta guarda la frase literal del cliente, el minuto de la conversación y la versión del perfil. La entidad puede auditarlo todo.</div>
+      <div><b>4 → Perfil listo para agentes (MCP).</b>Los agentes de la entidad leen por MCP los límites del cliente (p. ej. riesgo máx. 3 de 7, renta variable no conveniente) y buscan solo dentro de ellos, por ejemplo en el catálogo de MyInvestor.</div>
+      <div><b>5 → El asesor solo revisa dudas.</b>El perfil llega hecho y comprobado; la entidad lo valida y el asesor interviene solo donde hay contradicciones o datos dudosos.</div>
+      <div><b>6 → Hablar en vez de rellenar.</b>Por voz o por escrito, desde el móvil y con sus palabras: el cliente entiende lo que se le pregunta y el alta es más rápida.</div>
+    </div>
+    <p class="nota" style="margin-top:1.8mm"><b>Fiabilidad de la IA:</b> Claude propone y el código decide. El riesgo y la conveniencia los calcula código con reglas MiFID, cada dato debe estar respaldado por una cita literal y la entidad valida el resultado. Los datos personales van aparte y con consentimiento propio.</p>
+  </section>
+
+  <section class="sec">
+    <p class="eti">03 · El valor diferencial</p>
+    <h2>No es un test más bonito: es un perfil en el que la entidad y sus agentes pueden confiar</h2>
+    <table class="vd">
+      <tr><th></th><th>Test de casillas</th><th>idóneo</th></tr>
+      <tr><td>Conocimiento</td><td>Declarado</td><td>Demostrado; las diferencias se señalan al asesor</td></tr>
+      <tr><td>Trazabilidad</td><td>Casilla sin contexto</td><td>Frase literal, minuto y versión de cada dato</td></tr>
+      <tr><td>Actualización</td><td>Una vez, y caduca</td><td>Perfil vivo con microentrevistas y versiones</td></tr>
+      <tr><td>Agentes de IA</td><td>PDF o formulario</td><td>Límites estructurados por MCP, listos para usar</td></tr>
+      <tr><td>Uso de la IA</td><td>No aplica</td><td>La IA propone, el código decide, la entidad valida</td></tr>
+    </table>
+    <p style="margin-top:2mm"><b>Para la entidad:</b> recomendaciones que encajan, menos riesgo de reclamaciones y cumplimiento MiFID documentado. <b>Para el asesor:</b> menos revisión manual, solo los casos dudosos. <b>Para el cliente:</b> un alta sencilla y productos acordes a lo que sabe y puede asumir.</p>
+    <p class="nota"><b>Medido con Claude real:</b> detecta 5 de 5 sobrevaloraciones que un test de casillas no ve (0 de 5); 165 de 166 datos correctos en 20 entrevistas, 31/31 en 7 casos difíciles, 0 recomendaciones de producto y perfil listo en ~43 s. Con clientes simulados: no es una validación independiente.</p>
+  </section>
+</main>
+
+<footer><span>Voz de ElevenLabs · inteligencia de Claude · catálogo de MyInvestor</span><span>idoneo-app.vercel.app · github.com/fernanrama/idoneo</span></footer>
+</div></body>
+</html>

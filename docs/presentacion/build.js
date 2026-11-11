@@ -24,7 +24,7 @@ const fa = require("react-icons/fa");
 
 const ASSETS = __dirname + "/assets";
 const MARCA = path.resolve(__dirname, "../../docs/marca");
-const OUT = process.argv[2] || "../Idoneo_presentacion.pptx";
+const OUT = process.argv[2] || "Idoneo_presentacion.pptx";
 const FINAL = process.argv.includes("--final");
 const nota = (t) => (FINAL ? "" : t);
 
