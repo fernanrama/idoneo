@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="docs/img/aura.gif" width="100%" alt="Portada de Idóneo: el aura del entrevistador cambia de color mientras lanza preguntas de ejemplo">
+
 # Idóneo
 
 **El test MiFID convertido en una conversación que comprueba y deja pruebas.**
@@ -10,9 +12,11 @@ y lo entrega por API y **MCP** a los agentes de la entidad.
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-backend-009688?logo=fastapi&logoColor=white)
 ![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)
+![Claude](https://img.shields.io/badge/Claude-agentes-D97757)
+![ElevenLabs](https://img.shields.io/badge/ElevenLabs-voz-000000)
 ![MCP](https://img.shields.io/badge/MCP-servidor_propio-6E56CF)
 
-[Cómo funciona](#cómo-funciona) · [Probarlo en 10 minutos](#probarlo-en-10-minutos) · [Claude + MyInvestor](#usarlo-desde-claude-con-myinvestor) · [Evaluación](#evaluación) · [Marco normativo](#marco-normativo) · [Estado](#estado)
+[La demo](#la-demo-en-un-minuto) · [Cómo funciona](#cómo-funciona) · [Capturas](#en-el-móvil-del-cliente) · [Probarlo en 10 minutos](#probarlo-en-10-minutos) · [Claude + MyInvestor](#usarlo-desde-claude-con-myinvestor) · [Evaluación](#evaluación) · [Estado](#estado)
 
 <sub>Hack Finance UC3M 2026 · Prototipo con datos simulados</sub>
 
@@ -20,21 +24,17 @@ y lo entrega por API y **MCP** a los agentes de la entidad.
 
 ---
 
-<table>
-<tr>
-<td align="center" width="33%"><img src="docs/img/app-inicio.png" width="240" alt="Entrada a la feature en la app"><br><sub><b>1.</b> La feature dentro de la app</sub></td>
-<td align="center" width="33%"><img src="docs/img/app-demo.png" width="240" alt="Entrevista con subtítulos"><br><sub><b>2.</b> La entrevista, por voz o por escrito</sub></td>
-<td align="center" width="33%"><img src="docs/img/app-entidad.png" width="240" alt="Vista de la entidad"><br><sub><b>3.</b> Lo que recibe la entidad</sub></td>
-</tr>
-</table>
+## La demo en un minuto
+
+A la izquierda, lo que vive el cliente: el aura que le entrevista, una pregunta cada vez. A la derecha, lo que recibe la entidad en directo: cada dato con la frase que lo justifica, el aviso *declarado ≠ demostrado* y, al final, el perfil calculado con reglas fijas. Es la demo guiada de Carmen (`/escenario`), acelerada ×4.
+
+<p align="center"><img src="docs/img/demo-guiada.gif" width="100%" alt="Demo guiada: la entrevista de Carmen a la izquierda y su perfil construyéndose en directo a la derecha"></p>
 
 ## El problema
 
 Antes de ofrecer un producto de inversión, la entidad tiene que evaluar si es **idóneo** y **conveniente** para el cliente (MiFID II). Hoy eso es un formulario de casillas basado en lo que el cliente **dice** de sí mismo, y el cliente tiende a sobrevalorarse. No queda constancia de qué entendía de verdad. ESMA lo advierte expresamente: el riesgo de sobrevaloración es mayor en los sistemas automatizados con poca interacción humana ([marco normativo](docs/normativa.md)).
 
-> **Carmen, 68 años** (caso simulado), marca en el test «conozco bien los fondos de renta variable».
-> Hablando con ella sale: *«Eso no puede pasar, el fondo es del banco.»*
-> **Declarado ≠ demostrado.**
+<p align="center"><img src="docs/img/problema.png" width="100%" alt="Test de casillas frente a la conversación: Carmen marca que conoce la renta variable, pero dice «Eso no puede pasar, el fondo es del banco»"></p>
 
 ## Qué hacemos
 
@@ -42,7 +42,7 @@ Antes de ofrecer un producto de inversión, la entidad tiene que evaluar si es *
 |---|---|
 | 🗣️ **Habla** | Entrevista por voz desde el móvil, con subtítulos y alternativa escrita. |
 | 🔎 **Comprueba** | Plantea escenarios y contrasta lo declarado con lo demostrado. Avisa de las contradicciones. |
-| 🧾 **Deja pruebas** | Cada dato guarda su fuente, su confianza, la cita exacta y el segundo de la grabación. Nada se sobrescribe: cada cambio es una versión nueva. |
+| 🧾 **Deja pruebas** | Cada dato guarda su fuente, su confianza, la cita exacta y el momento de la conversación en que se dijo. Nada se sobrescribe: cada cambio es una versión nueva. |
 | 🧮 **Calcula con código** | Idoneidad, conveniencia y restricciones salen de funciones deterministas, nunca del modelo. |
 | 🔌 **Se integra** | El perfil se sirve por API y por MCP a GPTadvisor, a Claude con el conector de MyInvestor o al agente de cualquier entidad. |
 
@@ -70,6 +70,30 @@ Resultado para Carmen, calculado por el backend:
 | **Perfil de riesgo** | CONSERVADOR · riesgo máximo **3 sobre 7**. Manda el más restrictivo de tolerancia (1/5), capacidad de pérdida y plazo |
 | **Conveniencia** | Depósitos y monetarios ✅ · Fondos de renta fija ✅ · Fondos de renta variable ❌ (declaró saber, no lo demostró) |
 | **Restricciones para MyInvestor** | `max_risk: 3`, `currency: EUR`, `asset_type: Monetario o Renta Fija` |
+
+## En el móvil del cliente
+
+<table>
+<tr>
+<td align="center" width="25%"><img src="docs/img/movil-portada.png" alt="Portada en el móvil"><br><sub><b>1 · Entrada</b><br>La feature dentro de la app</sub></td>
+<td align="center" width="25%"><img src="docs/img/movil-entrevista.png" alt="Entrevista con el aura y la pregunta de comprobación"><br><sub><b>2 · Entrevista</b><br>Por voz o por escrito, una pregunta cada vez</sub></td>
+<td align="center" width="25%"><img src="docs/img/movil-perfil.png" alt="Resumen del perfil para el cliente"><br><sub><b>3 · Su perfil</b><br>Lo que hemos entendido, con la frase de cada dato</sub></td>
+<td align="center" width="25%"><img src="docs/img/movil-productos.png" alt="Filtros del perfil y familias que puede contratar"><br><sub><b>4 · Sus límites</b><br>Riesgo máximo y qué familias le convienen</sub></td>
+</tr>
+</table>
+
+## Lo que recibe la entidad
+
+<table>
+<tr>
+<td width="50%"><img src="docs/img/entidad-revision.png" alt="Vista de la entidad: perfil de Carmen por validar con el aviso declarado ≠ demostrado"><br><sub><b>Revisión.</b> Perfil por validar, con el aviso <i>declarado ≠ demostrado</i>, la idoneidad y la conveniencia calculadas con reglas fijas.</sub></td>
+<td width="50%"><img src="docs/img/entidad-evidencia.png" alt="Evidencias: cada dato con su fuente, su confianza y la frase exacta"><br><sub><b>Evidencias.</b> Cada dato con su fuente (declarado, demostrado o calculado), su confianza y la frase exacta, con el turno y los segundos.</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/img/entidad-validada.png" alt="Perfil validado por el asesor, versión 2, disponible por MCP"><br><sub><b>Validación.</b> Una persona firma: el perfil pasa a <code>active</code> como versión nueva y queda disponible por MCP.</sub></td>
+<td width="50%"><img src="docs/img/entidad-mcp.png" alt="Restricciones para el agente en el formato del catálogo de MyInvestor"><br><sub><b>Para el agente.</b> Las restricciones que el agente pasa tal cual al catálogo de MyInvestor.</sub></td>
+</tr>
+</table>
 
 ## Probarlo en 10 minutos
 
@@ -120,7 +144,7 @@ npm run dev
 | # | Abre | Qué verás |
 |:-:|---|---|
 | 1 | http://localhost:3000 | La entrada a la feature dentro de la app |
-| 2 | http://localhost:3000/onboarding/entrevista → **Ver demo guiada** | La entrevista de Carmen turno a turno, con subtítulos y barra de bloques |
+| 2 | http://localhost:3000/escenario → **Ver la demo guiada** | La entrevista de Carmen y, al lado, su perfil construyéndose en directo (la demo de arriba) |
 | 3 | http://localhost:3000/entidad/carmen-68 | Cada dato con fuente, confianza y cita; perfil CONSERVADOR; la alerta *declarado ≠ demostrado* |
 | 4 | Botón **Validar perfil** en esa vista (lo habilita el [modo asesor de demostración](docs/modo-asesor-demo.md), que `preparar_demo.py` deja activado) | El perfil pasa a `active` y ya se puede usar |
 | 5 | Bloque **Restricciones para el agente** de esa vista | Las restricciones en el formato del catálogo de MyInvestor, utilizables tras validar. La API (`/api/clients/…`) exige la credencial del cliente; sin ella, http://localhost:8000/api/demo/constraints enseña el formato con la Carmen de muestra, sin validar |
@@ -143,7 +167,7 @@ El backend sirve un **servidor MCP en `/mcp`** con 4 herramientas de solo lectur
 | Herramienta | Para qué |
 |---|---|
 | `get_investment_constraints` | Los límites que cualquier propuesta debe cumplir, en el formato del catálogo de MyInvestor |
-| `get_evidence` | La cita y los segundos de la grabación que justifican un dato |
+| `get_evidence` | La cita y el momento de la conversación que justifican un dato |
 | `get_client_profile` | El perfil completo, con fuente y confianza de cada dato |
 | `get_client_context` | Un resumen breve del cliente para otro agente |
 
