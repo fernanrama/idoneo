@@ -17,7 +17,7 @@ import {
 import type { Comparacion, Fact, Perfil, Restricciones, Revision, VersionResumen } from "@/lib/tipos";
 import { AntesDespues, Busquedas, EnRevision } from "@/components/PerfilCambios";
 import { usePerfil } from "@/lib/usePerfil";
-import { esValidable } from "@/lib/validacion";
+import { esConflictoDeVersion, esValidable, mensajeErrorValidacion } from "@/lib/validacion";
 import { OrbePerfil, PALETA_ENTIDAD } from "@/components/Formas";
 import s from "./entidad.module.css";
 
@@ -60,7 +60,9 @@ export default function VistaEntidad({
       await recargar();
       setAccion({ enCurso: false, error: null });
     } catch (e) {
-      setAccion({ enCurso: false, error: e instanceof Error ? e.message : String(e) });
+      // Conflicto de versión: se recarga para que el asesor vea (y valide, si procede) la versión actual.
+      if (esConflictoDeVersion(e)) await recargar();
+      setAccion({ enCurso: false, error: mensajeErrorValidacion(e) });
     }
   };
   const [pestana, setPestana] = useState<Pestana>("Resumen");
@@ -120,9 +122,14 @@ export default function VistaEntidad({
                 <Recorrido estado={restricciones?.pending_review && perfil.status !== "active" ? "pending_validation" : perfil.status} />
               </>
             )}
-            {asesor === true && (
+            {asesor === true && (modo?.admin ? (
+              <p role="note">
+                Sesión de administración: revisas y validas como <code>asesor-web</code>.{" "}
+                <Link href="/admin">Otro cliente o cerrar sesión</Link>
+              </p>
+            ) : (
               <p role="note">Modo asesor de demostración: cliente ficticio y validación autorizada por el servidor local.</p>
-            )}
+            ))}
             {modo?.activo && !modo.permitido && (
               <p role="note">
                 Modo asesor de demostración activo, pero este cliente aún no está autorizado. El operador debe ejecutar en el
@@ -149,7 +156,7 @@ export default function VistaEntidad({
                   className={s.boton}
                   disabled={asesor !== true || accion.enCurso}
                   title={asesor === true ? undefined : "Requiere un permiso independiente de asesor"}
-                  onClick={asesor === true ? () => ejecutar(() => api.validarComoAsesor(cid)) : undefined}
+                  onClick={asesor === true && perfil ? () => ejecutar(() => api.validarComoAsesor(cid, perfil.version)) : undefined}
                 >
                   {accion.enCurso ? "Validando…" : restricciones?.pending_review ? "Validar los cambios" : "Validar perfil"}{" "}
                   <span aria-hidden="true">→</span>
@@ -161,7 +168,7 @@ export default function VistaEntidad({
                   Validado · v{perfil.version}
                 </span>
               )}
-              {asesor === true && cid === CLIENTE_DEMO && perfil?.status === "active" && (
+              {asesor === true && !modo?.admin && cid === CLIENTE_DEMO && perfil?.status === "active" && (
                 <button
                   type="button"
                   className={s.reiniciar}
@@ -611,19 +618,20 @@ function Mcp({ restricciones: r }: { restricciones: Restricciones | null }) {
  * null mientras el servidor responde. `activo`: el servidor confirma el modo asesor de demo;
  * `permitido`: además, este cliente es un fixture ficticio o lo ha autorizado el operador.
  */
-function useModoAsesor(cid: string): { activo: boolean; permitido: boolean } | null {
-  const [modo, setModo] = useState<{ cid: string; activo: boolean; permitido: boolean } | null>(null);
+function useModoAsesor(cid: string): { activo: boolean; permitido: boolean; admin: boolean } | null {
+  const [modo, setModo] = useState<{ cid: string; activo: boolean; permitido: boolean; admin: boolean } | null>(null);
   useEffect(() => {
     let vivo = true;
     api
       .modoAsesor()
-      .then((m) => vivo && setModo({ cid, activo: m.enabled, permitido: m.enabled && m.clients.includes(cid) }))
-      .catch(() => vivo && setModo({ cid, activo: false, permitido: false }));
+      .then((m) => vivo && setModo({ cid, activo: m.enabled, admin: m.admin === true,
+        permitido: m.enabled && (m.all === true || m.clients.includes(cid)) }))
+      .catch(() => vivo && setModo({ cid, activo: false, permitido: false, admin: false }));
     return () => {
       vivo = false;
     };
   }, [cid]);
-  return modo && modo.cid === cid ? { activo: modo.activo, permitido: modo.permitido } : null;
+  return modo && modo.cid === cid ? { activo: modo.activo, permitido: modo.permitido, admin: modo.admin } : null;
 }
 
 const BUSQUEDA_NOMBRE: Record<string, string> = { funds: "fondos", portfolios: "carteras", etfs: "ETF", stocks: "acciones" };

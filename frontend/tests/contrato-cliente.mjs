@@ -198,3 +198,16 @@ test("historial de demo declara un ejemplo fijo y no lee versiones privadas", as
   assert.equal(versiones[0].version, 7);
   assert.match(versiones[0].reason, /SIMULADOS.*sin historial persistido/);
 });
+
+test("finalizar la revisión: POST con la credencial del cliente y sin cuerpo; 409 si faltan respuestas", async () => {
+  autenticar();
+  mock(() => respuesta({ closed: true, already_closed: false, result: "sin_cambios", status: "active", pending_validation: false, version: 5 }));
+  const c = await api.cerrarRevision("cliente-A");
+  assert.equal(c.result, "sin_cambios");
+  assert.equal(llamadas[0].init.method, "POST");
+  assert.ok(llamadas[0].url.endsWith("/api/clients/cliente-A/review/close"));
+  assert.equal(auth(), `Bearer ${alta.access_token}`);
+  assert.equal(llamadas[0].init.body, undefined);
+  mock(() => respuesta({ detail: "faltan" }, 409));
+  await assert.rejects(api.cerrarRevision("cliente-A"), (e) => e.status === 409);
+});

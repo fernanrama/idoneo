@@ -13,6 +13,8 @@ import { IconoMotivo } from "@/components/IconoMotivo";
 import { useEsPropio } from "@/lib/useRevision";
 import type { Alerta, Comparacion, Fact, Perfil, Revision } from "@/lib/tipos";
 import { usePerfil } from "@/lib/usePerfil";
+import { api } from "@/lib/api";
+import { esConflictoDeVersion, mensajeCierre } from "@/lib/validacion";
 import { BarraCliente } from "@/components/BarraCliente";
 import s from "@/components/cliente.module.css";
 import rv from "@/components/revision.module.css";
@@ -54,7 +56,7 @@ function mayus(t: string) {
 // Resumen para el cliente, en lenguaje claro: qué hemos entendido, qué significa y qué pasa ahora.
 export default function MiPerfil() {
   const { clientId } = useOnboarding();
-  const { perfil, error, revision, cambios } = usePerfil(clientId);
+  const { perfil, error, revision, cambios, recargar } = usePerfil(clientId);
   const propio = useEsPropio(clientId);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -77,13 +79,15 @@ export default function MiPerfil() {
           </p>
         )}
         {!perfil && !error && <div className={s.cargando} aria-label="Cargando tu perfil" />}
-        {perfil && <Contenido perfil={perfil} revision={propio ? revision : null} cambios={cambios} />}
+        {perfil && <Contenido perfil={perfil} revision={propio ? revision : null} cambios={cambios} recargar={recargar} />}
       </main>
     </div>
   );
 }
 
-function Contenido({ perfil, revision, cambios }: { perfil: Perfil; revision: Revision | null; cambios: Comparacion | null }) {
+function Contenido({ perfil, revision, cambios, recargar }: {
+  perfil: Perfil; revision: Revision | null; cambios: Comparacion | null; recargar: () => Promise<void>;
+}) {
   const su = perfil.assessments.suitability;
   const revisado = perfil.status === "active";
   const alertas = perfil.alerts.filter((a) => a.status === "open");
@@ -154,7 +158,7 @@ function Contenido({ perfil, revision, cambios }: { perfil: Perfil; revision: Re
         <AvisoCliente key={a.id} alerta={a} />
       ))}
 
-      {revision && su.complete && <PerfilVivo revision={revision} />}
+      {revision && su.complete && <PerfilVivo revision={revision} clientId={perfil.client_id} recargar={recargar} />}
       {cambios && <AntesDespues c={cambios} />}
 
       <Revela como="section" className={`${s.tarjeta} ${s.siguiente}`}>
@@ -182,6 +186,12 @@ function Contenido({ perfil, revision, cambios }: { perfil: Perfil; revision: Re
             </span>
           )}
         </div>
+        <p className={s.suave} style={{ flexBasis: "100%", marginTop: 12, fontSize: 14 }}>
+          Tu código de cliente: <code>{perfil.client_id}</code> ·{" "}
+          <a href={`/admin?cliente=${encodeURIComponent(perfil.client_id)}`} target="_blank" rel="noopener">
+            ¿Eres del banco? Abre la vista del asesor
+          </a>
+        </p>
       </Revela>
     </>
   );
@@ -293,11 +303,28 @@ function AvisoCliente({ alerta }: { alerta: Alerta }) {
 }
 
 /** «¿Ha cambiado algo?»: el perfil no se queda congelado. Con una revisión abierta, muestra cómo va. */
-function PerfilVivo({ revision }: { revision: Revision }) {
+function PerfilVivo({ revision, clientId, recargar }: { revision: Revision; clientId: string; recargar: () => Promise<void> }) {
+  const [cierre, setCierre] = useState<{ enCurso: boolean; aviso: string | null; error: string | null }>({ enCurso: false, aviso: null, error: null });
+  const finalizar = async () => {
+    setCierre({ enCurso: true, aviso: null, error: null });
+    try {
+      const c = await api.cerrarRevision(clientId);
+      await recargar();
+      setCierre({ enCurso: false, aviso: mensajeCierre(c), error: null });
+    } catch (e) {
+      // 409: aún falta algo (p. ej. otra pestaña ha cambiado la revisión). Se recarga para ver qué.
+      if (esConflictoDeVersion(e)) await recargar();
+      setCierre({
+        enCurso: false, aviso: null,
+        error: esConflictoDeVersion(e) ? "Aún falta alguna respuesta. Sigue la revisión para completarla." : "No hemos podido finalizar la revisión. Inténtalo de nuevo.",
+      });
+    }
+  };
   if (!revision.open) {
     return (
       <Revela como="section" className={rv.vivo}>
         <div className={rv.vivoTexto}>
+          {cierre.aviso && <p role="status" style={{ marginBottom: 10, color: "#7ef0c8" }}>{cierre.aviso}</p>}
           <h2>¿Ha cambiado algo en tu vida?</h2>
           <p>
             Un cambio de sueldo, un gasto que se acerca, una herencia, otra idea para tu dinero… Cuéntanoslo y te haremos
@@ -312,15 +339,19 @@ function PerfilVivo({ revision }: { revision: Revision }) {
   }
   const total = revision.questions.length;
   const hechas = total - revision.remaining;
+  const listo = revision.can_finish;
   return (
     <Revela como="section" className={rv.vivo}>
       <div className={rv.vivoTexto}>
-        <h2>{revision.remaining ? "Tienes una revisión a medias" : "Tus cambios están enviados"}</h2>
+        <h2>{listo ? "Ya puedes finalizar tu revisión" : "Tienes una revisión a medias"}</h2>
         <p>
-          {revision.remaining
-            ? `Llevas ${hechas} de ${total} preguntas. Te quedan unos segundos por cada una.`
-            : "Has contestado todo. Una persona del banco revisará los cambios y te avisaremos."}
+          {listo
+            ? "Has contestado todo. Al finalizar, si algo ha cambiado, una persona del banco lo revisará; si todo sigue igual, tu perfil sigue vigente."
+            : revision.remaining
+              ? `Llevas ${hechas} de ${total} preguntas. Te quedan unos segundos por cada una.`
+              : "Faltan algunos datos obligatorios. Sigue la revisión para completarlos."}
         </p>
+        {cierre.error && <p role="alert" style={{ marginTop: 8, color: "#ffd0d0" }}>{cierre.error}</p>}
         <div className={rv.progreso} aria-hidden="true">
           {revision.questions.map((q) => <i key={q.path} className={q.respondida ? rv.hecha : ""} />)}
         </div>
@@ -333,9 +364,15 @@ function PerfilVivo({ revision }: { revision: Revision }) {
           ))}
         </div>
       </div>
-      <Link href={revision.remaining ? "/onboarding/entrevista?revision=1" : "/onboarding/cambio"} className={rv.vivoBoton}>
-        {revision.remaining ? "Seguir la revisión" : "Añadir otro cambio"} <span aria-hidden="true">→</span>
-      </Link>
+      {listo ? (
+        <button type="button" className={rv.vivoBoton} onClick={finalizar} disabled={cierre.enCurso}>
+          {cierre.enCurso ? "Finalizando…" : "Finalizar revisión"} <span aria-hidden="true">→</span>
+        </button>
+      ) : (
+        <Link href="/onboarding/entrevista?revision=1" className={rv.vivoBoton}>
+          Seguir la revisión <span aria-hidden="true">→</span>
+        </Link>
+      )}
     </Revela>
   );
 }

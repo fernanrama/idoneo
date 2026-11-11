@@ -168,7 +168,11 @@ def estado(conf: Configuracion = Depends(exigir_asesor_demo)) -> dict[str, Any]:
 @router.get("/clientes/{client_id}")
 def expediente(client_id: str, conf: Configuracion = Depends(exigir_asesor_demo)) -> dict[str, Any]:
     """Lo que ve el asesor: última versión, restricciones tal como las sirve el MCP e historial."""
-    cid = _cliente_permitido(client_id, conf)
+    return armar_expediente(_cliente_permitido(client_id, conf))
+
+
+def armar_expediente(cid: str) -> dict[str, Any]:
+    """Expediente para la vista de la entidad (también lo usa `app/entidad.py`)."""
     return {"profile": _perfil_para_asesor(cid),
             "constraints": _llamar(store.restricciones_para_consumidor, cid).model_dump(mode="json"),
             "versions": [{**v, "created_at": v["created_at"].isoformat(), "status": v["status"].value}
