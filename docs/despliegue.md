@@ -39,6 +39,8 @@ navegador nunca las ve. Ningún secreto se escribe en el repositorio.
 2. Pégala en tu `.env` local como `DATABASE_URL=...` (nunca en un chat ni en un commit).
 3. Desde `backend/`, sigue los pasos 1 a 6 de [`backend/migraciones/README.md`](../backend/migraciones/README.md):
    comprobación previa, ensayo (no cambia nada), plan, aplicar, verificación y repetición.
+   Cada comando lleva el destino explícito, para no tocar nunca otra base por error; con el pooler del equipo:
+   `--env-file ../.env --destino aws-1-eu-central-1.pooler.supabase.com:5432/postgres`.
 
 ### 2. Render: el backend
 
