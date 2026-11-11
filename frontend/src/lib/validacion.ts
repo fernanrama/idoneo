@@ -20,3 +20,15 @@ export function esValidable(perfil: Pick<Perfil, "status" | "assessments"> | nul
   }
   return false;
 }
+
+/** Un 409 al validar: alguien ha cambiado el perfil mientras el asesor lo revisaba (expected_version). */
+export const esConflictoDeVersion = (e: unknown): boolean =>
+  typeof e === "object" && e !== null && (e as { status?: unknown }).status === 409;
+
+/** Texto para el asesor. En un conflicto la vista recarga el perfil, así que se le pide revisar la versión nueva. */
+export function mensajeErrorValidacion(e: unknown): string {
+  if (esConflictoDeVersion(e)) {
+    return "El perfil ha cambiado mientras lo revisabas. Hemos cargado la versión nueva: revísala antes de validar.";
+  }
+  return e instanceof Error ? e.message : String(e);
+}

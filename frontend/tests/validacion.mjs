@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-const { esValidable } = (await import(pathToFileURL(join(process.env.IDONEO_CLIENT_BUILD, "validacion.js")))).default;
+const { esValidable, esConflictoDeVersion, mensajeErrorValidacion } = (await import(pathToFileURL(join(process.env.IDONEO_CLIENT_BUILD, "validacion.js")))).default;
 
 const perfil = (status, complete = true) => ({ status, assessments: { suitability: { complete } } });
 
@@ -33,4 +33,17 @@ test("sin perfil cargado no hay botón", () => {
 test("recorrido active → review_due → active: el botón aparece y desaparece al validar", () => {
   const recorrido = ["active", "review_due", "active"].map((s) => esValidable(perfil(s)));
   assert.deepEqual(recorrido, [false, true, false]);
+});
+
+test("un 409 al validar se reconoce y se explica al asesor", () => {
+  const conflicto = Object.assign(new Error("409 No se ha podido completar la petición."), { status: 409 });
+  assert.equal(esConflictoDeVersion(conflicto), true);
+  assert.match(mensajeErrorValidacion(conflicto), /ha cambiado mientras lo revisabas/);
+});
+
+test("los demás errores de validación mantienen su mensaje", () => {
+  const prohibido = Object.assign(new Error("403 Necesitas la credencial"), { status: 403 });
+  assert.equal(esConflictoDeVersion(prohibido), false);
+  assert.equal(mensajeErrorValidacion(prohibido), "403 Necesitas la credencial");
+  assert.equal(esConflictoDeVersion(null), false);
 });

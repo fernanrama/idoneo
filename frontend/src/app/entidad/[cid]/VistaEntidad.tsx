@@ -16,7 +16,7 @@ import {
 import type { Comparacion, Fact, Perfil, Restricciones, Revision, VersionResumen } from "@/lib/tipos";
 import { AntesDespues, Busquedas, EnRevision } from "@/components/PerfilCambios";
 import { usePerfil } from "@/lib/usePerfil";
-import { esValidable } from "@/lib/validacion";
+import { esConflictoDeVersion, esValidable, mensajeErrorValidacion } from "@/lib/validacion";
 import { OrbePerfil, PALETA_ENTIDAD } from "@/components/Formas";
 import s from "./entidad.module.css";
 
@@ -59,7 +59,9 @@ export default function VistaEntidad({
       await recargar();
       setAccion({ enCurso: false, error: null });
     } catch (e) {
-      setAccion({ enCurso: false, error: e instanceof Error ? e.message : String(e) });
+      // Conflicto de versión: se recarga para que el asesor vea (y valide, si procede) la versión actual.
+      if (esConflictoDeVersion(e)) await recargar();
+      setAccion({ enCurso: false, error: mensajeErrorValidacion(e) });
     }
   };
   const [pestana, setPestana] = useState<Pestana>("Resumen");
@@ -148,7 +150,7 @@ export default function VistaEntidad({
                   className={s.boton}
                   disabled={asesor !== true || accion.enCurso}
                   title={asesor === true ? undefined : "Requiere un permiso independiente de asesor"}
-                  onClick={asesor === true ? () => ejecutar(() => api.validarComoAsesor(cid)) : undefined}
+                  onClick={asesor === true && perfil ? () => ejecutar(() => api.validarComoAsesor(cid, perfil.version)) : undefined}
                 >
                   {accion.enCurso ? "Validando…" : restricciones?.pending_review ? "Validar los cambios" : "Validar perfil"}{" "}
                   <span aria-hidden="true">→</span>
