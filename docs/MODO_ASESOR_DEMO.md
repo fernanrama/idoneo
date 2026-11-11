@@ -67,7 +67,7 @@ Recupera el paso «Validar perfil» del recorrido de Carmen sin reabrir la autov
 Una entrevista real completa dura unos ocho minutos y, si falta un dato obligatorio, «Validar» responde 409. Para enseñar la voz real en el pitch sin ese riesgo existe `carmen-corta` (`backend/fixtures/carmen-corta.json`, DATOS SIMULADOS). Es Carmen con casi todo el perfil hecho; **solo faltan** el conocimiento de renta variable, el escenario de caída y la sostenibilidad. Es justo el momento «declarado ≠ demostrado».
 
 1. Con el modo asesor activo, en `http://localhost:3000/escenario` aparece la casilla **«Entrevista corta del pitch»**. Márcala, marca las dos de consentimiento y pulsa **Hablar** o **Escribir**.
-2. El asistente solo pregunta lo que falta: la lista de pendientes sale de `OBLIGATORIOS`. Respuesta sugerida: dice que conoce bien los fondos de renta variable y, ante la comprobación, «eso no puede pasar, el fondo es del banco»; ante una caída del 20 %, «lo saco todo»; la sostenibilidad, «me importa algo, como un extra; que no condicione la elección».
+2. El asistente solo pregunta lo que falta: la lista de pendientes sale de `OBLIGATORIOS`. Respuesta sugerida: dice que conoce bien los fondos de renta variable y, ante la comprobación, «eso no puede pasar, el fondo es del banco»; ante una caída del 20 %, «lo saco todo»; la sostenibilidad, «sí, me importa algo: me gustaría que una parte siguiera esos criterios» (una respuesta ambigua hace que repregunte y, con el verificador, puede dejar el dato pendiente).
 3. Al terminar, «Validar en la entidad» abre `/entidad/carmen-corta` → **Validar perfil** (un solo clic).
 4. Claude Code lee `carmen-corta` con `MCP_DEMO_TOKEN`: por defecto `MCP_DEMO_CLIENTS` incluye `carmen-68,carmen-corta`.
 
