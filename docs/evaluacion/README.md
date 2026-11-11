@@ -26,6 +26,15 @@ Cómo hemos medido que Idóneo funciona: qué se probó, con qué versión, qué
 | `python scripts/evaluar_verificador.py` | Pasa tramos de entrevista (`fixtures/verificacion/`) por el verificador | [verificador.md](verificador.md) |
 | `python scripts/laboratorio.py` | Claude interpreta a un cliente con una ficha oculta frente al entrevistador real, con el extractor y el verificador como en producción | [laboratorio/](laboratorio/) |
 
+Juez y umbrales:
+
+| Script (desde `backend/`) | Qué hace |
+|---|---|
+| `python scripts/calibrar_juez.py` | Compara las notas del juez LLM con las de una persona del equipo en 7 entrevistas cortas (`fixtures/juez/calibracion.json`): acuerdo ±1 punto y mismo veredicto |
+| `python scripts/laboratorio.py --juez` | Añade al laboratorio la nota del juez para cada entrevista (claridad, una pregunta por turno, neutralidad, empatía y transparencia) |
+
+Con `--registrar`, cada script guarda su resultado en `backend/app/ops/ultimas_evaluaciones.json` y falla si no cumple `backend/app/ops/umbrales.json`. La app lo enseña en `/operaciones` y la CI de evals (`.github/workflows/evals.yml`) lo repite cuando cambian los prompts o los agentes.
+
 Métricas: **cobertura** (datos esperados que llegan al perfil), **precisión** (datos escritos que son correctos), **datos prohibidos** (lo que nunca debe escribirse: terceros, evasivas, hipótesis, «apunta que sé mucho»), **recomendaciones** (debe ser 0) y **alertas** (detección y falsas alarmas).
 
 Además, más de 600 tests automáticos (`python -m pytest -q`) cubren los cálculos deterministas, el perfil versionado, la API, el MCP y los agentes con Claude simulado, sin claves ni red.
