@@ -27,7 +27,11 @@ y le entrega al asesor un perfil listo para validar. Se integra dentro de la app
 
 </div>
 
-<!-- VÍDEO DE PRESENTACIÓN: cuando esté listo, poner aquí su enlace o su miniatura enlazada, antes de «La demo en un minuto». -->
+## Vídeo de presentación
+
+<p align="center"><a href="https://www.youtube.com/watch?v=pHuOet5q8R0"><img src="https://img.youtube.com/vi/pHuOet5q8R0/maxresdefault.jpg" width="100%" alt="Vídeo de presentación de idóneo en YouTube"></a></p>
+
+<p align="center"><a href="https://www.youtube.com/watch?v=pHuOet5q8R0"><b>▶ Ver el vídeo en YouTube</b></a></p>
 
 ---
 
