@@ -53,10 +53,20 @@ async def lifespan(_app: FastAPI):
         yield
 
 
+def origenes_permitidos(valor: str) -> list[str]:
+    """Orígenes del front, separados por comas. Tolera la barra final y un dominio escrito sin `https://`."""
+    origenes = []
+    for o in valor.split(","):
+        o = o.strip().rstrip("/")
+        if o:
+            origenes.append(o if "://" in o else f"https://{o}")
+    return origenes
+
+
 app = FastAPI(title="API del perfil", version="1.0.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[o.strip().rstrip("/") for o in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",") if o.strip()],
+    allow_origins=origenes_permitidos(os.getenv("CORS_ORIGINS", "http://localhost:3000")),
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["ETag"],
