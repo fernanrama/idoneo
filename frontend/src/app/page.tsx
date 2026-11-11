@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Logo } from "@/components/Logo";
 import { Revela } from "@/components/Revela";
 import { clasesBoton, Icono, MarcaNoche, Noche } from "@/components/visual";
 import { AuraPreguntas } from "./_portada/AuraPreguntas";
@@ -15,7 +16,7 @@ const ENLACES = [
   ["#probar", "Pruébalo"],
 ] as const;
 
-// Portada del producto. Solo explica qué hace Idóneo; no muestra resultados de pruebas.
+// Portada del producto. Solo explica qué hace idóneo; no muestra resultados de pruebas.
 export default function Portada() {
   const [conFondo, setConFondo] = useState(false);
   useEffect(() => {
@@ -55,7 +56,7 @@ export default function Portada() {
                 <span className="texto-degradado">En una conversación.</span>
               </h1>
               <p className={s.entrada}>
-                Idóneo sustituye el test de idoneidad por una conversación. Escucha al cliente, anota cada dato con la frase que lo
+                idóneo sustituye el test de idoneidad por una conversación. Escucha al cliente, anota cada dato con la frase que lo
                 justifica y entrega a la entidad un perfil que se puede revisar, validar y auditar.
               </p>
               <div className={s.acciones}>
@@ -110,7 +111,7 @@ export default function Portada() {
                 <p className={s.ladoPie}>Tres clics. Nadie comprueba si es verdad ni de dónde sale cada respuesta.</p>
               </Revela>
               <Revela retraso={0.15} className={`${s.lado} ${s.ladoBueno} vidrio`}>
-                <span className={`${s.ladoTitulo} mono`}>Con Idóneo · una conversación</span>
+                <span className={`${s.ladoTitulo} mono`}>Con idóneo · una conversación</span>
                 <p className={s.cita}>«Eso no puede pasar, el fondo es del banco.»</p>
                 <div className={s.alertaMini}>
                   {Icono.aviso}
@@ -188,7 +189,7 @@ export default function Portada() {
                 <h3>No recomienda productos.</h3>
               </div>
               <p>
-                Idóneo solo construye el perfil. Qué ofrecer al cliente lo decide la entidad, con su catálogo y sus agentes, dentro de
+                idóneo solo construye el perfil. Qué ofrecer al cliente lo decide la entidad, con su catálogo y sus agentes, dentro de
                 los límites de un perfil ya validado.
               </p>
             </Revela>
@@ -220,8 +221,17 @@ export default function Portada() {
           </section>
         </main>
 
+        <section className={s.lema} aria-label="Lema de idóneo">
+          <Logo variante="oscuro" alto={44} />
+          <p>
+            Del cuestionario a la conversación.
+            <br />
+            <span className="texto-degradado">Perfiles vivos que cumplen la norma.</span>
+          </p>
+        </section>
+
         <footer className={`${s.pie} mono`}>
-          <span>Idóneo · prototipo · datos simulados</span>
+          <span>idóneo · prototipo · datos simulados</span>
           <span>Hack Finance UC3M</span>
         </footer>
       </div>

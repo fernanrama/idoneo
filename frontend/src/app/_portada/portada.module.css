@@ -99,6 +99,8 @@
 .cartaEnlace { height: 100%; box-sizing: border-box; color: inherit; }
 .ir { margin-top: auto; font-size: 12px; color: var(--n-azul); }
 .cartaEnlace:hover .ir { color: var(--n-tinta); }
+.lema { display: flex; flex-direction: column; align-items: center; gap: 22px; padding: 72px 0 64px; text-align: center; }
+.lema p { margin: 0; font-size: clamp(22px, 3.4vw, 36px); line-height: 1.25; font-weight: 600; letter-spacing: -0.01em; color: var(--n-tinta); max-width: 40ch; }
 .pie { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; padding: 30px 0 40px; border-top: 1px solid var(--n-borde); font-size: 12px; color: var(--n-tenue); }
 
 @media (max-width: 960px) {

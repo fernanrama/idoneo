@@ -6,8 +6,7 @@
 .barra { position: sticky; top: 0; z-index: 10; background: rgba(255, 255, 255, 0.72); border-bottom: 1px solid #e8e6f2; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 .barraCaja { max-width: 1240px; margin: 0 auto; padding: 14px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 18px; }
 .marca { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; font-size: 17px; color: #12122a; }
-.marca span:last-child { font-weight: 400; color: #5a5a7a; }
-.logo { width: 22px; height: 22px; border-radius: 7px; background: conic-gradient(from 200deg, #f08ad0, #6b4ef0, #4fb3ff, #f4a261, #f08ad0); }
+.marca span { font-weight: 400; font-size: 15px; color: #5a5a7a; padding-top: 4px; }
 .nav { display: flex; gap: 22px; margin-left: auto; font-size: 14px; color: #5a5a7a; flex-wrap: wrap; }
 .nav a:hover { color: #12122a; }
 .nav a[aria-current="page"] { color: #12122a; font-weight: 600; }

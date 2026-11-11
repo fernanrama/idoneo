@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "./Logo";
 import s from "./cliente.module.css";
 
 const PASOS = [
@@ -12,9 +13,8 @@ export function BarraCliente({ paso }: { paso: 1 | 2 | 3 }) {
   return (
     <header className={s.barra}>
       <div className={s.barraCaja}>
-        <Link href="/" className={s.marca}>
-          <span className={s.logo} aria-hidden="true" />
-          Idóneo
+        <Link href="/" className={s.marca} aria-label="idóneo, inicio">
+          <Logo variante="claro" alto={28} decorativo />
         </Link>
         <ol className={s.pasos} aria-label="Pasos">
           {PASOS.map((p, i) => (

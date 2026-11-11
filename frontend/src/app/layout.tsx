@@ -10,14 +10,15 @@ const asesor = Outfit({ variable: "--font-asesor", subsets: ["latin"], weight: [
 const mono = JetBrains_Mono({ variable: "--font-mono", subsets: ["latin"], weight: ["400", "500"] });
 
 export const metadata: Metadata = {
-  title: "Idóneo · Tu perfil inversor, en una conversación",
-  description: "Prototipo: perfil inversor MiFID II por voz, con la prueba de cada dato y validación humana. Datos simulados.",
+  title: "idóneo · Tu perfil inversor, en una conversación",
+  description:
+    "Del cuestionario a la conversación. Perfiles vivos que cumplen la norma. Prototipo: perfil inversor MiFID II por voz, con la prueba de cada dato y validación humana. Datos simulados.",
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#05070d",
+  themeColor: "#0C1A1F",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

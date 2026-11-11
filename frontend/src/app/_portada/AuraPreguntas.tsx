@@ -36,7 +36,7 @@ export function AuraPreguntas() {
       <p key={i} className={s.preguntaEjemplo} aria-live="off">
         {PREGUNTAS[i]}
       </p>
-      <ol className={`${s.pasos} mono`} aria-label="Cómo trabaja Idóneo">
+      <ol className={`${s.pasos} mono`} aria-label="Cómo trabaja idóneo">
         {PASOS.map((p, n) => (
           <li key={p} className={n === 0 ? s.pasoActivo : ""}>
             <span>{String(n + 1).padStart(2, "0")}</span> {p}
