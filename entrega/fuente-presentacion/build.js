@@ -116,7 +116,7 @@ async function main() {
   img(s, LOGO, 0.75, 1.35, 4.6, 4.6 * 635 / 2000, "Logotipo idóneo");
   texto(s, "Invertir empieza por escucharte.", { x: 0.75, y: 3.1, w: 7.5, h: 0.6, fontFace: F.tit, fontSize: 28, valign: "middle", objectName: "Lema" });
   texto(s, "Tu perfil inversor, en una conversación.", { x: 0.75, y: 3.7, w: 7.5, h: 0.45, fontFace: F.fina, fontSize: 18, color: K.suave, valign: "middle", objectName: "Subtítulo" });
-  s.addNotes(`Somos ${EQUIPO}. Acabáis de ver idóneo desde fuera; ahora, en dos minutos, cómo está hecho por dentro y por qué es fiable.` +
+  s.addNotes(`Somos ${EQUIPO}. Acabáis de ver idóneo desde fuera; ahora, por dentro.` +
     nota("\n(Pendiente: decidir quién presenta esta parte.)"));
 
   // ===== 2 · Cómo funciona por dentro =====
@@ -142,9 +142,7 @@ async function main() {
   });
   texto(s, [{ text: "La IA entiende y propone. ", options: { color: K.tinta, fontFace: F.tit } }, { text: "El código decide y calcula. ", options: { color: K.menta, fontFace: F.tit } }, { text: "Una persona valida.", options: { color: K.tinta, fontFace: F.tit } }],
     { x: 0.6, y: 4.75, w: 8.8, h: 0.45, fontSize: 15, align: "center", valign: "middle", objectName: "Idea clave" });
-  s.addNotes("Así está montado. El cliente habla por voz o por escrito, y Claude conduce la conversación. En cada turno, otro Claude, el extractor, propone los datos que ha oído, cada uno con la frase exacta del cliente. " +
-    "Pero no se fía: el código comprueba que la cita existe y que la pregunta previa era la correcta, y una rúbrica fija decide el nivel. Los números del perfil, como el riesgo, los calculan reglas en Python, nunca el modelo. " +
-    "Y nada sale hacia el agente de la entidad hasta que una persona lo valida.");
+  s.addNotes("Así está montado. El cliente habla y Claude conduce la conversación. En cada turno, el extractor propone los datos con la frase exacta del cliente. Pero el código no se fía: comprueba que la cita existe y decide el nivel con una rúbrica fija. Los números, como el riesgo, los calculan reglas en Python, nunca el modelo. Y nada sale hasta que una persona lo valida.");
 
   // ===== 3 · Cada dato con su prueba =====
   s = nueva(BG.b);
@@ -164,9 +162,7 @@ async function main() {
   texto(s, "Declarado ≠ demostrado · lo revisa el asesor", { x: 4.9, y: 3.36, w: 4.3, h: 0.34, fontFace: F.tit, fontSize: 12, color: K.ambar, valign: "middle" });
   texto(s, "Fuente: conversación · cita literal · minuto · versión del perfil", { x: 4.55, y: 3.78, w: 4.7, h: 0.3, fontFace: F.mono, fontSize: 9.5, color: K.tenue });
   texto(s, "Si la cita no aparece literal en la conversación, el dato se descarta con su motivo.", { x: 0.6, y: 4.55, w: 8.8, h: 0.4, fontSize: 13, color: K.suave, align: "center", valign: "middle", objectName: "Regla" });
-  s.addNotes("El paso clave. Carmen marcó en el test que conoce bien la renta variable. En la conversación dice: «eso no puede pasar, el fondo es del banco». " +
-    "El extractor lo detecta mientras habla y el dato queda así: declaró alto, demostró ninguno, con la cita exacta, el minuto y la versión del perfil. El aviso le llega al asesor. " +
-    "Y si el modelo se inventa una cita que no está en la conversación, el código la descarta.");
+  s.addNotes("El paso clave, con Carmen: declaró alto, demostró ninguno. El dato guarda la cita, el minuto y la versión del perfil, y el aviso llega al asesor. Si el modelo inventa una cita, el código la descarta.");
 
   // ===== 4 · Lo que recibe la entidad =====
   s = nueva(BG.a);
@@ -184,8 +180,7 @@ async function main() {
     texto(s, h, { x: 6.55, y: y + 0.14, w: 2.75, h: 0.36, fontFace: F.tit, fontSize: 13.5, valign: "middle" });
     texto(s, d, { x: 6.55, y: y + 0.5, w: 2.75, h: 0.42, fontSize: 10.5, color: K.suave, valign: "top" });
   });
-  s.addNotes("Esto es lo que ve el asesor: el perfil hecho. Carmen es conservadora, riesgo máximo tres sobre siete; sale de tres criterios y manda el más restrictivo. " +
-    "La renta variable, no conveniente. Todo lo calculan reglas fijas. El asesor solo interviene ante dudas, como este aviso, y valida. Hasta entonces, el agente no puede usar el perfil.");
+  s.addNotes("El asesor recibe el perfil hecho: conservador, riesgo máximo tres de siete, y renta variable no conveniente. Solo interviene ante dudas, como este aviso, y valida. Hasta entonces, el agente no puede usarlo.");
 
   // ===== 5 · Dentro de la app de cada entidad =====
   s = nueva(BG.b);
@@ -215,9 +210,7 @@ async function main() {
   texto(s, "Agente → get_investment_constraints", { x: 7.0, y: 2.9, w: 2.3, h: 0.5, fontFace: F.mono, fontSize: 9.5, color: K.tinta, valign: "top" });
   texto(s, "← riesgo máx. 3\n← renta variable: no conveniente", { x: 7.0, y: 3.4, w: 2.3, h: 0.62, fontFace: F.mono, fontSize: 9.5, color: K.menta, valign: "top" });
   texto(s, "Probado con Claude y el conector de MyInvestor", { x: 7.0, y: 4.1, w: 2.3, h: 0.6, fontSize: 9.5, color: K.tenue, valign: "top" });
-  s.addNotes("idóneo no es otra app: vive dentro de la de cada entidad, con su marca, como Bizum en tu banco. Powered by idóneo. " +
-    "Aparece en tres momentos: en el alta, que es el principal; en microentrevistas cuando algo cambia, preguntando solo eso; y manteniendo el perfil vivo. " +
-    "Y se conecta a los agentes de IA de la entidad por MCP: el agente pide las restricciones de Carmen y recibe riesgo máximo tres y renta variable no conveniente. Lo hemos probado con Claude y el conector público de MyInvestor." +
+  s.addNotes("idóneo vive dentro de la app de cada entidad, con su marca: Powered by idóneo. En el alta, en microentrevistas cuando algo cambia y manteniendo el perfil vivo. Y se conecta a sus agentes de IA por MCP: el agente pide las restricciones de Carmen y recibe riesgo máximo tres y renta variable no conveniente. Probado con Claude y el conector de MyInvestor." +
     nota("\n(No decir precio. Si preguntan: lo contrata la entidad y lo integra como una función más.)"));
 
   // ===== 6 · Lo que hemos medido =====
@@ -239,9 +232,7 @@ async function main() {
     texto(s, d, { x: x + 0.05, y: 3.32, w: 1.95, h: 0.6, fontSize: 9, color: K.tenue, align: "center", valign: "top" });
   });
   texto(s, "Clientes simulados · casos escritos por el equipo · no es una validación independiente", { x: 0.6, y: 4.4, w: 8.8, h: 0.4, fontSize: 12, color: K.suave, align: "center", valign: "middle", objectName: "Límite" });
-  s.addNotes("¿Por qué una IA? ESMA advierte de que con sistemas automatizados el cliente tiende a sobrevalorarse. idóneo es el contrapeso. " +
-    "Lo que hemos medido: el extractor acertó 31 de 31 datos en siete entrevistas difíciles; en el laboratorio, 70 de 70 datos cubiertos; el verificador, cero falsas alarmas; y la entrevista corta deja el perfil listo para validar en unos 43 segundos. " +
-    "Con un límite que decimos claro: son clientes simulados y casos escritos por nosotros.");
+  s.addNotes("¿Por qué comprobar? ESMA avisa: con sistemas automatizados, el cliente tiende a sobrevalorarse. Lo que hemos medido: 31 de 31 datos acertados, 70 de 70 cubiertos, cero falsas alarmas y el perfil listo para validar en unos 43 segundos. Con un límite claro: clientes simulados y casos escritos por nosotros.");
 
   // ===== 7 · Cierre =====
   s = nueva(BG.centro);
@@ -251,7 +242,7 @@ async function main() {
   s.addShape(SH.roundRect, { x: 3.3, y: 4.05, w: 3.4, h: 0.55, rectRadius: 0.27, fill: { color: K.menta }, line: { color: K.menta, width: 0 }, objectName: "Botón demo" });
   img(s, IC.play, 3.6, 4.22, 0.2, 0.2, "Play");
   texto(s, "Demo en vivo · datos simulados", { x: 3.88, y: 4.05, w: 2.82, h: 0.55, fontFace: F.tit, fontSize: 11.5, color: K.noche, valign: "middle" });
-  s.addNotes("GPTadvisor hace fiable la recomendación. idóneo hace fiable el perfil sobre el que se recomienda. Vamos a verlo en directo." +
+  s.addNotes("GPTadvisor hace fiable la recomendación. idóneo hace fiable el perfil sobre el que se recomienda. Vamos a verlo." +
     nota("\n(Si no da tiempo a la demo en directo: cerrar aquí con el lema «Invertir empieza por escucharte».)"));
 
   await pres.writeFile({ fileName: OUT });
