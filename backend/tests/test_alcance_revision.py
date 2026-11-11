@@ -184,3 +184,18 @@ def test_una_correccion_del_asesor_sin_cita_no_cuenta_como_respuesta_del_inverso
     store.aplicar(C, [Parche(path=AHORRO, value=80000, source="advisor")], "corrige la entidad", "advisor:asesor-07")
     a = plan(motivos=[Motivo.planned_expense], desde=apertura)
     assert AHORRO in [q.path for q in a.preguntas] and a.respondidas == []
+
+
+# ---------- revisión pedida por el cliente (#46): mismo planificador ----------
+
+def test_la_revision_del_cliente_usa_alcance_revision(validada):
+    from app.perfil import revision
+
+    revision.abrir(C, ["planned_expense"])
+    extractor(LIQUIDEZ, "high", "Necesito 6.000 € en tres meses")  # contesta al motivo
+    extractor(INGRESOS, 800, "Y me han bajado la pensión a ochocientos")  # cambio que no estaba en el motivo
+    r = revision.en_curso(C)
+    a = alcance_revision(store.perfil_para_consumidor(C), store.perfil(C), HOY, r.motivos, desde=r.abierta_en)
+    assert [q.path for q in r.pendientes] == [q.path for q in a.preguntas]
+    assert {q.path for q in r.preguntas if q.respondida} == {q.path for q in a.respondidas} == {LIQUIDEZ}
+    assert GASTOS in [q.path for q in r.pendientes]  # dependencia del cambio de ingresos (verificador)

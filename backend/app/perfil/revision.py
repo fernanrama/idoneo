@@ -3,20 +3,21 @@
 Diseño: docs/diseno/06-actualizacion-continua.md (§3.2, §3.3 y §4.2). Sin tabla nueva ni migración:
 - Abrir una revisión escribe una versión con motivo `review_requested:<motivos>` (historial inmutable).
 - La revisión en curso se reconstruye leyendo el historial hacia atrás hasta la última validación.
-- Qué preguntar lo decide `alcance.planificar` (determinista). Una pregunta está respondida cuando su dato
-  se ha vuelto a escribir después de abrir la revisión (cambio o confirmación con cita nueva).
+- Qué preguntar lo decide `alcance.alcance_revision` (determinista, el único planificador de microentrevistas).
+  Una pregunta está respondida cuando el cliente ha dado o confirmado su dato, con cita, después de abrir la
+  revisión.
 - `cambios` compara el último perfil validado con el último guardado, para la vista de la entidad.
 """
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from pydantic import BaseModel
 
 from . import alcance, store
-from .alcance import Motivo, Peticion, TipoPregunta
+from .alcance import Motivo, TipoPregunta
 from .modelos import CALCULADOS, EstadoPerfil, Perfil
 
 PREFIJO = "review_requested:"
@@ -172,18 +173,22 @@ def en_curso(client_id: str) -> RevisionEnCurso | None:
 
 
 def _momento(f) -> datetime:
-    """Última vez que el cliente dio el dato: al escribirlo o al confirmarlo. Una confirmación de mismo
-    valor (#45) conserva `updated_at` y anota `confirmed_at`."""
-    return max(f.updated_at, f.confirmed_at or f.updated_at)
+    """Última vez que el cliente dio el dato: al escribirlo o al confirmarlo (#45)."""
+    return alcance.ultimo_momento(f)
 
 
 def _construir(p: Perfil, motivos: list[Motivo], abierta_en: datetime, desde: int) -> RevisionEnCurso:
-    a = alcance.planificar(p, [Peticion(motivo=m) for m in motivos])
-    preguntas = []
-    for q in a.preguntas:
-        f = p.mifid.get(q.path)
-        hecha = f is not None and _momento(f) >= abierta_en and f.evidence != []
-        preguntas.append(Pregunta(path=q.path, tipo=q.tipo, valor_vigente=q.valor_vigente, respondida=hecha))
+    """Delega en el único planificador de microentrevistas, `alcance.alcance_revision`.
+
+    Combina los motivos del cliente, los datos caducados, lo que ya cambió y sus dependencias, y lo que el
+    cliente ya dijo o confirmó (con su cita) desde `abierta_en`: eso sale como respondido y no se repite.
+    """
+    servido = store.perfil_para_consumidor(p.client_id)
+    hoy = datetime.now(timezone.utc).date()
+    a = alcance.alcance_revision(servido, p, hoy, motivos, desde=abierta_en)
+    todas = [(q, False) for q in a.preguntas] + [(q, True) for q in a.respondidas]
+    todas.sort(key=lambda x: (x[0].tipo == TipoPregunta.confirmar, alcance.ORDEN_GUION.get(x[0].path, 999)))
+    preguntas = [Pregunta(path=q.path, tipo=q.tipo, valor_vigente=q.valor_vigente, respondida=r) for q, r in todas]
     return RevisionEnCurso(motivos=motivos, abierta_en=abierta_en, desde_version=desde, preguntas=preguntas,
                            aplazadas=a.aplazadas, reevaluacion_completa=a.reevaluacion_completa, razones=a.razones)
 
