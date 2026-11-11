@@ -344,7 +344,10 @@ stateDiagram-v2
     pending_validation --> active: asesor valida
     active --> review_due: un agente cambia un dato
     review_due --> draft: comienza una entrevista nueva
+    review_due --> active: el asesor valida la microentrevista (D2)
 ```
+
+Abrir una revisión del cliente («¿Ha cambiado algo?») no cambia el estado (R1): solo deja una versión de trámite con los mismos datos.
 
 | Estado | Significado | ¿Puede usarse para recomendar? |
 |---|---|:---:|
