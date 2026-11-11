@@ -177,6 +177,8 @@ class Alcance(BaseModel):
     # Sesión de revisión: tras las preguntas (o si no hay ninguna) se pregunta si ha cambiado algo más.
     # Así una revisión no termina nada más empezar por tener la lista vacía. False en la entrevista inicial.
     apertura: bool = False
+    # Rutas del alcance que el inversor ya dio o confirmó en esta revisión (para el progreso). Orden del guion.
+    respondidas: list[str] = Field(default_factory=list)
 
 
 # ---------- planificación ----------
@@ -217,6 +219,12 @@ def _tipo(perfil: Perfil, ruta: str, base: TipoPregunta) -> TipoPregunta:
     return tipo
 
 
+def _dado(perfil: Perfil, ruta: str) -> bool:
+    """Tiene valor y no ha quedado dudoso: se puede dar por respondido."""
+    f = perfil.mifid.get(ruta)
+    return f is not None and f.value is not None and not _dudoso(perfil, ruta)
+
+
 def _dudoso(perfil: Perfil, ruta: str) -> bool:
     f = perfil.mifid.get(ruta)
     return f is not None and (Flag.low_confidence in f.flags or Flag.inconsistent in f.flags)
@@ -229,8 +237,10 @@ def planificar(perfil: Perfil, peticiones: list[Peticion], vigentes: frozenset[s
     salvo que haya quedado dudosa; sí se confirman sus dependencias de `calculos.py`. Cuenta como cambio
     para decidir si hay que ampliar a una reevaluación completa.
 
-    `vigentes`: rutas que el inversor ya dio o confirmó en esta revisión. No se vuelven a confirmar (sí se
-    repreguntan si faltan o son dudosas).
+    `vigentes`: rutas que el inversor ya dio o confirmó en esta revisión. No se vuelven a preguntar, sea
+    cual sea el tipo de pregunta (sí si faltan o han quedado dudosas), y salen en `Alcance.respondidas`.
+    Las reglas para ampliar a una reevaluación completa se evalúan antes de quitarlas, así que contestar
+    no cambia esa decisión.
     """
     tipos: dict[str, TipoPregunta] = {}
     motivos: dict[str, list[Motivo]] = {}
@@ -258,20 +268,25 @@ def planificar(perfil: Perfil, peticiones: list[Peticion], vigentes: frozenset[s
             for dep in DEPENDENCIAS.get(r, []):
                 anotar(dep, TipoPregunta.confirmar, p.motivo)
 
+    ya: list[str] = []
     for r in respondidas:
         if _dudoso(perfil, r):
             anotar(r, TipoPregunta.repreguntar, Motivo.value_changed)
         else:
-            tipos.pop(r, None)  # ya respondida en esta revisión: no se vuelve a preguntar
+            if r in tipos:
+                ya.append(r)  # otro motivo la pedía, pero ya está respondida en esta revisión
+            tipos.pop(r, None)
     preguntas = [Pregunta(path=r, tipo=_tipo(perfil, r, t), motivos=motivos[r], valor_vigente=valor(perfil, r))
                  for r, t in tipos.items()]
-    preguntas = [q for q in preguntas if not (q.tipo == TipoPregunta.confirmar and q.path in vigentes)]
     preguntas.sort(key=lambda q: (q.tipo == TipoPregunta.confirmar, ORDEN_GUION[q.path]))
+    bloques = {q.path.split(".")[0] for q in preguntas if q.tipo != TipoPregunta.confirmar}  # antes de filtrar
+    hechas = {q.path for q in preguntas if q.path in vigentes and _dado(perfil, q.path)}
+    ya += hechas
+    preguntas = [q for q in preguntas if q.path not in hechas]
 
     razones = []
     if any(p.motivo == Motivo.full_reassessment_requested for p in peticiones):
         razones.append("lo pide el cliente o la entidad")
-    bloques = {q.path.split(".")[0] for q in preguntas if q.tipo != TipoPregunta.confirmar}
     bloques |= {r.split(".")[0] for r in respondidas}
     if len(bloques) >= BLOQUES_AMPLIAR:
         razones.append(f"cambios en {len(bloques)} bloques: {', '.join(sorted(bloques))}")
@@ -279,7 +294,7 @@ def planificar(perfil: Perfil, peticiones: list[Peticion], vigentes: frozenset[s
         razones.append("hay una alerta abierta que necesita al asesor")
 
     return Alcance(preguntas=preguntas[:MAX_PREGUNTAS], aplazadas=[q.path for q in preguntas[MAX_PREGUNTAS:]],
-                   reevaluacion_completa=bool(razones), razones=razones)
+                   reevaluacion_completa=bool(razones), razones=razones, respondidas=orden_guion(ya))
 
 
 # ---------- cambios entre versiones ----------

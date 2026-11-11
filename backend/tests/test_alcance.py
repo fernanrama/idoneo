@@ -239,6 +239,38 @@ def test_cambios_en_tres_bloques_amplian(carmen):
     assert a.reevaluacion_completa and "bloques" in a.razones[0]
 
 
+# ---------- respondidas en la revisión ----------
+
+def test_lo_ya_respondido_no_se_pregunta_sea_cual_sea_el_tipo(carmen):
+    """Gasto previsto pide repreguntar la liquidez; si ya la dio (aunque sea el mismo valor), no se repite."""
+    a = planificar(carmen, [Peticion(motivo=Motivo.planned_expense)], vigentes=frozenset({LIQUIDEZ}))
+    assert resumen(a) == [(AHORRO, C), (PLAZO, C)] and a.respondidas == [LIQUIDEZ]
+
+
+def test_lo_respondido_pero_dudoso_se_vuelve_a_preguntar(carmen):
+    p = cambiar(carmen, LIQUIDEZ, flags=[Flag.low_confidence])
+    a = planificar(p, [Peticion(motivo=Motivo.planned_expense)], vigentes=frozenset({LIQUIDEZ}))
+    assert (LIQUIDEZ, R) in resumen(a) and a.respondidas == []
+
+
+def test_un_dato_cambiado_que_pedia_un_motivo_cuenta_como_respondido(carmen):
+    a = planificar(carmen, [Peticion(motivo=Motivo.planned_expense), cambio(LIQUIDEZ)])
+    assert a.respondidas == [LIQUIDEZ] and resumen(a) == [(AHORRO, C), (PLAZO, C)]
+
+
+def test_contestar_no_cambia_la_decision_de_ampliar(carmen):
+    peticiones = [Peticion(motivo=Motivo.retirement), Peticion(motivo=Motivo.behaviour_vs_tolerance),
+                  Peticion(motivo=Motivo.knowledge_not_assessed, rutas=["knowledge.etfs"])]
+    antes = planificar(carmen, peticiones)
+    todo = frozenset(q.path for q in antes.preguntas) | frozenset(antes.aplazadas)
+    despues = planificar(carmen, peticiones, vigentes=todo)
+    assert antes.reevaluacion_completa and despues.reevaluacion_completa
+
+
+def test_sin_vigentes_no_hay_respondidas(carmen):
+    assert planificar(carmen, [Peticion(motivo=Motivo.liquidity_change)]).respondidas == []
+
+
 @pytest.mark.parametrize("rutas", [[], ["financial.loss_capacity_eur"], ["disclosures.purpose_ack"]])
 def test_dato_cambiado_invalido(carmen, rutas):
     with pytest.raises(DatoInvalido):
