@@ -35,6 +35,29 @@ node build.js ../Idoneo_presentacion.pptx --final    # FINAL: notas limpias
 
 En `build.js` se editan a mano `EQUIPO` (solo se dice en voz alta) y las cifras de las diapositivas 6, 7 y 9. Las de la 6 y la 9 salen de [`docs/evaluacion/README.md`](../../docs/evaluacion/README.md); las de la 7, con sus fuentes y lo que falta por sustituir, están en [`docs/pitch.md`](../../docs/pitch.md).
 
+## Versión HTML animada (`../Idoneo_presentacion.html`)
+
+Un solo archivo que se abre con doble clic en cualquier navegador y **funciona sin internet**: lleva dentro las fuentes (Sora e IBM Plex Mono, licencia OFL), el logo, el sello y la captura. Pensado para proyector: el lienzo es 1920 × 1080 y se escala a la pantalla.
+
+| Tecla | Qué hace |
+|---|---|
+| → · espacio · clic | Siguiente paso o diapositiva (muchas se construyen por pasos) |
+| ← | Paso o diapositiva anterior |
+| F | Pantalla completa |
+| N | Notas del orador abajo |
+| S | Sonido suave al avanzar (apagado por defecto, no hace falta) |
+| Inicio / Fin | Primera / última |
+
+Orden: portada → **parte de Alex** (cómo funciona, el mapa completo por dentro, harness, memoria, LLMOps, lo que mejoró y laboratorio) → las diapositivas de siempre (cada dato con su prueba, lo que recibe el asesor, dentro de la app, lo que hemos medido, cierre). El guion de cada una va en las notas (tecla N). Se puede saltar a una diapositiva con `#número` al final de la URL.
+
+Las cifras salen de [`docs/evaluacion/`](../../docs/evaluacion/README.md): las del laboratorio (20 entrevistas, 1.280 llamadas a Claude, 165 de 166 datos) son la suma de los dos informes de [`docs/evaluacion/laboratorio/e07/`](../../docs/evaluacion/laboratorio/e07/). Si hay una tirada nueva, se cambian a mano en `html/deck.html`.
+
+Regenerar tras editar `html/deck.html`:
+
+```bash
+python entrega/fuente-presentacion/html/generar.py   # desde la raíz del repo
+```
+
 ## Resumen de una cara
 
 `../Idoneo_una_cara.html` es la fuente de `../Idoneo_una_cara.pdf` (A4, una página). Para regenerar el PDF con Chrome:
