@@ -50,7 +50,7 @@ Recupera el paso «Validar perfil» del recorrido de Carmen sin reabrir la autov
 |---|---|
 | `GET /api/demo/asesor/estado` | `{enabled, simulated, clients, advisor_id}` |
 | `GET /api/demo/asesor/clientes/{id}` | `{profile, constraints, versions}`. `constraints` es lo mismo que sirve el MCP |
-| `POST /api/demo/asesor/clientes/{id}/validar` | Perfil validado |
+| `POST /api/demo/asesor/clientes/{id}/validar` `{expected_version?}` | Perfil validado. Con `expected_version` (la versión que ve el asesor), 409 sin escribir nada si el perfil ha cambiado desde entonces; sin ella, valida la última versión (compatibilidad). Otros campos → 422 |
 | `POST /api/demo/asesor/clientes/{id}/reiniciar` | Perfil recargado desde el fixture |
 | `POST /api/demo/asesor/clientes/{id}/entrevista?channel=voice\|text` | Recarga el fixture, abre una sesión y devuelve `{session_id, client_id, access_token, …}` para la entrevista corta |
 
