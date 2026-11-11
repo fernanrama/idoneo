@@ -20,7 +20,7 @@ El backend tiene que estar en marcha (ver README raíz). Para probar en el móvi
 | `/onboarding` | Redirige a la entrevista (el aviso de IA y el consentimiento están ahora en su pantalla de inicio) |
 | `/onboarding/entrevista` | Entrevista con el aura: solo la pregunta actual, por voz o **por escrito** (modo texto, necesita la clave de Claude en el backend) y **demo guiada** |
 | `/onboarding/perfil` | Perfil para el cliente, en claro: medidor de riesgo, lo que hemos entendido con la frase de cada dato, avisos y siguiente paso |
-| `/onboarding/productos` | Filtros del perfil. **No consulta el MCP de MyInvestor por código**: sus términos lo prohíben (ver `docs/proyecto/05_MCP_MYINVESTOR.md`) |
+| `/onboarding/productos` | Filtros del perfil. **No consulta el MCP de MyInvestor por código**: sus términos lo prohíben (ver `docs/diseno/04-mcp-myinvestor.md`) |
 | `/escenario` | Pantalla partida para el pitch: entrevista a la izquierda y lo que recibe la entidad, en directo, a la derecha. `?cliente=<id>` muestra un perfil ya existente |
 | `/entidad/[cid]` | Vista de la entidad con pestañas: resumen, evidencias, historial y restricciones; validación web bloqueada hasta contar con permiso de asesor |
 
@@ -43,7 +43,7 @@ backend y en consumidores de servicio autorizados, sin copiarlo al entorno del f
 - `src/tema/tema.css`: tokens y utilidades globales que importa `globals.css` (`.pila`, `.fila`, `.oculto-visual`…).
 - `src/lib/useEntrevista.ts`: lógica de la entrevista (voz de ElevenLabs o guion), envío de turnos, sondeo del perfil y paso de alertas al agente.
 - `src/lib/guion.ts`: guion de Carmen (**simulado**). Se sustituirá por `backend/eval/carmen.json` de Pablo.
-- `src/lib/api.ts` y `src/lib/tipos.ts`: cliente y tipos del contrato (`docs/CONTRATOS.md`).
+- `src/lib/api.ts` y `src/lib/tipos.ts`: cliente y tipos del contrato (`docs/contratos.md`).
 
 ## Demo guiada
 «Ver la demo guiada» repite la entrevista **simulada** de Carmen (`src/lib/guion.ts`) en un minuto aproximadamente. Las voces son audios grabados una sola vez con ElevenLabs (`public/demo/carmen/`), así que en la demo no se gasta ningún crédito. Si falta el audio de un turno, se usa la voz del navegador como respaldo. Para grabarlos o regrabarlos, desde `backend/`: `python scripts/generar_audios_demo.py --voz-carmen <ID> --aplicar`. La clave necesita el permiso «Text to Speech»; sin `--aplicar` solo cuenta los caracteres. Se ve la pregunta del asistente y la respuesta de Carmen, y su perfil de ejemplo (`carmen-68`, calculado por el backend) se va reconstruyendo dato a dato a medida que se oye la frase que justifica cada uno (`src/lib/demo.ts`). Tiene pausa, salto al siguiente turno, velocidad (1×, 1,5× y 2×) y botón para quitar el sonido. No escribe nada en el backend.
@@ -69,7 +69,7 @@ El cliente usa credenciales de posesión por cliente (no identidad real), separa
 
 La validación en el navegador está bloqueada hasta acordar un permiso independiente de asesor. El servidor de Next no añade credenciales privilegiadas a las peticiones del cliente.
 
-Contrato, evidencia y límites: [MEMORIA_PERSONAL_SEGURIDAD.md](../docs/MEMORIA_PERSONAL_SEGURIDAD.md).
+Contrato, evidencia y límites: [memoria-personal-seguridad.md](../docs/memoria-personal-seguridad.md).
 Pruebas de contrato sin proveedores: `npm run test:contrato`.
 
 La demo anónima usa `/api/demo/profile` y `/api/demo/constraints`, sin capa personal y sin depender
@@ -84,4 +84,4 @@ La prueba `npm run test:navegador` utiliza Chromium/Playwright existentes contra
 aislados, con `IDONEO_FRONT_URL`, `IDONEO_API_URL` y, si es necesario, las rutas
 `IDONEO_PLAYWRIGHT_MODULE` e `IDONEO_BROWSER_EXECUTABLE`. Incluye navegación real en escritorio y
 móvil emulado, demo, memoria, conflictos y permisos. Requisitos, defectos reproducidos y límites:
-[validación funcional de #21](../docs/VALIDACION_FUNCIONAL_PR21.md).
+la PR #21 (informe de validación en el historial de Git).

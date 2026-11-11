@@ -1,6 +1,6 @@
 """API REST (contrato v1).
 
-Especificación: docs/proyecto/04_CONTRATO_PERFIL.md; implementación y desviaciones: docs/CONTRATOS.md.
+Especificación: docs/diseno/03-contrato-perfil.md; implementación y desviaciones: docs/contratos.md.
 Arranque:  uvicorn app.main:app --reload --port 8000   (desde backend/)
 Docs interactivas: http://localhost:8000/docs
 """
@@ -62,7 +62,7 @@ app.add_middleware(
 )
 app.include_router(voz.router)
 app.include_router(voz.webhook_router)
-app.include_router(asesor_demo.router)  # 404 salvo DEMO_ADVISOR_MODE=1 (docs/MODO_ASESOR_DEMO.md)
+app.include_router(asesor_demo.router)  # 404 salvo DEMO_ADVISOR_MODE=1 (docs/modo-asesor-demo.md)
 app.include_router(demo_operador.router)  # ídem; solo local y con X-Admin-Token
 
 

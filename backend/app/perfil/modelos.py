@@ -1,7 +1,7 @@
 """Modelo de datos del perfil (contrato v1).
 
-Especificación: docs/proyecto/04_CONTRATO_PERFIL.md (Alex). Este módulo la implementa;
-las desviaciones están listadas en docs/CONTRATOS.md. Cambios aquí = PR avisada al equipo.
+Especificación: docs/diseno/03-contrato-perfil.md (Alex). Este módulo la implementa;
+las desviaciones están listadas en docs/contratos.md. Cambios aquí = PR avisada al equipo.
 
 Decisión de implementación: la capa `mifid` es un mapa plano de rutas con punto
 ("knowledge.equity_funds", "objectives.o1.horizon_years") a `Fact`. Equivale al JSON anidado

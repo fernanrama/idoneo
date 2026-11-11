@@ -12,7 +12,6 @@ de confianza y borrado con revisión técnica sin afirmar eliminación de copias
 Estas condiciones no constituyen autenticación bancaria ni autorización para producción.
 Los respaldos locales se conservan fuera del repositorio y no forman parte de los commits.
 
-[Inventario completo de archivos modificados y añadidos](MEMORIA_PERSONAL_ARCHIVOS.md).
 
 ## Autorización del prototipo
 
@@ -135,7 +134,7 @@ autorizada tras la revisión del usuario. No se autoriza fusionar a main ni habi
 ## Evidencia
 
 Las reproducciones iniciales y la evolución de los resultados se mantienen en
-[`backend/tests/MEMORIA_PERSONAL_CONTRATO_PENDIENTE.md`](../backend/tests/MEMORIA_PERSONAL_CONTRATO_PENDIENTE.md).
+el historial de Git (PR #21).
 Resultado: **474 tests backend correctos, 28 omitidos y 1 deseleccionado** (el que invoca el script
 de migraciones), sin fallos. Incluye las regresiones #19/#20 y una integración del código TypeScript
 real con uvicorn en un puerto local efímero. PostgreSQL se mantuvo deshabilitado.
@@ -171,4 +170,4 @@ Archivos de producción modificados: `backend/app/perfil/{store,personal}.py`,
 `servidor/entidad.ts`, componente de memoria y su CSS, montaje de perfil, aviso/permisos en la vista
 de entidad y rutas Next de validación/reset. `.env.example` documenta únicamente nombres y requisitos de configuración.
 Tests nuevos y adaptaciones de los existentes acompañan los cambios; no hay migraciones.
-`docs/CONTRATOS.md`, `frontend/README.md` y los ejemplos de entorno describen el contrato propuesto.
+`docs/contratos.md`, `frontend/README.md` y los ejemplos de entorno describen el contrato propuesto.

@@ -5,7 +5,7 @@
  * nunca entra en el bundle del navegador) y solo se envía a un backend local. Las peticiones del
  * navegador no llevan ninguna credencial de asesor y la del cliente nunca se reenvía.
  * Apagado por defecto: sin DEMO_ADVISOR_MODE=1 todo sigue como en la PR #21 (403).
- * Ver docs/MODO_ASESOR_DEMO.md.
+ * Ver docs/modo-asesor-demo.md.
  */
 
 export const CABECERA_ASESOR = "X-Demo-Advisor-Token";

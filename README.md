@@ -48,7 +48,7 @@ Antes de ofrecer un producto de inversión, la entidad tiene que evaluar si es *
 
 **Qué no hacemos: no recomendamos productos.** Damos los límites que cualquier propuesta debe respetar (riesgo máximo, familias convenientes, liquidez). Qué productos ofrecer lo decide el agente de la entidad, y un asesor valida el perfil antes de que se pueda usar.
 
-Visión propuesta: [evolución hacia un perfil continuo](docs/proyecto/06_EVOLUCION_PERFIL_CONTINUO.md), desde la entrevista inicial hasta microentrevistas adaptativas y comprobaciones solicitadas por agentes autorizados. Estas dos últimas fases son hoja de ruta; el documento distingue las piezas implementadas de lo pendiente.
+Visión propuesta: [evolución hacia un perfil continuo](docs/diseno/05-perfil-continuo.md), desde la entrevista inicial hasta microentrevistas adaptativas y comprobaciones solicitadas por agentes autorizados. Estas dos últimas fases son hoja de ruta; el documento distingue las piezas implementadas de lo pendiente.
 
 ## Cómo funciona
 
@@ -105,7 +105,7 @@ uvicorn app.main:app --port 8000
 ```
 </details>
 
-`preparar_demo.py` crea los dos ficheros de configuración, genera los secretos locales que el backend exige para crear clientes (sin mostrarlos ni cambiar los que ya existan) y activa el [modo asesor de demostración](docs/MODO_ASESOR_DEMO.md), que solo funciona en local y con clientes ficticios. Con eso funciona todo el recorrido de abajo. Para una entrevista nueva hacen falta además tus claves, puestas a mano en `.env`: `ANTHROPIC_API_KEY` (entrevista por escrito y extracción del perfil) y las de ElevenLabs (voz). Al arrancar se carga a Carmen (DATOS SIMULADOS).
+`preparar_demo.py` crea los dos ficheros de configuración, genera los secretos locales que el backend exige para crear clientes (sin mostrarlos ni cambiar los que ya existan) y activa el [modo asesor de demostración](docs/modo-asesor-demo.md), que solo funciona en local y con clientes ficticios. Con eso funciona todo el recorrido de abajo. Para una entrevista nueva hacen falta además tus claves, puestas a mano en `.env`: `ANTHROPIC_API_KEY` (entrevista por escrito y extracción del perfil) y las de ElevenLabs (voz). Al arrancar se carga a Carmen (DATOS SIMULADOS).
 
 ### 2. Frontend (otra terminal)
 
@@ -122,7 +122,7 @@ npm run dev
 | 1 | http://localhost:3000 | La entrada a la feature dentro de la app |
 | 2 | http://localhost:3000/onboarding/entrevista → **Ver demo guiada** | La entrevista de Carmen turno a turno, con subtítulos y barra de bloques |
 | 3 | http://localhost:3000/entidad/carmen-68 | Cada dato con fuente, confianza y cita; perfil CONSERVADOR; la alerta *declarado ≠ demostrado* |
-| 4 | Botón **Validar perfil** en esa vista (lo habilita el [modo asesor de demostración](docs/MODO_ASESOR_DEMO.md), que `preparar_demo.py` deja activado) | El perfil pasa a `active` y ya se puede usar |
+| 4 | Botón **Validar perfil** en esa vista (lo habilita el [modo asesor de demostración](docs/modo-asesor-demo.md), que `preparar_demo.py` deja activado) | El perfil pasa a `active` y ya se puede usar |
 | 5 | Bloque **Restricciones para el agente** de esa vista | Las restricciones en el formato del catálogo de MyInvestor, utilizables tras validar. La API (`/api/clients/…`) exige la credencial del cliente; sin ella, http://localhost:8000/api/demo/constraints enseña el formato con la Carmen de muestra, sin validar |
 | 6 | En esa vista, el dato **Fondos de renta variable** | La prueba: *«Eso no puede pasar, el fondo es del banco.»*, segundos 57–61 |
 | 7 | http://localhost:8000/docs | Toda la API, para probarla a mano |
@@ -159,9 +159,9 @@ Todo en el portátil, con Claude Code y sin túneles. **Nunca** pongas `ADMIN_TO
 3. Exporta el token en la terminal sin mostrarlo (`IDONEO_MCP_TOKEN`, ver la guía) y conecta Claude Code con **comillas simples**, para que guarde la referencia y no el token: `claude mcp add --transport http idoneo http://localhost:8000/mcp -H 'Authorization: Bearer ${IDONEO_MCP_TOKEN}'` y `claude mcp add --transport http myinvestor https://mcp.myinvestor.es/mcp`.
 4. En el chat: *«Usa Idóneo para leer las restricciones de <cliente> y busca en MyInvestor fondos compatibles»*.
 
-Guía completa: [docs/MODO_ASESOR_DEMO.md](docs/MODO_ASESOR_DEMO.md#recorrido-completo-del-pitch).
+Guía completa: [docs/modo-asesor-demo.md](docs/modo-asesor-demo.md#recorrido-completo-del-pitch).
 
-`ADMIN_TOKEN` no se copia al frontend. Para que el botón «Validar perfil» funcione en la presentación local, activa el [modo asesor de demostración](docs/MODO_ASESOR_DEMO.md); no funciona a través de un túnel ni de un despliegue público.
+`ADMIN_TOKEN` no se copia al frontend. Para que el botón «Validar perfil» funcione en la presentación local, activa el [modo asesor de demostración](docs/modo-asesor-demo.md); no funciona a través de un túnel ni de un despliegue público.
 </details>
 
 **Probado el 9/11/2026, antes de que la PR #21 protegiera `/mcp`:** Claude recibe por la URL pública el perfil activo de Carmen y encuentra fondos de renta fija y monetarios en EUR con riesgo ≤ 3, ninguno de renta variable. Detalles en [backend/app/mcp/README.md](backend/app/mcp/README.md).
@@ -175,7 +175,7 @@ Guía completa: [docs/MODO_ASESOR_DEMO.md](docs/MODO_ASESOR_DEMO.md#recorrido-co
 |---|---|
 | Perfil versionado, evidencias, validación de la entidad y persistencia (memoria, SQLite o Postgres) | ✅ Hecho, con tests |
 | Idoneidad, conveniencia y restricciones calculadas con código | ✅ Hecho · los umbrales son **supuestos del equipo**, pendientes de revisión |
-| Servidor MCP y conexión con Claude + MyInvestor | ✅ Hecho · desde la PR #21 exige credencial; para la demo, Claude Code en local con `MCP_DEMO_TOKEN` (PR #27, [guía](docs/MODO_ASESOR_DEMO.md)) · probado por túnel el 9/11, antes de la credencial |
+| Servidor MCP y conexión con Claude + MyInvestor | ✅ Hecho · desde la PR #21 exige credencial; para la demo, Claude Code en local con `MCP_DEMO_TOKEN` (PR #27, [guía](docs/modo-asesor-demo.md)) · probado por túnel el 9/11, antes de la credencial |
 | Frontend móvil: entrevista, demo guiada, perfil del cliente y vista de la entidad | ✅ Hecho · «Validar perfil» con el modo asesor de demostración (PR #25) · entrevista corta del pitch sobre `carmen-corta` |
 | Extractor (de la conversación al perfil, con Claude) y entrevistador en modo texto | ✅ Hecho, con tests (Claude simulado) · prueba con la API real: `python scripts/probar_extractor.py` · arquitectura en [`backend/app/agentes/`](backend/app/agentes/README.md) |
 | Verificador (incoherencias, datos dudosos y casos para el asesor) | ✅ Reglas fijas + revisión con Claude, con tests (Claude simulado) · evaluación con la API real: `python scripts/evaluar_verificador.py` · el resumen para agentes sigue siendo una plantilla fija |
@@ -200,7 +200,7 @@ Todas están en `.env.example`.
 | `DATA_PERSIST` | `1` | `1` vuelca el almacén en memoria a `DATA_DIR`; `0` no escribe nada en disco (lo usan los tests) |
 | `LOAD_DEMO_FIXTURE` | `1` | Carga a Carmen (DATOS SIMULADOS) al arrancar, solo si no existe |
 | `ADMIN_TOKEN` | vacío | Credencial de servicio: `POST /validate` (junto con el Bearer del propietario), `POST /api/demo/reset` y consumidores del MCP. Nunca va al frontend |
-| `DEMO_ADVISOR_MODE`, `DEMO_ADVISOR_TOKEN` | `0`, vacío | [Modo asesor de demostración](docs/MODO_ASESOR_DEMO.md): habilita «Validar perfil» solo en local y para clientes ficticios. El mismo token en `frontend/.env.local` |
+| `DEMO_ADVISOR_MODE`, `DEMO_ADVISOR_TOKEN` | `0`, vacío | [Modo asesor de demostración](docs/modo-asesor-demo.md): habilita «Validar perfil» solo en local y para clientes ficticios. El mismo token en `frontend/.env.local` |
 | `DEMO_ADVISOR_CLIENTS`, `DEMO_ADVISOR_ID` | `carmen-68`, `asesor-demo` | Clientes ficticios permitidos y autor de la validación en ese modo |
 | `DEMO_ENDPOINTS` | `1` | `0` desactiva `POST /api/demo/reset` (para un despliegue público) |
 | `CORS_ORIGINS` | `http://localhost:3000` | Orígenes del front permitidos, separados por comas |
@@ -231,7 +231,7 @@ El backend guarda el perfil en memoria por defecto, sin base de datos. Para pers
 
 Cada cambio crea una versión nueva que nunca se modifica, y en Postgres la propia base bloquea `UPDATE`, `DELETE` y `TRUNCATE` del registro. Antes de usar Postgres o Supabase hay que aplicar las migraciones: procedimiento, comprobaciones y qué hacer si algo falla en [backend/migraciones/README.md](backend/migraciones/README.md) (desde `backend/`: `python -m app.perfil.persistencia.verificar previo`, luego `ensayo`, y `python -m app.perfil.persistencia.migrar --aplicar` solo con autorización).
 
-Comportamiento del backend (almacenes, validación, versionado, estados, capa personal, rechazos y códigos de error): [docs/CONTRATOS.md](docs/CONTRATOS.md#backend-integrado-persistencia-validación-y-versionado).
+Comportamiento del backend (almacenes, validación, versionado, estados, capa personal, rechazos y códigos de error): [docs/contratos.md](docs/contratos.md#backend-integrado-persistencia-validación-y-versionado).
 
 Para repetir los tests también contra un Postgres **local y desechable** (nunca Supabase; se vacía en cada test y su nombre debe llevar `test`):
 
@@ -247,7 +247,8 @@ TEST_POSTGRES_URL=postgresql://usuario@127.0.0.1:5432/perfil_test python -m pyte
 |---|---|
 | [`backend/`](backend/) | API FastAPI: perfil versionado (`app/perfil/`), cálculos deterministas (`calculos.py`), agentes (`app/agentes/`), MCP (`app/mcp/`), migraciones y tests |
 | [`frontend/`](frontend/) | Feature móvil Next.js: onboarding por voz ([detalles](frontend/README.md)) |
-| [`docs/`](docs/) | Idea y contrato del perfil ([docs/proyecto/](docs/proyecto/README.md)), cómo lo implementa el código ([CONTRATOS.md](docs/CONTRATOS.md)), diseño y reparto |
-| [`gestion/`](gestion/) | Organización del hackathon: análisis del reto, pitch, demo y archivo |
+| [`docs/`](docs/README.md) | Documentación del producto: arquitectura, diseño, contrato del perfil, modo asesor de demostración y evaluaciones |
+| [`entrega/`](entrega/) | Material entregado: presentación (PowerPoint), resumen de una cara (PDF) y la fuente para regenerarlos |
+| [`gestion/`](gestion/README.md) | Organización interna del equipo: análisis del reto, decisiones, reparto, evidencias y guion del pitch |
 
 <div align="center"><sub>Prototipo para Hack Finance UC3M 2026 · No es un producto oficial de ninguna entidad</sub></div>

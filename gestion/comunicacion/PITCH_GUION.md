@@ -1,7 +1,7 @@
 # Guion del pitch — 6 minutos (diapositivas, luego demo)
 
 Borrador v3 · 10 nov 2026 · Responsable: Rodrigo · Revisión: equipo
-Presentación: [`Idoneo_presentacion.pptx`](Idoneo_presentacion.pptx) (las notas del orador llevan este mismo texto). Se genera con [`fuente-presentacion/`](fuente-presentacion/README.md): versión de trabajo (con etiquetas ámbar) o `--final`.
+Presentación: [`Idoneo_presentacion.pptx`](../../entrega/Idoneo_presentacion.pptx) (las notas del orador llevan este mismo texto). Se genera con [`fuente-presentacion/`](../../entrega/fuente-presentacion/README.md): versión de trabajo (con etiquetas ámbar) o `--final`.
 
 > **Cuándo.** Jueves 12/11, Tanda 1 (10:30-12:00), aula 4.2.E02. **Somos los últimos de la tanda.** Duración oficial: **5-7 minutos** (fuente: `[MEW26] Horas de presentaciones`, no incluido en el repo). Este guion dura 6 min.
 > **Orden.** Primero **3:45 de diapositivas** y después **salto directo a la demo en vivo (2:15)**. La demo es lo último que ve el jurado.
@@ -107,7 +107,7 @@ Pasos exactos, pantallas y plan B en [`DEMO_GUION.md`](DEMO_GUION.md). Esto es l
 |---|---|
 | **5 min** | Saltar la diapositiva 4 (el paso clave ya se ve en la demo) y la demo sin el paso de Claude con MyInvestor (cerrar en la entidad validada) |
 | **6 min** | El guion de arriba |
-| **7 min** | 15 s más a la diapositiva 4 y, en lugar de la demo guiada, la **entrevista corta por voz** (`carmen-corta`, unos 45 s más): Carmen contesta en directo las dos preguntas que faltan, salta el aviso y se valida. Ver `docs/MODO_ASESOR_DEMO.md` |
+| **7 min** | 15 s más a la diapositiva 4 y, en lugar de la demo guiada, la **entrevista corta por voz** (`carmen-corta`, unos 45 s más): Carmen contesta en directo las dos preguntas que faltan, salta el aviso y se valida. Ver `docs/modo-asesor-demo.md` |
 
 ## Comprobación de tiempos (habla a 130 palabras/min, ritmo tranquilo)
 
@@ -180,12 +180,12 @@ Estilo: el mismo que la web (fondo casi negro, brillos azul-violeta-rosa, tarjet
 
 | Afirmación | Fuente en el repo |
 |---|---|
-| El test depende de lo declarado; hay que comprobar | `docs/DISENO.md` (Marco legal MiFID) |
+| El test depende de lo declarado; hay que comprobar | `docs/diseno/01-diseno.md` (Marco legal MiFID) |
 | Aviso de ESMA sobre sistemas automatizados | `gestion/comunicacion/REVISION_NORMATIVA.md` (párr. 52) |
-| Solo perfiles, no recomienda | `docs/proyecto/02_AUDITORIA_Y_DECISIONES.md` (D1) |
-| Idoneidad y conveniencia | misma auditoría (D2) y `docs/CONTRATOS.md` |
+| Solo perfiles, no recomienda | `docs/diseno/02-auditoria-y-decisiones.md` (D1) |
+| Idoneidad y conveniencia | misma auditoría (D2) y `docs/contratos.md` |
 | Los números salen de Python | `backend/app/perfil/calculos.py` |
 | Lo que devuelve el MCP | `backend/app/mcp/servidor.py` (`get_investment_constraints`) |
 | Cifras medidas | `gestion/evaluacion/PLAN_Y_EVIDENCIAS.md` (E-02 a E-05) |
-| MyInvestor solo como conector en Claude | auditoría (D7) y `docs/proyecto/05_MCP_MYINVESTOR.md` |
+| MyInvestor solo como conector en Claude | auditoría (D7) y `docs/diseno/04-mcp-myinvestor.md` |
 | Competencia | `gestion/estrategia/ANALISIS_INICIAL.md` |

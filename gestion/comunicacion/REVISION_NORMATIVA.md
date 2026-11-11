@@ -1,8 +1,8 @@
 # Revisión normativa del pitch
 
-9 nov 2026 · Responsable: Rodrigo (revisión financiera y normativa, según `docs/REPARTO.md`)
+9 nov 2026 · Responsable: Rodrigo (revisión financiera y normativa, según `gestion/coordinacion/REPARTO.md`)
 
-> **Qué es esto.** Contraste de las citas legales de `docs/DISENO.md` y `docs/proyecto/02_AUDITORIA_Y_DECISIONES.md` con el **texto oficial** (EUR-Lex y BOE), leído en el navegador el 9/11/2026. El diseño las citaba "de memoria" y la auditoría la hizo una IA.
+> **Qué es esto.** Contraste de las citas legales de `docs/diseno/01-diseno.md` y `docs/diseno/02-auditoria-y-decisiones.md` con el **texto oficial** (EUR-Lex y BOE), leído en el navegador el 9/11/2026. El diseño las citaba "de memoria" y la auditoría la hizo una IA.
 > **Qué NO es.** No es asesoramiento jurídico. Es una comprobación de que lo que decimos coincide con lo que dicen los textos. Lo que depende de una decisión legal de la entidad (base jurídica, grabación) se marca como tal.
 > **Cómo leerlo.** ✔ confirmado en el texto oficial · ⚠ matiz o corrección · ✖ no se puede decir así · ❓ no pude verificarlo.
 
@@ -50,7 +50,7 @@
 |---|---|
 | Diapositiva 2 y PDF de una cara | Sustituir la etiqueta «verificar ESMA 2023» por la cita **Reg. Delegado 2017/565 (art. 54.7) y directrices de ESMA de 2023** (hecho) |
 | `PITCH_GUION.md` (diapositiva 2) | Idem: quitar `[VERIFICAR: ESMA 2023]` (hecho) |
-| `docs/DISENO.md` (dueño: Alex) | **Propuesta, no la toco yo:** corregir la fila "Registro" (arts. 72-76), añadir 54.7, 54.8 y 56, y quitar "traspone" de la Ley 6/2023 |
+| `docs/diseno/01-diseno.md` (dueño: Alex) | **Propuesta, no la toco yo:** corregir la fila "Registro" (arts. 72-76), añadir 54.7, 54.8 y 56, y quitar "traspone" de la Ley 6/2023 |
 | `PREGUNTAS_JURADO.md` | Usar las frases seguras de arriba |
 
 ## Pendiente de verificar (lo puedes hacer tú en 10 minutos)

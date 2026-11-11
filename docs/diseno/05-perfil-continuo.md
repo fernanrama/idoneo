@@ -1,6 +1,6 @@
 # Idóneo: evolución hacia un perfil financiero continuo
 
-9 noviembre 2026 · Propuesta estratégica para revisión del equipo. «Idóneo» sigue siendo un nombre provisional.
+9 noviembre 2026 · Propuesta estratégica para revisión del equipo.
 
 ## Visión y alcance
 
@@ -8,7 +8,7 @@ La entrevista inicial es el primer paso. La propuesta es que Idóneo mantenga un
 
 El valor esperado es reducir preguntas repetidas y dar a la entidad información más actual y trazable. Es una hipótesis de producto: todavía no se han medido ahorro de tiempo, precisión de las microentrevistas ni impacto en clientes reales.
 
-Este documento desarrolla la propuesta aportada en `Propuesta.pdf` (referencia local, no incorporada al repositorio). La actualización por eventos vitales ya aparece en [el diseño original](01_DISENO.md), [la auditoría](02_AUDITORIA_Y_DECISIONES.md) y [el contrato del perfil](04_CONTRATO_PERFIL.md). Aquí se ordena esa visión en tres fases, sin repetir el esquema ni cambiar contratos técnicos, cálculos o reparto. El estado de implementación se ha contrastado por lectura del código de la base local `a062686`; no acredita nuevas pruebas de funcionamiento con servicios reales.
+Este documento desarrolla la propuesta aportada en `Propuesta.pdf` (referencia local, no incorporada al repositorio). La actualización por eventos vitales ya aparece en [el diseño original](01-diseno.md), [la auditoría](02-auditoria-y-decisiones.md) y [el contrato del perfil](03-contrato-perfil.md). Aquí se ordena esa visión en tres fases, sin repetir el esquema ni cambiar contratos técnicos, cálculos o reparto. El estado de implementación se ha contrastado por lectura del código de la base local `a062686`; no acredita nuevas pruebas de funcionamiento con servicios reales.
 
 Contraste posterior con `main` en `470facd`: desde `ee4c48d` se han incorporado normalización de cifras, guardas de contexto y plausibilidad, procesamiento en serie por sesión y evaluación del extractor con entrevistas simuladas. Las [ejecuciones E-00 y E-01](../../gestion/evaluacion/PLAN_Y_EVIDENCIAS.md#2-ejecuciones-y-evidencias) registran resultados y limitaciones de esa evaluación; no validan la voz ni las microentrevistas. Estos cambios no añaden rutas administrativas, permisos de terceros ni un flujo de perfil continuo.
 
@@ -28,7 +28,7 @@ El recorrido propuesto combina una entrevista por voz con ElevenLabs y Claude, u
 
 **Parcialmente preparado:** integración del SDK de ElevenLabs, URL firmada y reenvío de turnos al backend. La documentación de voz deja pendientes las pruebas con cuenta real y móvil, la configuración de Claude en el agente de voz y la recuperación de audio. Las marcas de tiempo del navegador son aproximadas; una cita almacenada no acredita por sí sola la disponibilidad de un clip reproducible. La fase completa de voz, evidencias de audio y revisión no se presenta como validada de punta a punta.
 
-Referencias de implementación: [agentes](../../backend/app/agentes/README.md), [voz y límites de la prueba](../../frontend/README.md#voz-con-elevenlabs-lo-comprobado-y-lo-pendiente), [backend integrado](../CONTRATOS.md#backend-integrado-persistencia-validación-y-versionado).
+Referencias de implementación: [agentes](../../backend/app/agentes/README.md), [voz y límites de la prueba](../../frontend/README.md#voz-con-elevenlabs-lo-comprobado-y-lo-pendiente), [backend integrado](../contratos.md#backend-integrado-persistencia-validación-y-versionado).
 
 ## Fase 2 — Microentrevistas adaptativas
 
@@ -62,7 +62,7 @@ Esto permitiría a MyInvestor contextualizar alternativas de su catálogo según
 
 **Pendiente:** solicitudes de verificación, inicio de microentrevistas por otros agentes, devolución de resultados, autenticación y autorización de consumidores, permisos por cliente y propósito, minimización de datos y trazabilidad de accesos. Las lecturas actuales de API/MCP no autentican a sus consumidores; la demo debe usar datos simulados. `ADMIN_TOKEN` protege determinadas acciones administrativas, pero no resuelve esos permisos ni el filtro `Host`/`X-Forwarded-Host` autentica al asesor.
 
-La vía documentada para el catálogo de MyInvestor es su uso conversacional como conector en Claude; no se añade acceso programático desde Idóneo ni una copia del catálogo. Cualquier integración adicional requerirá revisar las condiciones y permisos aplicables. Véanse [los límites y condiciones ya recogidos](05_MCP_MYINVESTOR.md).
+La vía documentada para el catálogo de MyInvestor es su uso conversacional como conector en Claude; no se añade acceso programático desde Idóneo ni una copia del catálogo. Cualquier integración adicional requerirá revisar las condiciones y permisos aplicables. Véanse [los límites y condiciones ya recogidos](04-mcp-myinvestor.md).
 
 ## Ejemplo: Carmen comunica una nueva necesidad de liquidez
 

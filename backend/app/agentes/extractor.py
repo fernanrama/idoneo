@@ -1,6 +1,6 @@
 """Agente extractor (B1). Convierte los turnos de la entrevista en parches del perfil.
 
-Reparto del trabajo (contrato 04 y docs/REPARTO.md):
+Reparto del trabajo (contrato 04 y gestion/coordinacion/REPARTO.md):
 - Claude LEE: devuelve, con salida estructurada, qué datos aparecen, en qué turno, con qué cita literal,
   y categorías cerradas (certeza, periodo, resultado de una comprobación, reacción ante una caída).
 - El CÓDIGO DECIDE, de forma determinista y testeable:

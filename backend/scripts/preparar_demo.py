@@ -10,7 +10,7 @@ Qué hace:
   (sin él no se pueden crear clientes), `ADMIN_TOKEN`, `VOICE_USER_ID_SECRET`, `DEMO_ADVISOR_TOKEN` (el mismo
   en los dos ficheros) y `MCP_DEMO_TOKEN`;
 - activa el modo asesor de demostración (`DEMO_ADVISOR_MODE=1`), que solo funciona en local y con clientes
-  ficticios (docs/MODO_ASESOR_DEMO.md). Con `--sin-modo-asesor` no lo toca.
+  ficticios (docs/modo-asesor-demo.md). Con `--sin-modo-asesor` no lo toca.
 
 Qué no hace: no muestra ningún secreto, no cambia valores que ya estén puestos y no toca las claves de
 Claude ni de ElevenLabs (esas las pone cada persona a mano). Se puede ejecutar las veces que haga falta.

@@ -1,6 +1,6 @@
 # Reparto de desarrollo — 4 roles, 5 personas en código
 
-Versión del 8/11/2026. Hay cuatro módulos con dueño. Cada uno trabaja sobre los contratos de [CONTRATOS.md](CONTRATOS.md) y puede empezar **ya**, porque el backend v0 arranca con un perfil simulado de Carmen.
+Versión del 8/11/2026. Hay cuatro módulos con dueño. Cada uno trabaja sobre los contratos de [CONTRATOS.md](../../docs/contratos.md) y puede empezar **ya**, porque el backend v0 arranca con un perfil simulado de Carmen.
 
 | Rol | Persona | Módulo | Rutas que escribe |
 |---|---|---|---|

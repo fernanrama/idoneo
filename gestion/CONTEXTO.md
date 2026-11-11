@@ -4,11 +4,11 @@
 Dejar preparada la gestión integral del hackathon: repositorio, ideas, producto, desarrollo, evaluación, aprendizaje, demo, presentación y entrega. Las seis notas iniciales están creadas. El enunciado ha sido aportado y analizado por dirección; compartir el análisis y contrastar candidatas con el equipo antes de elegir producto y arquitectura. Fuente: [ANALISIS_INICIAL.md](estrategia/ANALISIS_INICIAL.md).
 
 ## Actualización 8/11 tarde — desarrollo iniciado
-- **Producto: Idóneo** (D-008), indicado por Fernán: el equipo empieza a desarrollarlo. Diseño de Alejandro en [docs/DISENO.md](../docs/DISENO.md). Demanda, novedad y encaje con los patrocinadores siguen siendo hipótesis por validar.
+- **Producto: Idóneo** (D-008), indicado por Fernán: el equipo empieza a desarrollarlo. Diseño de Alejandro en [docs/diseno/01-diseno.md](../docs/diseno/01-diseno.md). Demanda, novedad y encaje con los patrocinadores siguen siendo hipótesis por validar.
 - **Repo reorganizado** (D-009): gestión en `gestion/`, producto en `docs/`, código en `backend/` y `frontend/`. Checkout local: `C:\Users\ferna\gcx\hack-finance-uc3m-2026`. La carpeta antigua queda como copia de seguridad.
 - **PDF del enunciado fuera del repo** (D-010): solo en local, en `gestion/enunciado/`, porque el repo será visible para el jurado.
 - **Stack v0** (D-011): FastAPI + Next.js + ElevenLabs + Claude + MCP. Backend v0 probado en local (5 tests y arranque con datos simulados de Carmen). Pendiente de las pruebas de voz, del MCP de MyInvestor y del despliegue.
-- Reparto confirmado por Fernán en [docs/REPARTO.md](../docs/REPARTO.md): A Juan; B Hammad (entrevistador y extractor) y Pablo (verificador y medición); C Fernán; D Alejandro (incluye integración y entrega). Rodrigo: pitch y revisión financiera (propuesta).
+- Reparto confirmado por Fernán en [gestion/coordinacion/REPARTO.md](../gestion/coordinacion/REPARTO.md): A Juan; B Hammad (entrevistador y extractor) y Pablo (verificador y medición); C Fernán; D Alejandro (incluye integración y entrega). Rodrigo: pitch y revisión financiera (propuesta).
 - Lo que sigue más abajo es el estado previo a esta actualización; donde contradiga lo anterior, prevalece esta sección.
 
 ## Decisiones vigentes
@@ -44,4 +44,4 @@ Confirmar la separación de los seis nombres, habilidades, disponibilidad y resp
 La espera del enunciado queda superada por su recepción. Conservar las fechas declaradas del evento (8–12 de noviembre), distinguiéndolas del cierre de entrega comunicado (miércoles 23:59; 11/11 provisional, zona por confirmar). Recalcular el plan con ese cierre y la duración pendiente. Propuesta: contrastar dos candidatas durante 60–90 minutos cada una, buscar motivos de descarte y decidir con el equipo; no son validaciones ejecutadas. Orden de hitos: entender y elegir → recorrido completo → diferencial y evaluación → estabilización y ensayos → entrega.
 
 ## Uso
-Leer AGENTS.md. Consultar coordinacion/CHATS.md para los chats y coordinacion/areas/ para avances. Los chats no reciben automáticamente cada conversación de los demás: las notas son el punto de sincronización.
+Leer AGENTS.md. Consultar coordinacion/TABLERO.md y coordinacion/areas/ para avances. Los chats no reciben automáticamente cada conversación de los demás: las notas son el punto de sincronización.

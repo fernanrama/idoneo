@@ -1,6 +1,6 @@
 # MCP del perfil (rol D)
 
-Servidor MCP remoto con transporte HTTP ("streamable"), montado en la propia API en **`/mcp`**. Código: [`servidor.py`](servidor.py). Especificación: [`docs/proyecto/04_CONTRATO_PERFIL.md`](../../../docs/proyecto/04_CONTRATO_PERFIL.md), sección "Herramientas MCP y API REST".
+Servidor MCP remoto con transporte HTTP ("streamable"), montado en la propia API en **`/mcp`**. Código: [`servidor.py`](servidor.py). Especificación: [`docs/diseno/03-contrato-perfil.md`](../../../docs/diseno/03-contrato-perfil.md), sección "Herramientas MCP y API REST".
 
 | Herramienta | Entrada | Devuelve |
 |---|---|---|
@@ -46,7 +46,7 @@ La API REST no reconoce ninguna de las dos. Las cuatro herramientas se declaran 
 
 **Cliente:** Claude Code en el mismo portátil. Admite cabeceras (`claude mcp add -H`; comprobado en Claude Code 2.1.322) y conecta con `localhost` sin túnel. La cabecera se registra como referencia, `-H 'Authorization: Bearer ${IDONEO_MCP_TOKEN}'` con comillas simples: `~/.claude.json` guarda la referencia y Claude Code la resuelve al conectar, así que el token no queda escrito en disco. No usamos el conector de claude.ai ni el de Claude Desktop: necesitan una URL pública y, sin cabeceras propias, el token tendría que ir en la URL.
 
-El recorrido completo, con Carmen o con un cliente nuevo entrevistado en directo, está en [docs/MODO_ASESOR_DEMO.md](../../../docs/MODO_ASESOR_DEMO.md#recorrido-completo-del-pitch).
+El recorrido completo, con Carmen o con un cliente nuevo entrevistado en directo, está en [docs/modo-asesor-demo.md](../../../docs/modo-asesor-demo.md#recorrido-completo-del-pitch).
 
 ### Test de contrato
 
@@ -54,7 +54,7 @@ El recorrido completo, con Carmen o con un cliente nuevo entrevistado en directo
 
 ## MyInvestor: lo que se ha comprobado
 
-Detalle en [`docs/proyecto/05_MCP_MYINVESTOR.md`](../../../docs/proyecto/05_MCP_MYINVESTOR.md). Resumen:
+Detalle en [`docs/diseno/04-mcp-myinvestor.md`](../../../docs/diseno/04-mcp-myinvestor.md). Resumen:
 
 - 12 herramientas. `search_funds` filtra por `max_risk` (SRRI 1-7), `asset_type`, `esg_only` (art. 8 y 9), `max_ter` y `currency`; máximo 10 resultados sin paginación. Horizonte, liquidez, mínimos y exclusiones solo se pueden comprobar después, sobre la ficha (`post_filters`).
 - Los ETF no tienen SRRI.

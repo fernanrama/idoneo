@@ -4,7 +4,7 @@ Uso (desde backend/, con ANTHROPIC_API_KEY en ../.env o en el entorno):
 
     python scripts/evaluar_extractor.py
     python scripts/evaluar_extractor.py --caso 03 --repeticiones 3
-    python scripts/evaluar_extractor.py --informe ../docs/evaluacion-extractor.md
+    python scripts/evaluar_extractor.py --informe ../docs/evaluacion/extractor.md
 
 Reproduce el flujo real (cada turno del cliente se procesa al llegar, con extractor y verificador) en un
 almacén en memoria que no escribe en disco. Imprime, por caso, cada campo esperado o prohibido, y al

@@ -2,7 +2,7 @@
 
 Genera `../Idoneo_presentacion.pptx`: 8 diapositivas con el estilo «noche» de la web (fondo oscuro, brillos
 azul-violeta-rosa, tarjetas de vidrio y la esfera 3D), notas del orador con el guion y fundido.
-El texto hablado vive en [`../PITCH_GUION.md`](../PITCH_GUION.md) y debe coincidir con las notas.
+El texto hablado vive en [`../PITCH_GUION.md`](../../gestion/comunicacion/PITCH_GUION.md) y debe coincidir con las notas.
 
 **Regla de diseño: solo el texto necesario.** Cada diapositiva lleva su mensaje (título), la imagen y los rótulos
 que hacen falta para entenderla. Nada de pies de página, números, etiquetas decorativas ni párrafos. Lo que se

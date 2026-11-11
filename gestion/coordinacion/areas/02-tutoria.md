@@ -3,7 +3,7 @@
 Actualizado: 8 de noviembre de 2026. Estado: base de aprendizaje preparada; contenido aplicado pendiente del reto.
 
 ## Documento de trabajo
-[Guía de aprendizaje aplicado](../../aprendizaje/GUIA.md): método bajo demanda, glosario y ejemplo pendientes del caso, registro de comprensión y preguntas de defensa. Preparada y revisada para mantener separados estructura disponible y evidencia aún pendiente. Dirección revisará el documento. No se solicita ninguna respuesta durante esta preparación.
+Guía de aprendizaje aplicado (retirada del repositorio el 11/11; queda en el historial de Git): método bajo demanda, glosario y ejemplo pendientes del caso, registro de comprensión y preguntas de defensa. Preparada y revisada para mantener separados estructura disponible y evidencia aún pendiente. Dirección revisará el documento. No se solicita ninguna respuesta durante esta preparación.
 
 ## Misión y hechos
 Ayudar a Fernán a comprender, implementar y defender los conceptos financieros y técnicos que requiera el MVP. Está inscrito en el evento del 8 al 12 de noviembre y prevé centrarse en desarrollo; necesita apoyo en finanzas. Su nivel concreto está pendiente de diagnóstico. No se han recibido enunciado ni rúbrica, ni elegido producto o arquitectura.

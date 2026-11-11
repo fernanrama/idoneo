@@ -1,6 +1,6 @@
 # Contrato v1: cómo lo implementa el código
 
-**La especificación es [`docs/proyecto/04_CONTRATO_PERFIL.md`](proyecto/04_CONTRATO_PERFIL.md) (Alex).** Este documento no la repite: dice qué parte está implementada, dónde y en qué se desvía. El código de referencia es `backend/app/perfil/modelos.py` (esquema) y `calculos.py` (resultados). Cambiar el contrato = PR pequeña avisada al equipo.
+**La especificación es [`docs/diseno/03-contrato-perfil.md`](diseno/03-contrato-perfil.md) (Alex).** Este documento no la repite: dice qué parte está implementada, dónde y en qué se desvía. El código de referencia es `backend/app/perfil/modelos.py` (esquema) y `calculos.py` (resultados). Cambiar el contrato = PR pequeña avisada al equipo.
 
 Estado (8/11, `main`): contrato v1 (PR #9), MCP (PR #7) y persistencia, validación y versionado del backend (PR #8) integrados; frontend adaptado. Comportamiento del backend: sección [Backend integrado](#backend-integrado-persistencia-validación-y-versionado). Pendiente de revisión por **Alex** (especificación).
 
@@ -57,7 +57,7 @@ Comprobación con Carmen (datos simulados), que cubren los tests:
 memoria, contexto y voz exigen `Authorization: Bearer <credencial del cliente>` o una credencial
 de servicio explícita. Ni `client_id` ni `session_id` autorizan acceso. La posesión no acredita
 identidad real. Sin credencial: 401; recurso de otro cliente: 404. Véase
-[el contrato completo y las decisiones pendientes](MEMORIA_PERSONAL_SEGURIDAD.md).
+[el contrato completo y las decisiones pendientes](memoria-personal-seguridad.md).
 
 | Ruta | Qué hace | Códigos |
 |---|---|---|
@@ -81,8 +81,8 @@ identidad real. Sin credencial: 401; recurso de otro cliente: 404. Véase
 | `POST /api/webhooks/elevenlabs` | Verifica HMAC, deduplica por conversación y cierra/vincula la sesión post-llamada | 200 · 401 · 404 · 409 · 413 · 422 · 503 |
 | `POST /api/demo/reset` | Recarga a Carmen (DATOS SIMULADOS) como versión nueva; no borra el historial | 200 · 401 · 404 (`DEMO_ENDPOINTS=0`) |
 | `GET /api/demo/profile`, `GET /api/demo/constraints` | Ejemplo ficticio fijo, sin capa personal ni lectura del cliente mutable de Carmen. Desactivable con `DEMO_ENDPOINTS=0` | 200 · 404 |
-| `GET /api/demo/asesor/estado` · `GET /api/demo/asesor/clientes/{id}` · `POST …/{id}/validar` · `POST …/{id}/reiniciar` | Modo asesor de demostración, apagado por defecto: `X-Demo-Advisor-Token`, solo local y solo clientes ficticios. Valida con `store.validar` ([detalle](MODO_ASESOR_DEMO.md)) | 200 · 401 · 403 · 404 · 409 · 422 · 503 |
-| `POST /api/demo/operador/autorizaciones` `{client_id, ficticio: true, ttl_s?}` · `GET` · `DELETE …/{id}` · `DELETE` | Operador de la demo: autoriza un cliente ficticio nuevo para el asesor de demo y le emite un token MCP de lectura propio. Solo con `DEMO_ADVISOR_MODE=1`, en local y con `X-Admin-Token`. Caduca, se revoca y no sobrevive a un reinicio; no cambia el perfil MiFID ([detalle](MODO_ASESOR_DEMO.md#autorizar-un-cliente-nuevo-operador)) | 201 · 200 · 401 · 403 · 404 · 409 · 422 · 503 |
+| `GET /api/demo/asesor/estado` · `GET /api/demo/asesor/clientes/{id}` · `POST …/{id}/validar` · `POST …/{id}/reiniciar` | Modo asesor de demostración, apagado por defecto: `X-Demo-Advisor-Token`, solo local y solo clientes ficticios. Valida con `store.validar` ([detalle](modo-asesor-demo.md)) | 200 · 401 · 403 · 404 · 409 · 422 · 503 |
+| `POST /api/demo/operador/autorizaciones` `{client_id, ficticio: true, ttl_s?}` · `GET` · `DELETE …/{id}` · `DELETE` | Operador de la demo: autoriza un cliente ficticio nuevo para el asesor de demo y le emite un token MCP de lectura propio. Solo con `DEMO_ADVISOR_MODE=1`, en local y con `X-Admin-Token`. Caduca, se revoca y no sobrevive a un reinicio; no cambia el perfil MiFID ([detalle](modo-asesor-demo.md#autorizar-un-cliente-nuevo-operador)) | 201 · 200 · 401 · 403 · 404 · 409 · 422 · 503 |
 | `/mcp` | MCP con las 4 herramientas de solo lectura (`readOnlyHint`), sobre el perfil para consumidores. Credencial de cliente, de servicio o una [credencial MCP de demostración](../backend/app/mcp/README.md#conectarlo-en-claude-pitch) (`MCP_DEMO_TOKEN` o token de operador): solo por cabecera, solo desde local y solo sus clientes ficticios | 200 · 401 · 403 · 404 · 421 |
 | `GET /api/sessions/{id}/stream` (SSE) | Pendiente (Juan). El bus de eventos ya existe; el front sondea cada 1,5 s | — |
 | `GET /api/clients/{id}/dossier.pdf`, clips `.mp3` | Pendiente (Juan) | — |
@@ -190,7 +190,7 @@ En cada turno del cliente, extractor y verificador se ejecutan por separado (si 
 - `CLIENT_ACCESS_SECRET` obligatorio (mínimo 32 bytes) firma una credencial de posesión al crear un cliente nuevo. Nunca se emite otra por presentar un ID existente. Caducidad propuesta: ocho horas (`CLIENT_ACCESS_TTL_S`). No demuestra identidad ni permite recuperar datos antiguos sin credencial.
 - Lecturas y escrituras REST, contexto de agentes y las cuatro herramientas MCP comprueban el cliente autorizado. Las credenciales MCP de demostración (fija y de operador) solo valen en `/mcp`, por cabecera, desde local y para sus clientes ficticios; la API REST las rechaza (401). El transporte MCP también exige credencial. Los consumidores de servicio necesitan `ADMIN_TOKEN` explícito; no hay acceso implícito por localhost.
 - `POST /api/clients/{id}/validate` exige **ambos**: Bearer del propietario y `X-Admin-Token` de servicio. Reset exige servicio. Sin servicio configurado, estas acciones fallan con 503.
-- Las rutas Next de validación y reset devuelven 403 y no reenvían peticiones ni añaden credenciales de servicio, salvo con el [modo asesor de demostración](MODO_ASESOR_DEMO.md) activo: entonces el servidor Next usa su propio `DEMO_ADVISOR_TOKEN` (nunca `ADMIN_TOKEN` ni el Bearer del cliente) contra un backend local y solo para clientes ficticios. La validación web queda bloqueada hasta acordar un permiso independiente de asesor; el Bearer del cliente no sirve como ese permiso. La API directa sigue exigiendo propietario y servicio explícitos. La demo fija es de solo lectura.
+- Las rutas Next de validación y reset devuelven 403 y no reenvían peticiones ni añaden credenciales de servicio, salvo con el [modo asesor de demostración](modo-asesor-demo.md) activo: entonces el servidor Next usa su propio `DEMO_ADVISOR_TOKEN` (nunca `ADMIN_TOKEN` ni el Bearer del cliente) contra un backend local y solo para clientes ficticios. La validación web queda bloqueada hasta acordar un permiso independiente de asesor; el Bearer del cliente no sirve como ese permiso. La API directa sigue exigiendo propietario y servicio explícitos. La demo fija es de solo lectura.
 - Las credenciales permanecen en `sessionStorage`, fuera de URLs, metadatos de React y `localStorage`. Respuestas privadas con `Cache-Control: no-store`. Host/CORS son restricciones adicionales, no autorización. Una XSS podría leer la credencial; revisar el transporte antes de usar datos reales.
 - Pendiente: identidad real, comparar versiones, marcar un evento vital (`active → review_due`), que `next_review` venza solo, reconciliar tiempos/audio y coordinar el borrado con la retención configurada en ElevenLabs.
 
