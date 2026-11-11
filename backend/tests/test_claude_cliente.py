@@ -25,3 +25,14 @@ def test_sin_clave_no_se_crea_el_cliente(monkeypatch, sin_cliente):
     monkeypatch.setenv("ANTHROPIC_API_KEY", " \n")
     with pytest.raises(claude.ClaudeNoDisponible):
         claude._cliente_async()
+
+
+@pytest.mark.parametrize("pegada", ["sk-ant-ficticia-de-prueba\nMODEL_VERIFICADOR=claude-opus-5-5","sk-ant-ficticia de-prueba"])
+def test_una_clave_con_varias_lineas_se_rechaza_sin_mostrarla(monkeypatch, sin_cliente, pegada):
+    """Varias líneas del .env pegadas en el valor (visto en producción): error claro y la clave no aparece."""
+    monkeypatch.setenv("ANTHROPIC_API_KEY", pegada)
+    with pytest.raises(claude.ClaudeNoDisponible) as e:
+        claude._cliente_async()
+    assert "mal formada" in str(e.value)
+    assert "ficticia" not in str(e.value)
+    assert claude._cliente is None
