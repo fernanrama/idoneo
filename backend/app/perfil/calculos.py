@@ -52,6 +52,8 @@ ASSET_TYPE = {
 }
 # [ABIERTO] Operaciones en 3 años que compensan un conocimiento bajo, para la conveniencia.
 OPERACIONES_EXPERIENCIA = 5
+# [ABIERTO] SRI mínimo del perfil para buscar acciones sueltas: una acción suele estar en SRI 6–7.
+SRI_MIN_ACCIONES = 6
 # Plazo de reembolso máximo según la necesidad de liquidez.
 REEMBOLSO_MAX_DIAS = {"high": 3, "medium": 7}
 
@@ -244,9 +246,30 @@ def restricciones(perfil: Perfil) -> Restricciones:
     if s.risk_profile:
         funds["max_risk"] = s.max_sri
         portfolios = {"profile": s.risk_profile.value, "risk_max": RISK_MAX_CARTERAS[s.risk_profile]}
-    tipos = [ASSET_TYPE[f] for f in ASSET_TYPE if conv.get(f) == Conveniencia.appropriate]
-    if tipos:
-        funds["asset_type"] = tipos
+    # Lista explícita siempre: [] significa «ningún tipo», nunca «cualquiera».
+    funds["asset_type"] = [ASSET_TYPE[f] for f in ASSET_TYPE if conv.get(f) == Conveniencia.appropriate]
+
+    bloqueadas: list[str] = []
+    if not s.risk_profile:
+        bloqueadas += ["funds", "portfolios", "etfs", "stocks"]
+        motivos.append("Sin perfil de riesgo calculado: no se busca ningún producto")
+    else:
+        if not funds["asset_type"]:
+            bloqueadas.append("funds")
+            motivos.append("Ninguna familia de fondos es conveniente: no se buscan fondos")
+        if conv.get("etfs") != Conveniencia.appropriate:
+            bloqueadas.append("etfs")
+            motivos.append("ETF no convenientes o sin evaluar: no se buscan ETF")
+        else:
+            motivos.append("ETF convenientes, pero el catálogo no da su SRRI: comprobar el riesgo en cada ficha "
+                           f"(máximo {s.max_sri})")
+        if conv.get("stocks") != Conveniencia.appropriate:
+            bloqueadas.append("stocks")
+            motivos.append("Acciones no convenientes o sin evaluar: no se buscan acciones")
+        elif s.max_sri < SRI_MIN_ACCIONES:
+            bloqueadas.append("stocks")
+            motivos.append(f"Perfil {s.risk_profile.value} (SRI máximo {s.max_sri}): una acción suelta suele "
+                           f"tener SRI {SRI_MIN_ACCIONES}–7, no se buscan acciones")
 
     pref = valor(perfil, "sustainability.preference")
     art = valor(perfil, "sustainability.min_sfdr_article")
@@ -275,6 +298,7 @@ def restricciones(perfil: Perfil) -> Restricciones:
         client_id=perfil.client_id, profile_version=perfil.version, status=perfil.status, usable=usable,
         funds_query=funds, portfolios_query=portfolios, post_filters=post,
         appropriateness={f: v for f, v in conv.items() if v != Conveniencia.not_assessed},
+        blocked_searches=bloqueadas,
         evidence_refs=refs, rationale=motivos,
     )
 

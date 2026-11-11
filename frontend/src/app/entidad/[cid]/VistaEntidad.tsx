@@ -531,6 +531,7 @@ function Mcp({ restricciones: r }: { restricciones: Restricciones | null }) {
               funds_query: r.funds_query,
               portfolios_query: r.portfolios_query,
               post_filters: r.post_filters,
+              blocked_searches: r.blocked_searches ?? [],
             },
             null,
             2,

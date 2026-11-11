@@ -179,6 +179,8 @@ class Restricciones(BaseModel):
     portfolios_query: dict[str, Any] = Field(default_factory=dict)  # parámetros de search_portfolios
     post_filters: list[FiltroPosterior] = Field(default_factory=list)
     appropriateness: dict[str, Conveniencia] = Field(default_factory=dict)
+    # Búsquedas que no se hacen para este cliente: "funds", "portfolios", "etfs", "stocks".
+    blocked_searches: list[str] = Field(default_factory=list)
     evidence_refs: list[str] = Field(default_factory=list)
     rationale: list[str] = Field(default_factory=list)
 

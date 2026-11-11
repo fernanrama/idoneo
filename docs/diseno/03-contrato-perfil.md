@@ -167,6 +167,7 @@ Reglas de versiones:
     {"field": "min_initial", "op": "<=", "value": 20000, "why": "objectives.o1.amount_eur"}
   ],
   "appropriateness": {"equity_funds": "not_appropriate", "etfs": "not_appropriate", "stocks": "not_appropriate"},
+  "blocked_searches": ["etfs", "stocks"],
   "evidence_refs": ["knowledge.equity_funds", "financial.loss_capacity_eur"]
 }
 ```
