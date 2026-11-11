@@ -146,7 +146,7 @@ Abre **<https://hack-finance-uc3m-2026.vercel.app>**. El backend usa un plan gra
 Backend, en Windows (PowerShell):
 
 ```powershell
-git clone https://github.com/fernanrama/hack-finance-uc3m-2026
+git clone https://github.com/fernanrama/idoneo
 cd hack-finance-uc3m-2026\backend
 python -m venv .venv
 .venv\Scripts\activate        # si falla: Set-ExecutionPolicy -Scope Process Bypass
@@ -158,8 +158,8 @@ uvicorn app.main:app --port 8000
 Backend, en macOS o Linux:
 
 ```bash
-git clone https://github.com/fernanrama/hack-finance-uc3m-2026
-cd hack-finance-uc3m-2026/backend
+git clone https://github.com/fernanrama/idoneo
+cd idoneo/backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
