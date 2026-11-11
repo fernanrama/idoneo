@@ -85,7 +85,7 @@ export function PanelVivo({ perfil, enMarcha }: { perfil: Perfil | null; enMarch
 
           {su?.complete && (
             <div className={s.resumen}>
-              <div style={{ flex: "1 1 200px" }}>
+              <div style={{ flex: "1 1 320px" }}>
                 <span className="mono">Los números los calcula código, no la IA</span>
                 <strong>
                   {nombrePerfil(su.risk_profile)} · riesgo máximo {su.max_sri ?? "—"} de 7
