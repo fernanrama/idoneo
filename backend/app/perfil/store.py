@@ -328,8 +328,20 @@ def comprobar_parche(parche: Parche, autor: str) -> Parche:
         raise Conflicto(str(e)) from e
 
 
+_SIN_CONTENIDO = {"evidence", "updated_at", "updated_by", "confirmed_at", "confirmed_by"}
+
+
+def _es_confirmacion(previo: Fact, nuevo: Fact) -> bool:
+    """Mismo dato (valor, declarado, fuente, confianza, flags…); solo puede cambiar la evidencia."""
+    return previo.model_dump(exclude=_SIN_CONTENIDO) == nuevo.model_dump(exclude=_SIN_CONTENIDO)
+
+
 def _aplicar_parches(n: Perfil, normalizados: list[Parche], motivo: str, autor: str) -> str:
-    """Misma mutación para aplicar() y para los candidatos de validar()."""
+    """Misma mutación para aplicar() y para los candidatos de validar().
+
+    Confirmar (mismo dato con una cita nueva) acumula la evidencia y anota `confirmed_at`, sin cambiar el
+    valor ni `updated_at`. Sin cita nueva no hay nada que guardar: no se pierde la evidencia anterior.
+    """
     cambiado = False
     for c in normalizados:
         previo = n.mifid.get(c.path)
@@ -337,9 +349,17 @@ def _aplicar_parches(n: Perfil, normalizados: list[Parche], motivo: str, autor: 
             cambiado |= n.mifid.pop(c.path, None) is not None
             continue
         nuevo = _fact(c, autor, n.created_at)
-        if previo is None or not _iguales(previo, nuevo):
+        if previo is not None and _iguales(previo, nuevo):
+            continue
+        if previo is not None and _es_confirmacion(previo, nuevo):
+            nuevas = [e for e in nuevo.evidence if e not in previo.evidence]
+            if not nuevas:
+                continue
+            n.mifid[c.path] = previo.model_copy(update={
+                "evidence": [*previo.evidence, *nuevas], "confirmed_at": n.created_at, "confirmed_by": autor})
+        else:
             n.mifid[c.path] = nuevo
-            cambiado = True
+        cambiado = True
     if not cambiado:
         raise _SinCambios
     return motivo

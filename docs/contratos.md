@@ -119,6 +119,7 @@ Una escritura con varios parches es **todo o nada**. Excepción: lo que proponen
 ### Versionado
 
 - Cada cambio crea una versión nueva con `reason` y `author`; ninguna versión se modifica. Reescribir exactamente lo mismo no crea versión.
+- **Confirmaciones** (diseño 06, §4.3): el mismo dato (valor, declarado, fuente, confianza y flags) con una cita nueva **acumula** la evidencia y anota `confirmed_at`/`confirmed_by` en el `Fact`, sin cambiar `value` ni `updated_at`. Crea versión, pero no cuenta como cambio para `pending_review`. Sin cita nueva no se escribe nada (no se pierde la evidencia anterior). Un cambio de valor o de fuente sustituye la evidencia, como antes.
 - En base de datos lo garantiza la propia base: `UPDATE`, `DELETE` y `TRUNCATE` bloqueados en `clients`, `profile_versions` y `turns` (también para el rol `postgres` y con `CASCADE`).
 - Concurrencia optimista: si otra escritura (de este u otro proceso) se adelanta, se relee y reintenta; tras 5 intentos, 409.
 - Las alertas no se duplican: se ignora una alerta con el mismo `flag` y `path` que otra abierta, o con un `id` ya existente. Una alerta solo puede apuntar a una ruta de `CAMPOS` (o a ninguna).
