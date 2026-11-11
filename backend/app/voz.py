@@ -18,7 +18,7 @@ import httpx
 from fastapi import APIRouter, Header, HTTPException, Request
 from pydantic import BaseModel
 
-from . import acceso
+from . import acceso, limites
 from .agentes import chat, memoria
 from .perfil import store
 
@@ -96,6 +96,7 @@ async def url_firmada(x_admin_token: str | None = Header(default=None)):
 async def bootstrap(body: BootstrapVoz, authorization: str | None = Header(default=None),
                     x_admin_token: str | None = Header(default=None)):
     acceso.exigir_sesion(body.session_id, authorization, x_admin_token)
+    limites.consumir("voz", "LIMITE_VOZ_DIA")  # cada conexión abre una llamada de ElevenLabs
     contexto = contexto_sesion(body.session_id)
     return {"signed_url": await _url_firmada(), **contexto}
 

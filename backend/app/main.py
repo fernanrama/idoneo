@@ -27,7 +27,7 @@ from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Re
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from pydantic import BaseModel, ConfigDict, Field, field_validator  # noqa: E402
 
-from . import acceso, asesor_demo, demo_operador, voz  # noqa: E402
+from . import acceso, asesor_demo, demo_operador, limites, voz  # noqa: E402
 from .agentes import chat as entrevistador  # noqa: E402
 from .agentes import claude, contexto, extractor, verificador  # noqa: E402
 from .mcp import demo as mcp_demo  # noqa: E402
@@ -55,7 +55,7 @@ async def lifespan(_app: FastAPI):
 app = FastAPI(title="API del perfil", version="1.0.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("CORS_ORIGINS", "http://localhost:3000").split(","),
+    allow_origins=[o.strip().rstrip("/") for o in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",") if o.strip()],
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["ETag"],
@@ -139,6 +139,7 @@ def crear_sesion(body: NuevaSesion, authorization: str | None = Header(default=N
         return _llamar(store.crear_sesion, body.client_id, body.channel)
     # Verificar configuración antes de alterar el almacén; solo un alta exclusiva emite posesión.
     emitir = acceso.preparar_emision()
+    limites.consumir("sesion", "LIMITE_SESIONES_DIA")  # tope de gasto en un despliegue público
     cid = f"cliente-{uuid.uuid4().hex}"
     _llamar(store.crear_nuevo, cid)
     sesion = _llamar(store.crear_sesion, cid, body.channel)
@@ -229,10 +230,16 @@ async def _procesar_turno_sin_candado(session_id: str) -> None:
 
 @app.post("/api/sessions/{session_id}/turns", dependencies=[Depends(acceso.exigir_sesion)], status_code=202)
 def anadir_turno(session_id: str, turno: Turno, tareas: BackgroundTasks):
+    if turno.speaker == "client":
+        limites.comprobar_turnos(_turnos_cliente(session_id))
     t = _llamar(store.anadir_turno, session_id, turno)
     if turno.speaker == "client":
         tareas.add_task(_procesar_turno, session_id)
     return {"turn_id": t.turn_id}
+
+
+def _turnos_cliente(session_id: str) -> int:
+    return sum(1 for t in _llamar(store.sesion, session_id)["turns"] if t.speaker == "client")
 
 
 def _segundos(sesion: dict) -> float:
@@ -254,6 +261,7 @@ async def chat(session_id: str, body: MensajeChat, tareas: BackgroundTasks):
         raise HTTPException(503, "Modo texto no disponible: falta ANTHROPIC_API_KEY en el backend")
     cliente = None
     if body.text and body.text.strip():
+        limites.comprobar_turnos(sum(1 for x in s["turns"] if x.speaker == "client"))
         t = _segundos(s)
         cliente = _llamar(store.anadir_turno, session_id, Turno(speaker="client", text=body.text.strip(), t_start=t, t_end=t))
         tareas.add_task(_procesar_turno, session_id)

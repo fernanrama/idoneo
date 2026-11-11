@@ -211,6 +211,8 @@ Idóneo no «cumple MiFID» por sí solo: ayuda a la entidad a recoger y documen
 
 ## Configuración
 
+**Producción** (Vercel + Render + Supabase, con topes de gasto): [docs/despliegue.md](docs/despliegue.md).
+
 El `.env` va en la raíz del repo (plantilla en `.env.example`) y nunca se sube a Git. Arranca el backend desde `backend/`: las rutas relativas (`DATA_DIR=./data`) se resuelven desde ahí y `backend/data/` está ignorada por Git.
 
 <details>
