@@ -90,7 +90,7 @@ def entrevistar(monkeypatch, c: TestClient) -> dict:
     monkeypatch.setenv("ANTHROPIC_API_KEY", "clave-de-prueba")
     monkeypatch.setattr(claude, "_cliente_async", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("sin red")))
 
-    async def responder(turnos, perfil):
+    async def responder(turnos, perfil, revision=None):
         return chat.Respuesta(texto="¿Seguimos?", terminada=False)
 
     async def extraer(turnos, perfil, session_id):

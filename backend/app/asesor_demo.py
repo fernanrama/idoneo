@@ -30,7 +30,7 @@ from urllib.parse import urlsplit
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
 
 from . import acceso, demo_autorizaciones
-from .perfil import store, validacion
+from .perfil import revision, store, validacion
 
 log = logging.getLogger("perfil.asesor_demo")
 
@@ -171,7 +171,9 @@ def expediente(client_id: str, conf: Configuracion = Depends(exigir_asesor_demo)
     return {"profile": _perfil_para_asesor(cid),
             "constraints": _llamar(store.restricciones_para_consumidor, cid).model_dump(mode="json"),
             "versions": [{**v, "created_at": v["created_at"].isoformat(), "status": v["status"].value}
-                         for v in _llamar(store.versiones, cid)]}
+                         for v in _llamar(store.versiones, cid)],
+            "review": revision.vista(_llamar(revision.en_curso, cid)),
+            "changes": (c.model_dump(mode="json") if (c := _llamar(revision.comparar, cid)) else None)}
 
 
 @router.post("/clientes/{client_id}/validar")

@@ -32,7 +32,7 @@ from .agentes import chat as entrevistador  # noqa: E402
 from .agentes import claude, contexto, extractor, verificador  # noqa: E402
 from .mcp import demo as mcp_demo  # noqa: E402
 from .mcp.servidor import mcp  # noqa: E402
-from .perfil import calculos, store  # noqa: E402
+from .perfil import calculos, revision, store  # noqa: E402
 from .perfil.modelos import EstadoPerfil, Parche, Perfil, Restricciones, Turno  # noqa: E402
 
 log = logging.getLogger("perfil.api")
@@ -97,6 +97,11 @@ class NuevaSesion(BaseModel):
     model_config = ConfigDict(extra="forbid")
     client_id: str | None = Field(default=None, pattern=r"^[a-z0-9][a-z0-9_-]{0,63}$")
     channel: Literal["voice", "text"] = "voice"
+
+
+class PeticionRevision(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    reasons: list[str] = Field(min_length=1, max_length=8)
 
 
 class MensajeChat(BaseModel):
@@ -267,7 +272,8 @@ async def chat(session_id: str, body: MensajeChat, tareas: BackgroundTasks):
         tareas.add_task(_procesar_turno, session_id)
     turnos = store.sesion(session_id)["turns"]
     try:
-        r = await entrevistador.responder(turnos[-40:], store.perfil(s["client_id"]))
+        r = await entrevistador.responder(turnos[-40:], store.perfil(s["client_id"]),
+                                          _llamar(revision.en_curso, s["client_id"]))
     except Exception as e:  # rechazo del modelo, red, límite de uso…
         log.exception("Fallo del entrevistador en %s", session_id)
         raise HTTPException(502, f"El entrevistador no pudo responder: {type(e).__name__}") from e
@@ -300,7 +306,8 @@ async def pendientes(session_id: str):
         except asyncio.TimeoutError:
             pass
     perfil = store.perfil(s["client_id"])
-    return {"pending": entrevistador.pendientes(perfil), "text": entrevistador.pendientes_para_voz(perfil)}
+    rev = _llamar(revision.en_curso, s["client_id"])
+    return {"pending": entrevistador.pendientes(perfil, rev), "text": entrevistador.pendientes_para_voz(perfil, rev)}
 
 
 def _vista_capa(capa) -> dict[str, Any]:
@@ -376,6 +383,39 @@ def ver_restricciones(client_id: str):
     """Para consumidores: perfil activo más reciente; si no hay, el último con usable=false.
     `pending_review` dice qué datos están en revisión en una versión posterior (no usarlos para recomendar)."""
     return _llamar(store.restricciones_para_consumidor, client_id)
+
+
+# ---------- perfil vivo: microentrevista de revisión y antes/después ----------
+
+@app.get("/api/review-reasons")
+def motivos_revision():
+    """Qué puede contar el cliente en «Ha cambiado algo». Catálogo cerrado."""
+    return revision.opciones()
+
+
+@app.get("/api/clients/{client_id}/review", dependencies=[Depends(acceso.exigir_cliente)])
+def ver_revision(client_id: str):
+    """Revisión en curso: motivos, preguntas (con lo que consta) y cuáles ya se han contestado."""
+    return revision.vista(_llamar(revision.en_curso, client_id))
+
+
+@app.post("/api/clients/{client_id}/review/preview", dependencies=[Depends(acceso.exigir_cliente)])
+def previsualizar_revision(client_id: str, body: PeticionRevision):
+    """Qué se preguntaría con estos motivos. No escribe nada."""
+    return revision.vista(_llamar(revision.previsualizar, client_id, body.reasons))
+
+
+@app.post("/api/clients/{client_id}/review", dependencies=[Depends(acceso.exigir_cliente)], status_code=201)
+def abrir_revision(client_id: str, body: PeticionRevision):
+    """Abre la revisión (versión nueva en borrador). Después se abre una sesión normal con este cliente."""
+    return revision.vista(_llamar(revision.abrir, client_id, body.reasons))
+
+
+@app.get("/api/clients/{client_id}/changes", dependencies=[Depends(acceso.exigir_cliente)])
+def ver_cambios(client_id: str):
+    """Último perfil validado frente al último guardado: qué cambia y qué efecto tiene. null si nada."""
+    c = _llamar(revision.comparar, client_id)
+    return c.model_dump(mode="json") if c else None
 
 
 @app.get("/api/clients/{client_id}/evidence/{path}", dependencies=[Depends(acceso.exigir_cliente)])
