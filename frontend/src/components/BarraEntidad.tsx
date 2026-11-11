@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { Logo } from "./Logo";
 import s from "@/app/entidad/[cid]/entidad.module.css";
 
 export type Acceso = "comprobando" | "dentro" | "fuera";
@@ -47,8 +48,8 @@ export function BarraEntidad({ sesion, alSalir }: { sesion: boolean; alSalir?: (
     <header className={s.barra}>
       <div className={s.barraCaja}>
         <Link href="/admin" className={s.marca}>
-          <span className={s.logo} aria-hidden="true" />
-          Idóneo <span>para entidades</span>
+          <Logo variante="claro" alto={26} />
+          <span>para entidades</span>
         </Link>
         {sesion && (
           <nav className={s.nav} aria-label="Navegación de la entidad">

@@ -139,13 +139,6 @@
 }
 
 .marca { display: inline-flex; align-items: center; gap: 10px; color: var(--n-tinta); font-size: 13px; }
-.marcaPunto {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #ffffff, #8fa8ff 45%, #6d4bd8 100%);
-  box-shadow: 0 0 14px rgba(143, 168, 255, 0.7);
-}
 
 /* ---------- Bloques de la entrevista (versión noche) ---------- */
 .bloques { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; }

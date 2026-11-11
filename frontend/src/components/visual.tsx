@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Logo } from "./Logo";
 import { useCallback, useRef } from "react";
 import type { EstadoBloque } from "@/lib/bloques";
 import { Esfera3D, type AjustesEsfera, type Paleta } from "./Esfera3D";
@@ -92,11 +93,8 @@ export function Anotado() {
 
 export function MarcaNoche({ href = "/" }: { href?: string }) {
   return (
-    <Link href={href} className={s.marca}>
-      <span className={s.marcaPunto} aria-hidden="true" />
-      <span className="mono" style={{ letterSpacing: "0.28em", fontWeight: 500 }}>
-        Idóneo
-      </span>
+    <Link href={href} className={s.marca} aria-label="idóneo, inicio">
+      <Logo variante="oscuro" alto={28} decorativo />
     </Link>
   );
 }
