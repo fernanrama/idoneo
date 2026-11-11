@@ -26,7 +26,7 @@ Tests: `pytest tests/test_mcp.py tests/test_mcp_demo.py`. Probado el 8/11 con el
 
 ## Prueba completa en Claude (9/11)
 
-Hecha con un túnel de cloudflared desde el portátil de Alex, el conector añadido en Claude y Carmen validada (`active`, `usable: true`):
+Hecha con un túnel de cloudflared desde un portátil del equipo, el conector añadido en Claude y Carmen validada (`active`, `usable: true`):
 
 - Claude llamó a `get_investment_constraints` por la URL pública y recibió `max_risk: 3`, `asset_type: ["Monetario", "Renta Fija"]` y la renta variable `not_appropriate`.
 - Con esos límites, en MyInvestor: 450 fondos de renta fija y 28 monetarios en EUR con SRRI ≤ 3; ninguno de renta variable.

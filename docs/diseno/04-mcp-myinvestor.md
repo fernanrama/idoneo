@@ -6,7 +6,7 @@ Fecha: 2026-11-08. Endpoint: `https://mcp.myinvestor.es/mcp` (Streamable HTTP, s
 Servidor `myinvestor` v2.0.0, protocolo 2025-06-18. **No devuelve `Mcp-Session-Id`** (sin estado); `notifications/initialized` → HTTP 202.
 Catálogo: 2.410 fondos, 13 carteras robo (6 MyInvestor + 7 Finanbest), ~1.050 ETFs, ~6.000 acciones.
 
-Consultado a mano desde el portátil de Alex (5 llamadas de exploración). Los JSON en bruto no se suben al repo: los términos prohíben redistribuir los datos del catálogo.
+Consultado a mano (5 llamadas de exploración). Los JSON en bruto no se suben al repo: los términos prohíben redistribuir los datos del catálogo.
 
 ## ⚠️ Condiciones de uso (lo más importante)
 

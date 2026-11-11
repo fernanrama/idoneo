@@ -2,9 +2,6 @@
 
 ## Orientación
 
-**Código revisado:** `/Users/pablocpz/Desktop/hack-finance-uc3m-2026`<br>
-**Rama:** `feat/personal-memory-elevenlabs-harness`, en el mismo commit que `origin/main`, con cambios locales todavía sin commit.
-
 Aquí intervienen tres piezas distintas: el entrevistador conversa, Claude interpreta lenguaje natural y el extractor convierte esa interpretación en cambios seguros del perfil. La idea más importante es que **“Claude + extractor” no es otro chatbot ni una fase final**: es el procesamiento interno que se ejecuta después de cada turno del cliente.
 
 ```mermaid

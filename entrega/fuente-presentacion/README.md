@@ -2,7 +2,7 @@
 
 Genera `../Idoneo_presentacion.pptx`: 8 diapositivas con el estilo «noche» de la web (fondo oscuro, brillos
 azul-violeta-rosa, tarjetas de vidrio y la esfera 3D), notas del orador con el guion y fundido.
-El texto hablado vive en [`../PITCH_GUION.md`](../../gestion/comunicacion/PITCH_GUION.md) y debe coincidir con las notas.
+El texto hablado está en las notas del orador de cada diapositiva.
 
 **Regla de diseño: solo el texto necesario.** Cada diapositiva lleva su mensaje (título), la imagen y los rótulos
 que hacen falta para entenderla. Nada de pies de página, números, etiquetas decorativas ni párrafos. Lo que se
@@ -21,7 +21,7 @@ node build.js ../Idoneo_presentacion.pptx --hecho=voz,extractor,mcp            #
 node build.js ../Idoneo_presentacion.pptx --final --hecho=voz,extractor,mcp    # FINAL: notas limpias
 ```
 
-`--hecho=` marca lo que **funciona de verdad** (a 10/11, comprobado en `gestion/evaluacion/PLAN_Y_EVIDENCIAS.md`):
+`--hecho=` marca lo que **funciona de verdad** (a 10/11, comprobado en `docs/evaluacion/README.md`):
 
 | Clave | Qué significa | Estado 10/11 |
 |---|---|---|

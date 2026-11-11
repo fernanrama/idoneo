@@ -1,4 +1,4 @@
-# Frontend — Idóneo (rol C, Fernán)
+# Frontend — Idóneo
 
 Prototipo de **feature para la app móvil de MyInvestor**: onboarding del perfil inversor por voz. Next.js 16 (App Router), pensado primero para móvil. **No es un producto oficial; los datos son simulados.**
 
