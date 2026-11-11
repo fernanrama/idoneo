@@ -2,7 +2,7 @@
 
 Variables de entorno y persistencia del backend y del frontend. Para arrancar en local basta con `python scripts/preparar_demo.py` ([README](../README.md#pruébalo)); esta página es la referencia completa.
 
-**Producción** (Vercel + Render + Supabase, con topes de gasto): [docs/despliegue.md](despliegue.md). Desplegada en <https://hack-finance-uc3m-2026.vercel.app>.
+**Producción** (Vercel + Render + Supabase, con topes de gasto): [docs/despliegue.md](despliegue.md). Desplegada en <https://idoneo-app.vercel.app>.
 
 El `.env` va en la raíz del repo (plantilla en `.env.example`) y nunca se sube a Git. Arranca el backend desde `backend/`: las rutas relativas (`DATA_DIR=./data`) se resuelven desde ahí y `backend/data/` está ignorada por Git.
 
@@ -23,7 +23,7 @@ Todas están en `.env.example`.
 | `DEMO_ADVISOR_CLIENTS`, `DEMO_ADVISOR_ID` | `carmen-68,carmen-corta`, `asesor-demo` | Clientes ficticios permitidos y autor de la validación en ese modo |
 | `DEMO_ENDPOINTS` | `1` | `0` desactiva `POST /api/demo/reset` (para un despliegue público) |
 | `CORS_ORIGINS` | `http://localhost:3000` | Orígenes del front permitidos, separados por comas |
-| `MCP_ALLOWED_HOSTS` | vacío | Hosts públicos del MCP (túnel o despliegue) |
+| `MCP_ALLOWED_HOSTS` | vacío | Hosts públicos del MCP (túnel u otro despliegue), separados por comas. En Render no hace falta: el nombre del servicio (`RENDER_EXTERNAL_HOSTNAME`) se admite solo |
 | `ELEVENLABS_API_KEY`, `ELEVENLABS_AGENT_ID` | vacío | Voz privada: el backend crea el bootstrap firmado; sin ellas usa el agente público si el front tiene ID |
 | `VOICE_USER_ID_SECRET` | desarrollo local | Seudonimiza el `client_id` enviado como `userId`; debe ser aleatorio en despliegues |
 | `ELEVENLABS_WEBHOOK_SECRET` | vacío | Verifica el post-call webhook; sin él la ruta responde 503 |

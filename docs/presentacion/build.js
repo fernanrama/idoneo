@@ -1,4 +1,5 @@
-// Presentación de idóneo (Hack Finance UC3M 2026). Versión 5 (11/11): marca «Aurora» y papel TÉCNICO.
+// Presentación de idóneo (Hack Finance UC3M 2026). Versión 6 (11/11): marca «Aurora» y papel TÉCNICO;
+// la 6 compara con el test de casillas, la 7 enseña costes y la 8 cierra con dos peticiones.
 //
 // El pitch abre con el vídeo (problema, solución y cómo funciona). Estas diapositivas van DESPUÉS y cuentan lo
 // que el vídeo no puede: cómo está hecho por dentro, por qué es fiable y cómo se integra.
@@ -213,7 +214,70 @@ async function main() {
   s.addNotes("idóneo vive dentro de la app de cada entidad, con su marca: Powered by idóneo. En el alta, en microentrevistas cuando algo cambia y manteniendo el perfil vivo. Y se conecta a sus agentes de IA por MCP: el agente pide las restricciones de Carmen y recibe riesgo máximo tres y renta variable no conveniente. Probado con Claude y el conector de MyInvestor." +
     nota("\n(No decir precio. Si preguntan: lo contrata la entidad y lo integra como una función más.)"));
 
-  // ===== 6 · Lo que hemos medido =====
+  // ===== 6 · Frente al test de casillas =====
+  // Cifras: informes de docs/evaluacion/laboratorio/e07/ (Carmen dos veces, v004, v009 y v012) y E-06.
+  s = nueva(BG.centro);
+  titulo(s, "El formulario no detectó a ninguno.", { align: "center" });
+  texto(s, "En cinco entrevistas, el cliente decía conocer la renta variable y no era así.",
+    { x: 0.6, y: 1.05, w: 8.8, h: 0.45, fontSize: 13, color: K.suave, align: "center", valign: "middle", objectName: "Motivo" });
+  const frente = [
+    ["0 de 5", "Test de casillas", "Registra lo que el cliente marca.", K.rojo, null],
+    ["5 de 5", "idóneo", "Pregunta, comprueba y guarda la frase.", K.menta, K.menta],
+  ];
+  frente.forEach(([n, h, d, color, borde], i) => {
+    const x = 1.55 + i * 3.6;
+    vidrio(s, x, 1.8, 3.3, 2.3, "Cifra: " + h, borde);
+    texto(s, n, { x, y: 1.95, w: 3.3, h: 1.05, fontFace: F.tit, fontSize: 50, color, align: "center", valign: "middle" });
+    texto(s, h, { x: x + 0.1, y: 3.05, w: 3.1, h: 0.4, fontFace: F.tit, fontSize: 14, align: "center", valign: "middle" });
+    texto(s, d, { x: x + 0.1, y: 3.47, w: 3.1, h: 0.4, fontSize: 10, color: K.tenue, align: "center", valign: "top" });
+  });
+  texto(s, "Y no rebaja a quien sí sabe: 0 falsas alarmas en 24 pruebas · clientes simulados", { x: 0.6, y: 4.4, w: 8.8, h: 0.4, fontSize: 12, color: K.suave, align: "center", valign: "middle", objectName: "Límite" });
+  s.addNotes("¿Sirve de algo comprobar? En cinco entrevistas del laboratorio el cliente decía conocer la renta variable y creía que un fondo no puede perder. Un test de casillas registra lo que se marca: habría dejado pasar las cinco. idóneo las detectó todas, y no rebajó a quien sí sabía: cero falsas alarmas en veinticuatro pruebas del verificador. Con un límite claro: son clientes simulados, escritos para sobrevalorarse." +
+    nota("\n(Es una tasa de detección, no de frecuencia: no decir «uno de cada cuatro clientes». Si preguntan por los test con preguntas de control: docs/pitch.md.)"));
+
+  // ===== 7 · Lo que cuesta preguntar bien =====
+  // Coste: docs/evaluacion/README.md (tokens de Claude) más la voz. Multa: BOE-A-2025-21658. Son costes, no un precio.
+  s = nueva(BG.a);
+  titulo(s, "Preguntar bien cuesta un euro.\nNo preguntar costó 200.000.", { y: 0.35, h: 1.1, fontSize: 24, align: "center" });
+  const valor = [
+    ["≈ 1 €", "una entrevista por voz", "Estimado: tokens de Claude y unos seis minutos de voz.", K.menta],
+    ["≈ 10 €", "lo mismo con un asesor", "Supuesto del equipo: 20 minutos a 30 €/h.", K.suave],
+    ["200.000 €", "multa de la CNMV en 2025", "A CA Indosuez Wealth, por no recabar los conocimientos y experiencia de sus clientes.", K.rojo],
+  ];
+  valor.forEach(([n, h, d, color], i) => {
+    const x = 0.6 + i * 3.0;
+    vidrio(s, x, 1.8, 2.8, 2.3, "Valor: " + h);
+    texto(s, n, { x, y: 2.0, w: 2.8, h: 0.85, fontFace: F.tit, fontSize: 32, color, align: "center", valign: "middle" });
+    texto(s, h, { x: x + 0.1, y: 2.9, w: 2.6, h: 0.4, fontFace: F.tit, fontSize: 12, align: "center", valign: "middle" });
+    texto(s, d, { x: x + 0.15, y: 3.32, w: 2.5, h: 0.7, fontSize: 9.5, color: K.tenue, align: "center", valign: "top" });
+  });
+  texto(s, "BOE-A-2025-21658 · costes estimados a partir de los tokens y de los minutos de voz", { x: 0.6, y: 4.4, w: 8.8, h: 0.4, fontFace: F.mono, fontSize: 9.5, color: K.tenue, align: "center", valign: "middle", objectName: "Fuente" });
+  s.addNotes("¿Y cuánto cuesta? Una entrevista por voz nos sale en torno a un euro, entre Claude y la voz. La alternativa es el tiempo de un asesor. Y no preguntar tiene un precio público: en 2025 la CNMV multó con 200.000 euros a CA Indosuez Wealth por no recabar los conocimientos y experiencia de sus clientes." +
+    nota("\n(Pendiente: sustituir el coste de la voz por la factura de ElevenLabs y el del asesor por la cifra de un mentor. No decir precio: son costes y una multa pública. No decir que idóneo la habría evitado.)"));
+
+  // ===== 8 · Cierre =====
+  s = nueva(BG.centro);
+  img(s, ICONO, 4.55, 0.45, 0.9, 0.9, "Icono idóneo");
+  texto(s, "GPTadvisor hace fiable la recomendación.", { x: 0.5, y: 1.5, w: 9.0, h: 0.5, fontSize: 20, color: K.suave, align: "center", valign: "middle", objectName: "Frase 1" });
+  texto(s, "idóneo hace fiable el perfil sobre el que se recomienda.", { x: 0.3, y: 2.0, w: 9.4, h: 0.6, fontFace: F.tit, fontSize: 22, align: "center", valign: "middle", objectName: "Frase 2" });
+  texto(s, "PEDIMOS DOS COSAS", { x: 0.5, y: 2.85, w: 9.0, h: 0.3, fontFace: F.mono, fontSize: 10, color: K.tenue, charSpacing: 2, align: "center", valign: "middle" });
+  const peticiones = [
+    ["1", "Un piloto: 100 altas reales de MyInvestor, el test de casillas frente a idóneo."],
+    ["2", "Permiso para consultar su catálogo por MCP desde nuestro backend."],
+  ];
+  peticiones.forEach(([n, t], i) => {
+    const x = 0.9 + i * 4.2;
+    vidrio(s, x, 3.25, 4.0, 0.95, "Petición " + n, K.menta);
+    texto(s, n, { x: x + 0.2, y: 3.25, w: 0.4, h: 0.95, fontFace: F.tit, fontSize: 24, color: K.menta, valign: "middle" });
+    texto(s, t, { x: x + 0.65, y: 3.25, w: 3.2, h: 0.95, fontSize: 12, valign: "middle" });
+  });
+  s.addShape(SH.roundRect, { x: 3.3, y: 4.55, w: 3.4, h: 0.5, rectRadius: 0.25, fill: { color: K.menta }, line: { color: K.menta, width: 0 }, objectName: "Botón demo" });
+  img(s, IC.play, 3.6, 4.7, 0.2, 0.2, "Play");
+  texto(s, "Demo en vivo · datos simulados", { x: 3.88, y: 4.55, w: 2.82, h: 0.5, fontFace: F.tit, fontSize: 11.5, color: K.noche, valign: "middle" });
+  s.addNotes("GPTadvisor hace fiable la recomendación. idóneo hace fiable el perfil sobre el que se recomienda. Pedimos dos cosas: un piloto con cien altas reales, el test de casillas frente a idóneo, y permiso para consultar su catálogo desde nuestro backend. Vamos a verlo." +
+    nota("\n(Tras la demo en directo, volver a esta diapositiva: la petición es lo último que se oye. Antes del pitch, preguntar a GPTadvisor si su producto ya perfila al cliente: docs/pitch.md. Si no da tiempo a la demo: cerrar aquí con el lema «Perfiles vivos que cumplen la norma».)"));
+
+  // ===== 9 · Reserva para las preguntas: lo que hemos medido =====
   s = nueva(BG.centro);
   titulo(s, "Lo que hemos medido", { align: "center" });
   texto(s, [{ text: "ESMA avisa: ", options: { color: K.menta, fontFace: F.tit } }, { text: "con sistemas automatizados, el cliente tiende a sobrevalorarse.", options: { color: K.suave } }],
@@ -232,18 +296,7 @@ async function main() {
     texto(s, d, { x: x + 0.05, y: 3.32, w: 1.95, h: 0.6, fontSize: 9, color: K.tenue, align: "center", valign: "top" });
   });
   texto(s, "Clientes simulados · casos escritos por el equipo · no es una validación independiente", { x: 0.6, y: 4.4, w: 8.8, h: 0.4, fontSize: 12, color: K.suave, align: "center", valign: "middle", objectName: "Límite" });
-  s.addNotes("¿Por qué comprobar? ESMA avisa: con sistemas automatizados, el cliente tiende a sobrevalorarse. Lo que hemos medido: 31 de 31 datos acertados, 70 de 70 cubiertos, cero falsas alarmas y el perfil listo para validar en unos 43 segundos. Con un límite claro: clientes simulados y casos escritos por nosotros.");
-
-  // ===== 7 · Cierre =====
-  s = nueva(BG.centro);
-  img(s, ICONO, 4.45, 0.75, 1.1, 1.1, "Icono idóneo");
-  texto(s, "GPTadvisor hace fiable la recomendación.", { x: 0.5, y: 2.15, w: 9.0, h: 0.55, fontSize: 22, color: K.suave, align: "center", valign: "middle", objectName: "Frase 1" });
-  texto(s, "idóneo hace fiable el perfil sobre el que se recomienda.", { x: 0.3, y: 2.7, w: 9.4, h: 0.75, fontFace: F.tit, fontSize: 22, align: "center", valign: "middle", objectName: "Frase 2" });
-  s.addShape(SH.roundRect, { x: 3.3, y: 4.05, w: 3.4, h: 0.55, rectRadius: 0.27, fill: { color: K.menta }, line: { color: K.menta, width: 0 }, objectName: "Botón demo" });
-  img(s, IC.play, 3.6, 4.22, 0.2, 0.2, "Play");
-  texto(s, "Demo en vivo · datos simulados", { x: 3.88, y: 4.05, w: 2.82, h: 0.55, fontFace: F.tit, fontSize: 11.5, color: K.noche, valign: "middle" });
-  s.addNotes("GPTadvisor hace fiable la recomendación. idóneo hace fiable el perfil sobre el que se recomienda. Vamos a verlo." +
-    nota("\n(Si no da tiempo a la demo en directo: cerrar aquí con el lema «Perfiles vivos que cumplen la norma».)"));
+  s.addNotes("Reserva, solo si preguntan por las cifras. Lo que hemos medido: 31 de 31 datos acertados, 70 de 70 cubiertos, cero falsas alarmas y el perfil listo para validar en unos 43 segundos. Con un límite claro: clientes simulados y casos escritos por nosotros.");
 
   await pres.writeFile({ fileName: OUT });
   console.log("Escrito", OUT, FINAL ? "(final)" : "(trabajo)");

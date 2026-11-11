@@ -498,8 +498,49 @@ svg .f{transform:none}
   <div class="notas">idóneo vive dentro de la app de cada entidad, con su marca: Powered by idóneo. En el alta, en microentrevistas cuando algo cambia y manteniendo el perfil vivo. Y se conecta a sus agentes de IA por MCP: el agente pide las restricciones de Carmen y recibe riesgo máximo tres y renta variable no conveniente. Probado con Claude y el conector de MyInvestor.</div>
 </section>
 
-<!-- ============ 19 · LO QUE HEMOS MEDIDO (se mantiene) ============ -->
-<section class="slide" data-titulo="Lo que hemos medido">
+<!-- ============ 19 · FRENTE AL TEST DE CASILLAS (de #85; cifras en docs/pitch.md) ============ -->
+<section class="slide" data-titulo="Frente al test de casillas">
+  <h2 class="entra" style="text-align:center">El formulario no detectó a ninguno.</h2>
+  <p class="sub entra d1" style="text-align:center;margin-left:auto;margin-right:auto">En cinco entrevistas, el cliente decía conocer la renta variable y no era así.</p>
+  <div class="cifras4" style="grid-template-columns:repeat(2,1fr);max-width:1240px;margin:150px auto 0">
+    <div class="kpi entra d2" style="padding:50px 30px 44px"><div class="cifra" style="color:var(--rojo)">0 de 5</div><div class="et">Test de casillas</div><div class="de">Registra lo que el cliente marca.</div></div>
+    <div class="kpi entra d4" style="border-color:var(--menta);padding:50px 30px 44px"><div class="cifra grad">5 de 5</div><div class="et">idóneo</div><div class="de">Pregunta, comprueba y guarda la frase.</div></div>
+  </div>
+  <div class="pie entra d6" style="font-size:24px;color:var(--suave)">Y no rebaja a quien sí sabe: 0 falsas alarmas en 24 pruebas · clientes simulados</div>
+  <div class="notas">¿Sirve de algo comprobar? En cinco entrevistas del laboratorio el cliente decía conocer la renta variable y creía que un fondo no puede perder. Un test de casillas registra lo que se marca: habría dejado pasar las cinco. idóneo las detectó todas, y no rebajó a quien sí sabía: cero falsas alarmas en veinticuatro pruebas del verificador. Con un límite claro: son clientes simulados, escritos para sobrevalorarse.</div>
+</section>
+
+<!-- ============ 20 · LO QUE CUESTA PREGUNTAR BIEN (de #85; fuentes en docs/pitch.md) ============ -->
+<section class="slide" data-titulo="Lo que cuesta preguntar bien">
+  <h2 class="entra" style="text-align:center">Preguntar bien cuesta un euro.<br>No preguntar costó 200.000.</h2>
+  <div class="cifras4" style="grid-template-columns:repeat(3,1fr);margin-top:130px">
+    <div class="kpi entra d2"><div class="cifra media menta">≈ 1 €</div><div class="et">una entrevista por voz</div><div class="de">Estimado: tokens de Claude y unos seis minutos de voz.</div></div>
+    <div class="kpi entra d3"><div class="cifra media" style="color:var(--suave)">≈ 10 €</div><div class="et">lo mismo con un asesor</div><div class="de">Supuesto del equipo: 20 minutos a 30 €/h.</div></div>
+    <div class="kpi entra d4"><div class="cifra media" style="color:var(--rojo)">200.000 €</div><div class="et">multa de la CNMV en 2025</div><div class="de">A CA Indosuez Wealth, por no recabar los conocimientos y experiencia de sus clientes.</div></div>
+  </div>
+  <div class="pie entra d6 mono" style="font-size:20px">BOE-A-2025-21658 · costes estimados a partir de los tokens y de los minutos de voz</div>
+  <div class="notas">¿Y cuánto cuesta? Una entrevista por voz nos sale en torno a un euro, entre Claude y la voz. La alternativa es el tiempo de un asesor. Y no preguntar tiene un precio público: en 2025 la CNMV multó con 200.000 euros a CA Indosuez Wealth por no recabar los conocimientos y experiencia de sus clientes.</div>
+</section>
+
+<!-- ============ 21 · CIERRE CON DOS PETICIONES (de #85) ============ -->
+<section class="slide" data-titulo="Cierre">
+  <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+    <div class="entra" style="width:130px">{{ICONO}}</div>
+    <div class="entra d2" style="font-size:40px;color:var(--suave);margin-top:36px">GPTadvisor hace fiable la recomendación.</div>
+    <div class="entra d3" style="font-size:48px;font-weight:600;margin-top:12px">idóneo hace fiable el perfil <span class="grad">sobre el que se recomienda.</span></div>
+    <div class="entra d4 mono" style="margin-top:46px;font-size:20px;color:var(--tenue);letter-spacing:.2em">PEDIMOS DOS COSAS</div>
+    <div class="entra d4" style="display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:20px;max-width:1500px;text-align:left">
+      <div class="kpi" style="border-color:var(--menta);display:flex;gap:22px;align-items:center"><span class="cifra media menta">1</span><span style="font-size:27px">Un piloto: 100 altas reales de MyInvestor, el test de casillas frente a idóneo.</span></div>
+      <div class="kpi" style="border-color:var(--menta);display:flex;gap:22px;align-items:center"><span class="cifra media menta">2</span><span style="font-size:27px">Permiso para consultar su catálogo por MCP desde nuestro backend.</span></div>
+    </div>
+    <div class="entra d5" style="margin-top:46px"><span class="boton-demo">Demo en vivo · datos simulados</span></div>
+    <div class="entra d6 mono" style="margin-top:36px;font-size:20px;color:var(--tenue);letter-spacing:.1em">DEL CUESTIONARIO A LA CONVERSACIÓN · PERFILES VIVOS QUE CUMPLEN LA NORMA</div>
+  </div>
+  <div class="notas">GPTadvisor hace fiable la recomendación. idóneo hace fiable el perfil sobre el que se recomienda. Pedimos dos cosas: un piloto con cien altas reales, el test de casillas frente a idóneo, y permiso para consultar su catálogo desde nuestro backend. Vamos a verlo.</div>
+</section>
+
+<!-- ============ 22 · RESERVA: LO QUE HEMOS MEDIDO (solo si preguntan) ============ -->
+<section class="slide" data-titulo="Reserva: lo que hemos medido">
   <h2 class="entra" style="text-align:center">Lo que hemos medido</h2>
   <p class="sub entra d1" style="text-align:center;margin-left:auto;margin-right:auto"><span class="menta" style="font-weight:600">ESMA avisa:</span> con sistemas automatizados, el cliente tiende a sobrevalorarse.</p>
   <div class="cifras4">
@@ -509,19 +550,7 @@ svg .f{transform:none}
     <div class="kpi entra d5"><div class="cifra grad">43 s</div><div class="et">entrevista corta</div><div class="de">perfil listo para validar (E-08)</div></div>
   </div>
   <div class="pie entra d6" style="font-size:24px;color:var(--suave)">Clientes simulados · casos escritos por el equipo · no es una validación independiente</div>
-  <div class="notas">¿Por qué comprobar? ESMA avisa: con sistemas automatizados, el cliente tiende a sobrevalorarse. Lo que hemos medido: 31 de 31 datos acertados, 70 de 70 cubiertos, cero falsas alarmas y el perfil listo para validar en unos 43 segundos. Con un límite claro: clientes simulados y casos escritos por nosotros.</div>
-</section>
-
-<!-- ============ 20 · CIERRE (se mantiene) ============ -->
-<section class="slide" data-titulo="Cierre">
-  <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
-    <div class="entra" style="width:170px">{{ICONO}}</div>
-    <div class="entra d2" style="font-size:44px;color:var(--suave);margin-top:50px">GPTadvisor hace fiable la recomendación.</div>
-    <div class="entra d3" style="font-size:52px;font-weight:600;margin-top:16px">idóneo hace fiable el perfil <span class="grad">sobre el que se recomienda.</span></div>
-    <div class="entra d5" style="margin-top:70px"><span class="boton-demo">Demo en vivo · datos simulados</span></div>
-    <div class="entra d6 mono" style="margin-top:60px;font-size:22px;color:var(--tenue);letter-spacing:.1em">DEL CUESTIONARIO A LA CONVERSACIÓN · PERFILES VIVOS QUE CUMPLEN LA NORMA</div>
-  </div>
-  <div class="notas">GPTadvisor hace fiable la recomendación. idóneo hace fiable el perfil sobre el que se recomienda. Vamos a verlo.</div>
+  <div class="notas">Reserva, solo si preguntan por las cifras. Lo que hemos medido: 31 de 31 datos acertados, 70 de 70 cubiertos, cero falsas alarmas y el perfil listo para validar en unos 43 segundos. Con un límite claro: clientes simulados y casos escritos por nosotros.</div>
 </section>
 
   <div id="marca">{{LOGO_OSCURO_PEQ}}</div>
