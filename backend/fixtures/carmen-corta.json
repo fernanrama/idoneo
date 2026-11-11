@@ -2,7 +2,7 @@
   "client_id": "carmen-corta",
   "version": 1,
   "status": "draft",
-  "reason": "DATOS SIMULADOS: Carmen con la entrevista casi hecha, para la entrevista corta en directo del pitch (faltan conocimiento de renta variable, escenario de caída y sostenibilidad)",
+  "reason": "DATOS SIMULADOS: Carmen con la entrevista casi hecha, para la entrevista corta en directo del pitch (faltan el conocimiento de renta variable y el escenario de caída)",
   "author": "fixture",
   "mifid": {
     "disclosures.ai_notice_ack": {
@@ -208,6 +208,29 @@
         }
       ],
       "confidence": 0.6
+    },
+    "sustainability.preference": {
+      "value": "none",
+      "source": "declared",
+      "updated_by": "fixture",
+      "evidence": [
+        {
+          "session_id": "s-demo",
+          "turn_id": "t-016",
+          "t": [
+            82,
+            85
+          ],
+          "quote": "Eso me da igual, mientras no pierda."
+        }
+      ],
+      "confidence": 0.8
+    },
+    "sustainability.explained": {
+      "value": true,
+      "source": "declared",
+      "updated_by": "fixture",
+      "evidence": []
     }
   },
   "alerts": []

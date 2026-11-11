@@ -107,7 +107,7 @@ Pasos exactos, pantallas y plan B en [`DEMO_GUION.md`](DEMO_GUION.md). Esto es l
 |---|---|
 | **5 min** | Saltar la diapositiva 4 (el paso clave ya se ve en la demo) y la demo sin el paso de Claude con MyInvestor (cerrar en la entidad validada) |
 | **6 min** | El guion de arriba |
-| **7 min** | 15 s más a la diapositiva 4 y, en lugar de la demo guiada, la **entrevista corta por voz** (`carmen-corta`, unos 45 s más): Carmen contesta en directo las tres preguntas que faltan, salta el aviso y se valida. Ver `docs/MODO_ASESOR_DEMO.md` |
+| **7 min** | 15 s más a la diapositiva 4 y, en lugar de la demo guiada, la **entrevista corta por voz** (`carmen-corta`, unos 45 s más): Carmen contesta en directo las dos preguntas que faltan, salta el aviso y se valida. Ver `docs/MODO_ASESOR_DEMO.md` |
 
 ## Comprobación de tiempos (habla a 130 palabras/min, ritmo tranquilo)
 
