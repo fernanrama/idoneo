@@ -29,3 +29,39 @@ def test_el_catalogo_se_filtra_con_cada_restriccion():
     admitidos, descartados = e2e._filtrar_catalogo(restr, catalogo)
     assert admitidos == ["ok"] and set(descartados) == {"sri", "etf", "min", "usd", "fam"}
     assert e2e._filtrar_catalogo({**restr, "usable": False}, catalogo)[0] == []
+
+
+def test_el_modo_real_usa_un_solo_bucle_de_eventos(monkeypatch):
+    """El cliente de Anthropic es único: si cada petición abre su propio bucle, sus conexiones se cuelgan
+    hasta el timeout (la primera ejecución real tardó 19 minutos). Todo debe correr en el mismo bucle."""
+    import asyncio
+    from types import SimpleNamespace
+
+    from app import main
+    from app.agentes import claude, cliente_simulado
+
+    bucles: set[int] = set()
+    respuestas = iter(range(100))
+
+    def anotar():
+        bucles.add(id(asyncio.get_running_loop()))
+
+    async def estructurado(**_):
+        anotar()
+        raise RuntimeError("sin red en los tests")
+
+    async def entrevistador(*_a, **_k):
+        anotar()
+        return SimpleNamespace(texto="¿Seguimos?", terminada=next(respuestas) >= 4)
+
+    async def cliente(*_a, **_k):
+        anotar()
+        return "Sí."
+
+    monkeypatch.setattr(claude, "disponible", lambda: True)
+    monkeypatch.setattr(claude, "estructurado", estructurado)
+    monkeypatch.setattr(main.entrevistador, "responder", entrevistador)
+    monkeypatch.setattr(cliente_simulado, "responder", cliente)
+    informe = e2e.ejecutar("real", parchear=monkeypatch.setattr, fijar_entorno=monkeypatch.setenv)
+    assert informe.pasos[1].ok, informe.pasos[1].detalle
+    assert len(bucles) == 1
