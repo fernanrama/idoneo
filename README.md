@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/img/aura.gif" width="100%" alt="Portada de Idóneo: el aura del entrevistador cambia de color mientras lanza preguntas de ejemplo">
+<img src="docs/img/portada.png" width="100%" alt="Portada de idóneo: «Perfiles vivos que cumplen la norma. Del cuestionario a la conversación», con los botones «Mira cómo funciona» y «Pruébalo»">
 
 # Idóneo
 
@@ -30,7 +30,9 @@ y lo entrega por API y **MCP** a los agentes de la entidad.
 
 A la izquierda, lo que vive el cliente: el aura que le entrevista, una pregunta cada vez. A la derecha, lo que recibe la entidad en directo: cada dato con la frase que lo justifica, el aviso *declarado ≠ demostrado* y, al final, el perfil calculado con reglas fijas. Es la demo guiada de Carmen (`/escenario`), acelerada ×4. En el móvil, las dos mitades se ven por pestañas («El cliente» y «La entidad»).
 
-<p align="center"><img src="docs/img/demo-guiada.gif" width="100%" alt="Demo guiada: la entrevista de Carmen a la izquierda y su perfil construyéndose en directo a la derecha"></p>
+<p align="center"><img src="docs/img/demo-movil.png" width="100%" alt="Demo guiada: la entrevista de Carmen dentro del móvil de la entidad, con el sello «Powered by idóneo», y su perfil construido a la derecha"></p>
+
+<p align="center"><img src="docs/img/demo-asesor.png" width="100%" alt="Lo que recibe el asesor al acabar la demo: cada dato con su frase exacta y un botón para oírla, y la validación"></p>
 
 ## El problema
 
@@ -83,7 +85,7 @@ Resultado para Carmen, calculado por el backend:
 
 <table>
 <tr>
-<td align="center" width="25%"><img src="docs/img/movil-portada.png" alt="Portada en el móvil"><br><sub><b>1 · Entrada</b><br>La feature dentro de la app</sub></td>
+<td align="center" width="25%"><img src="docs/img/movil-portada.png" alt="Portada en el móvil"><br><sub><b>1 · Portada</b><br>Qué es idóneo y cómo probarlo</sub></td>
 <td align="center" width="25%"><img src="docs/img/movil-entrevista.png" alt="Entrevista con el aura y la pregunta de comprobación"><br><sub><b>2 · Entrevista</b><br>Por voz o por escrito, una pregunta cada vez</sub></td>
 <td align="center" width="25%"><img src="docs/img/movil-perfil.png" alt="Resumen del perfil para el cliente"><br><sub><b>3 · Su perfil</b><br>Lo que hemos entendido, con la frase de cada dato</sub></td>
 <td align="center" width="25%"><img src="docs/img/movil-productos.png" alt="Filtros del perfil y familias que puede contratar"><br><sub><b>4 · Sus límites</b><br>Riesgo máximo y qué familias le convienen</sub></td>
