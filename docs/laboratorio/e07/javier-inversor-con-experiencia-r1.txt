@@ -1,0 +1,53 @@
+TRANSCRIPCIÓN SIMULADA (cliente interpretado por Claude)
+
+Ficha:
+Javier, 34 años, ingeniero de software. Directo y con prisa, pero colabora.
+- Acepta la grabación.
+- Quiere invertir para la jubilación, a 25 años vista. No necesitará ese dinero antes.
+- Cobra 3.200 euros netos al mes, estables. Gastos fijos: unos 1.500 al mes, hipoteca incluida.
+- Ahorro disponible: 40.000 euros. Debe 120.000 euros de hipoteca.
+- Sabe bien cómo funcionan los ETF, las acciones y los fondos de renta variable: entiende que pueden caer mucho, que un ETF cotiza en bolsa y replica un índice, y que una sola acción tiene más riesgo que un fondo diversificado. Ha hecho unas 30 operaciones con ETF y acciones en los últimos tres años.
+- Sabe que si suben los tipos de interés, los bonos y los fondos de renta fija bajan de precio.
+- No ha tocado nunca productos complejos (derivados, estructurados) y lo dice.
+- En 2022 su cartera cayó un 20 % y compró algo más aprovechando la bajada.
+- La sostenibilidad le importa algo, pero no es lo principal.
+
+Asistente (t-001): Buenos días. Soy el asistente de inteligencia artificial del banco. Le haré unas preguntas sobre su situación, sus objetivos y lo que conoce de inversión, porque la ley nos obliga a hacerlo antes de ofrecerle productos de inversión. Una persona del banco revisará todo lo que hablemos. ¿Le parece bien que grabemos la conversación?
+Cliente (t-002): Sí, sin problema, grabe. Pero vamos al grano, que ando justo de tiempo.
+Asistente (t-003): Gracias, iremos al grano. Empiezo por lo principal: ¿para qué quiere invertir su dinero? Por ejemplo, ahorrar para la jubilación, comprar una vivienda o tener un colchón.
+Cliente (t-004): Para la jubilación. Es dinero a largo plazo, unos 25 años, no lo voy a necesitar antes.
+Asistente (t-005): Entendido, jubilación a 25 años, sin necesidad de usarlo antes. ¿Cuánto dinero más o menos piensa dedicar a esta inversión?
+Cliente (t-006): Tengo unos 40.000 euros ahorrados disponibles, y la idea es invertir la mayor parte de eso.
+Asistente (t-007): Gracias. Ahora un poco de su situación económica. ¿Cuánto ingresa más o menos al mes, una vez descontados los impuestos?
+Cliente (t-008): Unos 3.200 euros netos al mes, y son bastante estables.
+Asistente (t-009): Gracias. Ahora sus gastos: ¿cuánto suma más o menos al mes en gastos fijos, como hipoteca o alquiler, recibos y cuotas?
+Cliente (t-010): Unos 1.500 al mes, contando la hipoteca. Lo demás es variable, pero me sobra margen.
+Asistente (t-011): Gracias. Ya que menciona la hipoteca, ¿cuánto le queda más o menos por pagar de ella y de cualquier otra deuda que tenga?
+Cliente (t-012): Me quedan unos 120.000 euros de hipoteca. Otras deudas no tengo, nada más.
+Asistente (t-013): Gracias, anotado. Pasamos a su experiencia: ¿en qué ha invertido en los últimos tres años? Por ejemplo depósitos, fondos, acciones o algo más complejo. Si en nada, también me sirve.
+Cliente (t-014): Sobre todo ETF y algunas acciones sueltas, y algún fondo de renta variable. Habré hecho unas 30 operaciones en estos tres años. Productos complejos, tipo derivados o estructurados, nunca he tocado nada.
+Asistente (t-015): Gracias, muy claro. Sobre los fondos de renta variable, ¿cómo de bien diría que los conoce: nada, algo o bien?
+Cliente (t-016): Bien, los conozco bien. Sé que pueden caer mucho en un mal año, y que un fondo diversificado es menos arriesgado que una acción suelta.
+Asistente (t-017): Gracias. Una pregunta rápida para comprobarlo: si compra un fondo de renta variable en su banco, ¿podría perder dinero aunque lo venda el propio banco?
+Cliente (t-018): Sí, claro. Que lo venda el banco no garantiza nada, el valor sube y baja con el mercado y puedes perder parte de lo invertido.
+Asistente (t-019): Correcto, gracias. Ahora los fondos de renta fija, que son los que invierten en deuda de empresas o de Estados. ¿Cómo de bien diría que los conoce: nada, algo o bien?
+Cliente (t-020): Bien también. Sé que si suben los tipos de interés, los bonos y los fondos de renta fija bajan de precio, aunque a vencimiento recuperas lo invertido si no hay impago.
+Asistente (t-021): Muy bien, gracias. Antes de seguir, una pregunta rápida sobre renta fija para comprobarlo: si suben los tipos de interés, ¿qué cree que le pasa al valor de un fondo de renta fija?
+Cliente (t-022): Que baja, sobre todo si el fondo tiene bonos de vencimientos largos. Cuanto mayor es la duración, más le afecta la subida de tipos.
+Asistente (t-023): Correcto, gracias. Ahora sobre las acciones, que ha mencionado: ¿cómo de bien diría que las conoce: nada, algo o bien?
+Cliente (t-024): Bien. Sé que una acción puede caer mucho, incluso a cero si la empresa quiebra, y que es más arriesgado que un fondo diversificado. Llevo tiempo comprando y vendiendo.
+Asistente (t-025): Gracias. Ahora los ETF, que también ha mencionado: ¿cómo de bien diría que los conoce: nada, algo o bien?
+Cliente (t-026): Bien. Un ETF cotiza en bolsa como una acción y replica un índice, con comisiones bajas. Y también puede caer mucho si el índice cae.
+Asistente (t-027): Gracias. Una pregunta rápida para comprobarlo: si compra acciones de una sola empresa, ¿qué riesgo tiene frente a un fondo?
+Cliente (t-028): Que concentras todo el riesgo en una sola empresa. Si le va mal, pierdes mucho, y en un fondo diversificado ese golpe se reparte entre muchas compañías.
+Asistente (t-029): Correcto, gracias. Ya hemos hecho las comprobaciones, así que pasamos a otro tema. Imagine que sus ahorros invertidos bajan un veinte por ciento en unos meses. ¿Qué haría: vendería todo, vendería una parte, esperaría o compraría más?
+Cliente (t-030): Esperaría, y si puedo, compraría algo más. En 2022 mi cartera cayó un 20 % y aproveché la bajada para comprar. Con 25 años por delante, no me preocupa.
+Asistente (t-031): Gracias, queda anotado. Una última pregunta sobre lo que conoce: ¿en qué se parece un ETF a un fondo de inversión y en qué se diferencia?
+Cliente (t-032): Se parecen en que los dos son cestas de activos, diversificadas y con riesgo de mercado. La diferencia es que el ETF cotiza en bolsa y lo compras y vendes en cualquier momento, y suele replicar un índice con comisiones bajas. El fondo se suscribe y reembolsa a valor liquidativo, y muchos son de gestión activa.
+Asistente (t-033): Gracias, muy clara su explicación. Pasamos a lo último. Algunas inversiones siguen criterios ambientales o sociales, por ejemplo evitar empresas muy contaminantes. ¿Es algo que le importa a la hora de invertir?
+Cliente (t-034): Me importa algo, la verdad, pero no es lo principal. Si dos opciones son parecidas, prefiero la más sostenible, pero primero miro rentabilidad y riesgo.
+Asistente (t-035): Gracias, queda anotado. Una última cosa sobre la sostenibilidad: si tuviera que decir cuánto peso le daría a ese criterio, ¿diría que poco, un peso medio o mucho?
+Cliente (t-036): Poco, diría yo. Me parece bien que sea sostenible, pero solo como desempate; lo que decide es rentabilidad y riesgo.
+Asistente (t-037): Gracias, queda claro. Una última cosa sobre el dinero que quiere invertir: de esos 40.000 euros, ¿qué cantidad aproximada piensa destinar a la jubilación? Con un "más o menos" me basta.
+Cliente (t-038): Unos 35.000, más o menos. Prefiero dejarme un colchón de 5.000 aparte para imprevistos.
+Asistente (t-039): Gracias, anotado: unos 35.000 euros para la jubilación y 5.000 aparte como colchón. Con esto tengo lo que necesitaba. Resumiendo: quiere invertir a largo plazo, unos 25 años, para su jubilación, tiene ingresos estables, experiencia con ETF, acciones y fondos, y mantendría la calma ante una caída, dando poca importancia a la sostenibilidad. Una persona del banco revisará su perfil y le avisarán. Gracias por su tiempo y que tenga un buen día.

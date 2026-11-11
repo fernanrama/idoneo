@@ -1,0 +1,47 @@
+TRANSCRIPCIÓN SIMULADA (cliente interpretado por Claude)
+
+Ficha:
+Javier, 34 años, ingeniero de software. Directo y con prisa, pero colabora.
+- Acepta la grabación.
+- Quiere invertir para la jubilación, a 25 años vista. No necesitará ese dinero antes.
+- Cobra 3.200 euros netos al mes, estables. Gastos fijos: unos 1.500 al mes, hipoteca incluida.
+- Ahorro disponible: 40.000 euros. Debe 120.000 euros de hipoteca.
+- Sabe bien cómo funcionan los ETF, las acciones y los fondos de renta variable: entiende que pueden caer mucho, que un ETF cotiza en bolsa y replica un índice, y que una sola acción tiene más riesgo que un fondo diversificado. Ha hecho unas 30 operaciones con ETF y acciones en los últimos tres años.
+- Sabe que si suben los tipos de interés, los bonos y los fondos de renta fija bajan de precio.
+- No ha tocado nunca productos complejos (derivados, estructurados) y lo dice.
+- En 2022 su cartera cayó un 20 % y compró algo más aprovechando la bajada.
+- La sostenibilidad le importa algo, pero no es lo principal.
+
+Asistente (t-001): Buenos días. Soy el asistente virtual del banco y soy una inteligencia artificial. Le haré unas preguntas sobre su situación, sus objetivos y su experiencia con la inversión, porque la ley nos obliga a conocerle antes de ofrecerle productos de inversión. Una persona del banco revisará todo lo que hablemos. No le voy a recomendar nada ahora. ¿Le parece bien que grabemos la conversación?
+Cliente (t-002): Sí, sin problema, grabe. Vamos al grano, que ando justo de tiempo.
+Asistente (t-003): Gracias, iremos directos. Para empezar: ¿para qué quiere invertir, por ejemplo para complementar la jubilación, comprar una vivienda o tener un ahorro de reserva?
+Cliente (t-004): Para la jubilación. Tengo 34 años, así que hablamos de unos 25 años vista y ese dinero no lo voy a necesitar antes.
+Asistente (t-005): Entendido, gracias. Y ese dinero para la jubilación, ¿cuánto piensa dedicar más o menos? Una cifra aproximada vale.
+Cliente (t-006): Ahora mismo tengo unos 40.000 euros ahorrados disponibles. Luego iría aportando algo cada mes, según me vaya.
+Asistente (t-007): Perfecto, gracias. Pasemos a su situación del día a día: ¿cuánto cobra más o menos al mes, ya con los descuentos (neto)?
+Cliente (t-008): Unos 3.200 euros netos al mes, y es estable. Trabajo de ingeniero de software.
+Asistente (t-009): Gracias. Y en un mes normal, ¿cuánto suman sus gastos fijos más o menos, como alquiler o hipoteca, recibos y comida?
+Cliente (t-010): Unos 1.500 euros al mes, hipoteca incluida. Más o menos eso, tirando a ajustado.
+Asistente (t-011): Gracias, anotado. Hablemos ahora de otros bienes y deudas. Como ha mencionado una hipoteca, ¿cuánto le queda aproximadamente por pagar de ella y de cualquier otra deuda que tenga?
+Cliente (t-012): De hipoteca me quedan unos 120.000 euros. Otras deudas no tengo, solo esa.
+Asistente (t-013): Gracias, anotado. Pasamos a su experiencia. ¿En qué ha invertido en los últimos tres años? Por ejemplo depósitos, fondos, acciones o algo más complejo. Si no ha invertido en nada, también vale.
+Cliente (t-014): Sobre todo ETF y acciones sueltas, unas 30 operaciones en estos tres años. También algo de fondos de renta variable. Productos complejos, como derivados o estructurados, nunca he tocado.
+Asistente (t-015): Gracias, es muy útil. Voy a comprobar un par de cosas, empezando por los fondos de renta variable. ¿Cómo de bien diría que los conoce: nada, algo o bien?
+Cliente (t-016): Bien, los conozco bien. Sé que pueden caer mucho, y que un fondo diversificado es menos arriesgado que una acción suelta. Y los ETF cotizan en bolsa y replican un índice.
+Asistente (t-017): Gracias. Ya me ha explicado bien la idea de los fondos de renta variable, así que no hace falta insistir. Ahora los fondos de renta fija: ¿cómo de bien diría que los conoce: nada, algo o bien?
+Cliente (t-018): Bien también. Sé que si suben los tipos de interés, los bonos y los fondos de renta fija bajan de precio.
+Asistente (t-019): Gracias, eso me queda claro. Pasamos a otro tema: imagine que sus ahorros invertidos bajan un veinte por ciento en unos meses. ¿Qué haría: vendería todo, vendería una parte, esperaría o compraría más?
+Cliente (t-020): Esperaría y, si puedo, compraría algo más. De hecho me pasó en 2022: la cartera cayó un 20 % y aproveché la bajada para comprar un poco más.
+Asistente (t-021): Gracias, muy claro. Ahora un tema distinto: algunas inversiones siguen criterios ambientales o sociales, por ejemplo evitar empresas muy contaminantes. ¿Es algo que le importa a la hora de invertir?
+Cliente (t-022): Me importa algo, la verdad, pero no es lo principal. Si dos opciones se parecen en rentabilidad y riesgo, me quedo con la más sostenible.
+Asistente (t-023): Gracias, me queda claro. Para afinar un dato sobre las operaciones: de esas unas 30 que me comentó, ¿cuántas fueron aproximadamente en ETF y cuántas en acciones sueltas?
+Cliente (t-024): No lo llevo contado al detalle. Más o menos la mitad y la mitad, quizá algo más en ETF. Todo muy aproximado.
+Asistente (t-025): Gracias, con eso me vale. Solo me queda un dato sobre los fondos de renta variable: en estos tres años, ¿cuántas veces ha comprado o vendido alguno, más o menos? ¿Ninguna, una o dos veces, entre tres y diez, o más?
+Cliente (t-026): Pocas, la verdad. Entre una y dos veces, no más. Lo mío son más los ETF y las acciones.
+Asistente (t-027): Gracias, anotado. Una última cosa sobre los ETF: de esas operaciones, ¿diría que en estos tres años ha hecho con ellos ninguna, una o dos, entre tres y diez, o más de diez operaciones? Con una estimación me vale.
+Cliente (t-028): Más de diez, seguro. Si son unas 30 en total y la mitad o algo más son de ETF, andaré por las quince o así.
+Asistente (t-029): Gracias, con eso me queda claro lo de los ETF. Ya solo me falta confirmar un dato de las acciones sueltas: de esas unas 30 operaciones, ¿diría que en acciones ha hecho ninguna, una o dos, entre tres y diez, o más de diez?
+Cliente (t-030): Más de diez también, seguro. Si en ETF son unas quince, en acciones andaré por las catorce o quince, no sé exactamente.
+Asistente (t-031): Gracias, con eso me queda claro. Solo un detalle más sobre los fondos de renta variable: dice que ha hecho entre una y dos operaciones en estos tres años. ¿Me lo confirma, o diría que fueron más?
+Cliente (t-032): Sí, lo confirmo: una o dos veces, no más. Los fondos los toco poco, lo mío son los ETF y las acciones.
+Asistente (t-033): Muchas gracias por su tiempo y por ir directo al grano. Resumiendo: quiere invertir para su jubilación, a unos 25 años vista, con ingresos estables y experiencia sobre todo en ETF y acciones. Ante una caída, mantiene la calma, y valora algo la sostenibilidad. Una persona del banco revisará su perfil y le avisará. Que tenga un buen día.

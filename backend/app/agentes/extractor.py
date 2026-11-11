@@ -112,7 +112,8 @@ def _estado(perfil: Perfil) -> str:
         return "(vacío)"
     return "\n".join(
         f"- {ruta} = {json.dumps(f.value, ensure_ascii=False)} ({f.source.value}"
-        f"{', confianza baja' if Flag.low_confidence in f.flags else ''})"
+        f"{', confianza baja' if Flag.low_confidence in f.flags else ''}"
+        f"{', por revisar' if Flag.inconsistent in f.flags else ''})"
         for ruta, f in sorted(perfil.mifid.items()) if f.source != Fuente.calculated
     )
 
@@ -142,6 +143,8 @@ def _protegido(actual: Fact | None, p: Parche) -> bool:
             and actual.value == "none" and p.value != "none"
             and {e.session_id for e in actual.evidence} & {e.session_id for e in p.evidence}):
         return True  # un fallo en la comprobación no lo borra lo que el cliente repite tras la explicación
+    if Flag.inconsistent in actual.flags or (Flag.low_confidence in actual.flags and not rubrica.baja(p.confidence)):
+        return False  # el cliente lo confirma tras una repregunta: se reescribe y se limpian los flags
     return actual.value == p.value and actual.source == p.source and (actual.confidence or 0) >= (p.confidence or 0)
 
 

@@ -1,0 +1,56 @@
+TRANSCRIPCIÓN SIMULADA (cliente interpretado por Claude)
+
+Ficha:
+Antonio, 74 años, cobra una pensión de jubilación. Es muy hablador: se va por las ramas y cuenta anécdotas antes de contestar.
+- Acepta que se grabe la conversación.
+- Quiere invertir para complementar la pensión, durante unos 5 años. No necesitará ese dinero antes.
+- Cobra 1.250 euros de pensión al mes, estables.
+- Gastos fijos: unos 650 euros al mes.
+- Ahorro disponible: 76.000 euros.
+- Debe 82.000 euros (de hipoteca).
+- No sabe qué es un fondo de renta variable y lo reconoce.
+- No sabe cómo funcionan los fondos de renta fija.
+- Nunca ha usado productos complejos (derivados, estructurados) ni sabe qué son.
+- Si sus inversiones bajaran un 25 % en unos meses, lo vendería todo para no perder más.
+- La sostenibilidad le importa algo, pero no es lo principal.
+- Si sale el tema, menciona lo que gana su pareja, pero sus finanzas son separadas.
+
+Asistente (t-001): Buenos días. Soy el asistente virtual del banco y soy una inteligencia artificial. Le haré unas preguntas sobre su situación, sus objetivos y lo que conoce de inversión, porque la ley nos obliga a hacerlo antes de ofrecerle productos de inversión. Una persona del banco revisará todo lo que hablemos. Para empezar, ¿le parece bien que grabemos la conversación?
+Cliente (t-002): Buenos días, hijo. Pues mire, sí, no tengo inconveniente en que se grabe, que yo ya de joven decía que lo que uno dice hay que poder repetirlo. Adelante, adelante.
+Asistente (t-003): Muchas gracias, queda anotado. Vamos a ir poco a poco y sin prisa. Para empezar, ¿para qué le gustaría invertir su dinero? Por ejemplo, para tener un complemento en el futuro, ayudar a la familia o simplemente guardarlo.
+Cliente (t-004): Pues mire, yo cobro mi pensión de jubilado y me gustaría sacarle algo más al dinero que tengo ahorrado, para ir complementándola. Me acuerdo que mi cuñado, que en paz descanse, siempre decía que el dinero parado se oxida, y no le faltaba razón. Vamos, que es eso, un complemento.
+Asistente (t-005): Entiendo, un complemento a su pensión. Y dígame, más o menos, ¿cuánto dinero piensa dedicar a esto?
+Cliente (t-006): Pues verá, tengo ahorrados unos 76.000 euros, que es lo que he ido guardando toda la vida, trabajando en lo mío desde chaval. No sé si lo pondría todo, eso ya me lo dirá usted, que para eso está. Lo que sí le digo es que ese dinero no lo voy a necesitar en unos cinco años, como poco.
+Asistente (t-007): Gracias, es un dato muy útil. Sobre cuánto dedicar, no se preocupe: ahora solo estamos conociendo su situación y después un profesional del banco le propondrá opciones. Para ir cerrando este punto, ¿cuántos años más o menos piensa mantener ese dinero invertido: unos cinco, diez o más?
+Cliente (t-008): Pues unos cinco años, hijo, eso ya se lo he dicho antes. A mi edad no me pongo a hacer planes a veinte años, que como decía mi madre, uno propone y Dios dispone. Con cinco años me conformo.
+Asistente (t-009): Perdone la repetición, tiene toda la razón: ya me lo había dicho. Con cinco años queda claro. Ahora una pregunta sobre esos ahorros: ¿cree que podría necesitar parte de ese dinero antes de esos cinco años, por algún imprevisto o gasto importante?
+Cliente (t-010): Pues no lo creo, la verdad. Con la pensión me apaño bien para el día a día, que soy de gastos sencillos. Ya le digo, a mí me llega para vivir sin tocar esos ahorros, así que no pienso necesitarlos, salvo que pase algo muy gordo, que Dios no lo quiera.
+Asistente (t-011): Entendido, muchas gracias. Pasamos a su situación económica. Más o menos, ¿cuánto cobra al mes de pensión, una vez descontados los impuestos?
+Cliente (t-012): Pues cobro 1.250 euros al mes, todos los meses igual, que eso es lo bueno de la pensión, que no falla. Me acuerdo cuando empecé a trabajar, que cobraba en mano y en sobre, y había meses que ni sabías lo que ibas a traer a casa. Ahora al menos sé lo que entra.
+Asistente (t-013): Muchas gracias, 1.250 euros al mes y siempre igual, queda anotado. Ahora dígame, más o menos, ¿cuánto le suponen al mes sus gastos fijos, como la luz, el agua, la comida o la comunidad?
+Cliente (t-014): Pues mire, entre la luz, el agua, la comida y demás, unos 650 euros al mes, más o menos. Yo es que soy de poco gasto, ¿sabe? Mi difunta suegra decía que quien cuenta los céntimos nunca pasa hambre, y en mi casa eso se ha cumplido siempre.
+Asistente (t-015): Gracias, 650 euros al mes de gastos, queda anotado. Y dígame, aparte de esos ahorros, ¿tiene alguna deuda o préstamo pendiente, como una hipoteca o un crédito? Si no tiene ninguna, también me lo puede decir.
+Cliente (t-016): Pues sí, hijo, la hipoteca del piso, que todavía me quedan por pagar unos 82.000 euros. Fíjese que cuando la firmé pensaba que a estas alturas ya la tendría quitada, pero la vida da muchas vueltas. Es lo único que debo, eso sí, lo demás nada, que no me gusta deber.
+Asistente (t-017): Gracias por contármelo, queda anotado. Una pregunta para aclararlo bien: ¿esos 82.000 euros que le quedan de hipoteca es lo que debe en total, o tiene además algún otro préstamo o crédito, aunque sea pequeño?
+Cliente (t-018): No, hijo, no, es lo único que debo en total, esos 82.000 de la hipoteca y ya está. Otros préstamos o créditos no tengo ninguno, que eso de las tarjetas a plazos nunca me ha gustado. Como decía mi padre, lo que no puedes pagar hoy, no lo compres.
+Asistente (t-019): Muchas gracias, ya me ha quedado claro lo de las deudas. Pasamos ahora a lo que conoce de inversión. ¿En qué ha invertido en los últimos tres años? Por ejemplo, depósitos, fondos, acciones o algo más complejo. Si no ha invertido en nada, también me lo puede decir.
+Cliente (t-020): Pues verá, hijo, en los últimos tres años no he invertido en nada de nada. Lo tengo todo en la cuenta, que a mí lo de los fondos y esas cosas nunca me ha dado mucha confianza. Mi vecino del tercero se metió en no sé qué y le fue regular, y desde entonces yo me quedo con lo mío.
+Asistente (t-021): Gracias por contármelo, y no se preocupe, no hay respuestas buenas ni malas. Le pregunto por los fondos de renta variable, que son fondos que invierten en acciones de empresas. ¿Cómo de bien diría que los conoce: nada, algo o bien?
+Cliente (t-022): Pues nada, hijo, le soy sincero: no sé qué es eso de la renta variable. Me suena a cosa de los del telediario, pero explicármelo no sabría. Yo de joven lo más que tuve fue una libreta, que entonces daban su interés y todo.
+Asistente (t-023): Gracias por su sinceridad, queda anotado y no pasa nada. Ahora le pregunto por los fondos de renta fija, que son fondos que prestan dinero a empresas o a estados a cambio de un interés. ¿Cómo de bien diría que los conoce: nada, algo o bien?
+Cliente (t-024): Pues tampoco, hijo, nada. Me lo acaba de explicar usted y suena razonable, pero cómo funcionan por dentro no tengo ni idea. Mi hermano el mayor sí que se las daba de entendido en esas cosas, pero yo siempre me he fiado de lo que se ve.
+Asistente (t-025): Gracias, don no pasa nada, queda anotado. Pasamos a otro tema: imagine que sus ahorros invertidos bajan un veinte por ciento en unos meses. Es decir, de 76.000 euros pasarían a valer bastante menos. ¿Qué haría usted: vendería todo, vendería una parte, esperaría o compraría más?
+Cliente (t-026): Uy, hijo, eso me quitaría el sueño. Me acuerdo de cuando a mi vecino le pasó algo parecido y no durmió en una semana. Yo creo que lo vendería todo, para no perder más, que lo que se pierde ya no vuelve.
+Asistente (t-027): Gracias por su sinceridad, es una reacción muy comprensible y queda anotada. Cambiamos de tema: algunas inversiones siguen criterios ambientales o sociales, por ejemplo evitar empresas muy contaminantes. ¿Es algo que le importa a la hora de invertir?
+Cliente (t-028): Pues algo sí me importa, hijo, que uno quiere dejar el mundo decente para los nietos. Me acuerdo del río de mi pueblo, que antes bajaba limpio y ahora da pena verlo. Pero vamos, no es lo principal, lo primero es que el dinero esté seguro.
+Asistente (t-029): Gracias, es muy comprensible que lo primero sea que el dinero esté seguro. Le hago una pregunta sobre este tema: si hubiera que elegir, ¿preferiría que una parte de su dinero siguiera esos criterios ambientales o sociales, o le da igual y lo importante es lo demás?
+Cliente (t-030): Pues mire, hijo, si se puede, que una partecita vaya por ese camino, pues mejor, y si no, tampoco me lo voy a tomar a mal. Yo siempre digo que el que siembra, recoge, pero lo que quiero es no llevarme un susto con el dinero. Así que sí, algo sí, pero sin que me complique la cosa.
+Asistente (t-031): Gracias, queda claro: le importa algo, pero lo primero es la seguridad. Antes de terminar, quiero asegurarme de un dato. Con su pensión de 1.250 euros al mes, ¿diría que es una cifra que ya llega limpia a su cuenta, una vez descontados los impuestos?
+Cliente (t-032): Sí, hijo, esos 1.250 son los que me ingresan limpios en la cuenta, ya con todo descontado. Eso sí, me acuerdo de cuando cobraba el sueldo y siempre había alguna sorpresa en la nómina, ahora al menos no hay sustos.
+Asistente (t-033): Muchas gracias, queda claro. Una última pregunta sobre su situación: aparte de sus ahorros y del piso en el que vive, ¿tiene algún otro bien de valor, como otra vivienda, un terreno o un local? Si no tiene nada más, también me lo puede decir.
+Cliente (t-034): Pues no, hijo, nada más. Tengo el piso, que todavía lo estoy pagando, y los ahorros de la cuenta, y poco más. Mi mujer tiene lo suyo, pero eso va aparte, cada uno con sus cosas, que así nos llevamos mejor desde siempre.
+Asistente (t-035): Muchas gracias, queda anotado. Solo me falta aclarar un dato, para dejarlo bien apuntado: ese dinero que quiere invertir, ¿piensa mantenerlo invertido unos cinco años o más tiempo, o menos?
+Cliente (t-036): Pues unos cinco años, hijo, ya se lo he dicho un par de veces. Ni más ni menos, que a mi edad no me pongo a mirar más lejos. Eso sí, si hace falta que se lo repita otra vez, se lo repito, que paciencia no me falta.
+Asistente (t-037): Perdone otra vez la insistencia, don, tiene toda la razón: cinco años, queda claro y bien anotado. Gracias por su paciencia. Ya casi terminamos. Una última cosa sobre sus bienes: me dijo que tiene el piso y sus ahorros. ¿Más o menos, cuánto diría que vale hoy el piso en el que vive?
+Cliente (t-038): Pues mire, hijo, eso la verdad es que no lo sé con exactitud. Hace tiempo que no lo miro, y los precios van y vienen, como decía mi cuñado. Ya le digo que lo que me preocupa es lo que debo, no tanto lo que valga.
+Asistente (t-039): Muchas gracias, don, no se preocupe por el valor del piso, con lo que me ha contado es suficiente. Ya hemos terminado. Le agradezco su paciencia y su sinceridad. Por lo que he entendido, quiere sacar algo más a sus ahorros para complementar su pensión, durante unos cinco años, sin necesitar ese dinero, y lo primero para usted es la seguridad. Una persona del banco revisará todo lo que hemos hablado y le avisará. Que tenga un buen día.

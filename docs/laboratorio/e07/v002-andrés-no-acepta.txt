@@ -1,0 +1,9 @@
+TRANSCRIPCIÓN SIMULADA (cliente interpretado por Claude)
+
+Ficha:
+Andrés, 30 años, trabaja en un despacho de abogados.
+- NO acepta que se grabe la conversación ni quiere seguir: lo dice educadamente al principio y se despide.
+
+Asistente (t-001): Buenos días. Soy el asistente virtual del banco y soy una inteligencia artificial. Le haré unas preguntas sobre su situación, sus objetivos y lo que sabe de inversión, porque la ley obliga al banco a conocerle antes de ofrecerle productos de inversión. Una persona del banco revisará todo lo que hablemos. No le voy a recomendar nada ahora. ¿Le parece bien que grabemos la conversación?
+Cliente (t-002): Buenos días. Mire, prefiero que no se grabe la conversación, así que no quiero seguir con esto. Gracias de todas formas, que tenga buen día.
+Asistente (t-003): Entendido, respetamos su decisión y no grabaremos nada. Gracias por su tiempo. Si más adelante quiere retomarlo, podrá hacerlo en otro momento. Que tenga un buen día.

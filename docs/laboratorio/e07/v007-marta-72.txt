@@ -1,0 +1,43 @@
+TRANSCRIPCIÓN SIMULADA (cliente interpretado por Claude)
+
+Ficha:
+Marta, 72 años, cobra una pensión de jubilación. Es bromista y contesta con humor, pero acaba dando los datos.
+- Acepta que se grabe la conversación.
+- Quiere invertir para complementar la pensión, durante unos 10 años. No necesitará ese dinero antes.
+- Cobra 2.300 euros de pensión al mes, estables.
+- Gastos fijos: unos 1.200 euros al mes.
+- Ahorro disponible: 76.000 euros.
+- No tiene deudas.
+- Entiende bien los fondos de renta variable: sabe que pueden bajar mucho aunque los venda un banco. Ha invertido en ellos en los últimos tres años.
+- No sabe cómo funcionan los fondos de renta fija.
+- Nunca ha usado productos complejos (derivados, estructurados) ni sabe qué son.
+- Si sus inversiones bajaran un 20 % en unos meses, no haría nada y esperaría a que se recupere.
+- La sostenibilidad le importa mucho: no quiere invertir en empresas contaminantes.
+
+Asistente (t-001): Buenos días. Soy el asistente de perfil inversor del banco y soy una inteligencia artificial. Le haré unas preguntas sobre su situación, sus objetivos y lo que sabe de inversión, porque la ley nos obliga a conocerle antes de ofrecerle productos. Una persona del banco revisará todo lo que hablemos. ¿Le parece bien que grabemos la conversación?
+Cliente (t-002): Buenos días. Sí, sí, grabe usted lo que quiera, pero que me saque guapa, que hoy no me he peinado.
+Asistente (t-003): Muchas gracias, y tranquila, que solo se graba la voz y no se le ve el peinado. Pasamos al primer tema: ¿para qué le gustaría invertir? Por ejemplo, para complementar la jubilación, para un proyecto concreto o para tener un colchón de ahorro.
+Cliente (t-004): Pues mire, para tener un complemento a la pensión, que la vida está cara y uno no se hace más joven. Más que para comprarme un yate, vamos.
+Asistente (t-005): Entiendo, un complemento a la pensión. Y para eso, ¿cuánto dinero más o menos pensaría dedicar a invertir? Con una cifra aproximada me vale.
+Cliente (t-006): Pues tengo ahorrados unos setenta y pico mil euros, y la idea sería invertir ese dinero. Para el yate no da, ya le digo.
+Asistente (t-007): Entendido, unos setenta y pico mil euros. Y para ese complemento a la pensión, ¿durante cuánto tiempo piensa mantener invertido ese dinero, más o menos?
+Cliente (t-008): Pues unos diez años, más o menos, si el cuerpo aguanta. Ese dinero no lo voy a necesitar antes, así que puede estar tranquilito.
+Asistente (t-009): Perfecto, diez años y sin necesitar el dinero antes. Pasamos a su situación económica. ¿Cuánto cobra más o menos al mes, una vez descontados los impuestos? Puede ser entre pensión, sueldo u otros ingresos.
+Cliente (t-010): Pues cobro de pensión unos dos mil trescientos euros al mes, limpios, y siempre es la misma cantidad. Lo único bueno de la jubilación es que no hay sorpresas.
+Asistente (t-011): Gracias, dos mil trescientos euros fijos al mes, así da gusto. Ahora, ¿cuánto se le va más o menos al mes en gastos fijos, como la casa, los recibos y la comida? Con una cifra aproximada me vale.
+Cliente (t-012): Pues entre la casa, los recibos y la comida, unos mil doscientos euros al mes. Lo demás se va en caprichos y en el nieto, que sale carísimo.
+Asistente (t-013): Muy bien, gracias. Los caprichos y el nieto son gastos bien empleados. Ahora una pregunta sobre otros bienes: además de esos setenta y pico mil euros, ¿tiene alguna otra cosa de valor, como una vivienda en propiedad u otros ahorros? Una respuesta aproximada me vale.
+Cliente (t-014): Pues fíjese, ahí ya no le sé decir bien, que de eso no me acuerdo ahora. Lo que tengo ahorrado es eso y poco más que le pueda contar. Ah, y deudas no tengo ninguna, que eso sí que me da orgullo.
+Asistente (t-015): Muy bien, sin deudas, qué tranquilidad. Pasamos a lo que ha invertido antes. ¿En qué ha invertido en los últimos tres años? Por ejemplo depósitos, fondos, acciones o algo más complejo. Si en nada, también me sirve.
+Cliente (t-016): Pues he metido algo en fondos de renta variable, de bolsa, vamos. Sé que suben y bajan, y que aunque te los venda el banco no están garantizados, que a veces se pega uno un buen susto. Complicados, lo que se dice complicados, nada de nada.
+Asistente (t-017): Gracias, se explica usted muy bien. Cambiando de tema, ¿cómo de bien diría que conoce los fondos de renta fija: nada, algo o bien? Si no sabe lo que son, no pasa nada, me lo dice y seguimos.
+Cliente (t-018): Pues de esos sí que no sé nada, la verdad. Me suena a que son más tranquilos, pero cómo funcionan, ni idea. Usted me explicará, que para eso está.
+Asistente (t-019): Gracias por contármelo con tanta sinceridad, no pasa nada. Ahora solo la conocemos a usted, y más adelante una persona del banco le explicará lo que necesite. Sobre los fondos de renta variable, que ya me ha dicho que conoce: ¿cómo de bien diría que los conoce, nada, algo o bien?
+Cliente (t-020): Pues bien, diría yo, que ya me he llevado algún susto con ellos y algo he aprendido. Doctora no soy, pero me defiendo.
+Asistente (t-021): Gracias, con lo que me ha contado ya me hago una idea. Ahora le planteo una situación imaginaria. Imagine que sus ahorros invertidos bajan un veinte por ciento en unos meses. Es decir, de setenta mil euros pasarían a unos cincuenta y seis mil. ¿Qué haría: vendería todo, vendería una parte, esperaría o compraría más?
+Cliente (t-022): Pues esperar, hija, esperar. Si ya sé que esto sube y baja, no me voy a poner a vender con el susto en el cuerpo. Ya se recuperará, y si no, para eso tengo paciencia de jubilada.
+Asistente (t-023): Gracias, se le ve con las ideas claras. Ahora un último tema: algunas inversiones siguen criterios ambientales o sociales, por ejemplo evitar empresas muy contaminantes. ¿Es algo que le importa?
+Cliente (t-024): Pues sí, y mucho. No quiero que mi dinero ande en empresas que contaminan, que luego mi nieto se tiene que comer el humo. Prefiero ganar un poco menos y dormir tranquila.
+Asistente (t-025): Se lo agradezco, queda claro que es importante para usted. Para precisarlo un poco más: ¿diría que querría que todo su dinero siguiera esos criterios, que lo hicieran solo una parte, o que le importa pero no es imprescindible?
+Cliente (t-026): Pues todo, todo, hija. Si voy a mirar por mi nieto, no lo voy a hacer a medias, que luego me remuerde la conciencia.
+Asistente (t-027): Muchas gracias, ha sido muy amable y se ha explicado de maravilla. Le resumo lo que he entendido: quiere invertir unos setenta y pico mil euros durante unos diez años como complemento a su pensión, sin necesitar ese dinero antes, con unos ingresos fijos y sin deudas. Ha invertido en fondos de renta variable, ante una caída esperaría con calma, y para usted es muy importante que todo su dinero siga criterios ambientales. Una persona del banco revisará su perfil y le avisará. Que tenga un muy buen día y un abrazo al nieto.

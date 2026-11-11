@@ -181,10 +181,10 @@ Guía completa: [docs/MODO_ASESOR_DEMO.md](docs/MODO_ASESOR_DEMO.md#recorrido-co
 | Servidor MCP y conexión con Claude + MyInvestor | ✅ Hecho · desde la PR #21 exige credencial; para la demo, Claude Code en local con `MCP_DEMO_TOKEN` (PR #27, [guía](docs/MODO_ASESOR_DEMO.md)) · probado por túnel el 9/11, antes de la credencial |
 | Frontend móvil: entrevista, demo guiada, perfil del cliente y vista de la entidad | ✅ Hecho · «Validar perfil» con el modo asesor de demostración (PR #25) · entrevista corta del pitch sobre `carmen-corta` |
 | Extractor (de la conversación al perfil, con Claude) y entrevistador en modo texto | ✅ Hecho, con tests (Claude simulado) · prueba con la API real: `python scripts/probar_extractor.py` · arquitectura en [`backend/app/agentes/`](backend/app/agentes/README.md) |
-| Verificador con Claude y resumen para agentes | 🟡 Reglas deterministas hechas · versión con Claude en desarrollo |
+| Verificador (incoherencias, datos dudosos y casos para el asesor) | ✅ Reglas fijas + revisión con Claude, con tests (Claude simulado) · evaluación con la API real: `python scripts/evaluar_verificador.py` · el resumen para agentes sigue siendo una plantilla fija |
 | Voz con ElevenLabs | ✅ Probada de punta a punta con cuenta real (E-03) · agente compartido sincronizado con `scripts/sincronizar_voz.py` · audios de la demo guiada pendientes de elegir voces |
 | Memoria personal por usuario | ✅ Consentida, versionada, borrable y proyectada a ElevenLabs · falta identidad/login real |
-| Medición de impacto (aciertos, alertas, latencia, coste) | 🟡 Medido con clientes **simulados** (E-00 a E-09, [`PLAN_Y_EVIDENCIAS.md`](gestion/evaluacion/PLAN_Y_EVIDENCIAS.md)) · sin pruebas con personas reales · coste solo estimado |
+| Medición de impacto (aciertos, alertas, latencia, coste) | ✅ Con clientes **simulados**: 20 entrevistas completas con 99-100 % de aciertos y 0 datos inventados; verificador con 0 falsas alarmas · [evidencias](gestion/evaluacion/PLAN_Y_EVIDENCIAS.md) |
 
 ## Configuración
 
@@ -213,9 +213,10 @@ Todas están en `.env.example`.
 | `ELEVENLABS_WEBHOOK_SECRET` | vacío | Verifica el post-call webhook; sin él la ruta responde 503 |
 | `ELEVENLABS_SERVER_LOCATION` | vacío | Opcional: `us`, `global`, `eu-residency` o `in-residency`; no implica residencia contratada |
 | `ALLOW_LEGACY_SIGNED_URL` | `0` | Solo compatibilidad local con la antigua ruta sin sesión; no activar en despliegues |
-| `ANTHROPIC_API_KEY` | vacío | Activa el extractor y el modo texto. Sin clave el extractor no hace nada y `/chat` responde 503 |
+| `ANTHROPIC_API_KEY` | vacío | Activa el extractor, la revisión con Claude del verificador y el modo texto. Sin clave el extractor no hace nada, el verificador solo aplica sus reglas fijas y `/chat` responde 503 |
 | `MODEL_EXTRACTOR`, `MODEL_ENTREVISTADOR`, `MODEL_VERIFICADOR` | `claude-sonnet-5-5` | Modelo de Claude de cada agente |
-| `EFFORT_EXTRACTOR`, `EFFORT_ENTREVISTADOR` | `low` | Esfuerzo de razonamiento (`low`…`max`): más alto, más preciso y más lento |
+| `VERIFICADOR_CLAUDE` | `1` | `0` apaga la revisión con Claude del verificador; sus reglas fijas siguen funcionando |
+| `EFFORT_EXTRACTOR`, `EFFORT_ENTREVISTADOR`, `EFFORT_VERIFICADOR` | `low` | Esfuerzo de razonamiento (`low`…`max`): más alto, más preciso y más lento |
 
 Variables del frontend, en `frontend/.env.local` (plantilla en `frontend/.env.example`): `NEXT_PUBLIC_API_URL` (por defecto `http://localhost:8000`) y `NEXT_PUBLIC_ELEVENLABS_AGENT_ID` (solo si el agente de voz es público).
 </details>

@@ -118,7 +118,8 @@ async def entrevistar(
         recomendaciones=sum(1 for t in agente if _RECOMIENDA.search(sin_tildes(t.text).casefold())),
         comprobados=sorted(r.removeprefix("knowledge.") for r, f in p.mifid.items()
                            if r.startswith("knowledge.") and f.source == Fuente.demonstrated),
-        alertas_esperadas={ruta: any(a.path == ruta for a in p.alerts) for ruta in persona.alertas},
+        # Cada alerta esperada es una ruta («knowledge.equity_funds») o un flag («needs_advisor»).
+        alertas_esperadas={e: any(a.path == e or a.flag.value == e for a in p.alerts) for e in persona.alertas},
         pendientes=chat.pendientes(p),
     )
 

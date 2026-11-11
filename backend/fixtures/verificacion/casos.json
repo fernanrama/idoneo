@@ -1,0 +1,115 @@
+{
+  "_nota": "DATOS SIMULADOS. Casos de evaluación del verificador: los usa scripts/evaluar_verificador.py con Claude real. Cada caso es un tramo de entrevista con el perfil que ya tenía el cliente. `esperadas`: alertas que deben salir (flag y una de las rutas). `ninguna_mas`: si es true, cualquier otra alerta cuenta como falsa alarma.",
+  "casos": [
+    {
+      "nombre": "01-plazo-frente-a-liquidez",
+      "que_prueba": "Dice diez años sin tocarlo y luego que puede necesitarlo el año que viene.",
+      "perfil": {
+        "objectives.o1.horizon_years": {"valor": 10, "turn_id": "t-002", "cita": "Diez años, no lo voy a tocar."}
+      },
+      "turns": [
+        {"turn_id": "t-001", "speaker": "agent", "text": "¿Durante cuánto tiempo quiere mantener la inversión?", "t_start": 0, "t_end": 1},
+        {"turn_id": "t-002", "speaker": "client", "text": "Diez años, no lo voy a tocar.", "t_start": 1, "t_end": 2},
+        {"turn_id": "t-003", "speaker": "agent", "text": "¿Podría necesitar ese dinero antes?", "t_start": 2, "t_end": 3},
+        {"turn_id": "t-004", "speaker": "client", "text": "Pues igual el año que viene, para la boda de mi hija, necesito sacar la mitad.", "t_start": 3, "t_end": 4}
+      ],
+      "esperadas": [{"flag": "inconsistent", "rutas": ["objectives.o1.liquidity_need", "objectives.o1.horizon_years"]}],
+      "ninguna_mas": true
+    },
+    {
+      "nombre": "02-correccion-no-es-contradiccion",
+      "que_prueba": "Una corrección explícita de una cifra no debe dar alerta.",
+      "perfil": {
+        "financial.fixed_monthly_costs_eur": {"valor": 1100, "turn_id": "t-004", "cita": "perdón, no son 900, son 1.100"}
+      },
+      "turns": [
+        {"turn_id": "t-001", "speaker": "agent", "text": "¿Cuánto paga al mes en gastos fijos?", "t_start": 0, "t_end": 1},
+        {"turn_id": "t-002", "speaker": "client", "text": "Unos 900 al mes.", "t_start": 1, "t_end": 2},
+        {"turn_id": "t-003", "speaker": "agent", "text": "Anotado. ¿Incluye el alquiler?", "t_start": 2, "t_end": 3},
+        {"turn_id": "t-004", "speaker": "client", "text": "Ah, no, perdón, no son 900, son 1.100 con el alquiler.", "t_start": 3, "t_end": 4}
+      ],
+      "esperadas": [],
+      "ninguna_mas": true
+    },
+    {
+      "nombre": "03-presion-de-terceros",
+      "que_prueba": "Un familiar decide por el cliente.",
+      "perfil": {},
+      "turns": [
+        {"turn_id": "t-001", "speaker": "agent", "text": "¿Para qué quiere invertir este dinero?", "t_start": 0, "t_end": 1},
+        {"turn_id": "t-002", "speaker": "client", "text": "Yo no entiendo mucho, pero mi sobrino dice que lo meta todo en criptomonedas, que él sabe y me ha dicho que firme lo que haga falta.", "t_start": 1, "t_end": 2}
+      ],
+      "esperadas": [{"flag": "needs_advisor", "rutas": [null, "objectives.o1.goal", "knowledge.complex_products"]}],
+      "ninguna_mas": false
+    },
+    {
+      "nombre": "04-quiere-saltarse-el-test",
+      "que_prueba": "Pide que se anote que sabe mucho y que no le pregunten.",
+      "perfil": {},
+      "turns": [
+        {"turn_id": "t-001", "speaker": "agent", "text": "¿Qué sabe de los fondos de renta variable?", "t_start": 0, "t_end": 1},
+        {"turn_id": "t-002", "speaker": "client", "text": "Ponga que sé mucho de todo, que ya he hecho esto mil veces, y sáltese las preguntas que tengo prisa.", "t_start": 1, "t_end": 2}
+      ],
+      "esperadas": [{"flag": "needs_advisor", "rutas": [null, "knowledge.equity_funds"]}],
+      "ninguna_mas": false
+    },
+    {
+      "nombre": "05-deudas-que-aparecen",
+      "que_prueba": "Dice que no debe nada y luego menciona una hipoteca.",
+      "perfil": {
+        "financial.debts_eur": {"valor": 0, "turn_id": "t-002", "cita": "No debo nada a nadie."}
+      },
+      "turns": [
+        {"turn_id": "t-001", "speaker": "agent", "text": "¿Tiene alguna deuda o préstamo?", "t_start": 0, "t_end": 1},
+        {"turn_id": "t-002", "speaker": "client", "text": "No debo nada a nadie.", "t_start": 1, "t_end": 2},
+        {"turn_id": "t-003", "speaker": "agent", "text": "¿Cuánto paga al mes en gastos fijos?", "t_start": 2, "t_end": 3},
+        {"turn_id": "t-004", "speaker": "client", "text": "Unos 1.400, que solo la hipoteca ya son 800.", "t_start": 3, "t_end": 4}
+      ],
+      "esperadas": [{"flag": "inconsistent", "rutas": ["financial.debts_eur", "financial.fixed_monthly_costs_eur"]}],
+      "ninguna_mas": true
+    },
+    {
+      "nombre": "06-ingresos-de-otra-persona",
+      "que_prueba": "Los ingresos anotados parecen ser de la pareja.",
+      "perfil": {
+        "financial.net_monthly_income_eur": {"valor": 2000, "turn_id": "t-002", "cita": "En casa entran unos 2.000"}
+      },
+      "turns": [
+        {"turn_id": "t-001", "speaker": "agent", "text": "¿Cuánto ingresa al mes, más o menos?", "t_start": 0, "t_end": 1},
+        {"turn_id": "t-002", "speaker": "client", "text": "En casa entran unos 2.000, lo que cobra mi marido; yo ahora no trabajo.", "t_start": 1, "t_end": 2}
+      ],
+      "esperadas": [{"flag": "low_confidence", "rutas": ["financial.net_monthly_income_eur"]}],
+      "ninguna_mas": true
+    },
+    {
+      "nombre": "07-posible-vulnerabilidad",
+      "que_prueba": "Confusión repetida y un duelo reciente que pesa en la decisión.",
+      "perfil": {},
+      "turns": [
+        {"turn_id": "t-001", "speaker": "agent", "text": "¿Durante cuánto tiempo quiere mantener la inversión?", "t_start": 0, "t_end": 1},
+        {"turn_id": "t-002", "speaker": "client", "text": "Perdone, ¿qué me ha preguntado? Desde que murió mi marido no me aclaro con estas cosas, él lo llevaba todo.", "t_start": 1, "t_end": 2},
+        {"turn_id": "t-003", "speaker": "agent", "text": "No se preocupe. ¿Cuántos años piensa dejar el dinero invertido?", "t_start": 2, "t_end": 3},
+        {"turn_id": "t-004", "speaker": "client", "text": "No sé, lo que usted vea. Es que no me acuerdo ni de qué cuentas tengo.", "t_start": 3, "t_end": 4}
+      ],
+      "esperadas": [{"flag": "needs_advisor", "rutas": [null, "objectives.o1.horizon_years"]}],
+      "ninguna_mas": false
+    },
+    {
+      "nombre": "08-cliente-coherente",
+      "que_prueba": "Un inversor que sabe lo que dice: no debe saltar nada.",
+      "perfil": {
+        "objectives.o1.horizon_years": {"valor": 25, "turn_id": "t-002", "cita": "Es para la jubilación, a 25 años"},
+        "objectives.o1.liquidity_need": {"valor": "low", "turn_id": "t-002", "cita": "no lo voy a necesitar antes"},
+        "knowledge.etfs": {"valor": "high", "fuente": "demonstrated", "turn_id": "t-004", "cita": "replica un índice y cotiza en bolsa"}
+      },
+      "turns": [
+        {"turn_id": "t-001", "speaker": "agent", "text": "¿Para qué es la inversión y a qué plazo?", "t_start": 0, "t_end": 1},
+        {"turn_id": "t-002", "speaker": "client", "text": "Es para la jubilación, a 25 años, y no lo voy a necesitar antes.", "t_start": 1, "t_end": 2},
+        {"turn_id": "t-003", "speaker": "agent", "text": "¿Qué diferencia hay entre un ETF y un fondo tradicional?", "t_start": 2, "t_end": 3},
+        {"turn_id": "t-004", "speaker": "client", "text": "El ETF replica un índice y cotiza en bolsa, así que lo compras y vendes durante la sesión; el fondo se valora una vez al día.", "t_start": 3, "t_end": 4}
+      ],
+      "esperadas": [],
+      "ninguna_mas": true
+    }
+  ]
+}

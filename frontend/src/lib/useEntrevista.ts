@@ -343,6 +343,8 @@ export function useEntrevista() {
         for (const a of p.alerts) {
           if (a.status !== "open" || alertasVistas.current.has(a.id)) continue;
           alertasVistas.current.add(a.id);
+          // Lo que es para el asesor (posible vulnerabilidad, presión de terceros…) no se lee al cliente.
+          if (a.flag === "needs_advisor" || !a.path) continue;
           if (modo === "voz" && estado === "activa") {
             conversacion.sendContextualUpdate(
               `El verificador ha detectado esto: ${a.message} Explícaselo al cliente con calma, en lenguaje sencillo y sin juzgarle, y comprueba que lo ha entendido.`,

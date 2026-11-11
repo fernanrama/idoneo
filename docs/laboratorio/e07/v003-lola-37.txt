@@ -1,0 +1,56 @@
+TRANSCRIPCIÓN SIMULADA (cliente interpretado por Claude)
+
+Ficha:
+Lola, 37 años, trabaja en un colegio. Habla poco: contesta con frases muy cortas.
+- Acepta que se grabe la conversación.
+- Quiere invertir para hacer crecer sus ahorros, durante unos 5 años. Quizá necesite una parte antes, no lo sabe.
+- Cobra 1.150 euros netos al mes, estables.
+- Gastos fijos: unos 850 euros al mes.
+- Ahorro disponible: 96.000 euros.
+- No tiene deudas.
+- Entiende bien los fondos de renta variable: sabe que pueden bajar mucho aunque los venda un banco. Ha invertido en ellos en los últimos tres años.
+- No sabe cómo funcionan los fondos de renta fija.
+- Nunca ha usado productos complejos (derivados, estructurados) ni sabe qué son.
+- Si sus inversiones bajaran un 15 % en unos meses, aprovecharía para invertir un poco más.
+- La sostenibilidad no le importa.
+- Si sale el tema, menciona lo que gana su pareja, pero sus finanzas son separadas.
+
+Asistente (t-001): Buenos días. Soy el asistente virtual del banco y soy una inteligencia artificial. Voy a hacerle unas preguntas sobre su situación, sus objetivos y lo que conoce de inversión, porque la ley obliga al banco a conocerle antes de ofrecerle productos de inversión. Una persona del banco revisará todo lo que hablemos. Para ello, ¿le parece bien que grabemos la conversación?
+Cliente (t-002): Sí, vale, no hay problema.
+Asistente (t-003): Muchas gracias. Empecemos por lo básico: ¿para qué le gustaría invertir? Por ejemplo, para complementar la jubilación, ahorrar para un proyecto o tener un colchón para imprevistos.
+Cliente (t-004): Quiero que mis ahorros crezcan un poco. Para unos cinco años, más o menos.
+Asistente (t-005): Gracias, entendido: que sus ahorros crezcan un poco en unos cinco años. Y sobre cuánto dinero piensa dedicar a esto, ¿más o menos qué cantidad sería?
+Cliente (t-006): Pues tengo unos 96.000 euros ahorrados. Todavía no sé cuánto meter exactamente.
+Asistente (t-007): Gracias, es un dato muy útil. No hace falta que lo decida ahora. Pasemos a otra cosa: ¿podría necesitar parte de ese dinero antes de los cinco años, por ejemplo para un imprevisto o un gasto grande?
+Cliente (t-008): Pues no sé, quizá sí. Una parte puede que la necesite antes, pero no sé cuándo.
+Asistente (t-009): Gracias, es normal no saberlo con exactitud. Pasemos a su situación económica del día a día. ¿Cuánto cobra más o menos al mes, una vez descontados los impuestos?
+Cliente (t-010): Cobro 1.150 euros netos al mes. Siempre es lo mismo.
+Asistente (t-011): Gracias. Y, más o menos, ¿cuánto suman al mes sus gastos fijos, como alquiler o hipoteca, recibos y comida?
+Cliente (t-012): Unos 850 euros al mes, más o menos.
+Asistente (t-013): Gracias. Ahora, sobre otros bienes y deudas: ¿tiene alguna deuda pendiente, como un préstamo, una hipoteca o tarjetas a plazos? Si es así, dígame más o menos cuánto debe en total.
+Cliente (t-014): No, no tengo deudas.
+Asistente (t-015): Gracias, me alegra saberlo. Ahora le pregunto por otros bienes: aparte de sus ahorros, ¿tiene alguna propiedad, como una vivienda o un local, o algún otro bien de valor?
+Cliente (t-016): No, no tengo nada más. Solo los ahorros.
+Asistente (t-017): Gracias, queda claro. Pasemos a lo que conoce de inversión. ¿En qué ha invertido en los últimos tres años? Por ejemplo depósitos, fondos, acciones o algo más complejo. Si no ha invertido en nada, también me sirve.
+Cliente (t-018): He invertido en fondos de renta variable. Nada más.
+Asistente (t-019): Gracias. Sobre esos fondos de renta variable, ¿cómo de bien diría que los conoce: nada, algo o bien?
+Cliente (t-020): Bien, creo. Sé que pueden bajar bastante, aunque te los venda un banco.
+Asistente (t-021): Gracias, eso que dice es correcto: pueden bajar aunque los venda un banco. Ahora le pregunto por otro tipo de fondos, los de renta fija. ¿Cómo de bien diría que los conoce: nada, algo o bien?
+Cliente (t-022): Nada, la verdad. No sé cómo funcionan.
+Asistente (t-023): Gracias por decírmelo con sinceridad, no pasa nada: queda anotado. Pasemos a otro tema. Imagine que sus ahorros invertidos bajan un veinte por ciento en unos meses. ¿Qué haría: vendería todo, vendería una parte, esperaría o compraría más?
+Cliente (t-024): Esperaría. Y si acaso, invertiría un poco más.
+Asistente (t-025): Gracias, queda anotado. Pasemos a otro tema: algunas inversiones siguen criterios ambientales o sociales, por ejemplo evitar empresas muy contaminantes. ¿Es algo que le importa a la hora de invertir?
+Cliente (t-026): No, la verdad es que no me importa.
+Asistente (t-027): Gracias, queda anotado. Antes de terminar, quiero asegurarme de un par de datos. Me dijo que tiene unos 96.000 euros ahorrados. De esos ahorros, ¿cuánto tiene disponible ahora mismo en cuenta o depósito, es decir, dinero que puede usar enseguida: menos de 20.000 euros, entre 20.000 y 60.000, o más de 60.000?
+Cliente (t-028): Todo, los 96.000. Lo tengo todo disponible.
+Asistente (t-029): Gracias, queda claro: tiene todos sus ahorros disponibles. Una última duda sobre los fondos de renta variable en los que ha invertido: en los últimos tres años, ¿cuántas veces ha comprado o vendido alguno? ¿Una o dos veces, entre tres y cinco, o más?
+Cliente (t-030): Pues no sé exactamente... Unas pocas veces, creo que entre tres y cinco.
+Asistente (t-031): Gracias, con eso me basta. Una última cosa sobre el plazo: antes me dijo que pensaba en unos cinco años, pero que quizá necesite una parte antes. De todo ese dinero, ¿cuánto cree que podría necesitar antes de cinco años: casi nada, una parte pequeña, o más de la mitad?
+Cliente (t-032): Pues una parte pequeña, supongo. No sé, no lo tengo claro.
+Asistente (t-033): Gracias, no se preocupe si no lo tiene claro. Solo me falta concretar el plazo. Pensando en la mayor parte de ese dinero, ¿durante cuánto tiempo cree que lo dejaría invertido: menos de tres años, entre tres y cinco, o más de cinco?
+Cliente (t-034): Unos cinco años, entre tres y cinco, diría yo.
+Asistente (t-035): Gracias, entendido: entre tres y cinco años. Para dejarlo bien anotado, ¿diría que son más bien tres años, cuatro o cinco?
+Cliente (t-036): Cinco, más bien cinco.
+Asistente (t-037): Gracias, con eso queda claro el plazo. Para dejar bien anotados sus ingresos: me dijo que cobra 1.150 euros netos al mes. ¿Esa cantidad es lo que cobra cada mes del año, o es el resultado de repartir pagas extra?
+Cliente (t-038): Cada mes lo mismo, 1.150. Sin pagas extra que yo sepa.
+Asistente (t-039): Gracias, queda claro: 1.150 euros netos cada mes, siempre lo mismo. Hemos terminado con lo que necesitaba preguntarle. Le resumo lo que he entendido: quiere que sus 96.000 euros de ahorros crezcan un poco durante unos cinco años, con la posibilidad de necesitar una parte antes, y ya ha invertido en fondos de renta variable. Una persona del banco revisará su perfil y le avisarán. Muchas gracias por su tiempo y que tenga un buen día.

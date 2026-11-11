@@ -1,0 +1,52 @@
+TRANSCRIPCIÓN SIMULADA (cliente interpretado por Claude)
+
+Ficha:
+Carmen, 68 años, jubilada, viuda. Educada y algo confiada; responde poco.
+- Acepta la grabación y entiende que la entrevista sirve para conocerla antes de invertir.
+- Quiere un dinero extra cada mes para complementar la pensión, durante unos diez años. No piensa tocar el capital salvo una urgencia.
+- Pensión: unos 1.450 euros netos al mes, fija. Gastos fijos: unos 900 al mes (luz, comunidad, compra).
+- Ahorro: 80.000 euros en depósitos. No tiene deudas; la casa está pagada. No tiene otros bienes aparte de la casa.
+- Depósitos: los conoce bien, sabe que si los cancela antes pierde intereses.
+- En el test del banco marcó que conoce bien los fondos de renta variable, pero en realidad cree que un fondo del banco no puede perder dinero porque «es del banco». Nunca ha invertido en fondos, ETF ni acciones. No sabe qué es un ETF.
+- Si sus ahorros bajaran un 20 %, lo sacaría todo.
+- La sostenibilidad le da igual mientras no pierda dinero.
+
+Asistente (t-001): Buenos días. Soy el asistente de perfil inversor del banco y soy una inteligencia artificial. Le haré unas preguntas sobre su situación, sus objetivos y lo que conoce de inversión, porque la ley obliga al banco a hacerlo antes de ofrecerle productos. Una persona del banco revisará todo el resultado. ¿Le parece bien que grabemos la conversación?
+Cliente (t-002): Buenos días. Sí, sí, no hay problema, grabe lo que haga falta. Entiendo que es para conocerme antes de invertir.
+Asistente (t-003): Muchas gracias, eso es justo: conocerle un poco antes de hablar de inversión. Empezamos por lo más importante: ¿para qué quiere invertir su dinero? Por ejemplo, para complementar su jubilación, comprar algo en el futuro, ahorrar para sus hijos o algo distinto.
+Cliente (t-004): Pues mire, quería sacarle un dinerito extra cada mes para complementar la pensión. Eso sí, sin tocar lo que tengo ahorrado.
+Asistente (t-005): Entendido, gracias. Complementar la pensión con un dinero extra cada mes. Ahora le pregunto por el plazo: ¿durante cuánto tiempo calcula que mantendría ese dinero invertido? Más o menos, por ejemplo, unos cinco años, diez o más.
+Cliente (t-006): Pues unos diez años, más o menos. Y el capital no pensaba tocarlo, salvo que hubiera alguna urgencia.
+Asistente (t-007): Gracias, queda claro: unos diez años, y solo tocaría el capital si hubiera una urgencia. Ahora le pregunto por la cantidad: ¿cuánto dinero, más o menos, pensaría dedicar a esta inversión?
+Cliente (t-008): Pues tengo unos ochenta mil euros ahorrados en depósitos. Pensaba dedicar eso, más o menos.
+Asistente (t-009): Muchas gracias, ochenta mil euros más o menos. Pasamos a su situación económica, con cifras aproximadas. ¿Cuánto cobra más o menos al mes, en neto, entre pensión y otros ingresos si los tiene?
+Cliente (t-010): Cobro unos mil cuatrocientos cincuenta euros al mes de pensión, netos. Otros ingresos no tengo.
+Asistente (t-011): Gracias, mil cuatrocientos cincuenta euros netos al mes de pensión. ¿Y sus ppensión es estable, es decir, la cobra todos los meses por la misma cantidad? Ahora le pregunto por sus gastos fijos al mes.
+Cliente (t-012): Sí, sí, es fija, la cobro todos los meses igual. Y de gastos fijos tengo unos novecientos euros al mes, entre la luz, la comunidad y la compra.
+Asistente (t-013): Gracias, anotado: unos novecientos euros al mes de gastos fijos. Sobre el ahorro, me ha dicho que tiene unos ochenta mil euros en depósitos. ¿Tiene además otros ahorros o bienes, como una vivienda aparte de la que vive, o algún otro dinero?
+Cliente (t-014): No, nada más. Solo la casa donde vivo, que está pagada, y esos ahorros. Deudas tampoco tengo.
+Asistente (t-015): Gracias, queda claro: la casa pagada, los ahorros y ninguna deuda. Pasamos ahora a lo que conoce de inversión. ¿En qué ha invertido en los últimos tres años? Por ejemplo depósitos, fondos, acciones o algo más complejo.
+Cliente (t-016): Pues solo depósitos, que es lo que he tenido siempre. Fondos o acciones no he tenido nunca.
+Asistente (t-017): Gracias, queda claro: solo depósitos. Ahora le pregunto por los fondos de inversión. Un fondo de renta variable es el que invierte sobre todo en acciones de empresas. ¿Cómo de bien diría que conoce este tipo de fondos: nada, algo o bien?
+Cliente (t-018): Pues los conozco bien, eso marqué en el test del banco. Vamos, que un fondo del banco no puede perder dinero, ¿no? Al ser del banco.
+Asistente (t-019): Es una duda muy común, y se lo aclaro: un fondo de inversión puede perder dinero aunque lo venda el banco. Si las acciones en las que invierte bajan, el valor del fondo baja, y el banco no garantiza que no pierda. Pasamos a otro tema: ¿cómo de bien diría que conoce los fondos de renta fija, que invierten sobre todo en deuda de empresas o de Estados: nada, algo o bien?
+Cliente (t-020): Ay, pues no sé qué decirle. Algo, supongo, por los depósitos. Aunque me sorprende lo que dice, yo pensaba que el banco no lo permitiría.
+Asistente (t-021): Es normal que le sorprenda, y hace bien en preguntarlo. No hay respuestas buenas ni malas. Sobre los fondos de renta fija, si los tipos de interés suben, es decir, si el dinero se vuelve más caro, ¿qué cree que le pasa al valor de un fondo de ese tipo: sube, baja o no cambia? Si no lo sabe, dígamelo y seguimos.
+Cliente (t-022): Pues la verdad es que no lo sé. Supongo que subiría, ¿no? Si suben los intereses, será que gana más. Pero no estoy segura.
+Asistente (t-023): Es una duda muy común, y no se preocupe. En un fondo de renta fija ocurre más bien lo contrario: si suben los tipos de interés, su valor tiende a bajar. Pasamos a otro tema. Imagine que sus ahorros invertidos bajan un veinte por ciento en unos meses. Por ejemplo, de ochenta mil euros pasarían a valer bastante menos. ¿Qué haría: vendería todo, vendería una parte, esperaría o compraría más?
+Cliente (t-024): Uy, pues si bajara tanto, lo sacaría todo, la verdad. No quiero perder lo que tengo ahorrado.
+Asistente (t-025): Gracias, lo tengo claro: si bajara tanto, preferiría sacarlo todo para no perder lo ahorrado. Pasamos a otro tema. Algunas inversiones siguen criterios ambientales o sociales, por ejemplo evitar empresas muy contaminantes. ¿Es algo que le importa?
+Cliente (t-026): Pues la verdad es que me da bastante igual, mientras no pierda dinero. Lo importante es que no me quede sin lo mío.
+Asistente (t-027): Gracias, lo tengo anotado: lo más importante para usted es no perder su dinero. Antes de terminar, quiero asegurarme de un dato sobre sus depósitos. En los últimos tres años, ¿ha contratado o renovado depósitos ninguna vez, una o dos veces, o más?
+Cliente (t-028): Pues los he ido renovando cuando vencían, no sabría decirle cuántas veces exactamente. Una o dos veces, calculo. Sé que si los cancelas antes de tiempo pierdes parte de los intereses.
+Asistente (t-029): Gracias, y tiene razón: cancelar un depósito antes de tiempo suele suponer perder parte de los intereses. Ya está anotado. Para terminar de aclarar un dato: de esos ochenta mil euros que tiene en depósitos, ¿cuánto piensa dedicar a esta inversión para complementar la pensión? ¿Todo, o solo una parte?
+Cliente (t-030): Pues pensaba dedicar todo, los ochenta mil. Aunque ahora, con lo que me dice de que se puede perder, ya no lo tengo tan claro.
+Asistente (t-031): Es totalmente comprensible, y es bueno que lo piense con calma. Lo dejo anotado: ahora mismo pensaba dedicar los ochenta mil euros, pero tiene dudas. Para aclarar un último dato sobre sus gastos: esos novecientos euros al mes que me ha dicho, ¿son todos sus gastos fijos, o hay otros, como seguros o impuestos, que no haya incluido?
+Cliente (t-032): Pues no, creo que eso es todo: la luz, la comunidad y la compra. Seguros e impuestos no me acuerdo de nada más ahora mismo.
+Asistente (t-033): Gracias, entonces los novecientos euros al mes recogen todos sus gastos fijos. Ahora una pregunta sobre el plazo: en esos diez años, ¿cree que podría necesitar parte de ese dinero antes, o piensa que no lo tocaría en absoluto?
+Cliente (t-034): Pues no creo que lo necesitara, la verdad. Solo si hubiera alguna urgencia, como una enfermedad o algo así, pero en principio no lo tocaría.
+Asistente (t-035): Gracias, queda claro: en principio no tocaría ese dinero, salvo una urgencia como una enfermedad. Le hago una última pregunta para cerrar bien el dato de los gastos. Sus novecientos euros al mes de gastos fijos, ¿diría que se acercan bastante a la realidad, o son menos de ochocientos, entre ochocientos y mil, o más de mil?
+Cliente (t-036): Pues entre ochocientos y mil, calculo. Unos novecientos, vamos, más o menos lo que le he dicho.
+Asistente (t-037): Muchas gracias, ya tengo todo bastante claro. Solo me queda un detalle sobre sus depósitos: antes me dijo que los ha ido renovando una o dos veces en estos tres años. ¿Diría que fueron una o dos veces, o más de dos?
+Cliente (t-038): Pues una o dos veces, no más. Eso es lo que recuerdo, la verdad.
+Asistente (t-039): Muchas gracias, ya lo tengo claro: una o dos veces. Con esto he recogido todo lo que necesitaba. Le resumo lo que he entendido: quiere complementar su pensión durante unos diez años con sus ochenta mil euros ahorrados, aunque ahora tiene dudas, y lo más importante para usted es no perder su dinero. Una persona del banco revisará su perfil y le avisará. Muchas gracias por su tiempo y que tenga un buen día.
