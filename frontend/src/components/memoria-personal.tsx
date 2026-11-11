@@ -94,15 +94,20 @@ function FormularioMemoria({ sessionId }: { sessionId: string | null }) {
   return (
     <section className={s.tarjeta} aria-labelledby="memoria-titulo">
       <div className={s.cabecera}>
-        <span className={s.icono} aria-hidden="true">↻</span>
-        <div>
+        <span className={s.icono} aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 11.5a7.5 7.5 0 0 1-11 6.6L4 19.5l1.4-4.6A7.5 7.5 0 1 1 20 11.5Z" />
+            <path d="M9.5 10h6M9.5 13.5h3.5" />
+          </svg>
+        </span>
+        <div className={s.cabeceraTexto}>
           <h2 id="memoria-titulo">Recordar cómo prefieres hablar</h2>
           <p>Estas opciones sustituyen tus preferencias de conversación anteriores y se guardan separadas del expediente MiFID.</p>
         </div>
+        <span className={`${s.estado} ${activa ? s.estadoActiva : ""}`}>
+          {activa ? "Memoria personal activa" : "No estamos recordando preferencias"}
+        </span>
       </div>
-      <span className={`${s.estado} ${activa ? s.estadoActiva : ""}`}>
-        {activa ? "Memoria personal activa" : "No estamos recordando preferencias"}
-      </span>
       <fieldset className={s.campos} disabled={ocupada || !etag}>
         <label className={s.campo}>
           <span>Cómo dirigirse a ti</span>
@@ -127,15 +132,15 @@ function FormularioMemoria({ sessionId }: { sessionId: string | null }) {
         <input type="checkbox" checked={consiente} disabled={ocupada || !etag} onChange={(e) => setConsiente(e.target.checked)} />
         <span>Autorizo a guardar estas preferencias para futuras conversaciones. Puedo borrarlas cuando quiera.</span>
       </label>
-      <p>Borrar memoria elimina toda tu capa personal, incluidas otras preferencias guardadas. No borra tu expediente MiFID.</p>
-      <div className={`${s.acciones} ${activa ? s.accionesConBorrado : ""}`}>
+      <div className={s.acciones}>
         <button type="button" className={s.boton} onClick={guardar} disabled={ocupada || !consiente || !etag}>
           {ocupada ? "Cargando…" : "Guardar preferencias"}
         </button>
         {activa && <button type="button" className={s.botonBorrar} onClick={olvidar} disabled={ocupada || !etag}>Borrar memoria personal</button>}
         {sessionId && !etag && !ocupada && <button type="button" className={s.botonBorrar} onClick={recargar}>Volver a cargar la memoria</button>}
       </div>
-      {!sessionId && <p className={s.mensaje} role="note">En este perfil de ejemplo no se guardan preferencias: hazlo con tu propia entrevista.</p>}
+      <p className={s.pequena}>Borrar memoria elimina toda tu capa personal, incluidas otras preferencias guardadas. No borra tu expediente MiFID.</p>
+      {!sessionId && <p className={`${s.mensaje} ${s.nota}`} role="note">En este perfil de ejemplo no se guardan preferencias: hazlo con tu propia entrevista.</p>}
       {mensaje && <p className={s.mensaje} role="status">{mensaje}</p>}
       {error && <p className={`${s.mensaje} ${s.error}`} role="alert">{error}</p>}
     </section>
