@@ -37,7 +37,8 @@ export function Entrevista({ e, compacto = false }: { e: HookEntrevista; compact
   return (
     <div className={`${s.raiz} ${compacto ? s.compacto : ""}`}>
       <header className={s.cabecera}>
-        <MarcaNoche />
+        {/* En el escenario, la entrevista va dentro del móvil de la entidad: idóneo firma al pie, no arriba. */}
+        {!compacto && <MarcaNoche />}
         {enMarcha && revision && <BarraRevision r={revision} />}
         {enMarcha && !revision && (
           <div className={s.bloquesCaja} style={{ margin: "0 auto" }}>
