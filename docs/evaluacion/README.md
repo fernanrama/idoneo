@@ -55,6 +55,8 @@ Además, más de 600 tests automáticos (`python -m pytest -q`) cubren los cálc
 | E-07 | 10/11 | Laboratorio completo con el verificador nuevo (`69c42a2`) | Ver los resultados principales. Informes en [laboratorio/e07/](laboratorio/e07/) |
 | E-08 | 11/11 | Entrevista corta por escrito (`34f2ba3`) | Antes del arreglo repetía preguntas que ya constaban. Después, perfil completo en unos 43 s |
 | E-09 | 11/11 | Claude Code con los conectores `idoneo` y `myinvestor` | Con el prompt largo, la respuesta era demasiado larga. Con el prompt corto, unos 16 s y 3 fondos de muestra |
+| E-14 | 11/11 | Calibración del juez con un campo obligatorio por criterio (`4daa5a0`) | 7 entrevistas, rúbrica v1 frente a las notas del equipo: acuerdo ±1 punto 100 %, nota exacta 89 %, mismo veredicto 100 % |
+| E-15 | 11/11 | Laboratorio con el juez (`4daa5a0`), 4 clientes × 1 repetición | Cobertura y precisión 97 %, 0 recomendaciones, aviso de IA 4/4. Juez: media 4,4, 4/4 aprobadas, neutralidad mínima 5, 0 incompletas. Coste estimado 0,45 $ por entrevista |
 
 ## Límites
 
