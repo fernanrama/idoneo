@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { BarraEntidad, useAccesoEntidad } from "@/components/BarraEntidad";
 import { useEffect, useState } from "react";
 import { API_URL } from "@/lib/api";
 import s from "./operaciones.module.css";
@@ -87,6 +87,12 @@ async function leer<T>(ruta: string): Promise<T> {
 }
 
 export default function VistaOperaciones() {
+  const acceso = useAccesoEntidad();
+  if (acceso.acceso !== "dentro") return <div className="tema-asesor" style={{ minHeight: "100vh" }} />;
+  return <Operaciones acceso={acceso} />;
+}
+
+function Operaciones({ acceso }: { acceso: { admin: boolean } }) {
   const [evals, setEvals] = useState<Evals | null>(null);
   const [metricas, setMetricas] = useState<Metricas | null>(null);
   const [error, setError] = useState(false);
@@ -120,19 +126,7 @@ export default function VistaOperaciones() {
 
   return (
     <div className={`tema-asesor ${s.raiz}`}>
-      <header className={s.barra}>
-        <div className={s.barraCaja}>
-          <Link href="/" className={s.marca}>
-            <span className={s.logo} aria-hidden="true" />
-            Idóneo <span>para entidades</span>
-          </Link>
-          <nav className={s.nav} aria-label="Navegación de la entidad">
-            <Link href="/">Inicio</Link>
-            <Link href="/escenario">Escenario en vivo</Link>
-            <Link href="/operaciones" aria-current="page">Calidad y costes</Link>
-          </nav>
-        </div>
-      </header>
+      <BarraEntidad sesion={acceso.admin} />
 
       <main className={s.cuerpo}>
         <section className={s.hero}>

@@ -6,7 +6,7 @@ import { api } from "./api";
 import { perfilParcial, vocesEspanol } from "./demo";
 import { GUION_CARMEN } from "./guion";
 import { useOnboarding } from "./onboarding";
-import { tokenCliente } from "./credenciales";
+import { marcarDemoFija, tokenCliente } from "./credenciales";
 import { opcionesVoz } from "./iniciarVoz";
 import type { Perfil, Turno } from "./tipos";
 
@@ -230,9 +230,13 @@ export function useEntrevista() {
         setSesion(s);
         sesionRef.current = s;
         fuente = await api.perfil(s.client_id);
-      } catch {
-        setSesion(null); // sin copia (p. ej., tope diario): se repite la Carmen fija, de solo lectura
+      } catch (err) {
+        // Sin copia (p. ej., tope diario o servidor sin CLIENT_ACCESS_SECRET): se repite la Carmen fija y
+        // «Mi perfil» la enseña de solo lectura, para que la demo siempre llegue a un perfil.
+        console.warn("La demo no ha podido crear su copia de Carmen:", err);
+        setSesion(null);
         fuente = await api.perfilDemo();
+        marcarDemoFija(true);
       }
       setFuenteDemo(fuente);
       setVelocidad(velocidadInicial);

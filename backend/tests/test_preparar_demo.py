@@ -25,6 +25,10 @@ def test_rellena_los_secretos_vacios_con_valores_validos_y_distintos(tmp_path):
     assert all(len(v.encode()) >= 32 for v in valores)
     assert len(set(valores)) == len(valores)
     assert front["DEMO_ADVISOR_TOKEN"] == back["DEMO_ADVISOR_TOKEN"]
+    # Entrada de la entidad en el front: mismo ADMIN_TOKEN, clave tecleable distinta y URL del backend.
+    assert front["ADMIN_TOKEN"] == back["ADMIN_TOKEN"]
+    assert len(front["ADMIN_LOGIN_CLAVE"]) >= 12 and front["ADMIN_LOGIN_CLAVE"] != front["ADMIN_TOKEN"]
+    assert front["API_URL_SERVIDOR"] == "http://localhost:8000"
     assert back["DEMO_ADVISOR_MODE"] == front["DEMO_ADVISOR_MODE"] == "1"
     assert back["ANTHROPIC_API_KEY"] == "" and back["ELEVENLABS_API_KEY"] == ""
     assert not any(v in linea for v in valores for linea in hecho), "el resumen no puede contener secretos"

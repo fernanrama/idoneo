@@ -36,7 +36,6 @@ export default function Portada() {
                 {t}
               </a>
             ))}
-            <Link href="/admin">Soy de la entidad</Link>
           </nav>
           <Link href="/onboarding/entrevista" className={s.navBoton}>
             Empezar
@@ -61,15 +60,15 @@ export default function Portada() {
               </p>
               <div className={s.acciones}>
                 <Link href="/onboarding/entrevista" className={clasesBoton.luz}>
-                  {Icono.micro} Soy cliente: empezar
+                  {Icono.micro} Soy cliente
                 </Link>
-                <Link href="/escenario" className={clasesBoton.vidrio}>
-                  {Icono.play} Ver la demo guiada
-                </Link>
-                <Link href="/admin" className={clasesBoton.vidrio}>
-                  {Icono.check} Soy de la entidad
+                <Link href="/admin" className={clasesBoton.luz}>
+                  {Icono.check} Soy entidad
                 </Link>
               </div>
+              <Link href="/escenario" className={`${s.demoEnlace} mono`}>
+                <span aria-hidden="true">{Icono.play}</span> O mira antes la demo guiada de Carmen, 68 años
+              </Link>
               <ul className={s.claves}>
                 <li>Voz o texto</li>
                 <li>Una pregunta cada vez</li>

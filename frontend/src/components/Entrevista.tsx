@@ -144,11 +144,14 @@ export function Entrevista({ e, compacto = false }: { e: HookEntrevista; compact
               </p>
             )}
             <div className={s.finAcciones}>
-              <Link href="/onboarding/perfil">
-                <span className={clasesBoton.luz}>
-                  {e.modo === "guion" ? "Ver el perfil de Carmen" : revision ? "Ver qué ha cambiado" : "Ver mi perfil"}
-                </span>
-              </Link>
+              {/* En el escenario, el botón al perfil está en el panel de la derecha, junto al resultado. */}
+              {!compacto && (
+                <Link href="/onboarding/perfil">
+                  <span className={clasesBoton.luz}>
+                    {e.modo === "guion" ? "Ver el perfil de Carmen" : revision ? "Ver qué ha cambiado" : "Ver mi perfil"}
+                  </span>
+                </Link>
+              )}
               {e.modo === "guion" && (
                 <BotonNoche variante="vidrio" onClick={() => e.iniciarGuion()}>
                   Repetir la demo

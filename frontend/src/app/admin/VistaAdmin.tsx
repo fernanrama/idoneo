@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { BarraEntidad } from "@/components/BarraEntidad";
 import { api } from "@/lib/api";
 import { ESTADOS } from "@/lib/bloques";
 import type { ClienteBandeja } from "@/lib/tipos";
@@ -25,7 +26,10 @@ const fecha = (iso: string) =>
  */
 export default function VistaAdmin() {
   const router = useRouter();
-  const sugerido = useSearchParams().get("cliente") ?? "";
+  const params = useSearchParams();
+  const sugerido = params.get("cliente") ?? "";
+  // A dónde volver tras meter la clave (p. ej. /operaciones). Solo rutas propias.
+  const volver = /^\/[a-z]/.test(params.get("volver") ?? "") ? params.get("volver")! : null;
   const [estado, setEstado] = useState<{ enabled: boolean; logged: boolean } | null>(null);
   const [clave, setClave] = useState("");
   const [ocupado, setOcupado] = useState(false);
@@ -36,10 +40,12 @@ export default function VistaAdmin() {
   }, []);
   useEffect(cargar, [cargar]);
 
-  // Viene de «Validarlo como entidad»: con la sesión iniciada, directo a ese expediente.
+  // Viene de «Validarlo como entidad» o de otra pantalla de la entidad: con la sesión iniciada, directo allí.
   useEffect(() => {
-    if (estado?.logged && CLIENTE.test(sugerido)) router.replace(`/entidad/${encodeURIComponent(sugerido)}`);
-  }, [estado, sugerido, router]);
+    if (!estado?.logged) return;
+    if (CLIENTE.test(sugerido)) router.replace(`/entidad/${encodeURIComponent(sugerido)}`);
+    else if (volver && volver !== "/admin") router.replace(volver);
+  }, [estado, sugerido, volver, router]);
 
   const entrar = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,34 +61,9 @@ export default function VistaAdmin() {
       setOcupado(false);
     }
   };
-  const salir = async () => {
-    await api.salirAdmin().catch(() => undefined);
-    cargar();
-  };
-
   return (
     <div className={`tema-asesor ${s.raiz}`}>
-      <header className={s.barra}>
-        <div className={s.barraCaja}>
-          <Link href="/" className={s.marca}>
-            <span className={s.logo} aria-hidden="true" />
-            Idóneo <span>para entidades</span>
-          </Link>
-          <nav className={s.nav} aria-label="Navegación de la entidad">
-            <Link href="/">Inicio</Link>
-            <Link href="/escenario">Escenario en vivo</Link>
-            <Link href="/operaciones">Calidad y costes</Link>
-            {estado?.logged && (
-              <span className={s.sesion}>
-                <i aria-hidden="true" /> Entidad ·{" "}
-                <button type="button" className={s.enlace} style={{ minHeight: 0, color: "inherit" }} onClick={salir}>
-                  cerrar sesión
-                </button>
-              </span>
-            )}
-          </nav>
-        </div>
-      </header>
+      <BarraEntidad sesion={estado?.logged === true} alSalir={cargar} />
       <section className={s.hero}>
         <div className={s.puntos} aria-hidden="true" />
         <div className={s.heroCaja}>
@@ -95,8 +76,9 @@ export default function VistaAdmin() {
             {!estado && <p>Comprobando…</p>}
             {estado && !estado.enabled && (
               <p role="note">
-                La administración no está activada en este despliegue. Los perfiles se pueden consultar desde la pestaña del
-                cliente, pero no validar.
+                La entrada de la entidad no está configurada en este servidor: faltan <code>ADMIN_LOGIN_CLAVE</code> y{" "}
+                <code>ADMIN_TOKEN</code>. En local se preparan con <code>python backend/scripts/preparar_demo.py</code> y
+                reiniciando el front.
               </p>
             )}
             {estado?.enabled && !estado.logged && (

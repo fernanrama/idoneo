@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
+import { BarraEntidad, useAccesoEntidad } from "@/components/BarraEntidad";
 import { nombrePerfil } from "@/components/PanelVivo";
 import { Icono } from "@/components/visual";
 import { api } from "@/lib/api";
@@ -51,14 +52,15 @@ export default function VistaEntidad({
   const asesor = modo === null ? null : modo.permitido;
   // Vista solo para la entidad: sin sesión de la entidad (ni el modo asesor de demo en local), a iniciar sesión.
   // El cliente ve su perfil en «Mi perfil», nunca esta página.
-  const fuera = modo !== null && !modo.admin && !modo.activo;
+  const { acceso } = useAccesoEntidad(false);
+  const fuera = acceso === "fuera" || (modo !== null && !modo.admin && !modo.permitido);
   const router = useRouter();
   useEffect(() => {
     if (fuera) router.replace(`/admin?cliente=${encodeURIComponent(cid)}`);
   }, [fuera, cid, router]);
   const { perfil, restricciones, versiones, revision, cambios, error, recargar } = usePerfil(cid, SONDEO_MS, {
     asesor: asesor === true,
-    esperar: asesor === null || fuera,
+    esperar: asesor === null || acceso === "comprobando" || fuera,
   });
   const [accion, setAccion] = useState<{ enCurso: boolean; error: string | null }>({ enCurso: false, error: null });
   const ejecutar = async (fn: () => Promise<unknown>) => {
@@ -80,27 +82,11 @@ export default function VistaEntidad({
   // Qué estados se validan (incluido review_due tras una microentrevista): ver esValidable.
   const validable = esValidable(perfil);
 
+  // Hasta saber si hay acceso no se pinta nada: el cliente nunca ve esta pantalla.
+  if (modo === null || acceso === "comprobando" || fuera) return <div className={`tema-asesor ${s.raiz}`} />;
   return (
     <div className={`tema-asesor ${s.raiz}`}>
-      <header className={s.barra}>
-        <div className={s.barraCaja}>
-          <Link href="/" className={s.marca}>
-            <span className={s.logo} aria-hidden="true" />
-            Idóneo <span>para entidades</span>
-          </Link>
-          <nav className={s.nav} aria-label="Navegación de la entidad">
-            <Link href="/">Inicio</Link>
-            <Link href="/admin">Bandeja</Link>
-            <Link href="/escenario">Escenario en vivo</Link>
-            <Link href="/operaciones">Calidad y costes</Link>
-            {asesor === true && (
-              <span className={s.sesion}>
-                <i aria-hidden="true" /> {modo?.admin ? "Entidad" : "Asesor · demo"}
-              </span>
-            )}
-          </nav>
-        </div>
-      </header>
+      <BarraEntidad sesion={modo?.admin === true} />
 
       <section className={s.hero}>
         <div className={s.puntos} aria-hidden="true" />

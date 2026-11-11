@@ -10,6 +10,7 @@
 .logo { width: 22px; height: 22px; border-radius: 7px; background: conic-gradient(from 200deg, #f08ad0, #6b4ef0, #4fb3ff, #f4a261, #f08ad0); }
 .nav { display: flex; gap: 22px; margin-left: auto; font-size: 14px; color: #5a5a7a; flex-wrap: wrap; }
 .nav a:hover { color: #12122a; }
+.nav a[aria-current="page"] { color: #12122a; font-weight: 600; }
 
 .hero { position: relative; overflow: hidden; }
 .puntos {

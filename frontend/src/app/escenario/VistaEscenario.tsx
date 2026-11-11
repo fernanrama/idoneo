@@ -31,6 +31,11 @@ function Escenario({ cliente }: { cliente: string | null }) {
   const perfil = e.estado === "inactiva" && cliente ? previo.perfil : e.perfil;
   // En el móvil no caben las dos mitades: se elige cuál ver. En el ordenador se ven a la vez.
   const [vista, setVista] = useState<"cliente" | "entidad">("cliente");
+  const [terminada, setTerminada] = useState(false);
+  if ((e.estado === "terminada") !== terminada) {
+    setTerminada(e.estado === "terminada");
+    if (e.estado === "terminada") setVista("entidad"); // en el móvil: ahí está «Ver el perfil de Carmen»
+  }
   const datos = perfil ? Object.entries(perfil.mifid).filter(([r, f]) => f.value != null && !r.startsWith("disclosures.")).length : 0;
 
   return (

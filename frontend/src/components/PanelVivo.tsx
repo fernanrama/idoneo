@@ -96,9 +96,11 @@ export function PanelVivo({ perfil, enMarcha }: { perfil: Perfil | null; enMarch
                   <span key={i} className={su.max_sri != null && i < su.max_sri ? s.lleno : ""} />
                 ))}
               </div>
-              <Link href={`/entidad/${encodeURIComponent(perfil.client_id)}`} className={s.botonClaro}>
-                {perfil.status === "active" ? "Ver en la entidad →" : "Validar en la entidad →"}
-              </Link>
+              {!enMarcha && (
+                <Link href="/onboarding/perfil" className={s.botonClaro}>
+                  Ver el perfil de Carmen →
+                </Link>
+              )}
             </div>
           )}
 

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { esDemoFija } from "@/lib/credenciales";
 import { OrbePerfil } from "@/components/Formas";
 import { nombrePerfil } from "@/components/PanelVivo";
 import { Revela } from "@/components/Revela";
@@ -58,7 +59,8 @@ function mayus(t: string) {
 // Es la misma pantalla final para todos: entrevista por voz, por escrito o demo guiada de Carmen.
 export default function MiPerfil() {
   const { clientId, sesion, listo } = useOnboarding();
-  const sinPerfil = listo && !sesion;
+  const demoFija = useDemoFija(listo);
+  const sinPerfil = listo && !sesion && !demoFija;
   // Mientras no esté validado, se vuelve a mirar cada pocos segundos: la entidad puede validarlo en otra pestaña.
   const [validado, setValidado] = useState(false);
   const { perfil, error, revision, cambios, recargar } = usePerfil(sinPerfil || !listo ? "" : clientId, validado ? undefined : 4000);
@@ -87,6 +89,12 @@ export default function MiPerfil() {
         )}
         {sinPerfil && <SinPerfil />}
         {!sinPerfil && !perfil && !error && <div className={s.cargando} aria-label="Cargando tu perfil" />}
+        {demoFija && !sesion && (
+          <p role="note" className={s.nota} style={{ marginTop: 16 }}>
+            Perfil de ejemplo de Carmen, de solo lectura: el servidor no ha podido preparar tu copia de la demo, así que aquí
+            no se puede guardar la memoria ni actualizarlo.
+          </p>
+        )}
         {!sinPerfil && perfil && (
           <Contenido perfil={perfil} revision={propio ? revision : null} cambios={cambios} recargar={recargar}
             sessionId={propio ? sesion?.session_id ?? null : null} />
@@ -94,6 +102,15 @@ export default function MiPerfil() {
       </main>
     </div>
   );
+}
+
+function useDemoFija(listo: boolean): boolean {
+  const [fija, setFija] = useState(false);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- la marca solo existe en el navegador
+    if (listo) setFija(esDemoFija());
+  }, [listo]);
+  return fija;
 }
 
 /** Sin entrevista en esta pestaña: no se enseña el perfil de nadie, se ofrecen las dos formas de empezar. */

@@ -9,6 +9,8 @@ export class ErrorAPI extends Error {
       ? `${status} Necesitas la credencial de esta pestaña para acceder a este cliente.`
       : status === 412
         ? "412 La memoria ha cambiado. Vuelve a cargarla y decide si quieres guardar de nuevo."
+        : status === 503
+          ? "503 El servidor no está preparado para abrir entrevistas (falta su configuración). En local: python backend/scripts/preparar_demo.py y reinicia el backend."
         : status === 429
           ? "429 Esta demo pública ha llegado a su límite de entrevistas por hoy. Puedes ver la demo guiada o volver mañana."
           : `${status} No se ha podido completar la petición.`);

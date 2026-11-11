@@ -9,6 +9,8 @@ Qué hace:
 - rellena con valores aleatorios y distintos los secretos locales que estén VACÍOS: `CLIENT_ACCESS_SECRET`
   (sin él no se pueden crear clientes), `ADMIN_TOKEN`, `VOICE_USER_ID_SECRET`, `DEMO_ADVISOR_TOKEN` (el mismo
   en los dos ficheros) y `MCP_DEMO_TOKEN`;
+- en `frontend/.env.local`, la entrada de la entidad (`/admin`): el mismo `ADMIN_TOKEN` que el backend, una
+  `ADMIN_LOGIN_CLAVE` para teclear (léela en ese fichero) y `API_URL_SERVIDOR`;
 - activa el modo asesor de demostración (`DEMO_ADVISOR_MODE=1`), que solo funciona en local y con clientes
   ficticios (docs/modo-asesor-demo.md). Con `--sin-modo-asesor` no lo toca.
 
@@ -89,6 +91,14 @@ def preparar(raiz: Path = RAIZ, modo_asesor: bool = True) -> list[str]:
                 cambios_front[nombre] = valor
         elif not back.get(nombre):
             cambios_back[nombre] = nuevo_secreto(usados)
+    # Entrada de la entidad en el front (/admin): el mismo ADMIN_TOKEN que el backend y una clave que se teclea.
+    token_admin = cambios_back.get("ADMIN_TOKEN") or back.get("ADMIN_TOKEN")
+    if token_admin and front.get("ADMIN_TOKEN") != token_admin:
+        cambios_front["ADMIN_TOKEN"] = token_admin
+    if len(front.get("ADMIN_LOGIN_CLAVE", "").strip()) < 12:
+        cambios_front["ADMIN_LOGIN_CLAVE"] = f"entidad-{secrets.token_hex(4)}"
+    if not front.get("API_URL_SERVIDOR"):
+        cambios_front["API_URL_SERVIDOR"] = front.get("NEXT_PUBLIC_API_URL") or "http://localhost:8000"
     if modo_asesor:
         if back.get("DEMO_ADVISOR_MODE") != "1":
             cambios_back["DEMO_ADVISOR_MODE"] = "1"
