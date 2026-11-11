@@ -66,8 +66,8 @@ export default function Portada() {
                   {Icono.check} Soy entidad
                 </Link>
               </div>
-              <Link href="/escenario" className={`${s.demoEnlace} mono`}>
-                <span aria-hidden="true">{Icono.play}</span> O mira antes la demo guiada de Carmen, 68 años
+              <Link href="/escenario" className={`${clasesBoton.vidrio} ${s.demo}`}>
+                {Icono.play} Ver la demo guiada
               </Link>
               <ul className={s.claves}>
                 <li>Voz o texto</li>

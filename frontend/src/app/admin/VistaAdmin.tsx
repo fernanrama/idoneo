@@ -56,7 +56,8 @@ export default function VistaAdmin() {
       setClave("");
       cargar();
     } catch (err) {
-      setError((err as { status?: number }).status === 401 ? "Clave incorrecta." : "No se ha podido iniciar sesión. Inténtalo de nuevo.");
+      const status = (err as { status?: number }).status;
+      setError(status === 401 ? "Clave incorrecta." : status === 404 ? "La entrada de la entidad aún no está activada." : "No se ha podido iniciar sesión. Inténtalo de nuevo.");
     } finally {
       setOcupado(false);
     }
@@ -74,14 +75,7 @@ export default function VistaAdmin() {
               de la entidad
             </h1>
             {!estado && <p>Comprobando…</p>}
-            {estado && !estado.enabled && (
-              <p role="note">
-                La entrada de la entidad no está configurada en este servidor: faltan <code>ADMIN_LOGIN_CLAVE</code> y{" "}
-                <code>ADMIN_TOKEN</code>. En local se preparan con <code>python backend/scripts/preparar_demo.py</code> y
-                reiniciando el front.
-              </p>
-            )}
-            {estado?.enabled && !estado.logged && (
+            {estado && !estado.logged && (
               <form onSubmit={entrar} style={{ display: "grid", gap: 12, marginTop: 16 }}>
                 <p>Entra con la clave del equipo para ver los perfiles que llegan, revisar sus evidencias y validarlos.</p>
                 <label htmlFor="clave-admin" style={{ fontWeight: 600 }}>Clave de la entidad</label>

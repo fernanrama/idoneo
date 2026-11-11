@@ -208,11 +208,19 @@ function Contenido({ perfil, revision, cambios, recargar, sessionId }: {
         <AvisoCliente key={a.id} alerta={a} />
       ))}
 
-      {revision && su.complete && (
+      {su.complete && (revision ? (
         <PerfilVivo revision={revision} clientId={perfil.client_id} recargar={recargar} validado={revisado} />
-      )}
+      ) : (
+        <SoloLectura titulo="¿Ha cambiado algo en tu vida?"
+          texto="Cuando el banco valide tu perfil podrás contárnoslo aquí y solo te preguntaremos eso." />
+      ))}
       {cambios && <AntesDespues c={cambios} />}
-      {sessionId && <MemoriaPersonal sessionId={sessionId} />}
+      {sessionId ? (
+        <MemoriaPersonal sessionId={sessionId} />
+      ) : (
+        <SoloLectura titulo="Recordar cómo prefieres hablar"
+          texto="Trato de usted o de tú, nivel de detalle y ritmo de la conversación, guardados aparte de tu expediente MiFID." />
+      )}
 
       <Revela como="section" className={`${s.tarjeta} ${s.siguiente}`}>
         <div className={s.siguienteIcono} aria-hidden="true">
@@ -351,6 +359,22 @@ function AvisoCliente({ alerta }: { alerta: Alerta }) {
         <p>{texto}</p>
         {cita && <p className={s.avisoCita}>«{cita}»</p>}
       </div>
+    </Revela>
+  );
+}
+
+/** La misma sección que ve cualquier cliente, sin acciones: este perfil de ejemplo no es tuyo (solo lectura). */
+function SoloLectura({ titulo, texto }: { titulo: string; texto: string }) {
+  return (
+    <Revela como="section" className={rv.vivo}>
+      <div className={rv.vivoTexto}>
+        <h2>{titulo}</h2>
+        <p>{texto}</p>
+        <p style={{ marginTop: 8, opacity: 0.8 }}>En este perfil de ejemplo no está disponible: hazlo con tu propia entrevista.</p>
+      </div>
+      <Link href="/onboarding/entrevista" className={rv.vivoBoton}>
+        Empezar mi entrevista <span aria-hidden="true">→</span>
+      </Link>
     </Revela>
   );
 }
