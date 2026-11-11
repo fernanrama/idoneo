@@ -29,29 +29,59 @@
     }
   },
   "laboratorio": {
-    "prueba": "E-07",
-    "fecha": "2026-11-10",
+    "prueba": "E-12",
+    "fecha": "2026-11-11",
     "modelo": "claude-sonnet-5-5",
-    "casos": 8,
-    "detalle": "4 personas × 2 repeticiones, entrevistas completas con cliente simulado",
+    "casos": 4,
+    "detalle": "4 clientes simulados × 1 repeticiones",
     "metricas": {
       "cobertura": 1.0,
       "precision": 1.0,
       "recomendaciones": 0,
       "aviso_ia": 1.0,
-      "coste_medio_usd": 0.35
+      "coste_medio_usd": 0.3742
     }
   },
   "e2e": {
-    "prueba": "E-10",
+    "prueba": "E-13",
     "fecha": "2026-11-11",
-    "modelo": "simulado",
+    "modelo": "real",
     "casos": 9,
     "detalle": "Lucía (ficticia) → Banco Ejemplo (ficticio)",
     "metricas": {
       "pasos_ok": 1.0,
-      "duracion_s": 0.25,
-      "coste_usd": 0.0
+      "duracion_s": 176.41,
+      "coste_usd": 0.4584
+    }
+  },
+  "calibracion_juez": {
+    "prueba": "E-11",
+    "fecha": "2026-11-11",
+    "modelo": "claude-sonnet-5-5",
+    "casos": 7,
+    "detalle": "rúbrica v1, notas humanas del equipo",
+    "metricas": {
+      "acuerdo": 1.0,
+      "exacto": 0.7714,
+      "veredicto": 1.0
+    }
+  },
+  "juez": {
+    "prueba": "E-12",
+    "fecha": "2026-11-11",
+    "modelo": "claude-sonnet-5-5",
+    "casos": 4,
+    "detalle": "rúbrica v1 sobre las entrevistas del laboratorio",
+    "metricas": {
+      "nota_media": 4.38,
+      "neutralidad_min": 0,
+      "aprobadas": 0.75,
+      "sin_prueba": 2,
+      "media_claridad": 4.25,
+      "media_una_pregunta": 4,
+      "media_neutralidad": 5,
+      "media_empatia": 3.67,
+      "media_transparencia": 5
     }
   }
 }
