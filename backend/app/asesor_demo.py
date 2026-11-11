@@ -28,6 +28,7 @@ from typing import Any
 from urllib.parse import urlsplit
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from pydantic import BaseModel, ConfigDict, Field
 
 from . import acceso, demo_autorizaciones
 from .perfil import revision, store, validacion
@@ -176,11 +177,27 @@ def expediente(client_id: str, conf: Configuracion = Depends(exigir_asesor_demo)
             "changes": (c.model_dump(mode="json") if (c := _llamar(revision.comparar, cid)) else None)}
 
 
+class ValidacionDemo(BaseModel):
+    """Cuerpo opcional de la validación del asesor de demo: solo la versión que ha revisado.
+
+    Ni correcciones ni otro asesor (campos extra → 422): firma siempre `advisor:<DEMO_ADVISOR_ID>`.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    expected_version: int | None = Field(default=None, ge=1)
+
+
 @router.post("/clientes/{client_id}/validar")
-def validar(client_id: str, conf: Configuracion = Depends(exigir_asesor_demo)) -> dict[str, Any]:
-    """Validación atómica de siempre, sin correcciones, firmada por `advisor:<DEMO_ADVISOR_ID>`."""
+def validar(client_id: str, body: ValidacionDemo | None = None,
+            conf: Configuracion = Depends(exigir_asesor_demo)) -> dict[str, Any]:
+    """Validación atómica de siempre, sin correcciones, firmada por `advisor:<DEMO_ADVISOR_ID>`.
+
+    `expected_version` (opcional): la versión que ve el asesor. Si el perfil ha cambiado desde entonces
+    (p. ej. otra respuesta de la microentrevista), 409 y no se escribe nada, igual que `POST /validate`.
+    Sin cuerpo o sin el campo, se valida la última versión como hasta ahora (compatibilidad).
+    """
     cid = _cliente_permitido(client_id, conf)
-    _llamar(store.validar, cid, conf.asesor_id, [])
+    _llamar(store.validar, cid, conf.asesor_id, [], body.expected_version if body else None)
     log.warning("Modo asesor de demo: %s validado por advisor:%s (DATOS SIMULADOS)", cid, conf.asesor_id)
     return _perfil_para_asesor(cid)
 
