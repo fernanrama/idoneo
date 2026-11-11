@@ -113,3 +113,79 @@ def test_api_valida_review_due_con_version_esperada_y_exige_permiso(validada):
     assert c.post(ruta, json={"advisor_id": "a-1", "expected_version": p.version - 1}).status_code == 409
     r = c.post(ruta, json={"advisor_id": "a-1", "expected_version": p.version})
     assert r.status_code == 200 and r.json()["status"] == "active"
+
+
+# ---------- R1–R6: la revisión del cliente («¿Ha cambiado algo?») ----------
+
+def servido():
+    return store.restricciones_para_consumidor(C)
+
+
+def test_1_abrir_la_revision_no_cambia_el_estado_ni_los_datos(validada):
+    revision.abrir(C, ["planned_expense"])
+    p = store.perfil(C)
+    assert p.status == EstadoPerfil.active and p.reason == "review_requested:planned_expense"
+    assert {r: f.value for r, f in p.mifid.items()} == {r: f.value for r, f in validada.mifid.items()}
+    assert p.assessments == validada.assessments
+    assert servido().usable and servido().pending_review is None
+
+
+def test_2_confirmar_en_la_revision_mantiene_active_con_evidencia_nueva(validada):
+    revision.abrir(C, ["planned_expense"])
+    antes = store.perfil(C).mifid[AHORRO]
+    p = decir(AHORRO, 80000, "Los ahorros siguen en ochenta mil")
+    assert p.status == EstadoPerfil.active and servido().pending_review is None
+    assert len(p.mifid[AHORRO].evidence) == len(antes.evidence) + 1 and p.mifid[AHORRO].confirmed_at is not None
+
+
+def test_3_cambiar_un_dato_en_la_revision_pasa_a_review_due(validada):
+    revision.abrir(C, ["planned_expense"])
+    p = decir(LIQUIDEZ, "high", "Necesito 6.000 € en tres meses")
+    assert p.status == EstadoPerfil.review_due and servido().pending_review.paths == [LIQUIDEZ]
+
+
+def test_4_validar_tras_la_microentrevista_cierra_la_revision(validada):
+    revision.abrir(C, ["planned_expense"])
+    p = decir(LIQUIDEZ, "high", "Necesito 6.000 € en tres meses")
+    v = store.validar(C, "asesor-07", [], version_esperada=p.version)
+    assert v.status == EstadoPerfil.active and revision.en_curso(C) is None and servido().pending_review is None
+
+
+def test_5_abandonar_sin_responder_no_altera_el_perfil(validada):
+    revision.abrir(C, ["planned_expense"])
+    store.crear_sesion(C, "text")  # abre la microentrevista y la deja sin contestar
+    p = store.perfil(C)
+    assert p.status == EstadoPerfil.active and p.assessments == validada.assessments
+    assert revision.en_curso(C) is not None  # la revisión queda abierta, pero no invalida nada
+    assert servido().usable and servido().pending_review is None
+
+
+def test_6_una_confirmacion_no_reactiva_un_perfil_ya_invalidado(validada):
+    decir(PLAZO, 1, "Lo necesitaré el año que viene")  # cambio previo: review_due
+    revision.abrir(C, ["planned_expense"])
+    assert store.perfil(C).status == EstadoPerfil.review_due  # abrir no lo reactiva
+    p = decir(AHORRO, 80000, "Los ahorros siguen en ochenta mil")
+    assert p.status == EstadoPerfil.review_due and servido().pending_review.paths == [PLAZO]
+
+
+def test_7_las_alertas_anteriores_no_desaparecen(validada):
+    from app.perfil.modelos import Alerta, EstadoAlerta, Flag
+
+    store.anadir_alertas(C, [Alerta(id="a-previa", path=GASTOS, flag=Flag.needs_advisor,
+                                    message="DATOS SIMULADOS: revisar los gastos")])
+    revision.abrir(C, ["planned_expense"])
+    p = decir(AHORRO, 80000, "Los ahorros siguen en ochenta mil")
+    abiertas = [a.id for a in p.alerts if a.status == EstadoAlerta.open]
+    assert "a-previa" in abiertas  # ni abrir la revisión ni confirmar la cierran; solo la validación
+
+
+def test_10_los_resultados_y_las_restricciones_se_actualizan_al_validar(validada):
+    revision.abrir(C, ["goal_change"])
+    p = decir(PLAZO, 1, "Lo necesitaré el año que viene")
+    filtros = lambda r: {f.field for f in r.post_filters}  # noqa: E731
+    assert "fixed_income_term" not in filtros(servido())  # se sirve lo validado, con aviso
+    assert servido().pending_review.paths == [PLAZO]
+    from app.perfil import calculos
+    assert "fixed_income_term" in filtros(calculos.restricciones(p))  # la versión nueva ya está recalculada
+    store.validar(C, "asesor-07", [], version_esperada=p.version)
+    assert "fixed_income_term" in filtros(servido()) and servido().pending_review is None

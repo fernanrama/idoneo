@@ -18,8 +18,10 @@ El algoritmo de escritura está aquí una sola vez, así que ambos almacenes se 
 Estados (docs/diseno/03-contrato-perfil.md):
   draft → pending_validation   cuando suitability.complete y sin alertas needs_advisor abiertas
   pending_validation → active  cuando valida la entidad (solo desde draft o pending_validation)
-  active → review_due          cuando un agente cambia un dato (o un evento vital)
+  active → review_due          cuando un agente cambia un dato (no por una confirmación pura, D3)
+  review_due → active          cuando valida la entidad (D2), sin otra entrevista
   review_due → draft           al empezar una entrevista nueva
+  (abrir una revisión del cliente no cambia el estado: pedir_revision)
 
 La capa personal se guarda aparte (personal.py) y se une al perfil al leerlo.
 """
@@ -218,12 +220,15 @@ def restricciones_para_consumidor(client_id: str) -> Restricciones:
 
 
 def pedir_revision(client_id: str, motivo: str) -> Perfil:
-    """Abre una revisión pedida por el cliente: versión nueva, sin tocar datos, en borrador.
+    """Abre (o amplía) una revisión pedida por el cliente SIN cambiar el estado MiFID (R1, R5).
 
-    Los consumidores siguen recibiendo el último `active` (con `pending_review` cuando cambie algo);
-    lo que se pregunte y conteste en la microentrevista lo valida después la entidad."""
+    Escribe una versión de trámite (`review_requested:<motivos>`) con los mismos datos y el mismo estado que
+    la vigente: un perfil `active` sigue `active` y uno en revisión sigue en revisión. Es necesaria para la
+    trazabilidad y para que la revisión abierta sobreviva a un reinicio y la vea la entidad sin una tabla
+    nueva (`revision.en_curso` la reconstruye del historial). Abandonarla no cambia nada. Lo que el cliente
+    cambie después pasa a `review_due` por la regla de siempre; lo que solo confirme no (D3)."""
     motivo = _motivo(motivo)
-    return _escribir(client_id, lambda n: motivo, "system", lambda n: EstadoPerfil.draft)
+    return _escribir(client_id, lambda n: motivo, "system", lambda n: n.status)
 
 
 def versiones(client_id: str) -> list[dict[str, Any]]:
