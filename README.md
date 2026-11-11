@@ -57,11 +57,16 @@ Visión: [evolución hacia un perfil continuo](docs/diseno/05-perfil-continuo.md
 
 ```mermaid
 flowchart LR
-    A["📱 Cliente<br/>voz o texto"] -->|turnos| B["Agentes con Claude<br/>extractor · verificador"]
-    B -->|datos con cita| C[("Perfil versionado<br/>evidencias · alertas")]
+    A["📱 Cliente<br/>voz o texto"] -->|alta| I["Entrevistador<br/>ElevenLabs (voz) · Claude (texto)"]
+    A -->|"«¿Ha cambiado algo?»"| R["Planificador determinista<br/>solo lo afectado · máx. 6 preguntas"]
+    R -->|microentrevista| I
+    I -->|turnos| B["Agentes con Claude<br/>extractor · verificador"]
+    B -->|datos con cita| C[("Perfil versionado<br/>evidencias · audio · alertas")]
     C --> D["Cálculos deterministas<br/>idoneidad · conveniencia"]
-    D --> E{"Asesor<br/>valida"}
+    D -.->|lo que falta| I
+    D --> E{"Asesor valida<br/>antes / después"}
     E -->|perfil activo| F["API REST + servidor MCP"]
+    C -.->|"datos en revisión<br/>(pending_review)"| F
     F --> G["Agente de la entidad<br/>GPTadvisor · Claude"]
     G -.->|conector en la conversación| H["Catálogo de MyInvestor"]
 ```

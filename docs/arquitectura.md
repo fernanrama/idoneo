@@ -12,23 +12,29 @@
 ```mermaid
 flowchart LR
     C([👤 Cliente])
-    I[🎙️ Entrevista<br/>voz o texto]
+    I[🎙️ Entrevistador<br/>ElevenLabs voz · Claude texto]
+    R[🧮 Planificador<br/>de la microentrevista]
     X[🤖 Extractor<br/>Claude + guardas]
     P[(📋 Perfil versionado<br/>datos + citas + confianza)]
     K[🧮 Cálculos<br/>deterministas]
-    V[🔎 Verificador<br/>reglas actuales]
+    V[🔎 Verificador<br/>reglas + Claude]
     H{🧑‍💼 Asesor<br/>valida}
-    M[🔌 MCP de Idóneo]
+    M[🔌 API REST + MCP de Idóneo]
     A[🤖 Agente de la entidad]
     MI[🏦 MCP MyInvestor]
 
-    C --> I -->|turnos| X
+    C -->|alta| I
+    C -->|¿Ha cambiado algo?| R
+    R -->|solo lo afectado| I
+    I -->|turnos| X
     X -->|parches validados| P
     P --> K
     K --> V
     V -->|alertas| P
+    K -. lo que falta .-> I
     P --> H
     H -->|perfil active| M
+    P -. datos en revisión .-> M
     M --> A
     A -. consulta catálogo .-> MI
 
@@ -37,8 +43,8 @@ flowchart LR
     classDef code fill:#DDF5E5,stroke:#29864A,color:#12351F
     classDef data fill:#DDEEFF,stroke:#3478B8,color:#102B43
     class C,H human
-    class X,A ai
-    class K,V code
+    class I,X,V,A ai
+    class R,K code
     class P,M data
 ```
 
