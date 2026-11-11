@@ -1,7 +1,9 @@
 """Verificación segura de la base de datos antes y después de aplicar las migraciones (Postgres/Supabase).
 
-Uso (desde backend/, con DATABASE_URL en el .env de la raíz):
-    python -m app.perfil.persistencia.verificar previo
+Uso (desde backend/). El destino es siempre explícito: no se lee el `.env` del repositorio por su cuenta.
+Todos los modos exigen `--destino host:puerto/base` y toman la URL de DATABASE_URL del entorno del proceso
+(o de `--env-file RUTA`, solo esa variable). Si la URL apunta a otra base, el script no se conecta.
+    python -m app.perfil.persistencia.verificar previo --destino host:5432/base
         Solo lectura (transacción READ ONLY): conexión, versión, permisos del usuario, objetos que
         chocarían con la migración, disparadores de eventos, permisos por defecto y pendientes.
     python -m app.perfil.persistencia.verificar ensayo
@@ -13,7 +15,7 @@ Uso (desde backend/, con DATABASE_URL en el .env de la raíz):
         las escrituras prohibidas (UPDATE, DELETE, TRUNCATE) en una transacción que se deshace.
 
 Salida: una línea OK/AVISO/FALLO por comprobación. Código 0 si no hay fallos, 1 si los hay,
-2 si no se puede conectar. Nunca imprime usuario ni contraseña.
+2 si el destino no es válido o no se puede conectar. Nunca imprime usuario ni contraseña.
 """
 
 from __future__ import annotations
@@ -25,10 +27,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from sqlalchemy import Connection, Engine, text
-from sqlalchemy.engine import make_url
 
-from . import migrar
-from .db import crear_motor, url_desde_entorno
+from . import migrar, seguridad
+from .db import crear_motor
 from .tablas import metadata
 
 TABLAS = sorted(metadata.tables)                       # las 5 del perfil
@@ -306,18 +307,17 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("modo", choices=["previo", "ensayo", "posterior"])
     parser.add_argument("--prueba-escritura", action="store_true", help="solo en 'posterior'")
+    seguridad.anadir_argumentos_destino(parser)
     args = parser.parse_args(argv)
 
-    from dotenv import load_dotenv
-    load_dotenv(Path(__file__).resolve().parents[4] / ".env")
-
-    url = make_url(url_desde_entorno())
-    if url.get_backend_name() != "postgresql":
-        print("La verificación es para Postgres. Define DATABASE_URL.")
-        return 2
-    print(f"Base de datos: {url.host} · base '{url.database}' · modo {args.modo}")
     try:
-        motor = crear_motor(url.render_as_string(hide_password=False))
+        url = seguridad.destino_explicito(args.destino, args.variable, args.env_file)
+    except seguridad.DestinoNoValido as e:
+        print(f"Destino no válido: {e}")
+        return 2
+    print(f"Base de datos: {seguridad.describir(url)} · modo {args.modo}")
+    try:
+        motor = crear_motor(url)
         if args.modo == "previo":
             inf = previo(motor)
         elif args.modo == "ensayo":

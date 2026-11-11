@@ -105,7 +105,7 @@ def servidor(request, tmp_path):
     if request.param == "sqlite":
         url = f"sqlite:///{tmp_path / 'perfil_test.db'}"
     else:
-        from tests.conftest import postgres_recien_migrado
+        from tests.soporte_bd import postgres_recien_migrado
         url = postgres_recien_migrado()
     s = Servidor(url, tmp_path / "uvicorn.log")
     yield s

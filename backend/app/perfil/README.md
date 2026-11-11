@@ -43,11 +43,12 @@ persistencia/     tablas, motor (Postgres/SQLite) y aplicador de migraciones
 
 ```bash
 cd backend
-python -m app.perfil.persistencia.verificar previo    # solo lectura
-python -m app.perfil.persistencia.verificar ensayo    # aplica y deshace (ROLLBACK)
-python -m app.perfil.persistencia.migrar              # plan: no cambia nada
-python -m app.perfil.persistencia.migrar --aplicar    # aplica (con autorización del responsable)
-python -m app.perfil.persistencia.verificar posterior --prueba-escritura
+D="--env-file ../.env --destino host:5432/base"          # destino explícito: nunca se lee el .env solo
+python -m app.perfil.persistencia.verificar previo $D    # solo lectura
+python -m app.perfil.persistencia.verificar ensayo $D    # aplica y deshace (ROLLBACK)
+python -m app.perfil.persistencia.migrar $D              # plan: no cambia nada
+python -m app.perfil.persistencia.migrar $D --aplicar    # aplica (con autorización del responsable)
+python -m app.perfil.persistencia.verificar posterior $D --prueba-escritura
 ```
 
 Procedimiento completo, qué esperar y qué hacer si falla: [backend/migraciones/README.md](../../migraciones/README.md).
@@ -58,6 +59,8 @@ Procedimiento completo, qué esperar y qué hacer si falla: [backend/migraciones
 cd backend && python -m pytest -q
 ```
 
-Los tests de contrato (API, MCP y store) se repiten con cada almacén. Para añadir un Postgres **local y
-desechable** (nunca Supabase; se vacía en cada test y debe llevar `test` en el nombre):
+Los tests arrancan sin credenciales de pago ni red externa (`tests/aislamiento/`). Los de contrato (API, MCP
+y store), validación, memoria personal y concurrencia entre procesos se repiten con cada almacén. Para añadir
+un Postgres **local y desechable** (nunca Supabase; se vacía en cada test, debe llevar `test` en el nombre y
+estar marcado: `COMMENT ON DATABASE perfil_test IS 'idoneo:base-desechable-de-pruebas'`):
 `TEST_POSTGRES_URL=postgresql://usuario@127.0.0.1:5432/perfil_test python -m pytest -q`

@@ -1,8 +1,11 @@
 """Aplica las migraciones SQL numeradas de backend/migraciones/ a la base de DATABASE_URL (Postgres).
 
-Uso (desde backend/):
-    python -m app.perfil.persistencia.migrar            # solo muestra el plan, no cambia nada
-    python -m app.perfil.persistencia.migrar --aplicar  # aplica las pendientes, cada una en su transacción
+Uso (desde backend/). El destino es siempre explícito: no se lee el `.env` del repositorio por su cuenta.
+    DATABASE_URL=postgresql://... python -m app.perfil.persistencia.migrar --destino host:5432/base
+        solo muestra el plan, no cambia nada
+    python -m app.perfil.persistencia.migrar --destino host:5432/base --env-file RUTA --aplicar
+        aplica las pendientes, cada una en su transacción (URL leída solo de DATABASE_URL en RUTA)
+Si la URL no apunta a `--destino`, el script se niega antes de conectar.
 
 Cada migración aplicada queda registrada en `schema_migrations` con su huella SHA-256: si alguien
 edita una migración ya aplicada, el script se niega a continuar. Nunca imprime la cadena de conexión.
@@ -18,9 +21,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from sqlalchemy import Engine, inspect, text
-from sqlalchemy.engine import make_url
 
-from .db import crear_motor, url_desde_entorno
+from . import seguridad
+from .db import crear_motor
 
 DIR_MIGRACIONES = Path(__file__).resolve().parents[3] / "migraciones"
 _NOMBRE = re.compile(r"^(\d{4})_[a-z0-9_]+\.sql$")
@@ -121,17 +124,17 @@ def aplicar(motor: Engine, directorio: Path = DIR_MIGRACIONES) -> list[str]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--aplicar", action="store_true", help="aplica las migraciones pendientes")
+    seguridad.anadir_argumentos_destino(parser)
     args = parser.parse_args(argv)
 
-    from dotenv import load_dotenv
-    load_dotenv(Path(__file__).resolve().parents[4] / ".env")  # .env en la raíz del repo
-
-    url = make_url(url_desde_entorno())
-    if url.get_backend_name() != "postgresql":
-        print("Las migraciones son para Postgres. En SQLite las tablas se crean solas al arrancar.")
-        return 1
-    print(f"Base de datos: {url.host} · base '{url.database}'")  # sin usuario ni contraseña
-    motor = crear_motor(url.render_as_string(hide_password=False))
+    try:
+        url = seguridad.destino_explicito(args.destino, args.variable, args.env_file)
+    except seguridad.DestinoNoValido as e:
+        print(f"Destino no válido: {e}")
+        print("En SQLite no hacen falta migraciones: las tablas se crean solas al arrancar.")
+        return 2
+    print(f"Base de datos: {seguridad.describir(url)}")  # sin usuario ni contraseña
+    motor = crear_motor(url)
     lista = pendientes(motor)
     if not lista:
         print("No hay migraciones pendientes.")

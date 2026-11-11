@@ -17,17 +17,26 @@ Qué garantiza la 0001:
 
 ## Procedimiento para aplicarla en Supabase
 
-Todos los comandos desde `backend/`, con `DATABASE_URL` (Session pooler, puerto 5432) en el `.env` de la
-raíz. Ninguno imprime usuario ni contraseña. **Detente en cuanto un paso dé FALLO o un código distinto de 0.**
+Todos los comandos desde `backend/`. **El destino es siempre explícito**: `migrar` y `verificar` no leen el
+`.env` por su cuenta. Cada comando lleva `--destino host:puerto/base` (la base que esperas tocar) y toma la URL
+de `DATABASE_URL` del entorno del proceso, o de un archivo con `--env-file RUTA` (solo esa variable: no carga
+nada más). Si la URL apunta a otra base, el comando se niega **sin conectarse** (código 2). Ninguno imprime
+usuario ni contraseña. **Detente en cuanto un paso dé FALLO o un código distinto de 0.**
+
+Para Supabase (Session pooler, puerto 5432), con la URL en el `.env` de la raíz:
+
+```bash
+D="--env-file ../.env --destino aws-0-<región>.pooler.supabase.com:5432/postgres"   # el host de tu proyecto
+```
 
 | Paso | Comando | Cambia la base | Resultado esperado |
 |---|---|---|---|
-| 1. Comprobación previa | `python -m app.perfil.persistencia.verificar previo` | No (transacción de solo lectura) | `SIN FALLOS`, código 0, `0001` pendiente |
-| 2. Ensayo | `python -m app.perfil.persistencia.verificar ensayo` | No: aplica en una transacción y **siempre** hace ROLLBACK | `SIN FALLOS` y `ensayo deshecho` |
-| 3. Plan | `python -m app.perfil.persistencia.migrar` | No | `Pendientes: 0001_esquema_inicial.sql` |
-| 4. Aplicar (**con autorización**) | `python -m app.perfil.persistencia.migrar --aplicar` | Sí | `Aplicada: 0001_esquema_inicial.sql` |
-| 5. Verificación posterior | `python -m app.perfil.persistencia.verificar posterior --prueba-escritura` | No: la prueba de escritura se deshace | `SIN FALLOS`; bloquea UPDATE, DELETE y TRUNCATE |
-| 6. Repetición | `python -m app.perfil.persistencia.migrar` | No | `No hay migraciones pendientes` |
+| 1. Comprobación previa | `python -m app.perfil.persistencia.verificar previo $D` | No (transacción de solo lectura) | `SIN FALLOS`, código 0, `0001` pendiente |
+| 2. Ensayo | `python -m app.perfil.persistencia.verificar ensayo $D` | No: aplica en una transacción y **siempre** hace ROLLBACK | `SIN FALLOS` y `ensayo deshecho` |
+| 3. Plan | `python -m app.perfil.persistencia.migrar $D` | No | `Pendientes: 0001_esquema_inicial.sql` |
+| 4. Aplicar (**con autorización**) | `python -m app.perfil.persistencia.migrar $D --aplicar` | Sí | `Aplicada: 0001_esquema_inicial.sql` |
+| 5. Verificación posterior | `python -m app.perfil.persistencia.verificar posterior $D --prueba-escritura` | No: la prueba de escritura se deshace | `SIN FALLOS`; bloquea UPDATE, DELETE y TRUNCATE |
+| 6. Repetición | `python -m app.perfil.persistencia.migrar $D` | No | `No hay migraciones pendientes` |
 | 7. Arranque de la app | `PERFIL_ALMACEN=bd uvicorn app.main:app --port 8000` | Sí: carga a Carmen (DATOS SIMULADOS) si no existe | `/api/health` ok; `/api/clients/carmen-68/profile` en v1 |
 
 Avisos esperados en los pasos 1 y 2 (no son fallos): los disparadores de eventos de Supabase
@@ -62,10 +71,25 @@ docker run -d --name perfil-supabase-ensayo -e POSTGRES_PASSWORD=$PW -p 127.0.0.
   public.ecr.aws/supabase/postgres:17.11.0.011
 # (opcional) replicar el disparador ensure_rls del proyecto real antes de empezar
 export DATABASE_URL="postgresql://postgres:$PW@127.0.0.1:54417/postgres"
+D="--destino 127.0.0.1:54417/postgres"
 # pasos 1 a 7 de la tabla anterior
 docker rm -f perfil-supabase-ensayo
 ```
 
-Para la suite completa contra Postgres usa una base cuyo nombre lleve `test` (se vacía en cada test; los
-tests se niegan a usar Supabase o hosts remotos):
-`TEST_POSTGRES_URL=postgresql://postgres:$PW@127.0.0.1:54417/perfil_test python -m pytest -q`
+## Tests contra un Postgres local desechable
+
+La suite vacía el esquema `public` de esa base en cada test. Por eso solo lo hace si la base es local, lleva
+`test` en el nombre, no es de Supabase **y está marcada como desechable en el propio servidor**. Sin la marca,
+los tests se niegan (`BaseNoAutorizada`) y no borran nada; así un `TEST_POSTGRES_URL` equivocado (otra base
+local, un túnel) no puede vaciar una base que no sea de pruebas.
+
+```bash
+createdb -h 127.0.0.1 -p 54417 -U postgres perfil_test
+psql -h 127.0.0.1 -p 54417 -U postgres -d perfil_test \
+  -c "COMMENT ON DATABASE perfil_test IS 'idoneo:base-desechable-de-pruebas'"
+TEST_POSTGRES_URL=postgresql://postgres:$PW@127.0.0.1:54417/perfil_test python -m pytest -q
+```
+
+Los tests arrancan siempre sin credenciales de pago ni red externa (`tests/aislamiento/`): las claves de
+Anthropic y ElevenLabs quedan vacías aunque exista el `.env`, y solo se permiten conexiones a esta máquina,
+también en los subprocesos que lanzan los tests.

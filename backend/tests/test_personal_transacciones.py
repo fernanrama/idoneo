@@ -1,4 +1,4 @@
-"""Contrato personal CAS, borrado durable y transacciones sin red ni migraciones."""
+"""Contrato personal CAS, borrado durable y transacciones; sin red (memoria, SQLite y Postgres local)."""
 
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
@@ -11,6 +11,7 @@ from app.perfil import store
 from app.perfil.almacenes.bd import AlmacenBD
 from app.perfil.almacenes.base import ConflictoVersion
 from app.perfil.modelos import Turno, ahora
+from tests.soporte_bd import ALMACENES_SQL, url_sql
 
 C = "cliente-personal-test"
 A = "agent:memory"
@@ -56,11 +57,10 @@ def test_sqlite_en_memoria_no_comparte_conexion_durante_transaccion_personal(ope
     assert not store.personal(C).consent_given
 
 
-@pytest.fixture(params=["memoria", "sqlite"])
+@pytest.fixture(params=["memoria", *ALMACENES_SQL])
 def personal_bd(request, tmp_path):
-    url = f"sqlite:///{tmp_path / 'personal_test.db'}"
-    almacen = store.configurar("memoria" if request.param == "memoria" else "bd",
-                              None if request.param == "memoria" else url)
+    url = None if request.param == "memoria" else url_sql(request.param, tmp_path, "personal_test.db")
+    almacen = store.configurar("memoria" if request.param == "memoria" else "bd", url)
     store.crear(C)
     yield almacen, url
     store.configurar("memoria")
@@ -178,7 +178,7 @@ def test_crear_nuevo_no_devuelve_un_cliente_preexistente(personal_bd):
     assert store.crear_nuevo("otro-cliente-test").version == 1
 
 
-def test_sqlite_otra_conexion_serializa_y_borrado_revertido_es_completo(personal_bd):
+def test_sql_otra_conexion_serializa_y_borrado_revertido_es_completo(personal_bd):
     almacen, url = personal_bd
     if almacen.tipo != "bd":
         pytest.skip("transacciones SQL")
@@ -204,7 +204,7 @@ def test_sqlite_otra_conexion_serializa_y_borrado_revertido_es_completo(personal
         otro.cerrar()
 
 
-def test_sqlite_dos_almacenes_concurrentes_comparten_revision(personal_bd):
+def test_sql_dos_almacenes_concurrentes_comparten_revision(personal_bd):
     almacen, url = personal_bd
     if almacen.tipo != "bd":
         pytest.skip("dos conexiones SQL independientes")
@@ -229,11 +229,11 @@ def test_sqlite_dos_almacenes_concurrentes_comparten_revision(personal_bd):
         otro.cerrar()
 
 
-@pytest.mark.parametrize("tipo", ["json", "sqlite"])
+@pytest.mark.parametrize("tipo", ["json", *ALMACENES_SQL])
 def test_tombstone_sobrevive_reinicio_sin_texto_antiguo(tipo, tmp_path, monkeypatch):
     monkeypatch.setenv("DATA_DIR", str(tmp_path))
     monkeypatch.setenv("DATA_PERSIST", "1" if tipo == "json" else "0")
-    url = f"sqlite:///{tmp_path / 'tombstone_test.db'}"
+    url = None if tipo == "json" else url_sql(tipo, tmp_path, "tombstone_test.db")
     argumentos = ("memoria",) if tipo == "json" else ("bd", url)
     store.configurar(*argumentos)
     store.crear(C)

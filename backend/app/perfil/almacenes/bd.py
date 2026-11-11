@@ -16,12 +16,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import Engine, delete, func, insert, inspect, or_, select, text, update
-from sqlalchemy.engine import make_url
+from sqlalchemy import Engine, delete, func, insert, inspect, or_, select, update
 from sqlalchemy.exc import IntegrityError, OperationalError
 
 from ..modelos import EstadoPerfil, Perfil, Turno
-from ..persistencia import db, migrar
+from ..persistencia import db, migrar, seguridad
 from ..persistencia.tablas import clients, metadata, personal_versions, profile_versions, sessions, turns
 from ..personal import CapaPersonal
 from .base import ConflictoVersion, cliente_del_lote, id_turno
@@ -274,12 +273,8 @@ class AlmacenBD:
             metadata.drop_all(self.motor)
             db.preparar(self.motor)
             return
-        host = u.host or ""
-        if "supabase" in str(u) or host not in ("", "localhost", "127.0.0.1") or "test" not in (u.database or ""):
-            raise RuntimeError("reiniciar() solo se permite en un Postgres local de pruebas, nunca en Supabase")
-        with self.motor.begin() as c:
-            c.execute(text("drop schema public cascade"))
-            c.execute(text("create schema public"))
+        # Local, con 'test' en el nombre y marcada como desechable en el servidor; si no, BaseNoAutorizada.
+        seguridad.vaciar_esquema_publico(self.motor)
         migrar.aplicar(self.motor)
         inspect(self.motor).clear_cache()
 
@@ -288,11 +283,8 @@ class AlmacenBD:
 
 
 def url_de_prueba(url: str) -> str:
-    """Utilidad para tests: rechaza cualquier base que no sea local y de pruebas."""
-    u = make_url(url)
-    if "supabase" in url or (u.host or "") not in ("", "localhost", "127.0.0.1") or "test" not in (u.database or ""):
-        raise RuntimeError("Solo un Postgres local de pruebas (nombre con 'test'), nunca Supabase")
-    return url
+    """Utilidad para tests: rechaza cualquier base que no sea local y de pruebas (sin conectar)."""
+    return seguridad.comprobar_url_de_pruebas(url)
 
 
 class _PersonalBD:

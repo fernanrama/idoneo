@@ -8,9 +8,9 @@ import re
 import pytest
 from sqlalchemy import inspect, text
 
-from app.perfil.almacenes.bd import url_de_prueba
 from app.perfil.persistencia import db, migrar
 from app.perfil.persistencia.tablas import metadata
+from tests.soporte_bd import postgres_vacio as postgres_vacio_url
 
 SQL = "\n".join(m.sql for m in migrar.listar())
 POSTGRES_TEST = os.getenv("TEST_POSTGRES_URL", "").strip()
@@ -57,18 +57,80 @@ def test_modo_plan_no_escribe_nada():
 
 def test_el_script_se_niega_con_sqlite(monkeypatch, capsys):
     monkeypatch.setenv("DATABASE_URL", "sqlite://")
-    assert migrar.main([]) == 1
+    assert migrar.main(["--destino", "127.0.0.1:5432/perfil_test"]) == 2
     assert "Postgres" in capsys.readouterr().out
+
+
+def test_sin_destino_explicito_no_arranca(monkeypatch, capsys):
+    monkeypatch.setenv("DATABASE_URL", "postgresql://u@127.0.0.1:5432/perfil_test")
+    with pytest.raises(SystemExit) as salida:
+        migrar.main([])
+    assert salida.value.code == 2 and "--destino" in capsys.readouterr().err
+
+
+def _sin_conexiones(monkeypatch, *modulos):
+    def prohibido(*_a, **_k):
+        raise AssertionError("no debía conectarse")
+    for modulo in modulos:
+        monkeypatch.setattr(modulo, "crear_motor", prohibido)
+
+
+@pytest.mark.parametrize("url", [
+    "postgresql://u:clave-sintetica@db.ejemplo.supabase.co:5432/postgres",
+    "postgresql://u:clave-sintetica@127.0.0.1:5433/perfil_test",
+    "postgresql://u:clave-sintetica@127.0.0.1:5432/otra_base",
+])
+def test_destino_distinto_no_se_conecta_ni_muestra_credenciales(monkeypatch, capsys, url):
+    from app.perfil.persistencia import verificar
+
+    _sin_conexiones(monkeypatch, migrar, verificar)
+    monkeypatch.setenv("DATABASE_URL", url)
+    assert migrar.main(["--destino", "127.0.0.1:5432/perfil_test", "--aplicar"]) == 2
+    assert verificar.main(["ensayo", "--destino", "127.0.0.1:5432/perfil_test"]) == 2
+    salida = capsys.readouterr().out
+    assert "no me conecto" in salida and "clave-sintetica" not in salida and "u@" not in salida
+
+
+def test_no_lee_el_env_del_repositorio_por_su_cuenta(monkeypatch, capsys, tmp_path):
+    """Sin la variable en el entorno no hay destino, aunque un .env la tenga; solo --env-file la lee."""
+    from app.perfil.persistencia import verificar
+
+    _sin_conexiones(monkeypatch, migrar, verificar)
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    env = tmp_path / ".env"
+    env.write_text("DATABASE_URL=postgresql://u:clave-sintetica@db.ejemplo.supabase.co:5432/postgres\n"
+                   "ANTHROPIC_API_KEY=clave-sintetica-de-pago\n", "utf-8")
+    monkeypatch.chdir(tmp_path)
+    assert migrar.main(["--destino", "127.0.0.1:5432/perfil_test"]) == 2
+    assert "No hay URL" in capsys.readouterr().out
+    assert migrar.main(["--destino", "127.0.0.1:5432/perfil_test", "--env-file", str(env)]) == 2
+    assert "db.ejemplo.supabase.co:5432/postgres" in capsys.readouterr().out
+    assert os.environ.get("ANTHROPIC_API_KEY") == "" and "DATABASE_URL" not in os.environ
+    for modulo in (migrar, verificar):
+        assert "load_dotenv" not in open(modulo.__file__, encoding="utf-8").read()
+
+
+def test_cli_postgres_con_destino_explicito(monkeypatch, capsys):
+    if not POSTGRES_TEST:
+        pytest.skip("requiere TEST_POSTGRES_URL (Postgres local de pruebas)")
+    from app.perfil.persistencia import seguridad
+
+    url = postgres_vacio_url()
+    monkeypatch.setenv("URL_ENSAYO", url)
+    destino = seguridad.describir(url)
+    argumentos = ["--destino", destino, "--variable", "URL_ENSAYO"]
+    assert migrar.main(argumentos) == 0
+    assert "Pendientes: 0001_esquema_inicial.sql" in capsys.readouterr().out
+    assert migrar.main([*argumentos, "--aplicar"]) == 0
+    assert migrar.main(argumentos) == 0
+    assert "No hay migraciones pendientes" in capsys.readouterr().out
 
 
 @pytest.fixture
 def postgres_vacio():
     if not POSTGRES_TEST:
         pytest.skip("requiere TEST_POSTGRES_URL (Postgres local de pruebas)")
-    motor = db.crear_motor(url_de_prueba(POSTGRES_TEST))
-    with motor.begin() as c:
-        c.execute(text("drop schema public cascade"))
-        c.execute(text("create schema public"))
+    motor = db.crear_motor(postgres_vacio_url())
     yield motor
     motor.dispose()
 
