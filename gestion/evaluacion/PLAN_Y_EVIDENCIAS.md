@@ -30,6 +30,26 @@ Registrar cada ejecución con esta ficha:
 
 No registrar secretos ni datos personales financieros. Usar ejemplos sintéticos o referencias seguras. Conservar fallos y repeticiones de salidas variables; no seleccionar solo resultados favorables. Distinguir coste medido de estimado. Una evidencia de otra versión no valida automáticamente la actual.
 
+### Ejecución E-09 · Claude Code con los conectores de Idóneo y MyInvestor · 11 nov 2026
+
+- **Ejecución / casos / fecha / ejecutor:** el paso final del pitch. Claude Code 2.1.322 (`claude -p --model sonnet`) con el conector `idoneo` (`http://localhost:8000/mcp`, cabecera `Authorization: Bearer ${IDONEO_MCP_TOKEN}` con `MCP_DEMO_TOKEN`) y `myinvestor` (`https://mcp.myinvestor.es/mcp`). Cliente `carmen-68` (**simulado**), validado con el modo asesor. Lanzado por Claude Code desde el portátil de Fernán.
+- **Versión exacta:** `main` en `e0dc4dd` (PR #27) más la rama `feat/demo-entrevista-corta`.
+- **Esperado y observado:**
+  - `claude mcp list`: los dos conectores conectados.
+  - Con el prompt largo, Claude leyó las restricciones (`usable: true`, CONSERVADOR, SRRI ≤ 3, renta variable no conveniente) y citó la evidencia con su tiempo («Si baja un veinte por ciento, lo saco todo», 71–74 s; «Eso no puede pasar, el fondo es del banco», 57–61 s). Buscó en MyInvestor una vez por tipo de activo y descartó fondos con motivos, pero la respuesta fue **demasiado larga** para la demo.
+  - Con el prompt corto (6 líneas): unos 16 s, restricciones con evidencia y 3 fondos. Aviso: los fondos son una muestra; la elección es del agente de la entidad.
+- **Limitaciones:** dos ejecuciones; la selección de fondos varía entre ejecuciones. El tiempo es del ordenador de Fernán con la red de casa.
+
+### Ejecución E-08 · Entrevista corta del pitch por escrito, con Claude real · 11 nov 2026
+
+(E-06 y E-07 están reservadas para la PR #26, del verificador.)
+
+- **Ejecución / casos / fecha / ejecutor:** entrevista corta sobre `carmen-corta` (fixture **simulado**: faltan el conocimiento de renta variable, el escenario de caída y la sostenibilidad), en modo texto. Las respuestas del cliente son un guion fijo escrito por el equipo. Lanzada por Claude Code desde el portátil de Fernán, a través de la ruta de Next `POST /api/entidad/corta` y de `POST /api/sessions/{id}/chat`.
+- **Versión exacta:** rama `feat/demo-entrevista-corta` (PR #29), commits `ab333ae` (antes) y `34f2ba3` (después); entrevistador y extractor con los modelos por defecto del `.env`.
+- **Antes (`ab333ae`):** el perfil llegó a `pending_validation` con la alerta declarado ≠ demostrado. Pero el entrevistador siguió el guion desde el principio y repitió «¿para qué le gustaría invertir?», que ya constaba. En el cierre dijo que la clienta «conoce» la renta variable.
+- **Después (`34f2ba3`):** dice que solo quedan unas preguntas y va directo a conocimiento → comprobación → caída → sostenibilidad. Explica el error con calma y en el cierre no afirma conocimiento. **`pending_validation`, 0 datos que falten, alerta declarado ≠ demostrado abierta**, en unos 43 s (7 turnos).
+- **Limitaciones:** una repetición por versión, en modo texto (no voz) y con respuestas fijas. Una respuesta ambigua sobre sostenibilidad provocó una repregunta: el guion de la demo sugiere una respuesta clara.
+
 ### Ejecución E-07 · Laboratorio completo con el verificador nuevo · 10 nov 2026
 
 - **Ejecución / casos / fecha / ejecutor:** `scripts/laboratorio.py --repeticiones 2` (4 personas **simuladas** × 2) y `scripts/laboratorio.py --variantes 12 --semilla 7 --sin-fijas` (12 clientes **simulados** generados), Alex en su portátil.

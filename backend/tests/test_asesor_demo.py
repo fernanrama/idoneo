@@ -84,7 +84,7 @@ def test_recorrido_de_carmen_hasta_validado_y_disponible_por_mcp(modo, mcp_servi
     c = local()
     estado = c.get(f"{BASE}/estado", headers=asesor())
     assert estado.status_code == 200 and estado.headers["Cache-Control"] == "no-store"
-    assert estado.json() == {"enabled": True, "simulated": True, "clients": [C], "advisor_id": "asesor-demo"}
+    assert estado.json() == {"enabled": True, "simulated": True, "clients": [C, "carmen-corta"], "advisor_id": "asesor-demo"}
     assert TOKEN not in estado.text
 
     antes = c.get(f"{BASE}/clientes/{C}", headers=asesor()).json()

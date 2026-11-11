@@ -178,11 +178,11 @@ Guía completa: [docs/MODO_ASESOR_DEMO.md](docs/MODO_ASESOR_DEMO.md#recorrido-co
 |---|---|
 | Perfil versionado, evidencias, validación de la entidad y persistencia (memoria, SQLite o Postgres) | ✅ Hecho, con tests |
 | Idoneidad, conveniencia y restricciones calculadas con código | ✅ Hecho · los umbrales son **supuestos del equipo**, pendientes de revisión |
-| Servidor MCP y conexión con Claude + MyInvestor | ✅ Hecho y probado con túnel |
-| Frontend móvil: entrevista, demo guiada, perfil del cliente y vista de la entidad | ✅ Hecho |
+| Servidor MCP y conexión con Claude + MyInvestor | ✅ Hecho · desde la PR #21 exige credencial; para la demo, Claude Code en local con `MCP_DEMO_TOKEN` (PR #27, [guía](docs/MODO_ASESOR_DEMO.md)) · probado por túnel el 9/11, antes de la credencial |
+| Frontend móvil: entrevista, demo guiada, perfil del cliente y vista de la entidad | ✅ Hecho · «Validar perfil» con el modo asesor de demostración (PR #25) · entrevista corta del pitch sobre `carmen-corta` |
 | Extractor (de la conversación al perfil, con Claude) y entrevistador en modo texto | ✅ Hecho, con tests (Claude simulado) · prueba con la API real: `python scripts/probar_extractor.py` · arquitectura en [`backend/app/agentes/`](backend/app/agentes/README.md) |
 | Verificador (incoherencias, datos dudosos y casos para el asesor) | ✅ Reglas fijas + revisión con Claude, con tests (Claude simulado) · evaluación con la API real: `python scripts/evaluar_verificador.py` · el resumen para agentes sigue siendo una plantilla fija |
-| Voz con ElevenLabs | 🟡 Integrado en código · sin probar con cuenta real |
+| Voz con ElevenLabs | ✅ Probada de punta a punta con cuenta real (E-03) · agente compartido sincronizado con `scripts/sincronizar_voz.py` · audios de la demo guiada pendientes de elegir voces |
 | Memoria personal por usuario | ✅ Consentida, versionada, borrable y proyectada a ElevenLabs · falta identidad/login real |
 | Medición de impacto (aciertos, alertas, latencia, coste) | ✅ Con clientes **simulados**: 20 entrevistas completas con 99-100 % de aciertos y 0 datos inventados; verificador con 0 falsas alarmas · [evidencias](gestion/evaluacion/PLAN_Y_EVIDENCIAS.md) |
 

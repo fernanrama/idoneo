@@ -16,7 +16,7 @@ flowchart LR
 | Fichero | Qué hace |
 |---|---|
 | `claude.py` | Cliente común: modelo y esfuerzo por variable (`MODEL_<AGENTE>`, `EFFORT_<AGENTE>`), salida estructurada validada con Pydantic, reintentos del SDK y métricas de tokens y latencia por agente. Sin `ANTHROPIC_API_KEY` lanza `ClaudeNoDisponible`. |
-| `rubrica.py` | Rúbrica de confianza v2, determinista y versionada. El modelo solo clasifica en categorías cerradas; aquí se fijan el nivel demostrado, la confianza y el umbral de `low_confidence` (0,65). Los números son **supuestos del equipo** y están explicados en el propio fichero. |
+| `rubrica.py` | Rúbrica de confianza v3, determinista y versionada (v3: un «No lo conozco» explícito es un dato suficiente; los niveles declarados sin comprobar siguen pidiendo comprobación). El modelo solo clasifica en categorías cerradas; aquí se fijan el nivel demostrado, la confianza y el umbral de `low_confidence` (0,65). Los números son **supuestos del equipo** y están explicados en el propio fichero. |
 | `extractor.py` + `prompts/extractor.md` | De los últimos 8 turnos a parches del perfil. El modelo devuelve texto y categorías; el extractor aplica normalización, guardas y rúbrica. |
 | `normalizacion.py` | Cifras como las dice un cliente español («1.450,50», «80 mil», «entre 800 y 1.000», «unos 900 €»), anual→mensual en código (supuesto: 12 pagas) y comparación de citas tolerante a tildes, mayúsculas y puntuación de la transcripción. |
 | `guardas.py` | Comprobaciones deterministas del contexto (¿el asistente avisó de que es una IA, hizo la pregunta de comprobación, planteó la caída, explicó la sostenibilidad?) y límites de plausibilidad (supuestos): lo que supera el límite se guarda marcado para el asesor, nunca se corrige solo. |
