@@ -35,9 +35,12 @@ def test_un_env_con_claves_no_las_rellena(tmp_path):
 def test_conexion_externa_bloqueada():
     with socket.socket() as s, pytest.raises(ConnectionRefusedError, match="aislamiento"):
         s.connect(EXTERNA)
-    with socket.socket(socket.AF_INET6) as s:
-        with pytest.raises(ConnectionRefusedError, match="aislamiento"):
-            s.connect(("2001:db8::1", 443, 0, 0))
+    try:
+        s6 = socket.socket(socket.AF_INET6)
+    except OSError:  # máquina sin IPv6 (algunos contenedores): no hay por dónde salir por IPv6
+        return
+    with s6, pytest.raises(ConnectionRefusedError, match="aislamiento"):
+        s6.connect(("2001:db8::1", 443, 0, 0))
 
 
 def test_conexion_externa_asincrona_bloqueada():

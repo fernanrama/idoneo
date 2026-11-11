@@ -93,7 +93,8 @@ SEMILLAS: dict[Motivo, tuple[list[str], list[str]]] = {
                       [f"{_F}liquid_savings_eur"]),
     Motivo.windfall: ([f"{_F}liquid_savings_eur", f"{_F}other_assets_eur"], [f"{_O}goal", f"{_O}amount_eur"]),
     Motivo.planned_expense: ([f"{_O}liquidity_need"], [f"{_F}liquid_savings_eur"]),
-    Motivo.new_debt: ([f"{_F}debts_eur", f"{_F}fixed_monthly_costs_eur"], []),
+    # Hipoteca o préstamo: la hipoteca de la vivienda va aparte y no resta capacidad, pero su cuota es gasto fijo.
+    Motivo.new_debt: ([f"{_F}debts_eur", f"{_F}mortgage_eur", f"{_F}fixed_monthly_costs_eur"], []),
     Motivo.dependants: ([f"{_F}fixed_monthly_costs_eur"], [f"{_O}goal"]),
     Motivo.liquidity_change: ([f"{_O}liquidity_need"], [f"{_F}liquid_savings_eur"]),
     Motivo.amount_exceeds_objective: ([f"{_O}amount_eur"], [f"{_F}liquid_savings_eur"]),
@@ -129,8 +130,8 @@ def _dependencias() -> dict[str, list[str]]:
         # plazo → perfil por plazo y renta fija a corto; liquidez → plazo de reembolso
         f"{_O}horizon_years": [f"{_O}liquidity_need"],
         f"{_O}liquidity_need": [f"{_O}horizon_years"],
-        # importe → filtro de inversión mínima
-        f"{_O}amount_eur": [f"{_F}liquid_savings_eur"],
+        # importe → filtro de inversión mínima y, si supera la capacidad de pérdida, perfil CONSERVADOR
+        f"{_O}amount_eur": [f"{_F}liquid_savings_eur", f"{_F}fixed_monthly_costs_eur", f"{_F}debts_eur"],
         # preferencias de sostenibilidad → esg_only y artículo SFDR
         "sustainability.preference": ["sustainability.min_sfdr_article"],
         "sustainability.min_sfdr_article": ["sustainability.preference"],
