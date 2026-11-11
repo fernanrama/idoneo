@@ -169,6 +169,9 @@ export function useEntrevista() {
         if (m.startsWith("503")) {
           setError("El modo texto no está disponible: el backend no tiene clave de Claude.");
           setEstado("error");
+        } else if (m.startsWith("429")) {
+          setError(m.slice(4));
+          setEstado("error");
         } else {
           // La entrevista sigue abierta: lo escrito ya está guardado y basta con pedir otra vez la pregunta.
           setError(m.startsWith("502")

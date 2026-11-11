@@ -9,7 +9,9 @@ export class ErrorAPI extends Error {
       ? `${status} Necesitas la credencial de esta pestaña para acceder a este cliente.`
       : status === 412
         ? "412 La memoria ha cambiado. Vuelve a cargarla y decide si quieres guardar de nuevo."
-        : `${status} No se ha podido completar la petición.`);
+        : status === 429
+          ? "429 Esta demo pública ha llegado a su límite de entrevistas por hoy. Puedes ver la demo guiada o volver mañana."
+          : `${status} No se ha podido completar la petición.`);
     this.name = "ErrorAPI";
   }
 }

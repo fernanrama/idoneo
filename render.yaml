@@ -1,0 +1,68 @@
+# Despliegue del backend en Render (Blueprint). Guía paso a paso: docs/despliegue.md
+# Render lee este fichero al crear el servicio desde «New → Blueprint». Las variables con
+# `sync: false` se rellenan a mano en el panel de Render: NUNCA se escriben aquí.
+services:
+  - type: web
+    name: idoneo-backend
+    runtime: python
+    region: frankfurt          # UE: más cerca de Supabase (UE) y de los usuarios
+    plan: free                 # el gratuito se duerme tras 15 min sin uso (tarda ~1 min en despertar); starter no
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    autoDeploy: true           # se vuelve a desplegar con cada cambio en main
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.1
+      # Persistencia en Supabase (Session pooler, puerto 5432). La contraseña solo en el panel de Render.
+      - key: PERFIL_ALMACEN
+        value: bd
+      - key: DATABASE_URL
+        sync: false
+      - key: DATA_PERSIST
+        value: "0"
+      - key: LOAD_DEMO_FIXTURE
+        value: "1"
+      - key: DEMO_ENDPOINTS
+        value: "1"             # la vista anónima de la entidad lee la Carmen fija; el reset exige ADMIN_TOKEN
+      # Secretos del servidor: Render los genera aleatorios al crear el servicio.
+      - key: CLIENT_ACCESS_SECRET
+        generateValue: true
+      - key: ADMIN_TOKEN
+        generateValue: true
+      - key: VOICE_USER_ID_SECRET
+        generateValue: true
+      # Modos de demostración local: apagados en un despliegue público.
+      - key: DEMO_ADVISOR_MODE
+        value: "0"
+      - key: ALLOW_LEGACY_SIGNED_URL
+        value: "0"
+      # Origen del frontend en Vercel, p. ej. https://idoneo.vercel.app (sin barra final).
+      - key: CORS_ORIGINS
+        sync: false
+      # Claude
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: MODEL_EXTRACTOR
+        value: claude-sonnet-5-5
+      - key: MODEL_VERIFICADOR
+        value: claude-sonnet-5-5
+      - key: MODEL_ENTREVISTADOR
+        value: claude-sonnet-5-5
+      - key: EFFORT_EXTRACTOR
+        value: low
+      - key: EFFORT_VERIFICADOR
+        value: low
+      # ElevenLabs (agente privado: el backend firma la conexión)
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: ELEVENLABS_AGENT_ID
+        sync: false
+      # Topes de gasto de la demo pública (0 = sin límite). Ver backend/app/limites.py
+      - key: LIMITE_SESIONES_DIA
+        value: "30"
+      - key: LIMITE_VOZ_DIA
+        value: "10"
+      - key: LIMITE_TURNOS_SESION
+        value: "60"
