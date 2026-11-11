@@ -82,6 +82,7 @@ export default function VistaEntidad({
           <nav className={s.nav} aria-label="Navegación de la entidad">
             <Link href="/">Inicio</Link>
             <Link href="/escenario">Escenario en vivo</Link>
+            <Link href="/operaciones">Calidad y costes</Link>
             <span className={s.sesion}>
               <i aria-hidden="true" /> Asesor · demo
             </span>
