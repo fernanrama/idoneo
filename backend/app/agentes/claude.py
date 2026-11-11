@@ -78,7 +78,10 @@ def _cliente_async():
         if _cliente is None:
             import anthropic
 
+            # La clave se pasa limpia: un salto de línea o un espacio al final (fácil al pegarla en Render)
+            # hace inválida la cabecera HTTP y el SDK lo convierte en APIConnectionError en cada llamada.
             _cliente = anthropic.AsyncAnthropic(
+                api_key=os.environ["ANTHROPIC_API_KEY"].strip(),
                 timeout=float(os.getenv("CLAUDE_TIMEOUT_S", "60")),
                 max_retries=int(os.getenv("CLAUDE_MAX_RETRIES", "2")),
             )
