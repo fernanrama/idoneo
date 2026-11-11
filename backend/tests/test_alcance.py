@@ -170,6 +170,57 @@ def test_peticiones_invalidas(carmen, peticion):
         planificar(carmen, [Peticion(**peticion)])
 
 
+# ---------- dato cambiado (sesión de revisión) ----------
+
+INGRESOS, DEUDAS = "financial.net_monthly_income_eur", "financial.debts_eur"
+
+
+def cambio(*rutas):
+    return Peticion(motivo=Motivo.value_changed, rutas=list(rutas))
+
+
+def test_cambio_de_ahorro_confirma_gastos_y_deudas_sin_repreguntar_el_ahorro(carmen):
+    a = planificar(carmen, [cambio(AHORRO)])
+    assert resumen(a) == [(GASTOS, C), (DEUDAS, C)]  # entradas de colchón y capacidad de pérdida
+    assert all(q.motivos == [Motivo.value_changed] for q in a.preguntas)
+
+
+def test_cambio_de_liquidez_confirma_el_plazo(carmen):
+    assert resumen(planificar(carmen, [cambio(LIQUIDEZ)])) == [(PLAZO, C)]
+
+
+def test_cambio_de_horizonte_confirma_la_liquidez(carmen):
+    assert resumen(planificar(carmen, [cambio(PLAZO)])) == [(LIQUIDEZ, C)]
+
+
+def test_cambio_de_ingresos_no_arrastra_nada(carmen):
+    """calculos.py no usa los ingresos en ningún resultado: no hay dependencias que confirmar."""
+    a = planificar(carmen, [cambio(INGRESOS)])
+    assert a.preguntas == [] and a.aplazadas == [] and not a.reevaluacion_completa
+
+
+def test_un_dato_cambiado_que_queda_dudoso_se_repregunta(carmen):
+    p = cambiar(carmen, AHORRO, 10000, flags=[Flag.low_confidence])
+    assert resumen(planificar(p, [cambio(AHORRO)]))[0] == (AHORRO, R)
+
+
+def test_un_dato_ya_cambiado_no_se_pregunta_aunque_lo_pida_otro_motivo(carmen):
+    a = planificar(carmen, [Peticion(motivo=Motivo.next_review_due), cambio(LIQUIDEZ, AHORRO)])
+    rutas = [q.path for q in a.preguntas]
+    assert LIQUIDEZ not in rutas and AHORRO not in rutas and PLAZO in rutas
+
+
+def test_cambios_en_tres_bloques_amplian(carmen):
+    a = planificar(carmen, [cambio(AHORRO, PLAZO, "risk_tolerance.scenario_score")])
+    assert a.reevaluacion_completa and "bloques" in a.razones[0]
+
+
+@pytest.mark.parametrize("rutas", [[], ["financial.loss_capacity_eur"], ["disclosures.purpose_ack"]])
+def test_dato_cambiado_invalido(carmen, rutas):
+    with pytest.raises(DatoInvalido):
+        planificar(carmen, [cambio(*rutas)])
+
+
 def test_el_catalogo_de_motivos_es_cerrado():
     with pytest.raises(ValidationError):
         Peticion(motivo="compruebalo_todo")

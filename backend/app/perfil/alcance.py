@@ -70,6 +70,8 @@ class Motivo(str, Enum):
     # asesor o cliente
     advisor_request = "advisor_request"
     full_reassessment_requested = "full_reassessment_requested"
+    # sesión de revisión: el dato ya cambió (está respondido); solo se confirman sus dependencias
+    value_changed = "value_changed"
 
 
 class TipoPregunta(str, Enum):
@@ -111,6 +113,7 @@ VARIABLES: dict[Motivo, tuple[tuple[str, ...], TipoPregunta]] = {
     Motivo.knowledge_not_assessed: (_CONOCIMIENTO, TipoPregunta.repreguntar),
     Motivo.new_product_family: (_CONOCIMIENTO, TipoPregunta.repreguntar),
     Motivo.advisor_request: (_TODO, TipoPregunta.repreguntar),
+    Motivo.value_changed: (_TODO, TipoPregunta.confirmar),  # ver planificar: no se pregunta la ruta
 }
 
 
@@ -198,8 +201,7 @@ def _tipo(perfil: Perfil, ruta: str, base: TipoPregunta) -> TipoPregunta:
     f = perfil.mifid.get(ruta)
     tipo = base
     if tipo == TipoPregunta.confirmar:
-        dudoso = f is not None and (Flag.low_confidence in f.flags or Flag.inconsistent in f.flags)
-        if f is None or f.value is None or dudoso:
+        if f is None or f.value is None or _dudoso(perfil, ruta):
             tipo = TipoPregunta.repreguntar  # no se confirma lo que falta o no es fiable
     if (tipo == TipoPregunta.repreguntar and ruta.startswith("knowledge.")
             and not desconocimiento_declarado(ruta, f)):
@@ -207,10 +209,21 @@ def _tipo(perfil: Perfil, ruta: str, base: TipoPregunta) -> TipoPregunta:
     return tipo
 
 
+def _dudoso(perfil: Perfil, ruta: str) -> bool:
+    f = perfil.mifid.get(ruta)
+    return f is not None and (Flag.low_confidence in f.flags or Flag.inconsistent in f.flags)
+
+
 def planificar(perfil: Perfil, peticiones: list[Peticion]) -> Alcance:
-    """Une las peticiones, añade dependencias de lo que cambia, ordena y recorta. Determinista."""
+    """Une las peticiones, añade dependencias de lo que cambia, ordena y recorta. Determinista.
+
+    `value_changed`: la ruta ya está respondida (cambió en esta revisión), así que no se pregunta otra vez
+    salvo que haya quedado dudosa; sí se confirman sus dependencias de `calculos.py`. Cuenta como cambio
+    para decidir si hay que ampliar a una reevaluación completa.
+    """
     tipos: dict[str, TipoPregunta] = {}
     motivos: dict[str, list[Motivo]] = {}
+    respondidas: set[str] = set()
 
     def anotar(ruta: str, tipo: TipoPregunta, motivo: Motivo) -> None:
         if tipos.get(ruta) != TipoPregunta.repreguntar:  # repreguntar gana a confirmar
@@ -220,6 +233,12 @@ def planificar(perfil: Perfil, peticiones: list[Peticion]) -> Alcance:
 
     for p in peticiones:
         repreguntar, confirmar = _semillas(p)
+        if p.motivo == Motivo.value_changed:
+            respondidas.update(confirmar)
+            for r in confirmar:
+                for dep in DEPENDENCIAS.get(r, []):
+                    anotar(dep, TipoPregunta.confirmar, p.motivo)
+            continue
         for r in repreguntar:
             anotar(r, TipoPregunta.repreguntar, p.motivo)
         for r in confirmar:
@@ -228,6 +247,11 @@ def planificar(perfil: Perfil, peticiones: list[Peticion]) -> Alcance:
             for dep in DEPENDENCIAS.get(r, []):
                 anotar(dep, TipoPregunta.confirmar, p.motivo)
 
+    for r in respondidas:
+        if _dudoso(perfil, r):
+            anotar(r, TipoPregunta.repreguntar, Motivo.value_changed)
+        else:
+            tipos.pop(r, None)  # ya respondida en esta revisión: no se vuelve a preguntar
     preguntas = [Pregunta(path=r, tipo=_tipo(perfil, r, t), motivos=motivos[r], valor_vigente=valor(perfil, r))
                  for r, t in tipos.items()]
     preguntas.sort(key=lambda q: (q.tipo == TipoPregunta.confirmar, ORDEN_GUION[q.path]))
@@ -236,6 +260,7 @@ def planificar(perfil: Perfil, peticiones: list[Peticion]) -> Alcance:
     if any(p.motivo == Motivo.full_reassessment_requested for p in peticiones):
         razones.append("lo pide el cliente o la entidad")
     bloques = {q.path.split(".")[0] for q in preguntas if q.tipo != TipoPregunta.confirmar}
+    bloques |= {r.split(".")[0] for r in respondidas}
     if len(bloques) >= BLOQUES_AMPLIAR:
         razones.append(f"cambios en {len(bloques)} bloques: {', '.join(sorted(bloques))}")
     if any(a.status == EstadoAlerta.open and a.flag == Flag.needs_advisor for a in perfil.alerts):
