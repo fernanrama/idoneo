@@ -200,6 +200,18 @@ export default function HaCambiadoAlgo() {
         </div>
 
         <p className={s.volver}><Link href="/onboarding/perfil">← Volver a mi perfil</Link></p>
+
+        {/* Móvil: el plan queda debajo de los motivos; esta barra dice cuánto es y lleva hasta él. */}
+        {preguntas.length > 0 && (
+          <div className={s.barraMovil}>
+            <span>
+              <b key={preguntas.length}>{preguntas.length}</b> {preguntas.length === 1 ? "pregunta" : "preguntas"} · ~{minutos(preguntas.length)} min
+            </span>
+            <button type="button" onClick={() => document.getElementById("t-plan")?.scrollIntoView({ behavior: "smooth", block: "start" })}>
+              Ver y empezar ↓
+            </button>
+          </div>
+        )}
       </main>
     </div>
   );

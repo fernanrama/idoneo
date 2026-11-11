@@ -159,10 +159,18 @@
 
 @media (max-width: 560px) {
   .adPerfil { grid-template-columns: 1fr; }
-  .adFlecha { transform: rotate(90deg); margin: 8px 0 8px 20px; }
+  .adFlecha { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .ad, .adFila, .adNuevo, .adEfectos li, .sriMini i, .adFlechaViva, .enRevision, .enRevisionIcono::after, .rutas span { animation: none !important; }
 }
 .iconoChip { width: 18px; height: 18px; }
 .notaHipoteca { margin-top: 14px; animation: v-sube 0.5s 0.3s both; }
+
+.barraMovil { display: none; }
+@media (max-width: 900px) {
+  .barraMovil { position: fixed; z-index: 30; left: 16px; right: 16px; bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 10px 10px 18px; border-radius: 999px; background: #0e1020; color: #ffffff; font-size: 14px; box-shadow: 0 14px 34px rgba(14, 16, 32, 0.35); animation: v-sube 0.4s both; }
+  .barraMovil b { font-size: 18px; color: #9db8ff; animation: v-sello 0.4s both; }
+  .barraMovil button { min-height: 42px; padding: 0 16px; border: 0; border-radius: 999px; background: #ffffff; color: #0e1020; font-weight: 700; cursor: pointer; }
+  .volver { margin-bottom: 80px; }
+}

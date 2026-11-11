@@ -14,3 +14,14 @@
 @media (max-width: 1000px) {
   .raiz .cliente { position: relative; height: auto; min-height: 100dvh; }
 }
+
+/* Móvil: pestañas para pasar de una mitad a otra */
+.conmutador { display: none; }
+@media (max-width: 1000px) {
+  .conmutador { position: sticky; top: 0; z-index: 20; flex: 1 1 100%; display: flex; justify-content: center; gap: 4px; padding: 8px 12px; background: rgba(9, 11, 26, 0.9); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+  .conmutador button { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: #c9d1ea; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; flex: 0 1 auto; }
+  .conmutador button[aria-selected="true"] { background: #ffffff; color: #0e1020; }
+  .conmutador b { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: #6b4ef0; color: #ffffff; font-size: 11px; animation: v-sello 0.4s both; }
+  .verCliente .entidad { display: none; }
+  .verEntidad .cliente { display: none; }
+}
