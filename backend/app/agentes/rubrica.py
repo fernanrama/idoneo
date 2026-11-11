@@ -16,13 +16,20 @@ SUPUESTOS v2 (revisables con tutoría; cambiar los números exige subir la versi
   Cambio v1 → v2 (9 nov 2026, laboratorio): con v1, una clienta que nunca había invertido acertó «una
   sola empresa tiene más riesgo» y quedó con conocimiento medio de acciones; demasiado generoso.
 - Un conocimiento solo declarado, sin comprobar, no llega al mínimo: hay que repreguntar.
+
+SUPUESTO v3 (11 nov 2026, defecto «No lo conozco»):
+- Declarar con claridad que no se conoce una familia («No lo conozco») es un dato suficiente (0,8): es el
+  valor más restrictivo posible, solo puede llevar a «no conveniente» y el riesgo que señala ESMA (párr. 52)
+  es la sobrevaloración, no esto. No hay nada que comprobar. Con v2 quedaba en 0,5 (low_confidence): el
+  entrevistador lo daba por cerrado, pero el perfil no se completaba y validar respondía 409.
+  Los niveles basic, medium y high declarados siguen necesitando comprobación (0,5).
 """
 
 from __future__ import annotations
 
 from typing import Literal
 
-VERSION = "v2"
+VERSION = "v3"
 UMBRAL = 0.65  # por debajo, el dato lleva low_confidence y el entrevistador debe repreguntar
 
 Certeza = Literal["explicita", "aproximada", "inferida"]
@@ -32,6 +39,7 @@ Nivel = Literal["none", "basic", "medium", "high"]
 
 CONFIANZA_CERTEZA: dict[str, float] = {"explicita": 0.9, "aproximada": 0.75, "inferida": 0.55}
 CONFIANZA_SOLO_DECLARADO = 0.5
+CONFIANZA_DESCONOCIMIENTO_DECLARADO = 0.8  # supuesto v3: «No lo conozco» explícito
 
 # Escenario: «sus ahorros bajan un X % en unos meses, ¿qué haría?» → puntuación 1–5 del contrato.
 PUNTUACION_REACCION: dict[str, int] = {
@@ -59,6 +67,8 @@ def conocimiento(ruta: str, declarado: str | None, resultado: str | None) -> tup
     Sin comprobación, el valor es el declarado y la fuente `declared`; con comprobación, `demonstrated`.
     """
     if resultado is None:
+        if declarado == "none":
+            return "none", "declared", CONFIANZA_DESCONOCIMIENTO_DECLARADO, base(ruta)
         return declarado, "declared", CONFIANZA_SOLO_DECLARADO, base(ruta)
     if resultado == "incorrecta":
         return "none", "demonstrated", 0.85, base(ruta)
