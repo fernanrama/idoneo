@@ -214,7 +214,7 @@ export function useEntrevista() {
       setPausa(false);
       cuentaDatos.current = 0;
       setVozDemo(true);
-      // Audios grabados de cada turno (public/demo/carmen/manifest.json); si faltan, voz del navegador.
+      // Audios grabados con ElevenLabs (scripts/generar_audios_demo.py); si faltan, voz del navegador.
       try {
         const r = await fetch("/demo/carmen/manifest.json", { cache: "no-store" });
         audiosDemo.current = r.ok ? ((await r.json()).turnos ?? {}) : {};

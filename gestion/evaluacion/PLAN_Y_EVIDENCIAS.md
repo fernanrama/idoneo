@@ -42,11 +42,14 @@ No registrar secretos ni datos personales financieros. Usar ejemplos sintéticos
 
 ### Ejecución E-08 · Entrevista corta del pitch por escrito, con Claude real · 11 nov 2026
 
+(E-06 y E-07 están reservadas para la PR #26, del verificador.)
+
 - **Ejecución / casos / fecha / ejecutor:** entrevista corta sobre `carmen-corta` (fixture **simulado**: faltan el conocimiento de renta variable, el escenario de caída y la sostenibilidad), en modo texto. Las respuestas del cliente son un guion fijo escrito por el equipo. Lanzada por Claude Code desde el portátil de Fernán, a través de la ruta de Next `POST /api/entidad/corta` y de `POST /api/sessions/{id}/chat`.
 - **Versión exacta:** rama `feat/demo-entrevista-corta` (PR #29), commits `ab333ae` (antes) y `34f2ba3` (después); entrevistador y extractor con los modelos por defecto del `.env`.
 - **Antes (`ab333ae`):** el perfil llegó a `pending_validation` con la alerta declarado ≠ demostrado. Pero el entrevistador siguió el guion desde el principio y repitió «¿para qué le gustaría invertir?», que ya constaba. En el cierre dijo que la clienta «conoce» la renta variable.
 - **Después (`34f2ba3`):** dice que solo quedan unas preguntas y va directo a conocimiento → comprobación → caída → sostenibilidad. Explica el error con calma y en el cierre no afirma conocimiento. **`pending_validation`, 0 datos que falten, alerta declarado ≠ demostrado abierta**, en unos 43 s (7 turnos).
 - **Limitaciones:** una repetición por versión, en modo texto (no voz) y con respuestas fijas. Una respuesta ambigua sobre sostenibilidad provocó una repregunta: el guion de la demo sugiere una respuesta clara.
+
 ### Ejecución E-07 · Laboratorio completo con el verificador nuevo · 10 nov 2026
 
 - **Ejecución / casos / fecha / ejecutor:** `scripts/laboratorio.py --repeticiones 2` (4 personas **simuladas** × 2) y `scripts/laboratorio.py --variantes 12 --semilla 7 --sin-fijas` (12 clientes **simulados** generados), Alex en su portátil.
