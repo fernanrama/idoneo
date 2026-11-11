@@ -94,7 +94,7 @@ try {
   const estado = await pedir(`${front}/api/entidad/asesor`);
   assert.equal(estado.headers.get("Cache-Control"), "no-store");
   const textoEstado = await estado.text(); sinToken(textoEstado, "el estado");
-  assert.deepEqual(JSON.parse(textoEstado), { enabled: true, clients: [C], advisor_id: "asesor-demo" });
+  assert.deepEqual(JSON.parse(textoEstado), { enabled: true, clients: [C, "carmen-corta"], advisor_id: "asesor-demo" });
   assert.deepEqual(await (await pedir(`${frontMal}/api/entidad/asesor`)).json(), { enabled: false, clients: [] });
   assert.deepEqual(await (await pedir(`${frontOff}/api/entidad/asesor`)).json(), { enabled: false, clients: [] });
   const html = await (await pedir(`${front}/entidad/${C}`)).text(); sinToken(html, "el HTML de la entidad");
@@ -147,7 +147,7 @@ try {
   // 5b. Cliente ficticio nuevo: invisible para el asesor hasta que el operador lo autoriza (solo backend, X-Admin-Token).
   const nuevo = await (await pedir(`${api}/api/sessions`, "POST", {}, { channel: "text" })).json();
   const ruta = `/api/entidad/${nuevo.client_id}`;
-  assert.deepEqual((await (await pedir(`${front}/api/entidad/asesor`)).json()).clients, [C]);
+  assert.deepEqual((await (await pedir(`${front}/api/entidad/asesor`)).json()).clients, [C, "carmen-corta"]);
   assert.equal((await pedir(`${front}${ruta}/asesor`)).status, 404);
   const op = `${api}/api/demo/operador/autorizaciones`;
   assert.equal((await pedir(op, "POST", { Authorization: `Bearer ${nuevo.access_token}` }, { client_id: nuevo.client_id, ficticio: true })).status, 401);

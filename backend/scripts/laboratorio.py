@@ -69,6 +69,8 @@ def imprimir(i: laboratorio.Informe, que_prueba: str) -> None:
     print(f"  Conocimientos comprobados: {', '.join(i.comprobados) or 'ninguno'}")
     for ruta, ok in i.alertas_esperadas.items():
         print(f"  Alerta esperada en {ruta}: {_si(ok)}")
+    for otra in i.otras_alertas:
+        print(f"  Alerta no prevista en la ficha (revisar): {otra}")
     for li in i.resultado.lineas:
         detalle = f"  ({li.detalle})" if li.detalle else ""
         print(f"  {SIMBOLO[li.estado]} {li.ruta:42} esperado {str(li.esperado)[:26]:26} obtenido {str(li.obtenido)[:30]}{detalle}")
@@ -80,7 +82,8 @@ def escribir_informe(ruta: Path, informes: list[laboratorio.Informe], r: dict, l
     filas = "\n".join(
         f"| {i.persona} | {i.resultado.cuenta('ok')}/{i.resultado.esperados} | {i.resultado.cuenta('prohibido')} | "
         f"{i.intervenciones} | {_si(i.terminada)} | {_si(i.aviso_ia_al_inicio)} | {', '.join(i.comprobados) or '—'} | "
-        f"{', '.join(f'{k}: {_si(v)}' for k, v in i.alertas_esperadas.items()) or '—'} | {len(i.pendientes)} |"
+        f"{', '.join(f'{k}: {_si(v)}' for k, v in i.alertas_esperadas.items()) or '—'} | "
+        f"{'; '.join(i.otras_alertas) or '—'} | {len(i.pendientes)} |"
         for i in informes
     )
     lat = "\n".join(f"| {a} | {statistics.median(xs):.1f} s | {_p95(xs):.1f} s | {len(xs)} |" for a, xs in sorted(latencias.items()))
@@ -97,8 +100,8 @@ cliente simulado `{claude.modelo('cliente_simulado')}`. Personas **simuladas** d
 | Datos prohibidos escritos | {r['prohibidos']} |
 | Recomendaciones del asistente (deben ser 0) | {sum(i.recomendaciones for i in informes)} |
 
-| Persona | Aciertos | Prohibidos | Turnos asistente | Terminada | Aviso IA | Comprobados | Alerta esperada | Pendientes |
-|---|---|---|---|---|---|---|---|---|
+| Persona | Aciertos | Prohibidos | Turnos asistente | Terminada | Aviso IA | Comprobados | Alerta esperada | Alertas no previstas | Pendientes |
+|---|---|---|---|---|---|---|---|---|---|
 {filas}
 
 | Agente | Mediana | p95 | Llamadas |

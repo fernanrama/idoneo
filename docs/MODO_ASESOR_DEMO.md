@@ -6,6 +6,8 @@ Recupera el paso «Validar perfil» del recorrido de Carmen sin reabrir la autov
 
 ## Cómo se activa para la presentación
 
+**Atajo:** `python scripts/preparar_demo.py` (desde `backend/`) hace los pasos 1 a 3 y genera también `MCP_DEMO_TOKEN` y el resto de secretos locales, sin mostrarlos y sin cambiar los que ya existan. Los pasos manuales siguen siendo válidos.
+
 1. Genera un token largo y aleatorio directamente en el `.env` de la raíz, **sin que aparezca en pantalla**. Tiene que ser distinto de `ADMIN_TOKEN`, de `CLIENT_ACCESS_SECRET` y de `VOICE_USER_ID_SECRET`. Hazlo solo si esa variable aún no está en el `.env`:
    ```bash
    printf 'DEMO_ADVISOR_TOKEN=%s\n' "$(python3 -c 'import secrets; print(secrets.token_urlsafe(48))')" >> .env && chmod 600 .env

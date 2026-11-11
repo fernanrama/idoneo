@@ -47,9 +47,10 @@ def _pendientes_por_tipo(perfil: Perfil) -> tuple[list[str], list[str], list[str
     # «No sé qué es un ETF» no se comprueba: no hay nada que verificar y alarga la entrevista.
     no_lo_conoce = {c for c, f in perfil.mifid.items() if desconocimiento_declarado(c, f)}
     # Dudosos: confianza baja (extractor o verificador) o una incoherencia que levantó el verificador.
+    # Una incoherencia se repregunta aunque el cliente dijera «no lo conozco» (p. ej. si cuenta que opera con ello).
     dudosos = [c for c, f in perfil.mifid.items()
-               if ({Flag.low_confidence, Flag.inconsistent} & set(f.flags)) and f.source != Fuente.advisor
-               and c not in no_lo_conoce and c not in faltan]
+               if f.source != Fuente.advisor and c not in faltan
+               and (Flag.inconsistent in f.flags or (Flag.low_confidence in f.flags and c not in no_lo_conoce))]
     sin_comprobar = [c for c, f in perfil.mifid.items()
                      if c.startswith("knowledge.") and f.source == Fuente.declared and c not in no_lo_conoce
                      and c not in faltan and c not in dudosos]
