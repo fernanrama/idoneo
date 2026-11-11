@@ -1,4 +1,4 @@
-"""Confirmar un dato (diseño 06, §4.3, hueco H4): mismo valor con una cita nueva acumula la evidencia.
+"""Confirmar un dato (diseño 06, §4.3; decisión D1): mismo valor, declarado y fuente acumula la evidencia.
 
 Contrato: se ejecuta con cada almacén (memoria, SQLite y, si existe, Postgres local). Datos simulados.
 """
@@ -6,7 +6,7 @@ Contrato: se ejecuta con cada almacén (memoria, SQLite y, si existe, Postgres l
 from __future__ import annotations
 
 from app.perfil import store
-from app.perfil.modelos import Evidencia, Fuente, Parche
+from app.perfil.modelos import Evidencia, Flag, Fuente, Parche
 
 C = "carmen-68"
 GASTOS = "financial.fixed_monthly_costs_eur"
@@ -32,6 +32,45 @@ def test_confirmar_acumula_la_evidencia_y_anota_la_fecha(carmen):
     assert f.evidence == [*antes.evidence, CITA]  # la cita anterior no se pierde
     assert f.confirmed_at == p.created_at and f.confirmed_by == EXTRACTOR
     assert (f.updated_at, f.updated_by) == (antes.updated_at, antes.updated_by)  # el valor no cambió
+
+
+def test_mismo_valor_con_menos_confianza_es_confirmacion_y_conserva_la_mas_alta(carmen):
+    antes = store.perfil(C).mifid[GASTOS]  # 0,7 en el fixture
+    p = store.aplicar(C, [como_estaba(GASTOS, confidence=0.4, confidence_basis="rubric:aproximada:v1",
+                                      evidence=[CITA])], "revisión", EXTRACTOR)
+    f = p.mifid[GASTOS]
+    assert f.evidence == [*antes.evidence, CITA] and f.confirmed_at == p.created_at
+    assert (f.confidence, f.confidence_basis) == (antes.confidence, antes.confidence_basis)
+
+
+def test_mismo_valor_con_mas_confianza_toma_la_mas_alta_y_acumula(carmen):
+    antes = store.perfil(C).mifid[GASTOS]
+    p = store.aplicar(C, [como_estaba(GASTOS, confidence=0.95, confidence_basis="rubric:explicita:v1",
+                                      evidence=[CITA])], "revisión", EXTRACTOR)
+    f = p.mifid[GASTOS]
+    assert f.evidence == [*antes.evidence, CITA]
+    assert (f.confidence, f.confidence_basis) == (0.95, "rubric:explicita:v1")
+
+
+def test_reprocesar_la_misma_cita_no_duplica(carmen):
+    """El mismo turno citado otra vez (aunque el modelo recorte la cita distinto) no es evidencia nueva."""
+    v = store.aplicar(C, [como_estaba(GASTOS, evidence=[CITA])], "revisión", EXTRACTOR).version
+    otra_vez = CITA.model_copy(update={"quote": "sigo gastando unos 900 €"})
+    p = store.aplicar(C, [como_estaba(GASTOS, confidence=0.95, evidence=[otra_vez])], "reproceso", EXTRACTOR)
+    assert p.version == v and p.mifid[GASTOS].evidence[-1] == CITA
+
+
+def test_si_cambian_los_flags_se_aplican_y_se_conserva_la_evidencia(carmen):
+    antes = store.perfil(C).mifid[GASTOS]
+    p = store.aplicar(C, [como_estaba(GASTOS, flags=[Flag.low_confidence], evidence=[CITA])], "duda", EXTRACTOR)
+    f = p.mifid[GASTOS]
+    assert f.flags == [Flag.low_confidence] and f.evidence == [*antes.evidence, CITA] and f.value == antes.value
+
+
+def test_un_cambio_de_declarado_no_es_confirmacion(carmen):
+    p = store.aplicar(C, [como_estaba(GASTOS, declared=1500, evidence=[CITA])], "declara otra cifra", EXTRACTOR)
+    f = p.mifid[GASTOS]
+    assert f.declared == 1500 and f.evidence == [CITA] and f.confirmed_at is None
 
 
 def test_repetir_la_misma_confirmacion_no_crea_version(carmen):

@@ -49,6 +49,7 @@ from .modelos import (
     Alerta,
     EstadoAlerta,
     EstadoPerfil,
+    Evidencia,
     Fact,
     Flag,
     Fuente,
@@ -328,19 +329,45 @@ def comprobar_parche(parche: Parche, autor: str) -> Parche:
         raise Conflicto(str(e)) from e
 
 
-_SIN_CONTENIDO = {"evidence", "updated_at", "updated_by", "confirmed_at", "confirmed_by"}
-
-
 def _es_confirmacion(previo: Fact, nuevo: Fact) -> bool:
-    """Mismo dato (valor, declarado, fuente, confianza, flags…); solo puede cambiar la evidencia."""
-    return previo.model_dump(exclude=_SIN_CONTENIDO) == nuevo.model_dump(exclude=_SIN_CONTENIDO)
+    """D1: mismo valor, mismo declarado y misma fuente, aunque cambie la confianza de la extracción."""
+    return (previo.value, previo.declared, previo.source) == (nuevo.value, nuevo.declared, nuevo.source)
+
+
+def _clave_cita(e: Evidencia) -> tuple:
+    """Una cita ya guardada: mismo turno de la misma sesión (o, sin turno, la misma cita exacta)."""
+    return (e.session_id, e.turn_id) if e.turn_id else (e.session_id, e.t, e.quote)
+
+
+def _confirmar(previo: Fact, nuevo: Fact, momento, autor: str) -> Fact | None:
+    """Une una confirmación con el dato guardado. None si no aporta nada (p. ej. reprocesar una cita).
+
+    - Evidencia: se conserva la anterior y se añaden las citas nuevas (sin duplicar turnos).
+    - Confianza: la más alta, con su base (la del dato guardado si empatan o la nueva no consta).
+    - Flags: los que trae la escritura nueva (el extractor limpia, p. ej., una duda tras una repregunta).
+      Si cambian, NO es una confirmación pura: aplicar() lo tratará como cambio para el estado.
+    - `confirmed_at`/`confirmed_by` solo si hay una cita nueva. `value` y `updated_at` no cambian.
+    """
+    guardadas = {_clave_cita(e) for e in previo.evidence}
+    nuevas = [e for e in nuevo.evidence if _clave_cita(e) not in guardadas]
+    cambian_flags = set(nuevo.flags) != set(previo.flags)
+    if not nuevas and not cambian_flags:
+        return None
+    sube = nuevo.confidence is not None and (previo.confidence is None or nuevo.confidence > previo.confidence)
+    cambios: dict[str, Any] = {"evidence": [*previo.evidence, *nuevas], "flags": list(nuevo.flags)}
+    if sube:
+        cambios.update(confidence=nuevo.confidence, confidence_basis=nuevo.confidence_basis)
+    if nuevas:
+        cambios.update(confirmed_at=momento, confirmed_by=autor)
+    return previo.model_copy(update=cambios)
 
 
 def _aplicar_parches(n: Perfil, normalizados: list[Parche], motivo: str, autor: str) -> str:
     """Misma mutación para aplicar() y para los candidatos de validar().
 
-    Confirmar (mismo dato con una cita nueva) acumula la evidencia y anota `confirmed_at`, sin cambiar el
-    valor ni `updated_at`. Sin cita nueva no hay nada que guardar: no se pierde la evidencia anterior.
+    Confirmar (mismo valor, declarado y fuente con una cita nueva) acumula la evidencia y anota
+    `confirmed_at`, sin cambiar el valor ni `updated_at` (`_confirmar`). Un cambio de valor, declarado o
+    fuente sustituye el dato, como siempre. Reescribir lo mismo o reprocesar una cita no crea versión.
     """
     cambiado = False
     for c in normalizados:
@@ -352,11 +379,10 @@ def _aplicar_parches(n: Perfil, normalizados: list[Parche], motivo: str, autor: 
         if previo is not None and _iguales(previo, nuevo):
             continue
         if previo is not None and _es_confirmacion(previo, nuevo):
-            nuevas = [e for e in nuevo.evidence if e not in previo.evidence]
-            if not nuevas:
+            unido = _confirmar(previo, nuevo, n.created_at, autor)
+            if unido is None:
                 continue
-            n.mifid[c.path] = previo.model_copy(update={
-                "evidence": [*previo.evidence, *nuevas], "confirmed_at": n.created_at, "confirmed_by": autor})
+            n.mifid[c.path] = unido
         else:
             n.mifid[c.path] = nuevo
         cambiado = True
