@@ -107,7 +107,7 @@ Resultado para Carmen, calculado por el backend:
 
 Un perfil MiFID caduca con la vida del cliente. En Idóneo no hay que repetir la entrevista: desde **Mi perfil**, el cliente pulsa **¿Ha cambiado algo en tu vida?**, elige qué ha pasado y ve al momento qué le vamos a preguntar y cuánto tardará.
 
-> **Solo sobre un perfil validado.** La microentrevista revisa un perfil que la entidad ya ha validado. Antes de eso no hay nada que revisar: el cliente termina su entrevista y la entidad valida el perfil (en local, con el modo asesor de demostración; en la web, desde `/admin`). Si no, el backend rechaza la revisión.
+> **Sobre un perfil completo, idealmente ya validado.** El backend solo abre una revisión si la entrevista está terminada (si faltan datos, la rechaza). El ciclo completo se ve mejor sobre un perfil que la entidad ya ha validado (en local, con el modo asesor de demostración; en la web, desde `/admin`): si el cliente cambia algún dato, el perfil pasa a *en revisión* y la entidad vuelve a validarlo; si solo confirma, sigue activo.
 
 <p align="center"><img src="docs/img/cliente-cambio.png" width="100%" alt="Pantalla «¿Ha cambiado algo en tu vida?»: motivos a la izquierda y, a la derecha, las seis preguntas que se harán"></p>
 
