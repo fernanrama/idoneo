@@ -80,8 +80,15 @@ def _cliente_async():
 
             # La clave se pasa limpia: un salto de línea o un espacio al final (fácil al pegarla en Render)
             # hace inválida la cabecera HTTP y el SDK lo convierte en APIConnectionError en cada llamada.
+            clave = os.environ["ANTHROPIC_API_KEY"].strip()
+            if any(c.isspace() for c in clave):
+                # Visto en producción (11/11): se pegaron varias líneas del .env en el valor. Se corta aquí,
+                # antes de construir la cabecera: el error de httpx incluiría la clave entera en los logs.
+                raise ClaudeNoDisponible(
+                    "ANTHROPIC_API_KEY mal formada: contiene espacios o saltos de línea dentro. "
+                    "Deja en la variable solo la clave (una línea)")
             _cliente = anthropic.AsyncAnthropic(
-                api_key=os.environ["ANTHROPIC_API_KEY"].strip(),
+                api_key=clave,
                 timeout=float(os.getenv("CLAUDE_TIMEOUT_S", "60")),
                 max_retries=int(os.getenv("CLAUDE_MAX_RETRIES", "2")),
             )
