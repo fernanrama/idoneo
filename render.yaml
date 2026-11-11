@@ -65,6 +65,8 @@ services:
       # Topes de gasto de la demo pública (0 = sin límite). Ver backend/app/limites.py
       - key: LIMITE_SESIONES_DIA
         value: "30"
+      - key: LIMITE_DEMOS_DIA
+        value: "200"           # demos guiadas: copias de Carmen sin IA (solo ocupan la base)
       - key: LIMITE_VOZ_DIA
         value: "10"
       - key: LIMITE_TURNOS_SESION

@@ -1,5 +1,5 @@
 import { CLIENTE_DEMO, registrarSesion, tokenCliente, tokenSesion } from "./credenciales";
-import type { AltaSesion, BootstrapVoz, CierreRevision, Comparacion, ContextoVoz, ExpedienteAsesor, MemoriaPersonal, ModoAsesor, MotivoRevision, Perfil, Restricciones, Revision, Sesion, Turno, VersionResumen } from "./tipos";
+import type { AltaSesion, BootstrapVoz, CierreRevision, ClienteBandeja, Comparacion, ContextoVoz, ExpedienteAsesor, MemoriaPersonal, ModoAsesor, MotivoRevision, Perfil, Restricciones, Revision, Sesion, Turno, VersionResumen } from "./tipos";
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -97,6 +97,8 @@ export const api = {
       method: "POST", headers: sesion(session_id), body: JSON.stringify({ conversation_id }),
     }),
 
+  /** Demo guiada: copia propia y ficticia de Carmen, con su credencial (sin IA). Acaba en el mismo perfil. */
+  sesionDemo: async (): Promise<Sesion> => registrarSesion(await pedir<AltaSesion>("/api/demo/sessions", { method: "POST" })),
   perfilDemo: () => pedir<Perfil>("/api/demo/profile"),
   restriccionesDemo: () => pedir<Restricciones>("/api/demo/constraints"),
   perfil: (client_id: string) => client_id === CLIENTE_DEMO && !tokenCliente(client_id)
@@ -148,6 +150,8 @@ export const api = {
     const r = await fetch("/api/admin/sesion", { method: "DELETE", cache: "no-store" });
     if (!r.ok) throw new ErrorAPI(r.status);
   },
+  /** Bandeja de la entidad (solo con sesión de administración): clientes recientes y su estado. */
+  bandejaEntidad: () => leerDelFront<{ clients: ClienteBandeja[] }>("/api/entidad/clientes"),
   expedienteAsesor: (client_id: string) => leerDelFront<ExpedienteAsesor>(`/api/entidad/${id(client_id)}/asesor`),
   /** `expected_version`: la versión que ve el asesor; si el perfil ha cambiado, el backend responde 409. */
   validarComoAsesor: (client_id: string, expected_version?: number) =>

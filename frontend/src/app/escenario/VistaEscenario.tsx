@@ -1,11 +1,10 @@
 "use client";
 
 import { ConversationProvider } from "@elevenlabs/react";
-import Link from "next/link";
 import { use, useState } from "react";
 import { Entrevista } from "@/components/Entrevista";
 import { PanelVivo } from "@/components/PanelVivo";
-import { Noche, clasesBoton } from "@/components/visual";
+import { Noche } from "@/components/visual";
 import { useEntrevista } from "@/lib/useEntrevista";
 import { usePerfil } from "@/lib/usePerfil";
 import s from "./escenario.module.css";
@@ -45,17 +44,7 @@ function Escenario({ cliente }: { cliente: string | null }) {
         </button>
       </div>
       <Noche className={s.cliente}>
-        <Entrevista
-          e={e}
-          compacto
-          alTerminar={
-            e.perfil && (
-              <Link href={`/entidad/${encodeURIComponent(e.perfil.client_id)}`}>
-                <span className={clasesBoton.luz}>Validar en la entidad</span>
-              </Link>
-            )
-          }
-        />
+        <Entrevista e={e} compacto />
       </Noche>
       <div className={s.entidad}>
         <PanelVivo perfil={perfil} enMarcha={enMarcha} />

@@ -38,7 +38,7 @@ ALMACENES = ["memoria", "bd-sqlite"] + (["bd-postgres"] if POSTGRES_TEST else []
 MODULOS_CONTRATO = {"test_api", "test_mcp", "test_store_contrato", "test_procesamiento_turnos", "test_asesor_demo",
                     "test_pending_review", "test_confirmaciones",
                     "test_alcance_revision", "test_revision_confirmaciones",
-                    "test_ciclo_revision", "test_cierre_revision"}
+                    "test_ciclo_revision", "test_cierre_revision", "test_demo_recorrido"}
 
 
 @pytest.fixture(autouse=True)

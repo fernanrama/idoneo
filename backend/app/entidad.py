@@ -38,6 +38,12 @@ def _asesor() -> str:
     return asesor
 
 
+@router.get("/clientes")
+def bandeja(limite: int = 50) -> dict[str, Any]:
+    """Los clientes más recientes con el estado de su última versión, para la bandeja de la entidad."""
+    return {"clients": _llamar(store.clientes, limite)}
+
+
 @router.get("/clientes/{client_id}")
 def expediente(client_id: str) -> dict[str, Any]:
     """Perfil (sin capa personal), restricciones tal como las sirve el MCP, historial, revisión y cambios."""

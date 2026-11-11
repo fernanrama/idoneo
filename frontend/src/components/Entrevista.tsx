@@ -19,9 +19,10 @@ type RevisionAbierta = Extract<Revision, { open: true }>;
 /**
  * La entrevista tal como la vive el cliente: el aura hace de entrevistador y solo se ve la pregunta
  * actual. Lo que responde el cliente no se muestra; solo un «Anotado» cuando el perfil gana un dato.
- * `compacto` es la versión para la columna izquierda del escenario del pitch.
+ * `compacto` es la versión para la columna izquierda del escenario del pitch, que solo reproduce la demo
+ * guiada. Acaben como acaben (voz, texto o demo), todas llevan a la misma pantalla final, «Mi perfil».
  */
-export function Entrevista({ e, compacto = false, alTerminar }: { e: HookEntrevista; compacto?: boolean; alTerminar?: React.ReactNode }) {
+export function Entrevista({ e, compacto = false }: { e: HookEntrevista; compacto?: boolean }) {
   const [teclado, setTeclado] = useState(false);
   // Las casillas viven aquí: si algo falla y vuelve el inicio, no hay que marcarlas otra vez.
   const [permisos, setPermisos] = useState({ ia: false, grabacion: false });
@@ -74,9 +75,12 @@ export function Entrevista({ e, compacto = false, alTerminar }: { e: HookEntrevi
           </>
         )}
 
-        {(e.estado === "inactiva" || e.estado === "error") && (
-          <Inicio e={e} compacto={compacto} permisos={permisos} setPermisos={setPermisos} revision={revision} />
-        )}
+        {(e.estado === "inactiva" || e.estado === "error") &&
+          (compacto ? (
+            <InicioDemo e={e} />
+          ) : (
+            <Inicio e={e} permisos={permisos} setPermisos={setPermisos} revision={revision} />
+          ))}
 
         {enMarcha && (
           <>
@@ -140,13 +144,11 @@ export function Entrevista({ e, compacto = false, alTerminar }: { e: HookEntrevi
               </p>
             )}
             <div className={s.finAcciones}>
-              {alTerminar ?? (
-                <Link href="/onboarding/perfil">
-                  <span className={clasesBoton.luz}>
-                    {e.modo === "guion" ? "Ver el perfil de Carmen" : revision ? "Ver qué ha cambiado" : "Ver mi perfil"}
-                  </span>
-                </Link>
-              )}
+              <Link href="/onboarding/perfil">
+                <span className={clasesBoton.luz}>
+                  {e.modo === "guion" ? "Ver el perfil de Carmen" : revision ? "Ver qué ha cambiado" : "Ver mi perfil"}
+                </span>
+              </Link>
               {e.modo === "guion" && (
                 <BotonNoche variante="vidrio" onClick={() => e.iniciarGuion()}>
                   Repetir la demo
@@ -209,8 +211,8 @@ function LineaEstado({ e }: { e: HookEntrevista }) {
 
 type Permisos = { ia: boolean; grabacion: boolean };
 
-function Inicio({ e, compacto, permisos, setPermisos, revision }: {
-  e: HookEntrevista; compacto: boolean; permisos: Permisos; setPermisos: (p: Permisos) => void; revision: RevisionAbierta | null;
+function Inicio({ e, permisos, setPermisos, revision }: {
+  e: HookEntrevista; permisos: Permisos; setPermisos: (p: Permisos) => void; revision: RevisionAbierta | null;
 }) {
   const { ia, grabacion } = permisos;
   const setIa = (v: boolean) => setPermisos({ ...permisos, ia: v });
@@ -237,7 +239,7 @@ function Inicio({ e, compacto, permisos, setPermisos, revision }: {
     const n = revision.questions.length;
     return (
       <div className={s.inicio}>
-        <Aura estado="reposo" tam={compacto ? 200 : 220} />
+        <Aura estado="reposo" tam={220} />
         <h1>
           Vamos a <span className="texto-degradado">ponerte al día</span>
         </h1>
@@ -300,7 +302,7 @@ function Inicio({ e, compacto, permisos, setPermisos, revision }: {
   }
   return (
     <div className={s.inicio}>
-      <Aura estado="reposo" tam={compacto ? 200 : 260} />
+      <Aura estado="reposo" tam={260} />
       <h1>
         Cuando quieras, <span className="texto-degradado">empezamos</span>
       </h1>
@@ -344,28 +346,44 @@ function Inicio({ e, compacto, permisos, setPermisos, revision }: {
           ? "Hablando o escribiendo, como te resulte más cómodo. Al empezar, el asistente te lo confirmará en voz alta para que quede en tu expediente. Podrás pausar cuando quieras."
           : "Marca las dos casillas para poder empezar."}
       </p>
-      {compacto ? (
-        <button className={s.demoBoton} onClick={() => e.iniciarGuion()}>
-          <span className={s.demoPlay} aria-hidden="true">
-            {Icono.play}
-          </span>
-          <span>
-            <strong>Ver la demo guiada</strong>
-            Carmen, 68 años · entrevista simulada de un minuto, con voz
-          </span>
-        </button>
-      ) : (
-        // La demo guiada vive en el escenario, donde se ve a la vez lo que recibe la entidad.
-        <Link href="/escenario" className={s.demoBoton}>
-          <span className={s.demoPlay} aria-hidden="true">
-            {Icono.play}
-          </span>
-          <span>
-            <strong>¿Solo quieres mirar?</strong>
-            Mira la demo de Carmen, 68 años, y lo que recibe la entidad
-          </span>
-        </Link>
+      {/* La demo guiada vive en el escenario, donde se ve a la vez lo que recibe la entidad. */}
+      <Link href="/escenario" className={s.demoBoton}>
+        <span className={s.demoPlay} aria-hidden="true">
+          {Icono.play}
+        </span>
+        <span>
+          <strong>¿Solo quieres mirar?</strong>
+          Mira la demo de Carmen, 68 años, y lo que recibe la entidad
+        </span>
+      </Link>
+      {e.error && (
+        <p role="alert" className={s.error}>
+          {e.error}
+        </p>
       )}
+    </div>
+  );
+}
+
+/** Inicio del escenario: aquí solo se reproduce la demo guiada. La entrevista propia va en su pantalla. */
+function InicioDemo({ e }: { e: HookEntrevista }) {
+  return (
+    <div className={s.inicio}>
+      <Aura estado="reposo" tam={200} />
+      <h1>
+        La demo de <span className="texto-degradado">Carmen</span>
+      </h1>
+      <p>
+        Carmen, 68 años (datos simulados), hace su entrevista en un minuto. A la vez ves lo que recibe la entidad, dato a
+        dato. Al acabar llegas a su perfil, el mismo que ve cualquier cliente.
+      </p>
+      <BotonNoche onClick={() => e.iniciarGuion()}>
+        {Icono.play}
+        Empezar la demo
+      </BotonNoche>
+      <Link href="/onboarding/entrevista" className={s.pista}>
+        ¿Prefieres hacer tu propia entrevista? Empieza aquí
+      </Link>
       {e.error && (
         <p role="alert" className={s.error}>
           {e.error}

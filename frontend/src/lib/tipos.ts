@@ -193,6 +193,15 @@ export interface VersionResumen {
   status: EstadoPerfil;
 }
 
+/** Fila de la bandeja de la entidad: la última versión de cada cliente, sin datos del perfil. */
+export interface ClienteBandeja {
+  client_id: string;
+  version: number;
+  status: EstadoPerfil;
+  updated_at: string;
+  reason: string;
+}
+
 /** Modo asesor de demostración (DATOS SIMULADOS). Lo decide el servidor; el navegador no tiene credencial. */
 export interface ModoAsesor {
   enabled: boolean;

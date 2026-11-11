@@ -16,6 +16,7 @@ import { usePerfil } from "@/lib/usePerfil";
 import { api } from "@/lib/api";
 import { esConflictoDeVersion, mensajeCierre } from "@/lib/validacion";
 import { BarraCliente } from "@/components/BarraCliente";
+import { MemoriaPersonal } from "@/components/memoria-personal";
 import s from "@/components/cliente.module.css";
 import rv from "@/components/revision.module.css";
 
@@ -54,10 +55,16 @@ function mayus(t: string) {
 }
 
 // Resumen para el cliente, en lenguaje claro: qué hemos entendido, qué significa y qué pasa ahora.
+// Es la misma pantalla final para todos: entrevista por voz, por escrito o demo guiada de Carmen.
 export default function MiPerfil() {
-  const { clientId } = useOnboarding();
-  const { perfil, error, revision, cambios, recargar } = usePerfil(clientId);
+  const { clientId, sesion, listo } = useOnboarding();
+  const sinPerfil = listo && !sesion;
+  // Mientras no esté validado, se vuelve a mirar cada pocos segundos: la entidad puede validarlo en otra pestaña.
+  const [validado, setValidado] = useState(false);
+  const { perfil, error, revision, cambios, recargar } = usePerfil(sinPerfil || !listo ? "" : clientId, validado ? undefined : 4000);
   const propio = useEsPropio(clientId);
+  const activo = perfil?.status === "active";
+  if (activo !== validado) setValidado(activo);
   const ref = useRef<HTMLDivElement>(null);
 
   const mover = (e: React.PointerEvent) => {
@@ -78,15 +85,41 @@ export default function MiPerfil() {
             No hemos podido cargar tu perfil. Inténtalo de nuevo en un momento.
           </p>
         )}
-        {!perfil && !error && <div className={s.cargando} aria-label="Cargando tu perfil" />}
-        {perfil && <Contenido perfil={perfil} revision={propio ? revision : null} cambios={cambios} recargar={recargar} />}
+        {sinPerfil && <SinPerfil />}
+        {!sinPerfil && !perfil && !error && <div className={s.cargando} aria-label="Cargando tu perfil" />}
+        {!sinPerfil && perfil && (
+          <Contenido perfil={perfil} revision={propio ? revision : null} cambios={cambios} recargar={recargar}
+            sessionId={propio ? sesion?.session_id ?? null : null} />
+        )}
       </main>
     </div>
   );
 }
 
-function Contenido({ perfil, revision, cambios, recargar }: {
-  perfil: Perfil; revision: Revision | null; cambios: Comparacion | null; recargar: () => Promise<void>;
+/** Sin entrevista en esta pestaña: no se enseña el perfil de nadie, se ofrecen las dos formas de empezar. */
+function SinPerfil() {
+  return (
+    <section className={s.hero}>
+      <div className={s.heroTexto}>
+        <h1>
+          Aún no tienes <span className={s.grad}>perfil</span>
+        </h1>
+        <p>Tu perfil sale de una conversación de unos ocho minutos, hablando o escribiendo. También puedes ver cómo queda con la demo de Carmen.</p>
+        <div className={s.botones} style={{ marginTop: 20 }}>
+          <Link href="/onboarding/entrevista" className={s.boton}>
+            Empezar mi entrevista
+          </Link>
+          <Link href="/escenario" className={s.botonSec}>
+            Ver la demo de Carmen
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Contenido({ perfil, revision, cambios, recargar, sessionId }: {
+  perfil: Perfil; revision: Revision | null; cambios: Comparacion | null; recargar: () => Promise<void>; sessionId: string | null;
 }) {
   const su = perfil.assessments.suitability;
   const revisado = perfil.status === "active";
@@ -158,8 +191,11 @@ function Contenido({ perfil, revision, cambios, recargar }: {
         <AvisoCliente key={a.id} alerta={a} />
       ))}
 
-      {revision && su.complete && <PerfilVivo revision={revision} clientId={perfil.client_id} recargar={recargar} />}
+      {revision && su.complete && (
+        <PerfilVivo revision={revision} clientId={perfil.client_id} recargar={recargar} validado={revisado} />
+      )}
       {cambios && <AntesDespues c={cambios} />}
+      {sessionId && <MemoriaPersonal sessionId={sessionId} />}
 
       <Revela como="section" className={`${s.tarjeta} ${s.siguiente}`}>
         <div className={s.siguienteIcono} aria-hidden="true">
@@ -303,7 +339,9 @@ function AvisoCliente({ alerta }: { alerta: Alerta }) {
 }
 
 /** «¿Ha cambiado algo?»: el perfil no se queda congelado. Con una revisión abierta, muestra cómo va. */
-function PerfilVivo({ revision, clientId, recargar }: { revision: Revision; clientId: string; recargar: () => Promise<void> }) {
+function PerfilVivo({ revision, clientId, recargar, validado }: {
+  revision: Revision; clientId: string; recargar: () => Promise<void>; validado: boolean;
+}) {
   const [cierre, setCierre] = useState<{ enCurso: boolean; aviso: string | null; error: string | null }>({ enCurso: false, aviso: null, error: null });
   const finalizar = async () => {
     setCierre({ enCurso: true, aviso: null, error: null });
@@ -320,6 +358,23 @@ function PerfilVivo({ revision, clientId, recargar }: { revision: Revision; clie
       });
     }
   };
+  if (!revision.open && !validado) {
+    // Un perfil se actualiza sobre una versión validada: hasta entonces, se explica y se lleva a la entidad.
+    return (
+      <Revela como="section" className={rv.vivo}>
+        <div className={rv.vivoTexto}>
+          <h2>¿Ha cambiado algo en tu vida?</h2>
+          <p>
+            Cuando el banco valide tu perfil podrás contárnoslo aquí (un cambio de sueldo, un gasto que se acerca, otra idea
+            para tu dinero) y solo te preguntaremos eso. Esta página se actualiza sola al validarse.
+          </p>
+        </div>
+        <a href={`/admin?cliente=${encodeURIComponent(clientId)}`} target="_blank" rel="noopener" className={rv.vivoBoton}>
+          Validarlo como entidad <span aria-hidden="true">→</span>
+        </a>
+      </Revela>
+    );
+  }
   if (!revision.open) {
     return (
       <Revela como="section" className={rv.vivo}>

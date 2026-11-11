@@ -505,6 +505,21 @@ def restricciones_demo():
     return calculos.restricciones(_perfil_demo_fijo())
 
 
+@app.post("/api/demo/sessions")
+def sesion_demo():
+    """Demo guiada: un cliente NUEVO con una copia ficticia de Carmen y su credencial, para que la demo
+    acabe en el mismo perfil que una entrevista de verdad (memoria, «ha cambiado algo», validación).
+    No llama a ningún modelo. Tiene su propio tope diario (LIMITE_DEMOS_DIA). Se apaga con DEMO_ENDPOINTS=0."""
+    if os.getenv("DEMO_ENDPOINTS", "1") != "1":
+        raise HTTPException(404, "Endpoint de demo desactivado")
+    emitir = acceso.preparar_emision()
+    limites.consumir("demo", "LIMITE_DEMOS_DIA")
+    cid = f"carmen-{uuid.uuid4().hex[:12]}"
+    _llamar(store.copiar_fixture, "carmen-68", cid)
+    sesion = _llamar(store.crear_sesion, cid, "voice")
+    return {**sesion, "access_token": emitir(cid), "demo": True}
+
+
 @app.post("/api/demo/reset", dependencies=[Depends(requiere_admin)])
 def reset_demo():
     """Vuelve a cargar el perfil simulado de Carmen (útil antes de cada ensayo).

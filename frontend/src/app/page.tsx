@@ -8,8 +8,6 @@ import { AuraPreguntas } from "./_portada/AuraPreguntas";
 import { Historia } from "./_portada/Historia";
 import s from "./_portada/portada.module.css";
 
-const CLIENTE_DEMO = "carmen-68";
-
 const ENLACES = [
   ["#problema", "El problema"],
   ["#como", "Cómo funciona"],
@@ -38,6 +36,7 @@ export default function Portada() {
                 {t}
               </a>
             ))}
+            <Link href="/admin">Soy de la entidad</Link>
           </nav>
           <Link href="/onboarding/entrevista" className={s.navBoton}>
             Empezar
@@ -62,10 +61,13 @@ export default function Portada() {
               </p>
               <div className={s.acciones}>
                 <Link href="/onboarding/entrevista" className={clasesBoton.luz}>
-                  {Icono.micro} Empezar a hablar
+                  {Icono.micro} Soy cliente: empezar
                 </Link>
                 <Link href="/escenario" className={clasesBoton.vidrio}>
                   {Icono.play} Ver la demo guiada
+                </Link>
+                <Link href="/admin" className={clasesBoton.vidrio}>
+                  {Icono.check} Soy de la entidad
                 </Link>
               </div>
               <ul className={s.claves}>
@@ -197,14 +199,14 @@ export default function Portada() {
             <Revela className={s.seccionCab}>
               <div>
                 <span className={`${s.kicker} mono`}>Pruébalo</span>
-                <h2>Tres formas de verlo.</h2>
+                <h2>Dos puertas y una demo.</h2>
               </div>
             </Revela>
             <div className={s.tres}>
               {[
-                { h: "/onboarding/entrevista", t: "Como cliente", p: "Haz tu entrevista, por voz o escribiendo, y actualiza tu perfil cuando algo cambie.", i: Icono.micro },
-                { h: "/escenario", t: "La demo guiada", p: "Carmen, 68 años: la entrevista y lo que recibe la entidad, a la vez. Sin claves ni micrófono.", i: Icono.play },
-                { h: `/entidad/${CLIENTE_DEMO}`, t: "Como entidad", p: "Revisa evidencias y avisos, valida el perfil y mira qué ve el agente.", i: Icono.check },
+                { h: "/onboarding/entrevista", t: "Como cliente", p: "Haz tu entrevista, por voz o escribiendo. Al acabar ves tu perfil y lo actualizas cuando algo cambie.", i: Icono.micro },
+                { h: "/escenario", t: "La demo guiada", p: "Carmen, 68 años: la entrevista y lo que recibe la entidad, a la vez. Acaba en el mismo perfil que la tuya.", i: Icono.play },
+                { h: "/admin", t: "Como entidad", p: "Entra con la clave, abre la bandeja, revisa evidencias y avisos y valida cada perfil.", i: Icono.check },
               ].map((c, n) => (
                 <Revela key={c.h} retraso={n * 0.12}>
                   <Link href={c.h} className={`${s.carta} ${s.cartaEnlace} vidrio`}>
