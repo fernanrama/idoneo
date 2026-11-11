@@ -16,6 +16,7 @@ import {
 import type { Comparacion, Fact, Perfil, Restricciones, Revision, VersionResumen } from "@/lib/tipos";
 import { AntesDespues, Busquedas, EnRevision } from "@/components/PerfilCambios";
 import { usePerfil } from "@/lib/usePerfil";
+import { esValidable } from "@/lib/validacion";
 import { OrbePerfil, PALETA_ENTIDAD } from "@/components/Formas";
 import s from "./entidad.module.css";
 
@@ -64,12 +65,9 @@ export default function VistaEntidad({
   const [pestana, setPestana] = useState<Pestana>("Resumen");
   const [abierto, setAbierto] = useState<string | null>(null);
   const alertas = perfil?.alerts.filter((a) => a.status === "open") ?? [];
-  // Un borrador completo también se valida: una alerta «revisar por el asesor» deja el perfil en borrador
-  // (store), pero es justo el asesor quien la revisa al validar. El backend ya admite validar un borrador.
   const paraAsesor = alertas.filter((a) => a.flag === "needs_advisor").length;
-  const validable =
-    perfil?.status === "pending_validation" ||
-    (perfil?.status === "draft" && perfil.assessments.suitability.complete);
+  // Qué estados se validan (incluido review_due tras una microentrevista): ver esValidable.
+  const validable = esValidable(perfil);
 
   return (
     <div className={`tema-asesor ${s.raiz}`}>
