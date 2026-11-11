@@ -27,6 +27,7 @@ flowchart LR
 | `verificador.py` + `prompts/verificador.md` | Rol B2: alertas tras cada turno del cliente. Reglas fijas (cruces entre datos: plazo y tolerancia, caída aceptada y escenario, conocimiento y experiencia, gastos e ingresos, cifras raras) y revisión con Claude: el modelo devuelve hallazgos en categorías cerradas (contradicción, dato dudoso, revisar por el asesor) con la cita literal del cliente; el código comprueba la cita, el motivo y las rutas, y pone el flag (`inconsistent`, `low_confidence`, `needs_advisor`) y el texto. Los datos marcados vuelven a la lista de pendientes del entrevistador. Si Claude falla, quedan las reglas. |
 | `evaluacion_verificador.py` | Puntuación de la batería del verificador (`fixtures/verificacion/casos.json`): detección y falsas alarmas. |
 | `contexto.py` | Rol B2: resumen para otros agentes (plantilla fija). |
+| `juez.py` + `prompts/juez.md` | Juez LLM de las evaluaciones: puntúa de 1 a 5 claridad, una pregunta por turno, neutralidad, empatía y transparencia del entrevistador. Cada nota de 3 o menos exige una cita literal de un turno del asistente; el veredicto (aprobada si nada baja de 3 y la neutralidad es 5) lo pone el código. Se calibra contra notas humanas (`fixtures/juez/calibracion.json`, `scripts/calibrar_juez.py`). Nunca interviene en una entrevista real. |
 
 ## Qué garantiza el extractor, pase lo que pase con el modelo
 

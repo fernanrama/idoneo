@@ -1,0 +1,71 @@
+# Evaluaciones con la API real de Claude: extractor, verificador, calibración del juez y laboratorio con juez.
+# Falla si alguna métrica baja de backend/app/ops/umbrales.json, así un cambio de prompt que empeora algo
+# no pasa sin que se vea. Cuesta dinero (unos pocos dólares por tirada), por eso no corre en cada push:
+# - a mano (Actions → Evals → Run workflow),
+# - en un pull request que toque prompts o agentes, si tiene la etiqueta «evals».
+# Necesita el secreto ANTHROPIC_API_KEY en Settings → Secrets and variables → Actions.
+name: Evals
+
+on:
+  workflow_dispatch:
+    inputs:
+      laboratorio:
+        description: "Incluir el laboratorio con juez (más caro)"
+        type: boolean
+        default: true
+  pull_request:
+    types: [labeled, synchronize]
+    paths:
+      - "backend/app/agentes/**"
+      - "backend/fixtures/**"
+      - "backend/app/ops/umbrales.json"
+
+permissions:
+  contents: read
+
+jobs:
+  evals:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'evals')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      PRUEBA: ci-${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - run: pip install -r requirements.txt
+      - name: Comprobar la clave
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::Falta el secreto ANTHROPIC_API_KEY"; exit 1
+          fi
+      - name: Extractor
+        run: python scripts/evaluar_extractor.py --registrar --prueba "$PRUEBA" --informe informe-extractor.md
+      - name: Verificador
+        if: success() || failure()
+        run: python scripts/evaluar_verificador.py --repeticiones 2 --registrar --prueba "$PRUEBA" --informe informe-verificador.md
+      - name: Calibración del juez
+        if: success() || failure()
+        run: python scripts/calibrar_juez.py --registrar --prueba "$PRUEBA"
+      - name: Laboratorio con juez
+        if: (success() || failure()) && (github.event_name == 'pull_request' || inputs.laboratorio)
+        run: python scripts/laboratorio.py --juez --registrar --prueba "$PRUEBA" --informe informe-laboratorio.md
+      - name: Pipeline de punta a punta con Claude real
+        if: success() || failure()
+        run: python scripts/e2e.py --real --registrar --prueba "$PRUEBA" --informe informe-e2e.md
+      - name: Guardar resultados
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evals-${{ github.run_number }}
+          path: |
+            backend/app/ops/ultimas_evaluaciones.json
+            backend/informe-*.md

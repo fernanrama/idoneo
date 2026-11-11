@@ -224,6 +224,10 @@ Medido con clientes **simulados** y Claude real (`claude-sonnet-5-5`). Detalle, 
 | Latencia y coste | Unos 2 s por llamada · unos 0,3–0,4 $ por entrevista (estimado a partir de los tokens) |
 | Tests automáticos | Más de 750, sin claves ni red (unos 990 con Postgres local) |
 
+**De punta a punta:** `python scripts/e2e.py` (desde `backend/`, sin claves) recorre el producto entero con un cliente y un banco ficticios: entrevista, perfil con citas, alerta, validación, MCP y catálogo del banco filtrado con las restricciones, trazas y evaluaciones. Con `--real` lo hace con Claude. La CI lo ejecuta en cada PR.
+
+**Calidad y costes en la app:** la página `/operaciones` (enlace «Calidad y costes» en la vista de la entidad) enseña la última evaluación de cada componente frente a sus umbrales y, en vivo, la latencia p50/p95, la caché, los fallos y el coste estimado de cada agente y de cada versión de prompt. Cada llamada a Claude queda trazada sin guardar lo que dice el cliente; un juez LLM calibrado contra notas humanas puntúa la calidad de la conversación, y la CI de evals bloquea una versión que baje de los umbrales. Detalle en [backend/app/ops/](backend/app/ops/README.md).
+
 **Límites:** muestras pequeñas, casos escritos por el propio equipo y clientes interpretados por Claude, no por personas. Los umbrales de los cálculos son supuestos del equipo, pendientes de revisión experta.
 
 ## Marco normativo
@@ -286,6 +290,8 @@ Todas están en `.env.example`.
 | `MODEL_EXTRACTOR`, `MODEL_ENTREVISTADOR`, `MODEL_VERIFICADOR` | `claude-sonnet-5-5` | Modelo de Claude de cada agente |
 | `VERIFICADOR_CLAUDE` | `1` | `0` apaga la revisión con Claude del verificador; sus reglas fijas siguen funcionando |
 | `EFFORT_EXTRACTOR`, `EFFORT_ENTREVISTADOR`, `EFFORT_VERIFICADOR` | `low` | Esfuerzo de razonamiento (`low`…`max`): más alto, más preciso y más lento |
+| `MODEL_JUEZ`, `EFFORT_JUEZ` | `claude-sonnet-5-5`, `medium` | Juez LLM de las evaluaciones; no interviene en entrevistas reales |
+| `TRAZAS_ARCHIVO`, `TRAZAS_MAX` | vacío, `2000` | Trazas de LLMOps: archivo JSONL con una línea por ejecución (sin texto del cliente) y tamaño del búfer en memoria |
 
 Variables del frontend, en `frontend/.env.local` (plantilla en `frontend/.env.example`): `NEXT_PUBLIC_API_URL` (por defecto `http://localhost:8000`) y `NEXT_PUBLIC_ELEVENLABS_AGENT_ID` (solo si el agente de voz es público).
 </details>

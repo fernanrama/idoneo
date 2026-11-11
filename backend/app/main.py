@@ -31,6 +31,7 @@ from . import acceso, asesor_demo, demo_operador, limites, voz  # noqa: E402
 from .agentes import chat as entrevistador  # noqa: E402
 from .agentes import claude, contexto, extractor, verificador  # noqa: E402
 from .mcp import demo as mcp_demo  # noqa: E402
+from .ops import evaluaciones, trazas  # noqa: E402
 from .mcp.servidor import mcp  # noqa: E402
 from .perfil import calculos, revision, store  # noqa: E402
 from .perfil.modelos import EstadoPerfil, Parche, Perfil, Restricciones, Turno  # noqa: E402
@@ -176,10 +177,11 @@ async def _procesar_turno(session_id: str) -> None:
     if candado is None:
         candado = _candados_sesion[session_id] = asyncio.Lock()
     async with candado:
-        await _procesar_turno_sin_candado(session_id)
+        with trazas.ejecucion("turno", session_id) as traza:
+            traza.resultado = await _procesar_turno_sin_candado(session_id)
 
 
-async def _procesar_turno_sin_candado(session_id: str) -> None:
+async def _procesar_turno_sin_candado(session_id: str) -> dict:
     """Extractor y verificador sobre el turno nuevo, en segundo plano.
 
     Aceptación parcial: cada parche y cada alerta se valida por separado (mismas reglas que store:
@@ -191,10 +193,12 @@ async def _procesar_turno_sin_candado(session_id: str) -> None:
         s = store.sesion(session_id)
     except store.NoEncontrado:
         log.error("Turno de una sesión que no existe: %s", session_id)
-        return
+        return {"error": "sesion_inexistente"}
     cid, turnos = s["client_id"], s["turns"]
+    cuenta = {"parches": 0, "alertas": 0, "rechazos": 0}
 
     def rechazar(origen: str, tipo: str, motivo: str, path: str | None = None) -> None:
+        cuenta["rechazos"] += 1
         store.registrar_rechazo(store.Rechazo(session_id=session_id, client_id=cid, origen=origen,
                                               tipo=tipo, path=path, motivo=motivo))
 
@@ -211,6 +215,7 @@ async def _procesar_turno_sin_candado(session_id: str) -> None:
     if parches:
         try:
             store.aplicar(cid, parches, f"extractor · {session_id}", AUTOR_EXTRACTOR)
+            cuenta["parches"] = len(parches)
         except Exception as e:  # p. ej. demasiadas escrituras simultáneas
             log.exception("No se pudieron guardar los parches de %s", session_id)
             for p in parches:
@@ -229,10 +234,12 @@ async def _procesar_turno_sin_candado(session_id: str) -> None:
     if alertas:
         try:
             store.anadir_alertas(cid, alertas, AUTOR_VERIFICADOR)
+            cuenta["alertas"] = len(alertas)
         except Exception as e:
             log.exception("No se pudieron guardar las alertas de %s", session_id)
             for a in alertas:
                 rechazar("backend", "alerta", f"no se pudo guardar: {str(e)[:300]}", a.path)
+    return cuenta
 
 
 @app.post("/api/sessions/{session_id}/turns", dependencies=[Depends(acceso.exigir_sesion)], status_code=202)
@@ -274,14 +281,40 @@ async def chat(session_id: str, body: MensajeChat, tareas: BackgroundTasks):
         tareas.add_task(_procesar_turno, session_id)
     turnos = store.sesion(session_id)["turns"]
     try:
-        r = await entrevistador.responder(turnos[-40:], store.perfil(s["client_id"]),
-                                          _llamar(revision.en_curso, s["client_id"]))
+        with trazas.ejecucion("chat", session_id) as traza:
+            r = await entrevistador.responder(turnos[-40:], store.perfil(s["client_id"]),
+                                              _llamar(revision.en_curso, s["client_id"]))
+            traza.resultado = {"terminada": r.terminada}
     except Exception as e:  # rechazo del modelo, red, límite de uso…
         log.exception("Fallo del entrevistador en %s", session_id)
         raise HTTPException(502, f"El entrevistador no pudo responder: {type(e).__name__}") from e
     t = _segundos(s)
     agente = _llamar(store.anadir_turno, session_id, Turno(speaker="agent", text=r.texto, t_start=t, t_end=t))
     return {"client_turn": cliente, "agent_turn": agente, "finished": r.terminada}
+
+
+@app.get("/api/sessions/{session_id}/trace", dependencies=[Depends(acceso.exigir_sesion)])
+def traza_sesion(session_id: str):
+    """Trazas de esta sesión: cada turno procesado y cada respuesta, con sus llamadas a Claude.
+
+    Solo recuentos, tiempos, versiones de prompt y coste estimado; nunca texto del cliente ni del modelo."""
+    _llamar(store.sesion, session_id)
+    return {"session_id": session_id, "runs": trazas.de_sesion(session_id)}
+
+
+# ---------- LLMOps ----------
+
+@app.get("/api/ops/metrics")
+def metricas_ops():
+    """Agregado de las trazas desde que arrancó el backend: latencia p50/p95, tokens, caché, coste estimado
+    y fallos por agente, por tipo de ejecución y por versión de prompt. Sin identificadores de sesión."""
+    return trazas.resumen()
+
+
+@app.get("/api/ops/evals")
+def evaluaciones_ops():
+    """Última evaluación registrada de cada componente, comparada con sus umbrales de calidad."""
+    return evaluaciones.estado()
 
 
 @app.get("/api/sessions/{session_id}", dependencies=[Depends(acceso.exigir_sesion)])

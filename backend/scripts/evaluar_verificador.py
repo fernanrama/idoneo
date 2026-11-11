@@ -38,6 +38,7 @@ load_dotenv(RAIZ / ".env")
 
 from app.agentes import claude, verificador  # noqa: E402
 from app.agentes import evaluacion_verificador as ev  # noqa: E402
+from app.ops import evaluaciones  # noqa: E402
 
 
 def _alerta(a) -> str:
@@ -98,6 +99,15 @@ async def principal(args) -> int:
             encoding="utf-8",
         )
         print(f"Informe: {args.informe}")
+    if args.registrar:
+        filas = evaluaciones.registrar(
+            "verificador",
+            {"casos_ok": s["casos_ok"] / s["casos"], "deteccion": s["deteccion"], "falsas_alarmas": s["falsas_alarmas"],
+             "latencia_p50_s": mediana, "latencia_p95_s": p95},
+            prueba=args.prueba, modelo=claude.modelo("verificador"), casos=s["casos"],
+            detalle=f"{len(casos)} tramos × {args.repeticiones} repeticiones")
+        if not evaluaciones.imprimir_comprobaciones("verificador", filas):
+            return 1
     return 1 if s["falsas_alarmas"] else 0
 
 
@@ -106,6 +116,9 @@ if __name__ == "__main__":
     p.add_argument("--caso", help="prefijo del caso (p. ej. 05)")
     p.add_argument("--repeticiones", type=int, default=1)
     p.add_argument("--informe", type=Path, help="escribe un informe en Markdown")
+    p.add_argument("--registrar", action="store_true",
+                   help="guarda el resultado en app/ops/ultimas_evaluaciones.json y falla si no cumple los umbrales")
+    p.add_argument("--prueba", default="manual", help="identificador de la ejecución (p. ej. E-10 o ci-123)")
     p.add_argument("--detalle", action="store_true", help="muestra el log de cada llamada a Claude")
     a = p.parse_args()
     logging.basicConfig(level=logging.INFO if a.detalle else logging.WARNING, format="%(levelname)s %(name)s: %(message)s")
