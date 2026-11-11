@@ -409,8 +409,17 @@ def previsualizar_revision(client_id: str, body: PeticionRevision):
 
 @app.post("/api/clients/{client_id}/review", dependencies=[Depends(acceso.exigir_cliente)], status_code=201)
 def abrir_revision(client_id: str, body: PeticionRevision):
-    """Abre la revisión (versión nueva en borrador). Después se abre una sesión normal con este cliente."""
+    """Abre la revisión: versión de trámite con los mismos datos y estado (R1; no pasa a borrador).
+    Después se abre una sesión normal con este cliente."""
     return revision.vista(_llamar(revision.abrir, client_id, body.reasons))
+
+
+@app.post("/api/clients/{client_id}/review/close", dependencies=[Depends(acceso.exigir_cliente)])
+def cerrar_revision(client_id: str):
+    """El cliente finaliza la revisión. NO valida el perfil: si no cambió nada sigue `active`; si cambió algo,
+    sigue `review_due` hasta que valide la entidad. 409 si quedan preguntas u obligatorios pendientes.
+    Idempotente: sin revisión abierta devuelve `already_closed` sin escribir."""
+    return _llamar(revision.cerrar, client_id)
 
 
 @app.get("/api/clients/{client_id}/changes", dependencies=[Depends(acceso.exigir_cliente)])

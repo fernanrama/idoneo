@@ -198,3 +198,29 @@ def test_dos_cierres_a_la_vez_escriben_un_solo_cierre(validada):
     assert len(resultados) == 2 and all(r["closed"] for r in resultados)
     cierres = [v for v in store.versiones(C) if v["reason"].startswith("review_closed:")]
     assert len(cierres) == 1
+
+
+# ---------- API ----------
+
+def test_api_finalizar_la_revision(validada):
+    from fastapi.testclient import TestClient
+
+    from app.main import app
+    from tests.soporte_acceso import cliente_autorizado
+
+    ruta = f"/api/clients/{C}/review/close"
+    assert TestClient(app).post(ruta).status_code == 401  # sin credencial del cliente, no
+    c = cliente_autorizado(C)
+    assert c.post(f"/api/clients/{C}/review", json={"reasons": ["planned_expense"]}).status_code == 201
+    assert c.get(f"/api/clients/{C}/review").json()["can_finish"] is False
+    pendiente = c.post(ruta)
+    assert pendiente.status_code == 409 and "faltan" in pendiente.json()["detail"]
+    responder_todo()
+    vista = c.get(f"/api/clients/{C}/review").json()
+    assert vista["can_finish"] is True and vista["blocking"] == []
+    r = c.post(ruta)
+    assert r.status_code == 200 and r.json()["result"] == "sin_cambios" and r.json()["status"] == "active"
+    assert c.get(f"/api/clients/{C}/review").json() == {"open": False}
+    otra = c.post(ruta)
+    assert otra.status_code == 200 and otra.json()["already_closed"] is True
+    assert c.get(f"/api/clients/{C}/constraints").json()["usable"] is True
