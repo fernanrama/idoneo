@@ -165,7 +165,7 @@ npm run dev
 | 3 | http://localhost:3000/entidad/carmen-68 | Cada dato con fuente, confianza y cita; perfil CONSERVADOR; la alerta *declarado ≠ demostrado* |
 | 4 | Botón **Validar perfil** en esa vista (lo habilita el [modo asesor de demostración](docs/modo-asesor-demo.md), que `preparar_demo.py` deja activado) | El perfil pasa a `active` y ya se puede usar |
 | 5 | Bloque **Restricciones para el agente** de esa vista | Las restricciones en el formato del catálogo de MyInvestor, utilizables tras validar. La API (`/api/clients/…`) exige la credencial del cliente; sin ella, http://localhost:8000/api/demo/constraints enseña el formato con la Carmen de muestra, sin validar |
-| 6 | En esa vista, el dato **Fondos de renta variable** | La prueba: *«Eso no puede pasar, el fondo es del banco.»*, segundos 57–61 |
+| 6 | Pestaña **Evidencias** → **Conocimiento: fondos de renta variable** → ▶ | La prueba, con la voz de Carmen: *«Eso no puede pasar, el fondo es del banco.»* |
 | 7 | http://localhost:8000/docs | Toda la API, para probarla a mano |
 | 8 | http://localhost:3000/onboarding/entrevista → marca **Entrevista corta del pitch** → **Escribir** | Un perfil completo de `carmen-corta` en dos preguntas (necesita `ANTHROPIC_API_KEY`). Valídalo en `/entidad/carmen-corta` |
 | 9 | **Mi perfil** → **¿Ha cambiado algo en tu vida?** | Elige, por ejemplo, «Me han subido el sueldo»: verás qué se pregunta, contestas solo eso y aparece «Lo que ha cambiado» en tu perfil y «cambios por validar» en la vista de la entidad |
@@ -254,6 +254,7 @@ Idóneo no «cumple MiFID» por sí solo: ayuda a la entidad a recoger y documen
 | Extractor (de la conversación al perfil, con Claude) y entrevistador en modo texto | ✅ Hecho, con tests (Claude simulado) · prueba con la API real: `python scripts/probar_extractor.py` · arquitectura en [`backend/app/agentes/`](backend/app/agentes/README.md) |
 | Verificador (incoherencias, datos dudosos y casos para el asesor) | ✅ Reglas fijas + revisión con Claude, con tests (Claude simulado) · evaluación con la API real: `python scripts/evaluar_verificador.py` · el resumen para agentes sigue siendo una plantilla fija |
 | Voz con ElevenLabs | ✅ Probada de punta a punta con cuenta real (E-03) · prompt del agente sincronizado con `scripts/sincronizar_voz.py` · demo guiada con audios grabados con ElevenLabs |
+| Pruebas de audio | ✅ Cada dato suena con el fragmento de la llamada que lo justifica: al colgar, el backend descarga el audio de ElevenLabs y alinea los tiempos reales ([cómo funciona](docs/pruebas-de-audio.md)) · con tests (ElevenLabs simulado) · en Carmen, con su voz grabada |
 | Memoria personal por usuario | ✅ Consentida, versionada, borrable y proyectada a ElevenLabs · falta identidad/login real |
 | Medición de impacto (aciertos, alertas, latencia, coste) | ✅ Con clientes **simulados**: 20 entrevistas completas con 99–100 % de aciertos y 0 datos inventados; verificador con 0 falsas alarmas · [evaluación](docs/evaluacion/README.md) |
 

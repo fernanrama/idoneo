@@ -107,6 +107,11 @@
 .evidencia { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .play { width: 40px; height: 40px; border-radius: 50%; background: #12122a; color: #ffffff; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .playApagado { background: #eceaf6; color: #8a8aa8; }
+button.play { border: 0; cursor: pointer; font: inherit; font-weight: 700; transition: transform 0.15s ease, background 0.15s ease; }
+button.play:hover { transform: scale(1.06); }
+button.play:focus-visible { outline: 2px solid #8b5cf6; outline-offset: 2px; }
+.playSonando { background: #8b5cf6; }
+.cuadro { width: 10px; height: 10px; background: currentColor; border-radius: 2px; }
 .evidencia p { flex: 1 1 300px; margin: 0; font-size: 15px; color: #3a3a5a; }
 .meta { font-size: 12px; color: #5a5a7a; }
 .declaro { font-size: 13px; color: #9a3412; margin: 0; }

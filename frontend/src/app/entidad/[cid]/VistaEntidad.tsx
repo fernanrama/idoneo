@@ -5,6 +5,7 @@ import { use, useEffect, useState } from "react";
 import { nombrePerfil } from "@/components/PanelVivo";
 import { Icono } from "@/components/visual";
 import { api } from "@/lib/api";
+import { fragmentoDe, useFragmentos, useReproductor, type EstadoClip, type Fragmento } from "@/lib/audio";
 import { CLIENTE_DEMO, tokenCliente } from "@/lib/credenciales";
 import {
   ESTADOS,
@@ -237,6 +238,7 @@ export default function VistaEntidad({
         )}
         {perfil && pestana === "Evidencias" && (
           <Evidencias
+            cid={cid}
             perfil={perfil}
             abierto={abierto}
             setAbierto={setAbierto}
@@ -374,14 +376,18 @@ function Resumen({
 }
 
 function Evidencias({
+  cid,
   perfil,
   abierto,
   setAbierto,
 }: {
+  cid: string;
   perfil: Perfil;
   abierto: string | null;
   setAbierto: (r: string | null) => void;
 }) {
+  const fragmentos = useFragmentos(cid, perfil);
+  const { activo, reproducir } = useReproductor(cid);
   const filas = Object.entries(perfil.mifid).sort(([a], [b]) => {
     const fa = perfil.mifid[a].flags.length > 0 ? 0 : 1;
     const fb = perfil.mifid[b].flags.length > 0 ? 0 : 1;
@@ -399,6 +405,9 @@ function Evidencias({
           f={f}
           abierta={abierto === ruta}
           alternar={() => setAbierto(abierto === ruta ? null : ruta)}
+          clips={f.evidence.map((ev, i) => fragmentoDe(fragmentos, ruta, i, ev))}
+          estadoClip={(i) => (activo?.clave === `${ruta}#${i}` ? activo.estado : "parado")}
+          reproducir={(i, clip) => reproducir(`${ruta}#${i}`, clip)}
         />
       ))}
     </div>
@@ -410,11 +419,17 @@ function FilaEvidencia({
   f,
   abierta,
   alternar,
+  clips,
+  estadoClip,
+  reproducir,
 }: {
   ruta: string;
   f: Fact;
   abierta: boolean;
   alternar: () => void;
+  clips: (Fragmento | null)[];
+  estadoClip: (i: number) => EstadoClip;
+  reproducir: (i: number, clip: Fragmento) => void;
 }) {
   const tieneDetalle =
     f.evidence.length > 0 ||
@@ -452,27 +467,14 @@ function FilaEvidencia({
           )}
           {f.evidence.map((ev, i) => (
             <div key={i} className={s.evidencia}>
-              {ev.audio_url ? (
-                <audio
-                  controls
-                  src={ev.audio_url}
-                  style={{ height: 40 }}
-                  aria-label="Escuchar la frase"
-                />
-              ) : (
-                <span
-                  className={`${s.play} ${s.playApagado}`}
-                  title="El clip de audio aún no está disponible"
-                  aria-hidden="true"
-                >
-                  {Icono.play}
-                </span>
-              )}
+              <BotonClip clip={clips[i]} estado={estadoClip(i)} alPulsar={(clip) => reproducir(i, clip)} />
               <p>«{ev.quote}»</p>
               <span className={s.meta}>
                 sesión {ev.session_id}
-                {ev.turn_id ? `, ${ev.turn_id}` : ""} · {ev.t[0].toFixed(1)}–
-                {ev.t[1].toFixed(1)} s
+                {ev.turn_id ? `, ${ev.turn_id}` : ""} ·{" "}
+                {clips[i]?.privado && clips[i]?.end != null
+                  ? `${clips[i]!.start.toFixed(1)}–${clips[i]!.end!.toFixed(1)} s en la grabación${clips[i]!.exact ? "" : " (aprox.)"}`
+                  : `${ev.t[0].toFixed(1)}–${ev.t[1].toFixed(1)} s`}
               </span>
             </div>
           ))}
@@ -485,6 +487,24 @@ function FilaEvidencia({
         </div>
       )}
     </div>
+  );
+}
+
+/** Escuchar la frase exacta: el fragmento de la llamada en que el cliente lo dijo. */
+function BotonClip({ clip, estado, alPulsar }: { clip: Fragmento | null; estado: EstadoClip; alPulsar: (c: Fragmento) => void }) {
+  if (!clip) {
+    return (
+      <span className={`${s.play} ${s.playApagado}`} title="Sin audio: entrevista por escrito o audio aún no descargado" aria-hidden="true">
+        {Icono.play}
+      </span>
+    );
+  }
+  const texto = estado === "sonando" ? "Parar" : estado === "cargando" ? "Cargando el audio" : estado === "error" ? "No se pudo reproducir; volver a intentarlo" : "Escuchar la frase";
+  return (
+    <button type="button" className={`${s.play} ${estado === "sonando" ? s.playSonando : ""}`} onClick={() => alPulsar(clip)}
+      aria-label={texto} title={texto} aria-pressed={estado === "sonando"}>
+      {estado === "sonando" ? <span className={s.cuadro} aria-hidden="true" /> : estado === "cargando" ? "…" : estado === "error" ? "!" : Icono.play}
+    </button>
   );
 }
 

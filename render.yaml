@@ -59,6 +59,9 @@ services:
         sync: false
       - key: ELEVENLABS_AGENT_ID
         sync: false
+      # Webhook post-llamada (pruebas de audio): el secreto lo da ElevenLabs al crear el webhook.
+      - key: ELEVENLABS_WEBHOOK_SECRET
+        sync: false
       # Topes de gasto de la demo pública (0 = sin límite). Ver backend/app/limites.py
       - key: LIMITE_SESIONES_DIA
         value: "30"

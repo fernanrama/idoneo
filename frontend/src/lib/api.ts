@@ -91,6 +91,12 @@ export const api = {
       method: "POST", headers: sesion(session_id), body: JSON.stringify(turno),
     }),
 
+  /** Pruebas de audio: al colgar, el backend descarga de ElevenLabs el audio de esta llamada. */
+  registrarAudio: (session_id: string, conversation_id: string) =>
+    pedir<{ status: string }>(`/api/sessions/${id(session_id)}/audio`, {
+      method: "POST", headers: sesion(session_id), body: JSON.stringify({ conversation_id }),
+    }),
+
   perfilDemo: () => pedir<Perfil>("/api/demo/profile"),
   restriccionesDemo: () => pedir<Restricciones>("/api/demo/constraints"),
   perfil: (client_id: string) => client_id === CLIENTE_DEMO && !tokenCliente(client_id)
