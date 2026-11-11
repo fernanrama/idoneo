@@ -67,6 +67,8 @@
 .vivoTexto { flex: 1 1 320px; position: relative; z-index: 1; }
 .vivoBoton { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 8px; min-height: 50px; padding: 0 22px; border-radius: 999px; background: #ffffff; color: #0e1020; font-weight: 700; transition: transform 0.2s; }
 .vivoBoton:hover { transform: translateY(-2px); }
+button.vivoBoton { border: 0; cursor: pointer; font-family: inherit; font-size: inherit; }
+button.vivoBoton:disabled { opacity: 0.7; cursor: progress; transform: none; }
 .progreso { display: flex; gap: 6px; margin-top: 12px; }
 .progreso i { width: 34px; height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.22); transition: background 0.4s; }
 .progreso i.hecha { background: #7ef0c8; animation: v-sello 0.4s both; }

@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-const { esValidable, esConflictoDeVersion, mensajeErrorValidacion } = (await import(pathToFileURL(join(process.env.IDONEO_CLIENT_BUILD, "validacion.js")))).default;
+const { esValidable, esConflictoDeVersion, mensajeErrorValidacion, mensajeCierre } = (await import(pathToFileURL(join(process.env.IDONEO_CLIENT_BUILD, "validacion.js")))).default;
 
 const perfil = (status, complete = true) => ({ status, assessments: { suitability: { complete } } });
 
@@ -46,4 +46,9 @@ test("los demás errores de validación mantienen su mensaje", () => {
   assert.equal(esConflictoDeVersion(prohibido), false);
   assert.equal(mensajeErrorValidacion(prohibido), "403 Necesitas la credencial");
   assert.equal(esConflictoDeVersion(null), false);
+});
+
+test("al finalizar la revisión, el cliente sabe si espera al banco o si todo sigue igual", () => {
+  assert.match(mensajeCierre({ pending_validation: true }), /persona del banco revisará/);
+  assert.match(mensajeCierre({ pending_validation: false }), /sigue vigente/);
 });

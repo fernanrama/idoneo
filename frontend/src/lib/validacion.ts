@@ -1,4 +1,4 @@
-import type { Perfil } from "./tipos";
+import type { CierreRevision, Perfil } from "./tipos";
 
 /**
  * ¿Debe ofrecerse al asesor el botón «Validar perfil»?
@@ -31,4 +31,11 @@ export function mensajeErrorValidacion(e: unknown): string {
     return "El perfil ha cambiado mientras lo revisabas. Hemos cargado la versión nueva: revísala antes de validar.";
   }
   return e instanceof Error ? e.message : String(e);
+}
+
+/** Qué se le dice al cliente al finalizar su revisión. Finalizar no valida: los cambios esperan al banco. */
+export function mensajeCierre(c: Pick<CierreRevision, "pending_validation">): string {
+  return c.pending_validation
+    ? "Revisión finalizada. Una persona del banco revisará tus cambios; mientras, se sigue usando tu perfil anterior."
+    : "Revisión finalizada: todo sigue igual y tu perfil sigue vigente. No hace falta nada más.";
 }
