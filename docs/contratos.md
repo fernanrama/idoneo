@@ -119,11 +119,18 @@ Una escritura con varios parches es **todo o nada**. Excepción: lo que proponen
 ### Versionado
 
 - Cada cambio crea una versión nueva con `reason` y `author`; ninguna versión se modifica. Reescribir exactamente lo mismo no crea versión.
+- **Confirmaciones** (diseño 06, §4.3; decisiones D1 y D3).
+  - **Qué es una confirmación:** el mismo valor, declarado y fuente, **aunque cambie la confianza**.
+  - **Qué se guarda:** se acumula la evidencia (una cita del mismo turno ya guardado no es nueva, así que reprocesar no crea versión), se conserva la confianza más alta y se anotan `confirmed_at`/`confirmed_by` en el `Fact`, sin cambiar `value` ni `updated_at`.
+  - **Flags:** son los de la escritura nueva.
+  - **Confirmación pura:** mismos flags y ningún cambio en calculados, idoneidad, conveniencia, restricciones ni alertas. Sobre un perfil `active` crea una versión de trazabilidad que sigue `active` y no abre `pending_review`. Si falta cualquiera de esas condiciones, es un cambio: `review_due`.
+  - **Nunca reactiva** un perfil en `review_due`, `draft` o `pending_validation`.
+  - **Un cambio de valor, declarado o fuente** sustituye el dato, como antes.
 - En base de datos lo garantiza la propia base: `UPDATE`, `DELETE` y `TRUNCATE` bloqueados en `clients`, `profile_versions` y `turns` (también para el rol `postgres` y con `CASCADE`).
 - Concurrencia optimista: si otra escritura (de este u otro proceso) se adelanta, se relee y reintenta; tras 5 intentos, 409.
 - Las alertas no se duplican: se ignora una alerta con el mismo `flag` y `path` que otra abierta, o con un `id` ya existente. Una alerta solo puede apuntar a una ruta de `CAMPOS` (o a ninguna).
 - **Perfil para consumidores** (restricciones, contexto y MCP): el último `active`; si no hay ninguno, la última versión (`usable: false`). `POST /api/demo/reset` abre una época nueva: añade una versión con `reason: "demo_reset: …"` y desde ese momento no se sirven activos anteriores.
-- **`pending_review`** (decisión §4.6 de [diseno/06](diseno/06-actualizacion-continua.md#46-vigencia-mientras-hay-una-revisión-abierta-decidido-opción-b), opción B). Si se sirve un `active` y hay una versión posterior sin validar con datos distintos, se sigue sirviendo el `active`, pero se avisa de qué cambió: `{since_version, latest_version, latest_status, paths, opened_at}`. Las rutas son las MiFID cuyo valor o declarado cambió, más las de alertas nuevas abiertas. Los calculados no cuentan y una confirmación del mismo valor tampoco. Si no hay revisión abierta, vale `null`. Lo incluyen `GET /constraints`, `GET /context`, `get_investment_constraints`, `get_client_profile` (sin `version`), `get_client_context` y el panel del asesor de demo. El consumidor no debe apoyar recomendaciones en esas rutas (`store.revision_pendiente`).
+- **`pending_review`** (decisión §4.6 de [diseno/06](diseno/06-actualizacion-continua.md#46-vigencia-mientras-hay-una-revisión-abierta-decidido-opción-b), opción B). Si se sirve un `active` y hay una versión posterior sin validar con datos distintos, se sigue sirviendo el `active`, pero se avisa de qué cambió: `{since_version, latest_version, latest_status, paths, opened_at}`. Las rutas son las MiFID cuyo valor, declarado o flags cambiaron, más las de alertas nuevas abiertas. Los calculados no cuentan, y una confirmación (solo evidencia o confianza) tampoco. Si no hay revisión abierta, vale `null`. Lo incluyen `GET /constraints`, `GET /context`, `get_investment_constraints`, `get_client_profile` (sin `version`), `get_client_context` y el panel del asesor de demo. El consumidor no debe apoyar recomendaciones en esas rutas (`store.revision_pendiente`).
 
 ### Estados y validación de la entidad
 
@@ -132,7 +139,7 @@ Una escritura con varios parches es **todo o nada**. Excepción: lo que proponen
 | `draft` | `pending_validation` | Tras cualquier escritura, si `suitability.complete` y no hay alertas `needs_advisor` abiertas |
 | `pending_validation` | `draft` | Si deja de estar completo o aparece una alerta `needs_advisor` |
 | `draft` o `pending_validation` | `active` | `POST /validate`, si el perfil está completo |
-| `active` | `review_due` | Un agente cambia un dato (las correcciones del asesor no lo cambian de estado) |
+| `active` | `review_due` | Un agente cambia un dato (las correcciones del asesor no lo cambian de estado). Una **confirmación pura** no: la versión nueva sigue `active` (D3) |
 | `review_due` | `draft` | Al abrir una sesión nueva (`POST /api/sessions`) |
 
 `POST /validate` responde **409** si el perfil está en `active` o `review_due` (desde `review_due` hay que reentrevistar), si falta algún dato obligatorio o si un cambio intenta escribir un dato calculado; **422** si `advisor_id` o algún cambio no son válidos. Al validar se cierran **todas** las alertas abiertas (regla del contrato v1) y cada una registra `resolved_by` y `resolved_at`; `review.next_review` queda a un año (todavía no vence solo). Añadir alertas a un perfil `active` no cambia su estado.

@@ -69,7 +69,7 @@ def test_cambio_de_liquidez_se_sirve_el_activo_con_aviso(validada):
 
 def test_una_confirmacion_no_abre_revision(validada):
     actual = store.perfil(C).mifid[AHORRO].value
-    assert extractor(AHORRO, actual).status == EstadoPerfil.review_due  # comportamiento actual del estado
+    assert extractor(AHORRO, actual).status == EstadoPerfil.active  # D3: confirmación pura, sigue active
     assert store.restricciones_para_consumidor(C).pending_review is None  # mismo valor: nada en revisión
 
 

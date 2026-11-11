@@ -49,6 +49,7 @@ from .modelos import (
     Alerta,
     EstadoAlerta,
     EstadoPerfil,
+    Evidencia,
     Fact,
     Flag,
     Fuente,
@@ -181,16 +182,17 @@ def perfil_para_consumidor(client_id: str) -> Perfil:
     return _con_personal(activa or ultima)
 
 
-def _valor_mifid(p: Perfil, ruta: str) -> tuple[Any, Any] | None:
+def _valor_mifid(p: Perfil, ruta: str) -> tuple[Any, Any, tuple[str, ...]] | None:
+    """Lo que cuenta como cambio para `pending_review`: valor, declarado y flags (no evidencia ni confianza)."""
     f = p.mifid.get(ruta)
-    return None if f is None else (f.value, f.declared)
+    return None if f is None else (f.value, f.declared, tuple(sorted(x.value for x in f.flags)))
 
 
 def revision_pendiente(client_id: str, servido: Perfil | None = None) -> RevisionPendiente | None:
     """Qué ha cambiado desde el perfil que se sirve a los consumidores (§4.6 del diseño 06, opción B).
 
-    Solo si se sirve un `active` y hay versiones posteriores con datos distintos (valor o declarado; la
-    evidencia sola es una confirmación) o alertas nuevas abiertas. Los calculados no cuentan: cambian
+    Solo si se sirve un `active` y hay versiones posteriores con datos distintos (valor, declarado o flags;
+    la evidencia o la confianza solas son una confirmación) o alertas nuevas abiertas. Los calculados no cuentan: cambian
     porque cambian sus entradas, que ya aparecen. Determinista; no escribe nada.
     """
     with _candado(client_id):
@@ -337,8 +339,46 @@ def comprobar_parche(parche: Parche, autor: str) -> Parche:
         raise Conflicto(str(e)) from e
 
 
+def _es_confirmacion(previo: Fact, nuevo: Fact) -> bool:
+    """D1: mismo valor, mismo declarado y misma fuente, aunque cambie la confianza de la extracción."""
+    return (previo.value, previo.declared, previo.source) == (nuevo.value, nuevo.declared, nuevo.source)
+
+
+def _clave_cita(e: Evidencia) -> tuple:
+    """Una cita ya guardada: mismo turno de la misma sesión (o, sin turno, la misma cita exacta)."""
+    return (e.session_id, e.turn_id) if e.turn_id else (e.session_id, e.t, e.quote)
+
+
+def _confirmar(previo: Fact, nuevo: Fact, momento, autor: str) -> Fact | None:
+    """Une una confirmación con el dato guardado. None si no aporta nada (p. ej. reprocesar una cita).
+
+    - Evidencia: se conserva la anterior y se añaden las citas nuevas (sin duplicar turnos).
+    - Confianza: la más alta, con su base (la del dato guardado si empatan o la nueva no consta).
+    - Flags: los que trae la escritura nueva (el extractor limpia, p. ej., una duda tras una repregunta).
+      Si cambian, NO es una confirmación pura: aplicar() lo tratará como cambio para el estado.
+    - `confirmed_at`/`confirmed_by` solo si hay una cita nueva. `value` y `updated_at` no cambian.
+    """
+    guardadas = {_clave_cita(e) for e in previo.evidence}
+    nuevas = [e for e in nuevo.evidence if _clave_cita(e) not in guardadas]
+    cambian_flags = set(nuevo.flags) != set(previo.flags)
+    if not nuevas and not cambian_flags:
+        return None
+    sube = nuevo.confidence is not None and (previo.confidence is None or nuevo.confidence > previo.confidence)
+    cambios: dict[str, Any] = {"evidence": [*previo.evidence, *nuevas], "flags": list(nuevo.flags)}
+    if sube:
+        cambios.update(confidence=nuevo.confidence, confidence_basis=nuevo.confidence_basis)
+    if nuevas:
+        cambios.update(confirmed_at=momento, confirmed_by=autor)
+    return previo.model_copy(update=cambios)
+
+
 def _aplicar_parches(n: Perfil, normalizados: list[Parche], motivo: str, autor: str) -> str:
-    """Misma mutación para aplicar() y para los candidatos de validar()."""
+    """Misma mutación para aplicar() y para los candidatos de validar().
+
+    Confirmar (mismo valor, declarado y fuente con una cita nueva) acumula la evidencia y anota
+    `confirmed_at`, sin cambiar el valor ni `updated_at` (`_confirmar`). Un cambio de valor, declarado o
+    fuente sustituye el dato, como siempre. Reescribir lo mismo o reprocesar una cita no crea versión.
+    """
     cambiado = False
     for c in normalizados:
         previo = n.mifid.get(c.path)
@@ -346,9 +386,16 @@ def _aplicar_parches(n: Perfil, normalizados: list[Parche], motivo: str, autor: 
             cambiado |= n.mifid.pop(c.path, None) is not None
             continue
         nuevo = _fact(c, autor, n.created_at)
-        if previo is None or not _iguales(previo, nuevo):
+        if previo is not None and _iguales(previo, nuevo):
+            continue
+        if previo is not None and _es_confirmacion(previo, nuevo):
+            unido = _confirmar(previo, nuevo, n.created_at, autor)
+            if unido is None:
+                continue
+            n.mifid[c.path] = unido
+        else:
             n.mifid[c.path] = nuevo
-            cambiado = True
+        cambiado = True
     if not cambiado:
         raise _SinCambios
     return motivo
@@ -361,8 +408,50 @@ def aplicar(client_id: str, parches: Iterable[Parche], motivo: str, autor: str) 
     motivo = _motivo(motivo)
     normalizados = [comprobar_parche(p, autor) for p in parches]
     revisar = not autor.startswith("advisor:")
-    return _escribir(client_id, lambda n: _aplicar_parches(n, normalizados, motivo, autor), autor,
-                     lambda n: _estado_tras_cambio(n, revisar_si_activo=revisar))
+    antes: dict[str, Perfil] = {}
+
+    def mutar(n: Perfil) -> str:
+        antes["perfil"] = n.model_copy(deep=True)  # la versión vigente, ya calculada, antes de escribir
+        return _aplicar_parches(n, normalizados, motivo, autor)
+
+    def estado(n: Perfil) -> EstadoPerfil:
+        if revisar and n.status == EstadoPerfil.active and _solo_confirmaciones(antes["perfil"], n):
+            return EstadoPerfil.active  # D3: confirmación pura, versión de trazabilidad
+        return _estado_tras_cambio(n, revisar_si_activo=revisar)
+
+    return _escribir(client_id, mutar, autor, estado)
+
+
+_RESTRICCIONES_VOLATILES = {"client_id", "profile_version", "status", "usable", "pending_review"}
+
+
+def _solo_confirmaciones(antes: Perfil, despues: Perfil) -> bool:
+    """D3: la escritura solo confirma datos y no cambia nada de lo que se usa para decidir.
+
+    Se exige todo a la vez, comparando el perfil completo (no solo los parches):
+    - cada dato MiFID es el mismo valor, declarado y fuente, con los mismos flags (solo cambian evidencia,
+      confianza y fechas de confirmación);
+    - los calculados, la idoneidad (incluido el perfil de riesgo), la conveniencia y las restricciones
+      que se servirían son idénticos;
+    - las alertas no cambian.
+    Solo se llama sobre un perfil `active`: una confirmación nunca reactiva un perfil en revisión.
+    """
+    for ruta in set(antes.mifid) | set(despues.mifid):
+        a, d = antes.mifid.get(ruta), despues.mifid.get(ruta)
+        if a is None or d is None:
+            return False
+        if ruta in CALCULADOS:
+            if a.value != d.value:
+                return False
+        elif not _es_confirmacion(a, d) or set(a.flags) != set(d.flags):
+            return False
+    if antes.assessments.model_dump() != despues.assessments.model_dump():
+        return False
+    if [(x.id, x.status) for x in antes.alerts] != [(x.id, x.status) for x in despues.alerts]:
+        return False
+    ra = calculos.restricciones(antes).model_dump(exclude=_RESTRICCIONES_VOLATILES)
+    rd = calculos.restricciones(despues).model_dump(exclude=_RESTRICCIONES_VOLATILES)
+    return ra == rd
 
 
 def anadir_alertas(client_id: str, alertas: Iterable[Alerta], autor: str = "agent:verifier") -> Perfil:

@@ -10,7 +10,8 @@ from app.perfil.modelos import Alerta, Evidencia, Flag, Parche, Turno
 
 C = "carmen-68"
 EV = [Evidencia(session_id="s", turn_id="t-001", t=(1.0, 2.0), quote="q")]
-VOLATILES = {"created_at", "updated_at", "validated_at", "resolved_at", "next_review", "started_at", "session_id"}
+VOLATILES = {"created_at", "updated_at", "confirmed_at", "validated_at", "resolved_at", "next_review",
+             "started_at", "session_id"}
 
 
 def _sin_volatiles(x):

@@ -254,13 +254,19 @@ def planificar(perfil: Perfil, peticiones: list[Peticion]) -> Alcance:
 
 # ---------- calendario ----------
 
-def plazo_restante(f: Fact, hoy: date) -> float:
-    """Años que quedan de un plazo declarado, contados desde que se escribió el dato.
+def ultima_vez(f: Fact) -> date:
+    """Último día en que el cliente dio este dato: al escribirlo o al confirmarlo (§4.3 del diseño)."""
+    return max(f.updated_at, f.confirmed_at or f.updated_at).date()
 
-    Límite: `updated_at` se renueva si el dato se reescribe (p. ej. al recargar un fixture). La solución
-    definitiva es guardar una fecha objetivo (§4.3 del diseño), que es un cambio de contrato.
+
+def plazo_restante(f: Fact, hoy: date) -> float:
+    """Años que quedan de un plazo declarado, contados desde la última vez que el cliente lo dijo.
+
+    Un plazo confirmado («siguen siendo diez años») cuenta desde la confirmación. Límite: si el dato se
+    reescribe por otro motivo (p. ej. al recargar un fixture) también se renueva. La solución definitiva es
+    guardar una fecha objetivo (§4.3 del diseño), que es un cambio de contrato.
     """
-    transcurridos = (hoy - f.updated_at.date()).days / DIAS_POR_ANIO
+    transcurridos = (hoy - ultima_vez(f)).days / DIAS_POR_ANIO
     return round(float(f.value) - transcurridos, 1)
 
 
@@ -285,7 +291,7 @@ def vencimientos(perfil: Perfil, hoy: date) -> list[Peticion]:
         bloque = ruta.split(".")[0]
         if ruta in CALCULADOS or bloque not in CADUCIDAD_DIAS or f.value is None or ruta not in CAMPOS:
             continue
-        if (hoy - f.updated_at.date()).days > CADUCIDAD_DIAS[bloque]:
+        if (hoy - ultima_vez(f)).days > CADUCIDAD_DIAS[bloque]:
             caducados.setdefault(bloque, []).append(ruta)
     for bloque in sorted(caducados, key=lambda b: min(ORDEN_GUION[r] for r in caducados[b])):
         out.append(Peticion(motivo=Motivo.stale_block, rutas=sorted(caducados[bloque], key=ORDEN_GUION.get)))

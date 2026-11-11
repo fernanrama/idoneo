@@ -56,6 +56,10 @@ class Fact(BaseModel):
     flags: list[Flag] = Field(default_factory=list)
     updated_at: datetime = Field(default_factory=ahora)
     updated_by: str  # "agent:extractor", "agent:verifier", "fn:<nombre>", "advisor:<id>", "fixture"
+    # Última vez que se confirmó el MISMO dato con una cita nueva (no cambia value ni updated_at; la
+    # evidencia se acumula). Diseño 06, §4.3. None si nunca se ha confirmado.
+    confirmed_at: datetime | None = None
+    confirmed_by: str | None = None
 
 
 # ---------- perfil ----------

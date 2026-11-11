@@ -209,13 +209,14 @@ def planificar(perfil: Perfil, solicitudes: list[SolicitudRevision], hoy: date) 
 
 `Alcance` se pasa al entrevistador como hoy se pasa `pendientes()`: `chat.pendientes()` y `memoria.siguiente_foco()` aceptarían el alcance por delante de lo que falta. Con eso se cierra H5 sin tocar el prompt más que una sección («en una revisión, confirma primero y no repitas lo que sigue válido»).
 
-### 4.3 Confirmaciones y frescura [Propuesta]
+### 4.3 Confirmaciones y frescura [Implementado en el almacén; falta el extractor]
 
 Para cerrar H4:
 
-- `Fact.confirmed_at: datetime | None` y `Fact.confirmed_by`. Confirmar el mismo valor **acumula** evidencia (`evidence` + la nueva cita) y actualiza `confirmed_at`, sin cambiar `value`.
-- `_iguales` ignora `confirmed_at` y la evidencia añadida al comparar el **valor**; así una confirmación crea versión (queda trazada, art. 72) pero la materialidad la ve como «sin cambio».
-- `vencimientos()` usa `max(updated_at, confirmed_at)`.
+- **Hecho (D1).** `Fact.confirmed_at` y `Fact.confirmed_by`. Una confirmación es el mismo valor, declarado y fuente, **aunque cambie la confianza**. Se acumula la evidencia (sin duplicar turnos ya citados), se conserva la confianza más alta y se aplican los flags nuevos, sin cambiar `value` ni `updated_at`. Sin cita nueva ni flags distintos no se guarda nada (`store._confirmar`, `tests/test_confirmaciones.py`).
+- **Hecho (D3).** Una **confirmación pura** sobre un perfil `active` deja la versión nueva en `active` y sin `pending_review`. Se exigen mismos flags y ningún cambio en calculados, idoneidad, conveniencia, restricciones ni alertas (`store._solo_confirmaciones`). Nunca reactiva un perfil en revisión. Si cambian los flags, es un cambio: `review_due` y la ruta aparece en `pending_review`.
+- **Hecho.** `vencimientos()` y `plazo_restante()` cuentan desde la última vez que el cliente dio el dato: `max(updated_at, confirmed_at)` (`alcance.ultima_vez`).
+- **Pendiente (B1, `agentes/extractor.py`).** `_protegido` descarta hoy un parche con el mismo valor, la misma fuente y una confianza que no sea mayor, aunque venga de un turno nuevo. Así una confirmación hablada no llega al almacén. Propuesta: descartarlo solo si **todas** sus citas ya están en la evidencia del dato. Repetir la misma extracción seguiría sin crear versiones (lo comprueba `test_extractor.py`). Con D3 ya no es un problema: una confirmación pura deja el perfil `active`.
 - Para H3, guardar además `objectives.o1.target_date` (calculado por el código a partir de `horizon_years` y la fecha de la evidencia) y que `_por_plazo` use el plazo restante. Es cambio de contrato y de cálculos: revisarlo con tutoría antes.
 
 ### 4.4 Materialidad [Propuesta]
@@ -353,7 +354,7 @@ sequenceDiagram
 | 1 | Vigencia (H1): `pending_review` en `restricciones`, contexto y MCP (opción B, §4.6) | A · Juan | — | Test: activo v5 + cambio de liquidez → v5 con `usable: true` y `pending_review.paths = [liquidez]` en API y MCP; sin revisión abierta, `null` |
 | 2 | `SolicitudRevision` en modelo, almacenes, migración `0002` y rutas REST | A · Juan | — | Paridad memoria/BD; deduplicación; validar no la cierra sola |
 | 3 | `alcance.py`: `vencimientos`, `planificar`, `es_material` (H2, H3) | A · Juan, revisa tutoría | 2 | Tests por tabla: cada fila de §4.2 y §3.4 |
-| 4 | Confirmaciones (H4): `confirmed_at`, evidencia acumulada | A · Juan | — | Confirmar no cambia `value` ni materialidad, pero deja versión y cita |
+| 4 | Confirmaciones (H4): `confirmed_at`, evidencia acumulada (hecho en el almacén; falta el extractor, §4.3) | A · Juan | — | Confirmar no cambia `value` ni materialidad, pero deja versión y cita |
 | 5 | Entrevistador con alcance (H5) y sección de revisión en el prompt | B1 · Hammad | 3 | Laboratorio: microentrevista de Carmen en ≤ 6 preguntas |
 | 6 | Diff en API y en `/entidad/[cid]`; pantalla de invitación | A + C · Fernán | 2, 4 | El asesor valida viendo antes/después y efecto |
 | 7 | MCP `request_profile_check` y `get_review_status`; aviso saliente | D · Alejandro | 1, 2 | Recorrido §5 desde Claude con token de demo |

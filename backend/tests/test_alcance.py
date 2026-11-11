@@ -202,6 +202,18 @@ def test_bloque_caducado(carmen):
         "financial.net_monthly_income_eur", "financial.income_stability", GASTOS, AHORRO, "financial.debts_eur"])]
 
 
+def test_un_dato_confirmado_no_caduca(carmen):
+    for ruta in [r for r in carmen.mifid if r.startswith("financial.")]:
+        carmen.mifid[ruta] = carmen.mifid[ruta].model_copy(update={"updated_at": _hace(400),
+                                                                   "confirmed_at": _hace(10)})
+    assert vencimientos(carmen, HOY) == []
+
+
+def test_el_plazo_confirmado_cuenta_desde_la_confirmacion(carmen):
+    f = carmen.mifid[PLAZO].model_copy(update={"updated_at": _hace(3 * 365.25), "confirmed_at": _hace(0)})
+    assert plazo_restante(f, HOY) == 10.0
+
+
 def test_plazo_restante(carmen):
     f = carmen.mifid[PLAZO].model_copy(update={"updated_at": _hace(3 * 365.25)})
     assert plazo_restante(f, HOY) == 7.0
