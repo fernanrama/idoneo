@@ -39,13 +39,12 @@ from typing import Any, Literal, TypeVar
 
 from pydantic import BaseModel, Field, ValidationError
 
-from . import calculos, personal as personal_mod, validacion
+from . import alcance, calculos, personal as personal_mod, validacion
 from .almacenes import Almacen, ConflictoVersion, crear_almacen
 from .almacenes.base import TransaccionPersonal
 from .eventos import BusEventos, Evento
 from .modelos import (
     CALCULADOS,
-    CAMPOS,
     Alerta,
     EstadoAlerta,
     EstadoPerfil,
@@ -69,7 +68,6 @@ AUTOR_FIXTURE = "fixture"
 CANALES = ("voice", "text")
 MAX_REINTENTOS = 5
 DIAS_HASTA_REVISION = 365
-_ORDEN_CAMPOS = {ruta: i for i, ruta in enumerate(CAMPOS)}
 _NOMBRE_FIXTURE = re.compile(r"^[a-z0-9][a-z0-9_-]{0,63}$")
 
 
@@ -182,26 +180,19 @@ def perfil_para_consumidor(client_id: str) -> Perfil:
     return _con_personal(activa or ultima)
 
 
-def _valor_mifid(p: Perfil, ruta: str) -> tuple[Any, Any, tuple[str, ...]] | None:
-    """Lo que cuenta como cambio para `pending_review`: valor, declarado y flags (no evidencia ni confianza)."""
-    f = p.mifid.get(ruta)
-    return None if f is None else (f.value, f.declared, tuple(sorted(x.value for x in f.flags)))
-
-
 def revision_pendiente(client_id: str, servido: Perfil | None = None) -> RevisionPendiente | None:
     """Qué ha cambiado desde el perfil que se sirve a los consumidores (§4.6 del diseño 06, opción B).
 
-    Solo si se sirve un `active` y hay versiones posteriores con datos distintos (valor, declarado o flags;
-    la evidencia o la confianza solas son una confirmación) o alertas nuevas abiertas. Los calculados no cuentan: cambian
-    porque cambian sus entradas, que ya aparecen. Determinista; no escribe nada.
+    Solo si se sirve un `active` y hay versiones posteriores con datos cambiados (`alcance.cambiados`: valor,
+    declarado o flags; una confirmación no cuenta) o alertas nuevas abiertas. Los calculados no cuentan:
+    cambian porque cambian sus entradas, que ya aparecen. Determinista; no escribe nada.
     """
     with _candado(client_id):
         servido = servido or perfil_para_consumidor(client_id)
         ultima = _ultima(client_id)
         if servido.status != EstadoPerfil.active or ultima.version <= servido.version:
             return None
-        rutas = {r for r in set(servido.mifid) | set(ultima.mifid)
-                 if r not in CALCULADOS and _valor_mifid(servido, r) != _valor_mifid(ultima, r)}
+        rutas = set(alcance.cambiados(servido, ultima))
         previas = {a.id for a in servido.alerts}
         rutas |= {a.path for a in ultima.alerts
                   if a.path and a.status == EstadoAlerta.open and a.id not in previas}
@@ -210,7 +201,7 @@ def revision_pendiente(client_id: str, servido: Perfil | None = None) -> Revisio
         siguiente = _a().version(client_id, servido.version + 1)
         return RevisionPendiente(
             since_version=servido.version + 1, latest_version=ultima.version, latest_status=ultima.status,
-            paths=sorted(rutas, key=lambda r: (_ORDEN_CAMPOS.get(r, len(_ORDEN_CAMPOS)), r)),
+            paths=alcance.orden_guion(rutas),
             opened_at=(siguiente or ultima).created_at)
 
 

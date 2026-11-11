@@ -245,6 +245,27 @@ def planificar(perfil: Perfil, peticiones: list[Peticion]) -> Alcance:
                    reevaluacion_completa=bool(razones), razones=razones)
 
 
+# ---------- cambios entre versiones ----------
+
+def _contenido(f: Fact | None) -> tuple[Any, Any, tuple[str, ...]] | None:
+    """Lo que cuenta como cambio de un dato: valor, declarado y flags (no evidencia, confianza ni fechas)."""
+    return None if f is None else (f.value, f.declared, tuple(sorted(x.value for x in f.flags)))
+
+
+def orden_guion(rutas) -> list[str]:
+    return sorted(set(rutas), key=lambda r: (ORDEN_GUION.get(r, len(ORDEN_GUION)), r))
+
+
+def cambiados(anterior: Perfil, nueva: Perfil) -> list[str]:
+    """Rutas MiFID no calculadas cuyo valor, declarado o flags difieren entre dos versiones (orden del guion).
+
+    Única definición de «dato cambiado»: la usan `store.revision_pendiente` (lo que se avisa a los
+    consumidores) y `alcance_revision` (lo que se pregunta al inversor). Una confirmación no cuenta.
+    """
+    return orden_guion(r for r in set(anterior.mifid) | set(nueva.mifid)
+                       if r not in CALCULADOS and _contenido(anterior.mifid.get(r)) != _contenido(nueva.mifid.get(r)))
+
+
 # ---------- calendario ----------
 
 def ultima_vez(f: Fact) -> date:

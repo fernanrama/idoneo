@@ -230,6 +230,24 @@ def test_plazo_que_envejece(carmen, dias, vence):
     assert (Motivo.horizon_elapsed in motivos) is vence
 
 
+# ---------- cambios entre versiones ----------
+
+def test_cambiados_valor_declarado_y_flags_en_orden_del_guion(carmen):
+    nueva = cambiar(cambiar(carmen, LIQUIDEZ, "high"), AHORRO, flags=[Flag.low_confidence])
+    nueva = cambiar(nueva, "knowledge.equity_funds", declared="medium")  # el fixture declara "high"
+    assert alcance.cambiados(carmen, nueva) == ["knowledge.equity_funds", AHORRO, LIQUIDEZ]
+
+
+def test_una_confirmacion_no_es_un_cambio(carmen):
+    cita = Evidencia(session_id="s-2", turn_id="t-001", t=(0, 1), quote="Sí, sigo igual")
+    nueva = cambiar(carmen, GASTOS, evidence=[cita], confidence=0.99, confirmed_at=_hace(0))
+    assert alcance.cambiados(carmen, nueva) == []
+
+
+def test_los_calculados_no_son_cambios_propios(carmen):
+    assert alcance.cambiados(carmen, cambiar(carmen, AHORRO, 10000)) == [AHORRO]
+
+
 # ---------- materialidad ----------
 
 def test_sin_cambios_no_es_material(carmen):
