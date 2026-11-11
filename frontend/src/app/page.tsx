@@ -60,10 +60,10 @@ export default function Portada() {
               </p>
               <div className={s.acciones}>
                 <Link href="/onboarding/entrevista" className={clasesBoton.luz}>
-                  {Icono.micro} Soy cliente
+                  Soy cliente
                 </Link>
                 <Link href="/admin" className={clasesBoton.luz}>
-                  {Icono.check} Soy entidad
+                  Soy entidad
                 </Link>
               </div>
               <Link href="/escenario" className={`${clasesBoton.vidrio} ${s.demo}`}>

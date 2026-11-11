@@ -9,18 +9,19 @@ type Trato = "usted" | "tu";
 type Detalle = "low" | "normal" | "high";
 type Ritmo = "slow" | "normal" | "fast";
 
-export function MemoriaPersonal({ sessionId }: { sessionId: string }) {
-  return <FormularioMemoria key={sessionId} sessionId={sessionId} />;
+/** Sin sesión propia (perfil de ejemplo), la misma tarjeta sin poder guardar: así todos los clientes la ven igual. */
+export function MemoriaPersonal({ sessionId }: { sessionId: string | null }) {
+  return <FormularioMemoria key={sessionId ?? "ejemplo"} sessionId={sessionId} />;
 }
 
-function FormularioMemoria({ sessionId }: { sessionId: string }) {
+function FormularioMemoria({ sessionId }: { sessionId: string | null }) {
   const [activa, setActiva] = useState(false);
   const [consiente, setConsiente] = useState(false);
   const [etag, setEtag] = useState<string | null>(null);
   const [trato, setTrato] = useState<Trato>("usted");
   const [detalle, setDetalle] = useState<Detalle>("normal");
   const [ritmo, setRitmo] = useState<Ritmo>("normal");
-  const [ocupada, setOcupada] = useState(true);
+  const [ocupada, setOcupada] = useState(sessionId !== null);
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,6 +37,7 @@ function FormularioMemoria({ sessionId }: { sessionId: string }) {
   }
 
   useEffect(() => {
+    if (!sessionId) return;
     let viva = true;
     api.memoria(sessionId)
       .then((m) => { if (viva) cargarValores(m); })
@@ -54,6 +56,7 @@ function FormularioMemoria({ sessionId }: { sessionId: string }) {
   }
 
   async function recargar() {
+    if (!sessionId) return;
     setOcupada(true);
     setError(null);
     setMensaje(null);
@@ -63,7 +66,7 @@ function FormularioMemoria({ sessionId }: { sessionId: string }) {
   }
 
   async function guardar() {
-    if (!etag || !consiente || ocupada) return;
+    if (!sessionId || !etag || !consiente || ocupada) return;
     setOcupada(true);
     setError(null);
     setMensaje(null);
@@ -77,7 +80,7 @@ function FormularioMemoria({ sessionId }: { sessionId: string }) {
   }
 
   async function olvidar() {
-    if (!etag || ocupada) return;
+    if (!sessionId || !etag || ocupada) return;
     setOcupada(true);
     setError(null);
     setMensaje(null);
@@ -130,8 +133,9 @@ function FormularioMemoria({ sessionId }: { sessionId: string }) {
           {ocupada ? "Cargando…" : "Guardar preferencias"}
         </button>
         {activa && <button type="button" className={s.botonBorrar} onClick={olvidar} disabled={ocupada || !etag}>Borrar memoria personal</button>}
-        {!etag && !ocupada && <button type="button" className={s.botonBorrar} onClick={recargar}>Volver a cargar la memoria</button>}
+        {sessionId && !etag && !ocupada && <button type="button" className={s.botonBorrar} onClick={recargar}>Volver a cargar la memoria</button>}
       </div>
+      {!sessionId && <p className={s.mensaje} role="note">En este perfil de ejemplo no se guardan preferencias: hazlo con tu propia entrevista.</p>}
       {mensaje && <p className={s.mensaje} role="status">{mensaje}</p>}
       {error && <p className={`${s.mensaje} ${s.error}`} role="alert">{error}</p>}
     </section>
