@@ -226,6 +226,15 @@ def restricciones_para_consumidor(client_id: str) -> Restricciones:
         return r
 
 
+def pedir_revision(client_id: str, motivo: str) -> Perfil:
+    """Abre una revisión pedida por el cliente: versión nueva, sin tocar datos, en borrador.
+
+    Los consumidores siguen recibiendo el último `active` (con `pending_review` cuando cambie algo);
+    lo que se pregunte y conteste en la microentrevista lo valida después la entidad."""
+    motivo = _motivo(motivo)
+    return _escribir(client_id, lambda n: motivo, "system", lambda n: EstadoPerfil.draft)
+
+
 def versiones(client_id: str) -> list[dict[str, Any]]:
     h = _a().historial(client_id)
     if not h:

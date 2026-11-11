@@ -20,7 +20,7 @@ from pydantic import BaseModel
 
 from . import acceso, limites
 from .agentes import chat, memoria
-from .perfil import store
+from .perfil import revision, store
 
 router = APIRouter(prefix="/api/voice", tags=["voz"])
 webhook_router = APIRouter(prefix="/api/webhooks", tags=["webhooks"])
@@ -52,7 +52,8 @@ def _user_id(client_id: str) -> str:
 def contexto_sesion(session_id: str) -> dict[str, Any]:
     sesion = _sesion(session_id)
     perfil = store.perfil(sesion["client_id"])
-    variables = memoria.variables(store.personal(sesion["client_id"]), chat.pendientes(perfil))
+    variables = memoria.variables(store.personal(sesion["client_id"]),
+                                  chat.pendientes(perfil, revision.en_curso(sesion["client_id"])))
     # El webhook usa session_id como correlación. No es autorización y no contiene el client_id.
     variables["session_id"] = session_id
     ubicacion = os.getenv("ELEVENLABS_SERVER_LOCATION", "").strip()

@@ -33,7 +33,7 @@ const PASOS = [
     kicker: "05 · Valida y entrega",
     titulo: "Una persona firma. El agente de la entidad lo usa.",
     texto:
-      "El perfil queda versionado. Hasta que alguien de la entidad lo valida, su agente no puede usarlo; después lo consulta por MCP para buscar productos dentro de esos límites.",
+      "El perfil queda versionado. Hasta que alguien de la entidad lo valida, su agente no puede usarlo; después lo consulta por MCP para buscar productos dentro de esos límites. Si algo cambia, se pregunta solo eso.",
   },
 ];
 

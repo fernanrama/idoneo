@@ -8,10 +8,14 @@ import { Revela } from "@/components/Revela";
 import { Icono } from "@/components/visual";
 import { FAMILIAS, mostrarValor } from "@/lib/bloques";
 import { useOnboarding } from "@/lib/onboarding";
-import type { Alerta, Fact, Perfil } from "@/lib/tipos";
+import { AntesDespues } from "@/components/PerfilCambios";
+import { IconoMotivo } from "@/components/IconoMotivo";
+import { useEsPropio } from "@/lib/useRevision";
+import type { Alerta, Comparacion, Fact, Perfil, Revision } from "@/lib/tipos";
 import { usePerfil } from "@/lib/usePerfil";
 import { BarraCliente } from "@/components/BarraCliente";
 import s from "@/components/cliente.module.css";
+import rv from "@/components/revision.module.css";
 
 const QUE_SIGNIFICA: Record<string, string> = {
   CONSERVADOR: "Prefieres no ver caer tus ahorros, aunque eso suponga ganar menos.",
@@ -50,7 +54,8 @@ function mayus(t: string) {
 // Resumen para el cliente, en lenguaje claro: qué hemos entendido, qué significa y qué pasa ahora.
 export default function MiPerfil() {
   const { clientId } = useOnboarding();
-  const { perfil, error } = usePerfil(clientId);
+  const { perfil, error, revision, cambios } = usePerfil(clientId);
+  const propio = useEsPropio(clientId);
   const ref = useRef<HTMLDivElement>(null);
 
   const mover = (e: React.PointerEvent) => {
@@ -72,13 +77,13 @@ export default function MiPerfil() {
           </p>
         )}
         {!perfil && !error && <div className={s.cargando} aria-label="Cargando tu perfil" />}
-        {perfil && <Contenido perfil={perfil} />}
+        {perfil && <Contenido perfil={perfil} revision={propio ? revision : null} cambios={cambios} />}
       </main>
     </div>
   );
 }
 
-function Contenido({ perfil }: { perfil: Perfil }) {
+function Contenido({ perfil, revision, cambios }: { perfil: Perfil; revision: Revision | null; cambios: Comparacion | null }) {
   const su = perfil.assessments.suitability;
   const revisado = perfil.status === "active";
   const alertas = perfil.alerts.filter((a) => a.status === "open");
@@ -149,6 +154,9 @@ function Contenido({ perfil }: { perfil: Perfil }) {
         <AvisoCliente key={a.id} alerta={a} />
       ))}
 
+      {revision && su.complete && <PerfilVivo revision={revision} />}
+      {cambios && <AntesDespues c={cambios} />}
+
       <Revela como="section" className={`${s.tarjeta} ${s.siguiente}`}>
         <div className={s.siguienteIcono} aria-hidden="true">
           {revisado ? Icono.check : <span className={s.reloj} />}
@@ -158,7 +166,9 @@ function Contenido({ perfil }: { perfil: Perfil }) {
           <p className={s.suave}>
             {revisado
               ? "Una persona del banco ya ha revisado tu perfil. Ya puedes ver los productos que encajan contigo."
-              : "Una persona del banco revisará tu perfil. Te avisaremos cuando esté listo; no tienes que hacer nada más."}
+              : revision?.open
+                ? "Una persona del banco revisará tus cambios. Mientras, se sigue usando tu perfil anterior."
+                : "Una persona del banco revisará tu perfil. Te avisaremos cuando esté listo; no tienes que hacer nada más."}
           </p>
         </div>
         <div className={s.botones}>
@@ -278,6 +288,54 @@ function AvisoCliente({ alerta }: { alerta: Alerta }) {
         <p>{texto}</p>
         {cita && <p className={s.avisoCita}>«{cita}»</p>}
       </div>
+    </Revela>
+  );
+}
+
+/** «¿Ha cambiado algo?»: el perfil no se queda congelado. Con una revisión abierta, muestra cómo va. */
+function PerfilVivo({ revision }: { revision: Revision }) {
+  if (!revision.open) {
+    return (
+      <Revela como="section" className={rv.vivo}>
+        <div className={rv.vivoTexto}>
+          <h2>¿Ha cambiado algo en tu vida?</h2>
+          <p>
+            Un cambio de sueldo, un gasto que se acerca, una herencia, otra idea para tu dinero… Cuéntanoslo y te haremos
+            solo las preguntas necesarias, sin repetir la entrevista.
+          </p>
+        </div>
+        <Link href="/onboarding/cambio" className={rv.vivoBoton}>
+          Actualizar mi perfil <span aria-hidden="true">→</span>
+        </Link>
+      </Revela>
+    );
+  }
+  const total = revision.questions.length;
+  const hechas = total - revision.remaining;
+  return (
+    <Revela como="section" className={rv.vivo}>
+      <div className={rv.vivoTexto}>
+        <h2>{revision.remaining ? "Tienes una revisión a medias" : "Tus cambios están enviados"}</h2>
+        <p>
+          {revision.remaining
+            ? `Llevas ${hechas} de ${total} preguntas. Te quedan unos segundos por cada una.`
+            : "Has contestado todo. Una persona del banco revisará los cambios y te avisaremos."}
+        </p>
+        <div className={rv.progreso} aria-hidden="true">
+          {revision.questions.map((q) => <i key={q.path} className={q.respondida ? rv.hecha : ""} />)}
+        </div>
+        <div className={rv.motivosChips}>
+          {revision.reasons.map((m) => (
+            <span key={m.code} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <IconoMotivo icono={m.icono} className={rv.iconoChip} />
+              {m.titulo}
+            </span>
+          ))}
+        </div>
+      </div>
+      <Link href={revision.remaining ? "/onboarding/entrevista?revision=1" : "/onboarding/cambio"} className={rv.vivoBoton}>
+        {revision.remaining ? "Seguir la revisión" : "Añadir otro cambio"} <span aria-hidden="true">→</span>
+      </Link>
     </Revela>
   );
 }

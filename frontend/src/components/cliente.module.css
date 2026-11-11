@@ -103,3 +103,5 @@
   .capsula { margin: 0 -8px; }
   .capsula span { font-size: 11px; padding: 7px 10px; }
 }
+.pasos a { color: inherit; text-decoration: none; }
+.pasos a:hover { text-decoration: underline; text-underline-offset: 3px; }
