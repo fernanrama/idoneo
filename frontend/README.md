@@ -43,7 +43,7 @@ backend y en consumidores de servicio autorizados, sin copiarlo al entorno del f
 - `src/components/Esfera3D.tsx`: la esfera de plasma en 3D (un shader de WebGL, sin librerías ni imágenes). Es el aura del entrevistador y, con otros colores, la esfera del perfil del cliente y la de la entidad (`Formas.tsx`). Si no hay WebGL se ve un respaldo en CSS. `Revela.tsx` hace aparecer los bloques al hacer scroll.
 - `src/tema/tema.css`: tokens y utilidades globales que importa `globals.css` (`.pila`, `.fila`, `.oculto-visual`…).
 - `src/lib/useEntrevista.ts`: lógica de la entrevista (voz de ElevenLabs o guion), envío de turnos, sondeo del perfil y paso de alertas al agente.
-- `src/lib/guion.ts`: guion de Carmen (**simulado**). Se sustituirá por `backend/eval/carmen.json` de Pablo.
+- `src/lib/guion.ts`: guion de Carmen (**simulado**).
 - `src/lib/api.ts` y `src/lib/tipos.ts`: cliente y tipos del contrato (`docs/contratos.md`).
 
 ## Demo guiada
@@ -57,7 +57,7 @@ Comprobado leyendo los tipos del SDK instalado (`@elevenlabs/react` 1.21.1), sin
 - Existen `sendUserMessage` (respuesta escrita dentro de la sesión de voz), `sendContextualUpdate` (las alertas del verificador se pasan al agente para que las explique) y `getId()` (id de conversación, útil para recuperar el audio después).
 
 Pendiente con la cuenta Creator:
-- [ ] Crear el agente en español con Claude como modelo y el prompt de Hammad.
+- [ ] Crear el agente en español con Claude como modelo y el prompt del entrevistador.
 - [ ] Probar `GET /api/voice/signed-url` del backend con la clave real.
 - [ ] Probar en un móvil real (HTTPS).
 - [ ] Decidir el audio de las evidencias: el que guarda ElevenLabs para cada conversación o una grabación propia en el navegador.
