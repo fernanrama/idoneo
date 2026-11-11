@@ -138,7 +138,7 @@ function Operaciones({ acceso }: { acceso: { admin: boolean } }) {
           </h1>
           <p>
             Cada versión del agente se mide antes de publicarse con clientes simulados y unos umbrales mínimos. En producción,
-            cada llamada al modelo queda trazada con su latencia, sus tokens y su coste estimado, sin guardar lo que dice el
+            cada llamada a Claude queda trazada con su latencia, sus tokens y su coste estimado, sin guardar lo que dice el
             cliente.
           </p>
           <div className={s.cifras}>
@@ -187,7 +187,7 @@ function Operaciones({ acceso }: { acceso: { admin: boolean } }) {
                   </>
                 ) : (
                   <p className={s.meta}>
-                    Necesita la API del modelo de IA. Desde <code>backend/</code>: <code>{COMANDO[nombre]}</code>
+                    Necesita la API de Claude. Desde <code>backend/</code>: <code>{COMANDO[nombre]}</code>
                   </p>
                 )}
               </article>

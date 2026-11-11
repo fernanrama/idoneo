@@ -18,8 +18,8 @@ export const nombrePerfil = (p: string | null | undefined) => (p ? (PERFILES[p] 
 const tieneValor = (f: Fact) => f.value !== null && f.value !== undefined;
 
 /**
- * Lo que recibe la entidad mientras el cliente habla: cada dato entra con su fuente y su cita;
- * la alerta de lo declarado frente a lo demostrado llega con una sacudida; al final, el perfil calculado.
+ * Lo que recibe la entidad mientras el cliente habla: cada dato entra con su fuente, su cita y su
+ * confianza; la alerta «declarado ≠ demostrado» llega con una sacudida; al final, el perfil calculado.
  * El dato más reciente brilla hasta que llega el siguiente.
  */
 export function PanelVivo({ perfil, enMarcha }: { perfil: Perfil | null; enMarcha: boolean }) {
@@ -39,7 +39,7 @@ export function PanelVivo({ perfil, enMarcha }: { perfil: Perfil | null; enMarch
   return (
     <section className={s.panel} aria-label="Lo que recibe la entidad">
       <div className={s.cabecera}>
-        <span className="mono">Así se construye el perfil</span>
+        <span className="mono">La entidad · en directo</span>
         {enMarcha && (
           <span className={s.sinc}>
             <span aria-hidden="true" />
@@ -76,7 +76,7 @@ export function PanelVivo({ perfil, enMarcha }: { perfil: Perfil | null; enMarch
               <div key={a.id} className={s.alerta} role="alert">
                 {Icono.aviso}
                 <div>
-                  <strong>{a.flag === "declared_vs_demonstrated" ? "Lo que dice frente a lo que demuestra" : "Revisar con el cliente"}</strong>
+                  <strong>{a.flag === "declared_vs_demonstrated" ? "Declarado ≠ demostrado" : "Revisar con el cliente"}</strong>
                   <p>{a.message}</p>
                   {a.evidence[0]?.quote && <p className={s.cita}>«{a.evidence[0].quote}»</p>}
                 </div>
@@ -85,10 +85,10 @@ export function PanelVivo({ perfil, enMarcha }: { perfil: Perfil | null; enMarch
 
           {su?.complete && (
             <div className={s.resumen}>
-              <div style={{ flex: "1 1 320px" }}>
-                <span className="mono">Los números los calcula código, no la IA</span>
+              <div style={{ flex: "1 1 200px" }}>
+                <span className="mono">Perfil calculado con reglas fijas</span>
                 <strong>
-                  {nombrePerfil(su.risk_profile)} · riesgo máximo {su.max_sri ?? "—"} de 7
+                  {nombrePerfil(su.risk_profile)} · SRI ≤ {su.max_sri ?? "—"}
                 </strong>
               </div>
               <div className={s.sri} role="img" aria-label={`Riesgo máximo ${su.max_sri ?? "sin definir"} de 7`}>
@@ -121,6 +121,7 @@ export function PanelVivo({ perfil, enMarcha }: { perfil: Perfil | null; enMarch
 
 function TarjetaDato({ ruta, f, nuevo, alerta }: { ruta: string; f: Fact; nuevo: boolean; alerta: boolean }) {
   const cita = f.evidence[0]?.quote;
+  const conf = f.source === "calculated" ? null : f.confidence;
   return (
     <div className={`${s.dato} ${nuevo ? s.nuevo : ""} ${alerta ? s.conAlerta : ""}`}>
       <div className={s.datoCab}>
@@ -134,6 +135,14 @@ function TarjetaDato({ ruta, f, nuevo, alerta }: { ruta: string; f: Fact; nuevo:
       ) : f.source === "calculated" ? (
         <p className={s.cita}>Cálculo a partir de: {f.inputs.map((i) => ETIQUETAS[i] ?? i).join(", ")}</p>
       ) : null}
+      {(f.source === "calculated" || conf != null) && (
+        <div className={s.conf}>
+          <div className={s.barra}>
+            <span style={{ width: `${conf == null ? 100 : Math.round(conf * 100)}%` }} />
+          </div>
+          <span className="mono">{conf == null ? "Regla" : `${Math.round(conf * 100)} %`}</span>
+        </div>
+      )}
     </div>
   );
 }

@@ -567,7 +567,7 @@ function Mcp({ restricciones: r }: { restricciones: Restricciones | null }) {
           </span>
         </div>
         <p className="pequena" style={{ margin: 0, color: "#4b4b6b" }}>
-          Lo que el agente pasa tal cual al catálogo de la entidad, y los
+          Lo que el agente pasa tal cual al catálogo de MyInvestor, y los
           filtros que aplica después sobre la ficha.
         </p>
         <pre className={s.codigo}>
@@ -605,8 +605,8 @@ function Mcp({ restricciones: r }: { restricciones: Restricciones | null }) {
             ` No busco ${(r.blocked_searches ?? []).map((b) => BUSQUEDA_NOMBRE[b] ?? b).join(", ")}.`}
         </div>
         <p className="pequena" style={{ margin: 0, color: "#4b4b6b" }}>
-          En la demo esto lo hace un agente de IA, con nuestro MCP y el del
-          catálogo de la entidad como conectores.
+          En la demo esto se hace en Claude, con nuestro MCP y el de MyInvestor
+          como conectores.
         </p>
       </div>
     </div>

@@ -87,8 +87,8 @@ tras 15 minutos sin uso y tarda cerca de un minuto en despertar; el plan Starter
 
 | Abre | Debe pasar |
 |---|---|
-| `https://<proyecto>.vercel.app` | Portada con el lema y los botones «Mira cómo funciona» y «Pruébalo» |
-| `/escenario` → **Empezar la demo** | La entrevista de Carmen y su perfil en directo (no gasta créditos) |
+| `https://<proyecto>.vercel.app` | Portada con el aura |
+| `/escenario` → **Ver la demo guiada** | La entrevista de Carmen y su perfil en directo (no gasta créditos) |
 | `/entidad/carmen-68` | El perfil de Carmen, con «Validar perfil» deshabilitado |
 | `/onboarding/entrevista` → **Escribir** | Una entrevista real por texto con Claude |
 | `/onboarding/entrevista` → **Hablar** | La entrevista por voz con ElevenLabs |

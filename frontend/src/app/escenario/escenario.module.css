@@ -1,73 +1,27 @@
-/* Demo guiada. Fuera del móvil manda idóneo (noche, Sora); dentro del móvil, los colores de la entidad. */
-.raiz {
-  min-height: 100vh;
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  color: #f7fbfa;
-  background: radial-gradient(900px 520px at 12% 0%, rgba(43, 179, 192, 0.16), transparent 70%), #0c1a1f;
-  font-family: var(--font-marca), system-ui, sans-serif;
+.raiz { display: flex; flex-wrap: wrap; min-height: 100vh; background: #f6f5fb; }
+.raiz .cliente {
+  flex: 1 1 420px;
+  min-width: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
 }
-.barra { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; padding: 16px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-.barraTitulo { font-family: var(--font-marca-mono), ui-monospace, monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #9fb0b5; }
-.apariencia { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; padding: 4px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(255, 255, 255, 0.04); font-size: 13px; }
-.apariencia span { padding: 0 10px 0 12px; color: #9fb0b5; }
-.apariencia button { min-height: 34px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: #f7fbfa; font-weight: 600; font-size: 13px; }
-.apariencia button[aria-pressed="true"] { background: linear-gradient(90deg, #7ce7c4, #2bb3c0); color: #0c1a1f; }
-.apariencia button:focus-visible { outline: 3px solid #7ce7c4; outline-offset: 2px; }
-
-.cuerpo { flex: 1; display: grid; grid-template-columns: minmax(360px, 430px) minmax(0, 1fr); gap: 36px; padding: 20px 28px 24px; align-items: start; }
-.colCliente { position: sticky; top: 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-.colEntidad { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
-.rotulo { margin: 0; font-size: 14px; color: #9fb0b5; text-align: center; }
-.colEntidad .rotulo { text-align: left; }
-.rotulo strong { display: block; font-size: 16px; font-weight: 600; color: #f7fbfa; }
-.entidad { border-radius: 24px; overflow: hidden; display: flex; flex-direction: column; min-height: min(800px, 100dvh - 160px); }
+.entidad { flex: 1.35 1 560px; min-width: 0; display: flex; flex-direction: column; }
 .entidad > section { flex: 1; }
-.pasoAsesor { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; padding: 16px 22px; border: 0; border-radius: 18px; background: linear-gradient(90deg, #7ce7c4, #2bb3c0); color: #0c1a1f; font-family: inherit; font-size: 14px; text-align: left; box-shadow: 0 12px 40px rgba(43, 179, 192, 0.35); animation: v-entra 0.6s both; }
-.pasoAsesor strong { display: block; font-size: 18px; font-weight: 600; }
-.pasoAsesor b { font-size: 24px; }
-.pasoAsesor:focus-visible { outline: 3px solid #f7fbfa; outline-offset: 3px; }
 
-/* El módulo de la entrevista, dentro del móvil */
-.raiz .cliente { flex: 1; min-height: 0; height: 100%; overflow-x: hidden; overflow-y: auto; }
-/* La entrevista está pensada para pantalla completa: dentro del marco se reduce para que quepa sin desplazarse. */
-@media (min-width: 1001px) { .raiz .cliente { zoom: 0.66; } }
-/* Entidad A: azul marino y tipografía geométrica. Entidad B: violeta y magenta, tipografía redonda. */
-.raiz .temaA {
-  --n-fondo: #060b1a;
-  --n-azul: #8fb4ff;
-  --n-violeta: #7fd0ff;
-  --n-rosa: #a9c4ff;
-  --n-degradado: linear-gradient(90deg, #8fb4ff, #7fd0ff);
-  --n-boton: linear-gradient(180deg, #e2ecff, #8fb4ff);
-  font-family: var(--font-sans), system-ui, sans-serif;
-}
-.raiz .temaB {
-  --n-fondo: #0f0818;
-  --n-azul: #d7a6ff;
-  --n-violeta: #c49bff;
-  --n-rosa: #f08ad0;
-  --n-degradado: linear-gradient(90deg, #f08ad0, #c49bff);
-  --n-boton: linear-gradient(180deg, #f8e1ff, #d7a6ff);
-  font-family: var(--font-asesor), system-ui, sans-serif;
+@media (max-width: 1000px) {
+  .raiz .cliente { position: relative; height: auto; min-height: 100dvh; }
 }
 
 /* Móvil: pestañas para pasar de una mitad a otra */
 .conmutador { display: none; }
 @media (max-width: 1000px) {
-  .barra { padding: 12px 16px; }
-  .barraTitulo { display: none; }
-  .apariencia span { display: none; }
-  .cuerpo { display: block; padding: 0; }
-  .colCliente { position: static; }
-  .rotulo { display: none; }
-  .entidad { border-radius: 0; min-height: 100dvh; }
-  .pasoAsesor { border-radius: 0; }
-  .conmutador { position: sticky; top: 0; z-index: 20; display: flex; justify-content: center; gap: 4px; padding: 8px 12px; background: rgba(12, 26, 31, 0.92); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
-  .conmutador button { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: #c9d6d8; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; flex: 0 1 auto; }
-  .conmutador button[aria-selected="true"] { background: #f7fbfa; color: #0c1a1f; }
-  .conmutador b { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: #2bb3c0; color: #0c1a1f; font-size: 11px; animation: v-sello 0.4s both; }
-  .verCliente .colEntidad { display: none; }
-  .verEntidad .colCliente { display: none; }
+  .conmutador { position: sticky; top: 0; z-index: 20; flex: 1 1 100%; display: flex; justify-content: center; gap: 4px; padding: 8px 12px; background: rgba(9, 11, 26, 0.9); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+  .conmutador button { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: #c9d1ea; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; flex: 0 1 auto; }
+  .conmutador button[aria-selected="true"] { background: #ffffff; color: #0e1020; }
+  .conmutador b { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: #6b4ef0; color: #ffffff; font-size: 11px; animation: v-sello 0.4s both; }
+  .verCliente .entidad { display: none; }
+  .verEntidad .cliente { display: none; }
 }

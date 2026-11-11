@@ -18,12 +18,6 @@ const AGENT_ID = process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID;
 const SONDEO_MS = 1500;
 const DESTELLO_MS = 1600;
 
-/** Texto de un fallo al empezar. El cupo diario agotado (429) no es una avería: se enseña sin el código delante. */
-function avisoDeInicio(e: unknown): string {
-  const m = e instanceof Error ? e.message : String(e);
-  return m.startsWith("429 ") ? m.slice(4) : m;
-}
-
 /** Cuántos datos MiFID tienen ya valor: cuando sube, el aura destella «Anotado». */
 function datosConValor(p: Perfil | null): number {
   if (!p) return 0;
@@ -167,7 +161,7 @@ export function useEntrevista() {
       await conversacion.startSession(await opcionesVoz(s.session_id, AGENT_ID));
       setEstado("activa");
     } catch (e) {
-      setError(avisoDeInicio(e));
+      setError(e instanceof Error ? e.message : String(e));
       setEstado("error");
     }
   }, [conversacion, nuevaSesion]);
@@ -218,7 +212,7 @@ export function useEntrevista() {
       setEstado("activa");
       await turnoTexto(null);
     } catch (e) {
-      setError(avisoDeInicio(e));
+      setError(e instanceof Error ? e.message : String(e));
       setEstado("error");
     }
   }, [nuevaSesion, turnoTexto]);
