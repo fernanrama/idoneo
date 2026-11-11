@@ -171,12 +171,18 @@ def en_curso(client_id: str) -> RevisionEnCurso | None:
     return _construir(store.perfil(client_id), motivos, abierta["created_at"], abierta["version"])
 
 
+def _momento(f) -> datetime:
+    """Última vez que el cliente dio el dato: al escribirlo o al confirmarlo. Una confirmación de mismo
+    valor (#45) conserva `updated_at` y anota `confirmed_at`."""
+    return max(f.updated_at, f.confirmed_at or f.updated_at)
+
+
 def _construir(p: Perfil, motivos: list[Motivo], abierta_en: datetime, desde: int) -> RevisionEnCurso:
     a = alcance.planificar(p, [Peticion(motivo=m) for m in motivos])
     preguntas = []
     for q in a.preguntas:
         f = p.mifid.get(q.path)
-        hecha = f is not None and f.updated_at >= abierta_en and f.evidence != []
+        hecha = f is not None and _momento(f) >= abierta_en and f.evidence != []
         preguntas.append(Pregunta(path=q.path, tipo=q.tipo, valor_vigente=q.valor_vigente, respondida=hecha))
     return RevisionEnCurso(motivos=motivos, abierta_en=abierta_en, desde_version=desde, preguntas=preguntas,
                            aplazadas=a.aplazadas, reevaluacion_completa=a.reevaluacion_completa, razones=a.razones)
@@ -218,10 +224,10 @@ def comparar(client_id: str) -> Comparacion | None:
             continue
         fa, fn = antes.mifid.get(ruta), ultima.mifid.get(ruta)
         va, vn = (fa.value if fa else None), (fn.value if fn else None)
-        confirmado = fn is not None and fa is not None and va == vn and fn.updated_at > fa.updated_at
+        confirmado = fn is not None and fa is not None and va == vn and _momento(fn) > _momento(fa)
         if va == vn and not confirmado:
             continue
-        cita = fn.evidence[0].quote if fn and fn.evidence else None
+        cita = fn.evidence[-1].quote if fn and fn.evidence else None  # la más reciente (la evidencia se acumula)
         cambios.append(Cambio(path=ruta, antes=va, ahora=vn, fuente=fn.source.value if fn else None, cita=cita))
     efectos = []
     for e in alcance.es_material(antes, ultima):
