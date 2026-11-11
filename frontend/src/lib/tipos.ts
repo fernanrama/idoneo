@@ -98,7 +98,22 @@ export type Revision =
       deferred: string[];
       full_reassessment: boolean;
       full_reassessment_reasons: string[];
+      /** Se puede finalizar: no quedan preguntas del alcance ni datos obligatorios (las aplazadas no bloquean). */
+      can_finish: boolean;
+      /** Lo que impide finalizar (rutas de datos). */
+      blocking: string[];
     };
+
+/** Respuesta de `POST /review/close`. Finalizar NO valida: si cambió algo, el perfil espera a la entidad. */
+export interface CierreRevision {
+  closed: true;
+  already_closed: boolean;
+  result?: "sin_cambios" | "pendiente_de_validacion";
+  status: EstadoPerfil;
+  pending_validation: boolean;
+  version: number;
+  full_reassessment?: boolean;
+}
 
 /** Último perfil validado frente al último guardado. */
 export interface Comparacion {

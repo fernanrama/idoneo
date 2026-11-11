@@ -1,5 +1,5 @@
 import { CLIENTE_DEMO, registrarSesion, tokenCliente, tokenSesion } from "./credenciales";
-import type { AltaSesion, BootstrapVoz, Comparacion, ContextoVoz, ExpedienteAsesor, MemoriaPersonal, ModoAsesor, MotivoRevision, Perfil, Restricciones, Revision, Sesion, Turno, VersionResumen } from "./tipos";
+import type { AltaSesion, BootstrapVoz, CierreRevision, Comparacion, ContextoVoz, ExpedienteAsesor, MemoriaPersonal, ModoAsesor, MotivoRevision, Perfil, Restricciones, Revision, Sesion, Turno, VersionResumen } from "./tipos";
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -121,6 +121,9 @@ export const api = {
     pedir<Revision>(`/api/clients/${id(client_id)}/review`, {
       method: "POST", headers: cliente(client_id), body: JSON.stringify({ reasons }),
     }),
+  /** El cliente finaliza su revisión. 409 si aún faltan respuestas. No valida: eso es cosa de la entidad. */
+  cerrarRevision: (client_id: string) =>
+    pedir<CierreRevision>(`/api/clients/${id(client_id)}/review/close`, { method: "POST", headers: cliente(client_id) }),
   cambios: (client_id: string) => client_id === CLIENTE_DEMO && !tokenCliente(client_id)
     ? Promise.resolve<Comparacion | null>(null)
     : pedir<Comparacion | null>(`/api/clients/${id(client_id)}/changes`, { headers: cliente(client_id) }),
