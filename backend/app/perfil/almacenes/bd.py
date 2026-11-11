@@ -166,6 +166,17 @@ class AlmacenBD:
             return [{**f._asdict(), "created_at": _utc(f.created_at), "status": EstadoPerfil(f.status)}
                     for f in c.execute(consulta)]
 
+    def clientes(self, limite: int) -> list[dict[str, Any]]:
+        t = profile_versions.c
+        ultima = (select(t.client_id, func.max(t.version).label("version"))
+                  .group_by(t.client_id).subquery())
+        consulta = (select(t.client_id, t.version, t.status, t.created_at, t.reason)
+                    .join(ultima, (t.client_id == ultima.c.client_id) & (t.version == ultima.c.version))
+                    .order_by(t.created_at.desc()).limit(limite))
+        with self._conexion() as c:
+            return [{"client_id": f.client_id, "version": f.version, "status": EstadoPerfil(f.status),
+                     "updated_at": _utc(f.created_at), "reason": f.reason} for f in c.execute(consulta)]
+
     # ---------- capa personal ----------
 
     @contextmanager

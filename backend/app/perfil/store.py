@@ -837,6 +837,33 @@ def cargar_fixture(nombre: str) -> Perfil:
     return perfil(cid)
 
 
+def copiar_fixture(nombre: str, client_id: str) -> Perfil:
+    """Alta exclusiva de un cliente NUEVO con los datos de un fixture (la demo guiada: cada visitante
+    recibe su propia copia ficticia de Carmen y sigue el mismo recorrido que cualquier cliente).
+    No llama a ningún modelo. Falla con Conflicto si el cliente ya existe."""
+    plantilla, parches, personal_fixture = _leer_fixture(nombre)
+    cid = validacion.comprobar_client_id(client_id)
+    p = Perfil(client_id=cid, version=1, created_at=ahora(), author=AUTOR_FIXTURE)
+    p.mifid = {c.path: _fact(c, AUTOR_FIXTURE, p.created_at) for c in parches if c.value is not None}
+    p.alerts = [a.model_copy(update={"created_by": a.created_by or AUTOR_FIXTURE}) for a in plantilla.alerts]
+    p.reason = f"DATOS SIMULADOS: demo guiada, copia de {nombre}"
+    calculos.recalcular(p)
+    p.status = _estado_tras_cambio(p, revisar_si_activo=False)
+    with _candado(cid):
+        if not _a().crear(p):
+            raise Conflicto("El cliente ya existe")
+        _publicar(None, p)
+        if personal_fixture:
+            consentimiento, datos = separar(personal_fixture)
+            guardar_personal(cid, datos, consentimiento, AUTOR_FIXTURE)
+    return perfil(cid)
+
+
+def clientes(limite: int = 50) -> list[dict[str, Any]]:
+    """Bandeja de la entidad: los clientes más recientes con su última versión (sin datos del perfil)."""
+    return _a().clientes(max(1, min(limite, 200)))
+
+
 def asegurar_fixture(nombre: str) -> Perfil:
     """Carga el fixture solo si el cliente no existe (arranque del backend sin pisar datos guardados)."""
     plantilla, _, _ = _leer_fixture(nombre)

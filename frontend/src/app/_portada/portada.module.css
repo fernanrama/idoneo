@@ -120,3 +120,5 @@
   .acciones a { flex: 1 1 100%; justify-content: center; }
   .panelNo { padding: 24px; }
 }
+
+.demo { margin-top: 14px; min-height: 48px; }

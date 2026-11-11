@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
+import { BarraEntidad, useAccesoEntidad } from "@/components/BarraEntidad";
 import { nombrePerfil } from "@/components/PanelVivo";
 import { Icono } from "@/components/visual";
 import { api } from "@/lib/api";
@@ -48,9 +50,17 @@ export default function VistaEntidad({
   // Modo asesor de demo: lo confirma el servidor; mientras tanto no se carga ninguna fuente.
   const modo = useModoAsesor(cid);
   const asesor = modo === null ? null : modo.permitido;
+  // Vista solo para la entidad: sin sesión de la entidad (ni el modo asesor de demo en local), a iniciar sesión.
+  // El cliente ve su perfil en «Mi perfil», nunca esta página.
+  const { acceso } = useAccesoEntidad(false);
+  const fuera = acceso === "fuera" || (modo !== null && !modo.admin && !modo.permitido);
+  const router = useRouter();
+  useEffect(() => {
+    if (fuera) router.replace(`/admin?cliente=${encodeURIComponent(cid)}`);
+  }, [fuera, cid, router]);
   const { perfil, restricciones, versiones, revision, cambios, error, recargar } = usePerfil(cid, SONDEO_MS, {
     asesor: asesor === true,
-    esperar: asesor === null,
+    esperar: asesor === null || acceso === "comprobando" || fuera,
   });
   const [accion, setAccion] = useState<{ enCurso: boolean; error: string | null }>({ enCurso: false, error: null });
   const ejecutar = async (fn: () => Promise<unknown>) => {
@@ -72,24 +82,11 @@ export default function VistaEntidad({
   // Qué estados se validan (incluido review_due tras una microentrevista): ver esValidable.
   const validable = esValidable(perfil);
 
+  // Hasta saber si hay acceso no se pinta nada: el cliente nunca ve esta pantalla.
+  if (modo === null || acceso === "comprobando" || fuera) return <div className={`tema-asesor ${s.raiz}`} />;
   return (
     <div className={`tema-asesor ${s.raiz}`}>
-      <header className={s.barra}>
-        <div className={s.barraCaja}>
-          <Link href="/" className={s.marca}>
-            <span className={s.logo} aria-hidden="true" />
-            Idóneo <span>para entidades</span>
-          </Link>
-          <nav className={s.nav} aria-label="Navegación de la entidad">
-            <Link href="/">Inicio</Link>
-            <Link href="/escenario">Escenario en vivo</Link>
-            <Link href="/operaciones">Calidad y costes</Link>
-            <span className={s.sesion}>
-              <i aria-hidden="true" /> Asesor · demo
-            </span>
-          </nav>
-        </div>
-      </header>
+      <BarraEntidad sesion={modo?.admin === true} />
 
       <section className={s.hero}>
         <div className={s.puntos} aria-hidden="true" />
@@ -124,8 +121,8 @@ export default function VistaEntidad({
             )}
             {asesor === true && (modo?.admin ? (
               <p role="note">
-                Sesión de administración: revisas y validas como <code>asesor-web</code>.{" "}
-                <Link href="/admin">Otro cliente o cerrar sesión</Link>
+                Sesión de la entidad: revisas y validas como <code>asesor-web</code>.{" "}
+                <Link href="/admin">Volver a la bandeja</Link>
               </p>
             ) : (
               <p role="note">Modo asesor de demostración: cliente ficticio y validación autorizada por el servidor local.</p>
@@ -141,7 +138,9 @@ export default function VistaEntidad({
               <p role="note">Ejemplo ficticio fijo de solo lectura; no representa un expediente persistido.</p>
             )}
             {asesor === false && !modo?.activo && validable && (
-              <p role="note">La validación está pendiente de habilitar un permiso independiente de asesor.</p>
+              <p role="note">
+                Para validarlo, <Link href={`/admin?cliente=${encodeURIComponent(cid)}`}>entra como entidad</Link>.
+              </p>
             )}
             {validable && paraAsesor > 0 && (
               <p role="note">
@@ -155,7 +154,7 @@ export default function VistaEntidad({
                   type="button"
                   className={s.boton}
                   disabled={asesor !== true || accion.enCurso}
-                  title={asesor === true ? undefined : "Requiere un permiso independiente de asesor"}
+                  title={asesor === true ? undefined : "Entra como entidad para validar"}
                   onClick={asesor === true && perfil ? () => ejecutar(() => api.validarComoAsesor(cid, perfil.version)) : undefined}
                 >
                   {accion.enCurso ? "Validando…" : restricciones?.pending_review ? "Validar los cambios" : "Validar perfil"}{" "}

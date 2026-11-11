@@ -6,7 +6,7 @@ import { api } from "./api";
 import { perfilParcial, vocesEspanol } from "./demo";
 import { GUION_CARMEN } from "./guion";
 import { useOnboarding } from "./onboarding";
-import { tokenCliente } from "./credenciales";
+import { marcarDemoFija, tokenCliente } from "./credenciales";
 import { opcionesVoz } from "./iniciarVoz";
 import type { Perfil, Turno } from "./tipos";
 
@@ -31,8 +31,9 @@ function datosConValor(p: Perfil | null): number {
  *   los marcamos en el cliente: el turno del cliente va desde que el agente deja de hablar
  *   (cambio a "listening") hasta que llega su transcripción. Es una APROXIMACIÓN, por verificar.
  * - modo "texto": el entrevistador de Claude del backend (POST /chat). No gasta minutos de voz.
- * - modo "guion": demo guiada. Repite la entrevista simulada de Carmen con las voces del navegador
- *   (gratis) y reconstruye su perfil de ejemplo dato a dato (ver lib/demo.ts). No escribe en el backend.
+ * - modo "guion": demo guiada. Repite la entrevista simulada de Carmen con sus audios grabados (o las voces
+ *   del navegador) y reconstruye su perfil dato a dato (ver lib/demo.ts). El backend solo crea, sin IA, una
+ *   copia propia de Carmen para esta pestaña, que es la que se ve al final en «Mi perfil».
  * En todos, el perfil se consulta cada 1,5 s. Las alertas nuevas del verificador se pasan al agente de voz
  * como contexto para que las explique.
  */
@@ -221,8 +222,22 @@ export function useEntrevista() {
     setEstado("conectando");
     setError(null);
     try {
-      const fuente = await api.perfilDemo();
-      setSesion(null); // la demo no crea sesión: el perfil del cliente mostrará el ejemplo
+      // Cada demo es una copia propia y ficticia de Carmen, con su credencial (sin IA): al acabar se llega
+      // al mismo perfil que tras una entrevista de verdad (memoria, «ha cambiado algo», validación).
+      let fuente: Perfil;
+      try {
+        const s = await api.sesionDemo();
+        setSesion(s);
+        sesionRef.current = s;
+        fuente = await api.perfil(s.client_id);
+      } catch (err) {
+        // Sin copia (p. ej., tope diario o servidor sin CLIENT_ACCESS_SECRET): se repite la Carmen fija y
+        // «Mi perfil» la enseña de solo lectura, para que la demo siempre llegue a un perfil.
+        console.warn("La demo no ha podido crear su copia de Carmen:", err);
+        setSesion(null);
+        fuente = await api.perfilDemo();
+        marcarDemoFija(true);
+      }
       setFuenteDemo(fuente);
       setVelocidad(velocidadInicial);
       setPaso(0);
@@ -343,7 +358,8 @@ export function useEntrevista() {
 
   // Sondeo del perfil mientras hay entrevista
   useEffect(() => {
-    if (!sesion || (estado !== "activa" && estado !== "terminada")) return;
+    // En la demo el perfil se reconstruye en el navegador (lib/demo.ts): no hace falta preguntar.
+    if (!sesion || modo === "guion" || (estado !== "activa" && estado !== "terminada")) return;
     let vivo = true;
     const tick = async () => {
       try {

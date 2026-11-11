@@ -113,6 +113,16 @@ class AlmacenMemoria:
             return [{"version": p.version, "created_at": p.created_at, "reason": p.reason,
                      "author": p.author, "status": p.status} for p in self._lista(client_id)]
 
+    def clientes(self, limite: int) -> list[dict[str, Any]]:
+        with self._candado:
+            ids = set(self._versiones)
+            if self._persistir() and self.data_dir.is_dir():
+                ids |= {r.stem.removeprefix("perfil_") for r in self.data_dir.glob("perfil_*.json")}
+            ultimas = [vs[-1] for cid in ids if (vs := self._lista(cid))]
+            ultimas.sort(key=lambda p: p.created_at, reverse=True)
+            return [{"client_id": p.client_id, "version": p.version, "status": p.status,
+                     "updated_at": p.created_at, "reason": p.reason} for p in ultimas[:limite]]
+
     def crear(self, perfil: Perfil) -> bool:
         with self._candado:
             if self._lista(perfil.client_id):

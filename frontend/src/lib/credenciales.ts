@@ -48,7 +48,28 @@ export function registrarSesion(sesion: AltaSesion): Sesion {
   return metadatosSesion(sesion);
 }
 
+const CLAVE_DEMO_FIJA = "idoneo.demoFija";
+
+/** La demo no pudo crear su copia de Carmen (p. ej., tope diario): «Mi perfil» enseña la Carmen fija, de solo lectura. */
+export function marcarDemoFija(activa: boolean): void {
+  try {
+    if (activa) window.sessionStorage.setItem(CLAVE_DEMO_FIJA, "1");
+    else window.sessionStorage.removeItem(CLAVE_DEMO_FIJA);
+  } catch {
+    /* sin almacenamiento: no pasa nada */
+  }
+}
+
+export function esDemoFija(): boolean {
+  try {
+    return window.sessionStorage.getItem(CLAVE_DEMO_FIJA) === "1";
+  } catch {
+    return false;
+  }
+}
+
 export function persistirSesion(sesion: AltaSesion | null): Sesion | null {
+  if (sesion) marcarDemoFija(false);
   if (!sesion) {
     window.localStorage.removeItem(CLAVE_SESION);
     return null;
