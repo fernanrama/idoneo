@@ -111,6 +111,8 @@ class MensajeChat(BaseModel):
 class Validacion(BaseModel):
     advisor_id: str
     changes: list[Parche] = []
+    # Opcional: la versión que ha revisado la entidad. Si el perfil ha cambiado desde entonces, 409.
+    expected_version: int | None = Field(default=None, ge=1)
 
 
 class ActualizacionMemoria(BaseModel):
@@ -375,7 +377,7 @@ def ver_versiones(client_id: str):
 
 @app.post("/api/clients/{client_id}/validate", response_model=Perfil, dependencies=[Depends(acceso.exigir_propietario), Depends(requiere_admin)])
 def validar(client_id: str, body: Validacion):
-    return _llamar(store.validar, client_id, body.advisor_id, body.changes)
+    return _llamar(store.validar, client_id, body.advisor_id, body.changes, version_esperada=body.expected_version)
 
 
 @app.get("/api/clients/{client_id}/constraints", dependencies=[Depends(acceso.exigir_cliente)], response_model=Restricciones)

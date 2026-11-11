@@ -37,7 +37,8 @@ from tests.soporte_bd import POSTGRES_TEST, postgres_recien_migrado, postgres_va
 ALMACENES = ["memoria", "bd-sqlite"] + (["bd-postgres"] if POSTGRES_TEST else [])
 MODULOS_CONTRATO = {"test_api", "test_mcp", "test_store_contrato", "test_procesamiento_turnos", "test_asesor_demo",
                     "test_pending_review", "test_confirmaciones",
-                    "test_alcance_revision", "test_revision_confirmaciones"}
+                    "test_alcance_revision", "test_revision_confirmaciones",
+                    "test_ciclo_revision"}
 
 
 @pytest.fixture(autouse=True)

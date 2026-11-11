@@ -71,7 +71,7 @@ identidad real. Sin credencial: 401; recurso de otro cliente: 404. Véase
 | `DELETE /api/sessions/{id}/memory` | Requiere If-Match; borra contenido e historial personal y conserva revisión técnica vacía creciente; no toca MiFID | 200 · 401 · 404 · 412 · 428 |
 | `GET /api/clients/{id}/profile[?version=n]` | Última versión en cualquier estado (o la `n`), con la capa personal vigente unida | 200 · 404 |
 | `GET /api/clients/{id}/versions` | `[{version, created_at, reason, author, status}]` | 200 · 404 |
-| `POST /api/clients/{id}/validate` `{advisor_id, changes[]}` | La entidad corrige (opcional) y valida → perfil `active` ([reglas](#estados-y-validación-de-la-entidad)) | 200 · 401 · 404 · 409 · 422 |
+| `POST /api/clients/{id}/validate` `{advisor_id, changes[], expected_version?}` | La entidad corrige (opcional) y valida → perfil `active` ([reglas](#estados-y-validación-de-la-entidad)) | 200 · 401 · 404 · 409 · 422 |
 | `GET /api/clients/{id}/constraints` | Restricciones del [perfil para consumidores](#versionado) | 200 · 404 |
 | `GET /api/clients/{id}/evidence/{path}` | `{path, value, source, evidence}` del dato en la última versión | 200 · 404 (cliente, ruta inexistente o dato sin valor) |
 | `GET /api/clients/{id}/context` | Resumen para otro agente, sobre el perfil para consumidores (plantilla; Pablo lo hará con Claude) | 200 · 404 |
@@ -130,7 +130,7 @@ Una escritura con varios parches es **todo o nada**. Excepción: lo que proponen
 - Concurrencia optimista: si otra escritura (de este u otro proceso) se adelanta, se relee y reintenta; tras 5 intentos, 409.
 - Las alertas no se duplican: se ignora una alerta con el mismo `flag` y `path` que otra abierta, o con un `id` ya existente. Una alerta solo puede apuntar a una ruta de `CAMPOS` (o a ninguna).
 - **Perfil para consumidores** (restricciones, contexto y MCP): el último `active`; si no hay ninguno, la última versión (`usable: false`). `POST /api/demo/reset` abre una época nueva: añade una versión con `reason: "demo_reset: …"` y desde ese momento no se sirven activos anteriores.
-- **`pending_review`** (decisión §4.6 de [diseno/06](diseno/06-actualizacion-continua.md#46-vigencia-mientras-hay-una-revisión-abierta-decidido-opción-b), opción B). Si se sirve un `active` y hay una versión posterior sin validar con datos distintos, se sigue sirviendo el `active`, pero se avisa de qué cambió: `{since_version, latest_version, latest_status, paths, opened_at}`. Las rutas son las MiFID cuyo valor, declarado o flags cambiaron, más las de alertas nuevas abiertas. Los calculados no cuentan, y una confirmación (solo evidencia o confianza) tampoco. Si no hay revisión abierta, vale `null`. Lo incluyen `GET /constraints`, `GET /context`, `get_investment_constraints`, `get_client_profile` (sin `version`), `get_client_context` y el panel del asesor de demo. El consumidor no debe apoyar recomendaciones en esas rutas (`store.revision_pendiente`).
+- **`pending_review`** (decisión §4.6 de [diseno/06](diseno/06-actualizacion-continua.md#46-vigencia-mientras-hay-una-revisión-abierta-decidido-opción-b), opción B). Si se sirve un `active` y hay una versión posterior sin validar con datos distintos, se sigue sirviendo el `active`, pero se avisa de qué cambió: `{since_version, latest_version, latest_status, paths, opened_at}`. Las rutas son las MiFID cuyo valor, declarado o flags cambiaron, más las de alertas nuevas abiertas. Los calculados no cuentan, y una confirmación (solo evidencia o confianza) tampoco. `material` (11/11, R6) lista los efectos de `alcance.es_material` (perfil de riesgo, conveniencia, filtros…); vacío si el cambio no altera las restricciones. Mientras hay `pending_review`, `rationale` añade un aviso: son las restricciones de la versión validada y pueden estar desactualizadas. Si no hay revisión abierta, vale `null`. Lo incluyen `GET /constraints`, `GET /context`, `get_investment_constraints`, `get_client_profile` (sin `version`), `get_client_context` y el panel del asesor de demo. El consumidor no debe apoyar recomendaciones en esas rutas (`store.revision_pendiente`).
 
 ### Estados y validación de la entidad
 
@@ -138,11 +138,12 @@ Una escritura con varios parches es **todo o nada**. Excepción: lo que proponen
 |---|---|---|
 | `draft` | `pending_validation` | Tras cualquier escritura, si `suitability.complete` y no hay alertas `needs_advisor` abiertas |
 | `pending_validation` | `draft` | Si deja de estar completo o aparece una alerta `needs_advisor` |
-| `draft` o `pending_validation` | `active` | `POST /validate`, si el perfil está completo |
+| `draft`, `pending_validation` o `review_due` | `active` | `POST /validate`, si el perfil está completo. Desde `review_due` (**D2**, 11/11): la entidad valida lo que cambió en la microentrevista sin otra entrevista completa |
 | `active` | `review_due` | Un agente cambia un dato (las correcciones del asesor no lo cambian de estado). Una **confirmación pura** no: la versión nueva sigue `active` (D3) |
 | `review_due` | `draft` | Al abrir una sesión nueva (`POST /api/sessions`) |
+| cualquiera | el mismo | **Abrir una revisión del cliente** («¿Ha cambiado algo?», `POST /api/clients/{id}/review`, R1): versión de trámite `review_requested:<motivos>` con los mismos datos y estado. Abandonarla no cambia nada (R5); una confirmación pura deja `active` (D3); un perfil en revisión no se reactiva |
 
-`POST /validate` responde **409** si el perfil está en `active` o `review_due` (desde `review_due` hay que reentrevistar), si falta algún dato obligatorio o si un cambio intenta escribir un dato calculado; **422** si `advisor_id` o algún cambio no son válidos. Al validar se cierran **todas** las alertas abiertas (regla del contrato v1) y cada una registra `resolved_by` y `resolved_at`; `review.next_review` queda a un año (todavía no vence solo). Añadir alertas a un perfil `active` no cambia su estado.
+`POST /validate` responde **409** si el perfil ya está `active`, si `expected_version` (opcional) no es la versión actual (el perfil cambió desde que la entidad lo revisó; no se escribe nada), si falta algún dato obligatorio o si un cambio intenta escribir un dato calculado; **422** si `advisor_id` o algún cambio no son válidos. Al validar se cierran **todas** las alertas abiertas (regla del contrato v1) y cada una registra `resolved_by` y `resolved_at`; `review.next_review` queda a un año (todavía no vence solo). Añadir alertas a un perfil `active` no cambia su estado.
 
 ### Capa personal
 

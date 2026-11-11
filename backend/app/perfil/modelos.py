@@ -186,6 +186,9 @@ class RevisionPendiente(BaseModel):
     latest_status: EstadoPerfil
     paths: list[str]              # rutas MiFID cuyo valor cambió o con alertas nuevas abiertas
     opened_at: datetime           # cuándo se creó `since_version`
+    # Qué resultados mueve el cambio pendiente (`alcance.es_material`: perfil de riesgo, conveniencia, filtros…).
+    # Vacío: el dato cambió pero no altera las restricciones (p. ej. los ingresos). Añadido el 11/11 (R6).
+    material: list[str] = Field(default_factory=list)
 
 
 class Restricciones(BaseModel):

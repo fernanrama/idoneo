@@ -45,6 +45,7 @@ def test_la_comparacion_muestra_la_confirmacion_con_su_cita_nueva(validada):
     assert c.perfil_antes == c.perfil_ahora and c.efectos == []  # confirmar no mueve el riesgo
 
 
-def test_la_revision_sigue_en_borrador_tras_una_confirmacion(validada):
+def test_una_confirmacion_en_la_revision_deja_el_perfil_active(validada):
+    """R1 + R2: abrir la revisión no cambia el estado y una confirmación pura tampoco (D3)."""
     revision.abrir(C, ["income_change"])
-    assert confirmar(GASTOS, "Los gastos siguen en novecientos").status != EstadoPerfil.active
+    assert confirmar(GASTOS, "Los gastos siguen en novecientos").status == EstadoPerfil.active

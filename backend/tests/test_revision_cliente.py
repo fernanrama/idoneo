@@ -46,13 +46,16 @@ def test_subida_de_sueldo_pregunta_solo_lo_necesario(validada):
 
     r = revision.abrir(C, ["income_change"])
     p = store.perfil(C)
-    assert p.version == validada.version + 1 and p.status == EstadoPerfil.draft
+    # R1 (11/11/2026): abrir la revisión deja una versión de trámite con los mismos datos y NO cambia el
+    # estado (antes pasaba a draft). Ajuste de Juan, pendiente de revisión de Alejandro.
+    assert p.version == validada.version + 1 and p.status == EstadoPerfil.active
     assert p.reason == "review_requested:income_change"
     assert {r: f.value for r, f in p.mifid.items()} == {r: f.value for r, f in validada.mifid.items()}
     assert r.desde_version == p.version and len(r.pendientes) == 3
-    # Los consumidores siguen con el perfil validado y sin aviso: aún no ha cambiado nada.
+    # Los consumidores siguen con el perfil validado y sin aviso: aún no ha cambiado nada. Reciben la versión
+    # de trámite, que tiene los mismos datos que la validada.
     c = store.restricciones_para_consumidor(C)
-    assert c.profile_version == validada.version and c.usable and c.pending_review is None
+    assert c.profile_version == p.version and c.usable and c.pending_review is None
     # El entrevistador solo pide lo de la revisión, en frases y sin rutas.
     assert chat.pendientes(p, r) == [INGRESOS, ESTABILIDAD, GASTOS]
     guion = chat.guion_revision(r)

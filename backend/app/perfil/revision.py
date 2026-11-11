@@ -228,7 +228,11 @@ def vista(r: RevisionEnCurso | None) -> dict[str, Any]:
 # ---------- antes y después, para la entidad ----------
 
 def _ultima_validada(client_id: str) -> int | None:
-    validadas = [v["version"] for v in store.versiones(client_id) if v["status"] == EstadoPerfil.active]
+    """La última versión que validó la entidad (`reason == "validated"`), no la última `active`: una
+    confirmación pura (#45, D3) o la apertura de una revisión dejan versiones `active` que nadie ha validado.
+    PARCHE DE COMPATIBILIDAD (Juan): pendiente de revisión de Alejandro."""
+    validadas = [v["version"] for v in store.versiones(client_id)
+                 if v["status"] == EstadoPerfil.active and v["reason"] == "validated"]
     return validadas[-1] if validadas else None
 
 
