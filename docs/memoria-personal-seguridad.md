@@ -1,10 +1,6 @@
 # Propuesta local de seguridad y persistencia de la memoria personal
 
-Corrección revisable del prototipo local sobre #21, preparada desde el commit original de Pablo
-`b1b182ed8aaa6710a7df59dcbc571508d38605d8` e integrada con main
-`8b698b795da2ee2be8ef28ee58590f0baf819453` (#22/#23). El commit de integración es `1149da4`.
-El usuario ha revisado el resultado y autorizado su publicación mediante push normal a
-`feat/personal-memory-elevenlabs-harness`, manteniendo #21 abierta y sin fusionarla a main.
+Diseño de seguridad y persistencia de la memoria personal del cliente en el prototipo.
 
 Se aceptan provisionalmente: credenciales de posesión para clientes ficticios, validación web
 bloqueada, recuperación y revocación individual pendientes, ADMIN_TOKEN exclusivo de servicios
@@ -147,7 +143,7 @@ MiFID, bloqueo del proxy y bootstrap sin claves. No toca los servidores de la de
 La integración local real conserva las páginas, estilos, `/escenario`, guion y componentes de main;
 resuelve los conflictos de README, página de perfil y hook de entrevista. El componente personal
 se monta desde el proveedor compartido; no necesita el antiguo ui.tsx eliminado por #23. API y vista
-de entidad combinan las adaptaciones de seguridad con main. Los scripts/prompts/harness de Pablo,
+de entidad combinan las adaptaciones de seguridad con main. Los scripts, prompts y harness originales,
 el webhook y la herramienta datos_pendientes se mantienen.
 
 JUnit actualizado: `/private/tmp/idoneo-pr21-integracion-final.xml`. #19: 35 correctos y 5 omitidos;

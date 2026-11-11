@@ -1,6 +1,6 @@
 # Modo asesor de demostración
 
-**Estado:** modo asesor IMPLEMENTADO en `main` (PR #25). Operador para clientes nuevos y credenciales MCP de demostración: rama `feat/mcp-pitch`, pendiente de revisión. Solo prototipo, DATOS SIMULADOS.
+**Estado:** implementado y apagado por defecto. Solo prototipo, DATOS SIMULADOS.
 
 Recupera el paso «Validar perfil» del recorrido de Carmen sin reabrir la autovalidación que cerró la PR #21. Está **apagado por defecto**. Encendido, permite que la vista de la entidad lea el expediente persistido de un cliente ficticio, lo valide con la validación atómica de siempre y lo reinicie para repetir el ensayo.
 

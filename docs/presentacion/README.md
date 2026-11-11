@@ -33,7 +33,7 @@ node build.js Idoneo_presentacion.pptx --final    # FINAL: notas limpias
 
 **Cierra PowerPoint antes de generar:** Windows bloquea el archivo abierto.
 
-En `build.js` se editan a mano `EQUIPO` (solo se dice en voz alta) y las cifras de las diapositivas 6, 7 y 9. Las de la 6 y la 9 salen de [`docs/evaluacion/README.md`](../../docs/evaluacion/README.md); las de la 7, con sus fuentes y lo que falta por sustituir, están en [`docs/pitch.md`](../../docs/pitch.md).
+En `build.js` se editan a mano `EQUIPO` (solo se dice en voz alta) y las cifras de las diapositivas 6, 7 y 9. Las de la 6 y la 9 salen de [`docs/evaluacion/README.md`](../../docs/evaluacion/README.md).
 
 ## Versión HTML animada (`entrega/Idoneo_presentacion.html`)
 
