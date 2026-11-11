@@ -11,6 +11,7 @@ Orden de lectura recomendado: primero la arquitectura, después el diseño y, al
 | [pruebas-de-audio.md](pruebas-de-audio.md) | Pruebas de audio: cómo cada dato suena con el fragmento de la llamada que lo justifica |
 | [modo-asesor-demo.md](modo-asesor-demo.md) | Modo asesor de demostración (validar en local con clientes ficticios), entrevista corta del pitch y MCP de demo |
 | [memoria-personal-seguridad.md](memoria-personal-seguridad.md) | Memoria personal por usuario: contrato, garantías de seguridad y límites |
+| [marca/README.md](marca/README.md) | Identidad de marca: logo, sello «Powered by idóneo», colores y tipografía |
 
 ## Diseño (8–9 nov 2026)
 
