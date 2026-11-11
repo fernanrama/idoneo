@@ -51,6 +51,13 @@ export function useEntrevista() {
   const [paso, setPaso] = useState(0);
   const [vozDemo, setVozDemo] = useState(true);
   const [velocidad, setVelocidad] = useState(1);
+  // Entrevista corta del pitch (solo con el modo asesor de demostración)
+  const [corta, setCortaEstado] = useState(false);
+  const cortaRef = useRef(false);
+  const setCorta = useCallback((v: boolean) => {
+    cortaRef.current = v;
+    setCortaEstado(v);
+  }, []);
   const audiosDemo = useRef<Record<string, { archivo: string; texto: string }>>({});
 
   const inicio = useRef(0);
@@ -114,7 +121,9 @@ export function useEntrevista() {
   const nuevaSesion = useCallback(
     async (canal: "voice" | "text" = "voice") => {
       const previo = sesionRef.current?.client_id;
-      const s = await api.crearSesion(previo && tokenCliente(previo) ? previo : undefined, canal);
+      const s = cortaRef.current
+        ? await api.entrevistaCorta(canal)
+        : await api.crearSesion(previo && tokenCliente(previo) ? previo : undefined, canal);
       setSesion(s);
       sesionRef.current = s;
       setTurnos([]);
@@ -150,20 +159,33 @@ export function useEntrevista() {
       const s = sesionRef.current;
       if (!s) return;
       setPensando(true);
+      setError(null);
       try {
         const r = await api.chat(s.session_id, texto);
         anadirLocal(r.agent_turn);
         if (r.finished) setEstado("terminada");
       } catch (e) {
         const m = e instanceof Error ? e.message : String(e);
-        setError(m.startsWith("503") ? "El modo texto no está disponible: el backend no tiene clave de Claude." : m);
-        setEstado("error");
+        if (m.startsWith("503")) {
+          setError("El modo texto no está disponible: el backend no tiene clave de Claude.");
+          setEstado("error");
+        } else {
+          // La entrevista sigue abierta: lo escrito ya está guardado y basta con pedir otra vez la pregunta.
+          setError(m.startsWith("502")
+            ? "El asistente no ha podido responder. Pulsa «Reintentar»."
+            : `No se ha podido enviar (${m.split(" ")[0]}). Pulsa «Reintentar».`);
+        }
       } finally {
         setPensando(false);
       }
     },
     [anadirLocal],
   );
+
+  /** Vuelve a pedir la intervención del asistente tras un fallo, sin perder la sesión ni lo escrito. */
+  const reintentar = useCallback(() => {
+    void turnoTexto(null);
+  }, [turnoTexto]);
 
   const iniciarTexto = useCallback(async () => {
     setModo("texto");
@@ -192,7 +214,7 @@ export function useEntrevista() {
       setPausa(false);
       cuentaDatos.current = 0;
       setVozDemo(true);
-      // Audios grabados de cada turno (public/demo/carmen/manifest.json); si faltan, voz del navegador.
+      // Audios grabados con ElevenLabs (scripts/generar_audios_demo.py); si faltan, voz del navegador.
       try {
         const r = await fetch("/demo/carmen/manifest.json", { cache: "no-store" });
         audiosDemo.current = r.ok ? ((await r.json()).turnos ?? {}) : {};
@@ -388,6 +410,9 @@ export function useEntrevista() {
     hablando: conversacion.isSpeaking,
     iniciarVoz,
     iniciarTexto,
+    reintentar,
+    corta,
+    setCorta,
     iniciarGuion,
     enviarTexto,
     alternarPausa,
