@@ -52,11 +52,12 @@ def test_valorar_usa_el_cliente_comun(monkeypatch):
 
     async def falso(**kw):
         vistos.update(kw)
-        return _valoracion(neutralidad=1), None
+        return juez.Respuesta(**{c: juez.Puntuacion(nota=1 if c == "neutralidad" else 5, motivo="m")
+                                 for c in juez.CRITERIOS}), None
 
     monkeypatch.setattr(claude, "estructurado", falso)
     r = asyncio.run(juez.valorar(TURNOS))
-    assert vistos["agente"] == "juez" and vistos["esquema"] is juez.Valoracion
+    assert vistos["agente"] == "juez" and vistos["esquema"] is juez.Respuesta
     assert "neutralidad" in vistos["sistema"] and r.notas["neutralidad"] == 1
 
 
@@ -66,6 +67,15 @@ def test_resumen_y_calibracion():
     assert s["neutralidad_min"] == 1 and s["aprobadas"] == 0.5 and s["media_neutralidad"] == 3
     c = juez.calibracion([(buena, {"claridad": 4, "neutralidad": 5}, True), (mala, {"claridad": 1, "neutralidad": 1}, False)])
     assert c == {"acuerdo": 0.75, "exacto": 0.5, "veredicto": 1.0}
+    # Si el juez deja un criterio sin puntuar no cuenta como neutralidad 0: se informa como incompleta.
+    coja = juez.comprobar(juez.Valoracion(notas=[juez.Nota(criterio="claridad", nota=5, motivo="m")]), TURNOS)
+    s = juez.resumen([buena, coja])
+    assert s["neutralidad_min"] == 5 and s["incompletas"] == 1 and s["aprobadas"] == 0.5
+
+
+def test_el_esquema_obliga_a_puntuar_los_cinco_criterios():
+    requeridos = juez.Respuesta.model_json_schema()["required"]
+    assert sorted(requeridos) == sorted(juez.CRITERIOS)
 
 
 def test_la_bateria_de_calibracion_esta_bien_formada():

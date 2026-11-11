@@ -48,6 +48,27 @@ class Valoracion(BaseModel):
     notas: list[Nota]
 
 
+class Puntuacion(BaseModel):
+    nota: int = Field(ge=1, le=5, description="1 a 5 según la rúbrica")
+    turn_id: str | None = Field(default=None, description="turno del asistente que prueba una nota de 3 o menos")
+    cita: str | None = Field(default=None, description="fragmento literal de ese turno")
+    motivo: str = Field(description="una frase breve")
+
+
+class Respuesta(BaseModel):
+    """Lo que devuelve el modelo: un campo obligatorio por criterio, así la salida estructurada garantiza
+    los cinco. Con una lista libre el modelo llegó a devolver solo dos (E-12, Javier) y la entrevista salía
+    suspensa sin que el entrevistador tuviera la culpa."""
+    claridad: Puntuacion
+    una_pregunta: Puntuacion
+    neutralidad: Puntuacion
+    empatia: Puntuacion
+    transparencia: Puntuacion
+
+    def a_valoracion(self) -> Valoracion:
+        return Valoracion(notas=[Nota(criterio=c, **getattr(self, c).model_dump()) for c in CRITERIOS])
+
+
 @dataclass
 class Resultado:
     notas: dict[str, int]
@@ -104,22 +125,24 @@ def comprobar(valoracion: Valoracion, turnos: list[Turno]) -> Resultado:
 
 
 async def valorar(turnos: list[Turno]) -> Resultado:
-    valoracion, _ = await claude.estructurado(agente=AGENTE, sistema=sistema(), mensaje=mensaje(turnos),
-                                              esquema=Valoracion, max_tokens=4000, esfuerzo_por_defecto="medium")
-    return comprobar(valoracion, turnos)
+    respuesta, _ = await claude.estructurado(agente=AGENTE, sistema=sistema(), mensaje=mensaje(turnos),
+                                             esquema=Respuesta, max_tokens=4000, esfuerzo_por_defecto="medium")
+    return comprobar(respuesta.a_valoracion(), turnos)
 
 
 def resumen(resultados: list[Resultado]) -> dict[str, float]:
     """Agregados para `umbrales.json` → juez."""
     if not resultados:
-        return {"nota_media": 0.0, "neutralidad_min": 0, "aprobadas": 0.0, "sin_prueba": 0}
+        return {"nota_media": 0.0, "neutralidad_min": 0, "aprobadas": 0.0, "sin_prueba": 0, "incompletas": 0}
     por_criterio = {c: round(statistics.mean(r.notas[c] for r in resultados if c in r.notas), 2)
                     for c in CRITERIOS if any(c in r.notas for r in resultados)}
     return {
         "nota_media": round(statistics.mean(r.media for r in resultados), 2),
-        "neutralidad_min": min(r.notas.get("neutralidad", 0) for r in resultados),
+        # Un criterio sin puntuar es un fallo del juez, no una nota de 0 al entrevistador: se cuenta aparte.
+        "neutralidad_min": min((r.notas["neutralidad"] for r in resultados if "neutralidad" in r.notas), default=0),
         "aprobadas": round(sum(r.aprobada for r in resultados) / len(resultados), 4),
         "sin_prueba": sum(len(r.sin_prueba) for r in resultados),
+        "incompletas": sum(1 for r in resultados if r.faltan),
         **{f"media_{c}": v for c, v in por_criterio.items()},
     }
 
