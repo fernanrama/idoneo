@@ -77,6 +77,19 @@
   .medido b { color: #7CE7C4; }
   .medido span { display: block; color: #7E9399; font-size: 6.8pt; margin-top: .6mm; }
   footer { margin-top: auto; padding: 2.6mm 13mm 3.4mm; display: flex; justify-content: space-between; font-size: 6.8pt; color: #7E9399; border-top: 1px solid #DDE7E9; white-space: nowrap; }
+
+  /* Versión texto */
+  .sec { border-top: 1.5px solid #0C1A1F; padding-top: 2mm; }
+  .pr { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6mm 7mm; }
+  .pr div b { display: block; font-size: 8.4pt; margin-bottom: .3mm; }
+  .pr div { padding-left: 3mm; border-left: 2px solid #C03B3B; }
+  .sol div { border-left-color: #1C8C97; }
+  .vd { width: 100%; border-collapse: collapse; font-size: 7.6pt; }
+  .vd th { text-align: left; font: 500 6.8pt "IBM Plex Mono", monospace; letter-spacing: .1em; text-transform: uppercase; color: #55666c; border-bottom: 1px solid #0C1A1F; padding: 1mm 2mm; }
+  .vd td { padding: 1.1mm 2mm; border-bottom: 1px solid #DDE7E9; vertical-align: top; }
+  .vd td:first-child { font-weight: 600; width: 19%; }
+  .vd td:nth-child(2) { color: #6a7a80; width: 30%; }
+  .nota { font-size: 7pt; color: #55666c; }
 </style>
 </head>
 <body><div class="hoja">
@@ -91,64 +104,49 @@
 </header>
 
 <main>
-  <!-- ===== 1 · PROBLEMA ===== -->
-  <section>
-    <p class="eti">01 · El problema</p>
-    <div class="problema">
-      <div>
-        <h2>La IA ya recomienda inversiones, <em>pero sobre un perfil que nadie comprueba</em></h2>
-        <p>Antes de ofrecer un producto, la entidad debe evaluar si encaja con el cliente (idoneidad y conveniencia de MiFID II). Hoy eso es un test de casillas:</p>
-        <div class="dolores">
-          <div class="dolor"><div class="x">✕</div><div><b>Se fía de lo que el cliente declara</b>Marca lo que cree saber y nadie comprueba si lo entiende.</div></div>
-          <div class="dolor"><div class="x">✕</div><div><b>Se rellena una vez y caduca</b>La vida del cliente cambia; el perfil, no.</div></div>
-          <div class="dolor"><div class="x">✕</div><div><b>No deja pruebas</b>Ni el asesor ni el agente saben de dónde sale cada respuesta.</div></div>
-        </div>
-        <p class="norma">La norma exige información fiable (RD 2017/565, art. 54.7) y ESMA avisa: en canales automatizados el cliente tiende a sobrevalorarse.</p>
-      </div>
-      <div class="tarjeta carmen">
-        <p class="eti" style="color:#7E9399">Carmen · 68 años · caso simulado</p>
-        <div class="q">En el test marcó «Conozco bien los fondos de renta variable». En la conversación le preguntan si un fondo puede perder dinero:</div>
-        <div class="cita">«Eso no puede pasar, el fondo es del banco.»</div>
-        <div class="vs"><div>Declaró<b>Alto</b></div><div>Demostró<b style="color:#1C8C97">Ninguno</b></div></div>
-        <div class="aviso">⚠ El test le habría dado por experta. Le habrían podido ofrecer renta variable.</div>
-      </div>
+  <section class="sec">
+    <p class="eti">01 · El problema que resolvemos</p>
+    <h2>El perfil inversor es la base de toda recomendación, y hoy no es fiable</h2>
+    <p>Antes de ofrecer un producto, la entidad debe evaluar si encaja con el cliente (idoneidad y conveniencia, MiFID II). La norma exige que esa información sea fiable (RD 2017/565, art. 54.7), pero hoy se recoge con un test de casillas:</p>
+    <div class="pr">
+      <div><b>1. Se fía de lo que el cliente declara.</b>Marca lo que cree saber y nadie comprueba si lo entiende. ESMA advierte que en canales automatizados el cliente tiende a sobrevalorar su conocimiento.</div>
+      <div><b>2. Se rellena una vez y caduca.</b>Cambian ingresos, objetivos u horizonte, pero el perfil sigue igual hasta la próxima revisión.</div>
+      <div><b>3. No deja pruebas.</b>Una casilla no dice de dónde sale ni en qué contexto se dijo. Ante una reclamación, la entidad no puede demostrar en qué se basó.</div>
+      <div><b>4. Los agentes de IA recomiendan sobre ese perfil.</b>GPTadvisor y otros agentes ya sugieren productos, pero leen un perfil declarado y sin comprobar, así que amplifican el error.</div>
+      <div><b>5. El asesor no tiene tiempo.</b>Revisar cada test a mano no escala: o se revisa poco, o el alta se vuelve lenta y el cliente abandona.</div>
+      <div><b>6. La experiencia es mala para el cliente.</b>Un formulario largo y técnico, con preguntas que no siempre entiende y que responde por salir del paso.</div>
     </div>
+    <p class="nota" style="margin-top:1.8mm"><b>Ejemplo (caso simulado):</b> Carmen, 68 años, marca «conozco bien los fondos de renta variable». Al preguntarle si un fondo puede perder dinero responde «eso no puede pasar, el fondo es del banco». El test la habría dado por experta.</p>
   </section>
 
-  <!-- ===== 2 · SOLUCIÓN ===== -->
-  <section>
-    <p class="eti">02 · La solución</p>
-    <h2>idóneo convierte el test en una conversación <em>que comprueba y deja pruebas</em></h2>
-    <div class="pasos">
-      <div class="tarjeta paso"><div class="n">1</div><b>Habla</b>El cliente responde por voz o por escrito, con sus palabras, desde el móvil.</div>
-      <div class="tarjeta paso"><div class="n">2</div><b>Comprueba</b>Plantea preguntas y escenarios y contrasta lo que dice con lo que demuestra.</div>
-      <div class="tarjeta paso"><div class="n">3</div><b>Deja pruebas</b>Cada dato guarda la frase exacta del cliente y su minuto. El riesgo lo calcula código, no la IA.</div>
-      <div class="tarjeta paso ent"><div class="n">✓</div><b>Valida la entidad</b>Su asesor recibe el perfil hecho y solo interviene ante dudas.</div>
+  <section class="sec">
+    <p class="eti">02 · La solución: idóneo</p>
+    <h2>Una entrevista conversacional que crea el perfil MiFID, lo comprueba y lo justifica</h2>
+    <p>idóneo solo crea perfiles: no recomienda productos. Se integra en la app de la entidad («Powered by idóneo») y responde, punto por punto, a cada problema:</p>
+    <div class="pr sol">
+      <div><b>1 → Comprueba, no solo pregunta.</b>Plantea preguntas de comprobación y escenarios. Guarda por separado lo declarado y lo demostrado, y avisa al asesor cuando no coinciden.</div>
+      <div><b>2 → Perfil vivo.</b>Microentrevistas periódicas o ante un cambio («¿Ha cambiado algo?»): solo se pregunta lo que cambió, y cada cambio crea una versión nueva.</div>
+      <div><b>3 → Cada dato con su prueba.</b>Cada respuesta guarda la frase literal del cliente, el minuto de la conversación y la versión del perfil. La entidad puede auditarlo todo.</div>
+      <div><b>4 → Perfil listo para agentes (MCP).</b>Los agentes de la entidad leen por MCP los límites del cliente (p. ej. riesgo máx. 3 de 7, renta variable no conveniente) y buscan solo dentro de ellos, por ejemplo en el catálogo de MyInvestor.</div>
+      <div><b>5 → El asesor solo revisa dudas.</b>El perfil llega hecho y comprobado; la entidad lo valida y el asesor interviene solo donde hay contradicciones o datos dudosos.</div>
+      <div><b>6 → Hablar en vez de rellenar.</b>Por voz o por escrito, desde el móvil y con sus palabras: el cliente entiende lo que se le pregunta y el alta es más rápida.</div>
     </div>
-    <div class="vive">
-      <div><b>Vive dentro de la app de cada entidad · «Powered by idóneo»</b>En el alta y en microentrevistas («¿Ha cambiado algo?»): el perfil se mantiene vivo y solo se pregunta lo que cambió.</div>
-      <div><b>Habla el idioma de los agentes de IA</b>Por MCP, el agente de la entidad lee los límites de Carmen (riesgo máx. 3 de 7, renta variable no conveniente) y busca en el catálogo real de MyInvestor.</div>
-    </div>
+    <p class="nota" style="margin-top:1.8mm"><b>Fiabilidad de la IA:</b> Claude propone y el código decide. El riesgo y la conveniencia los calcula código con reglas MiFID, cada dato debe estar respaldado por una cita literal y la entidad valida el resultado. Los datos personales van aparte y con consentimiento propio.</p>
   </section>
 
-  <!-- ===== 3 · VALOR DIFERENCIAL ===== -->
-  <section>
+  <section class="sec">
     <p class="eti">03 · El valor diferencial</p>
-    <h2>No es un test más bonito: <em>es un perfil en el que se puede confiar</em></h2>
-    <table class="tabla tarjeta">
-      <tr><th></th><th>Test de casillas</th><th class="id">idóneo</th></tr>
-      <tr><td>Conocimiento</td><td class="antes">Declarado</td><td class="idoneo">Demostrado, y la diferencia se avisa al asesor</td></tr>
-      <tr><td>Cada dato</td><td class="antes">Una casilla sin contexto</td><td class="idoneo">Con su prueba: frase literal, minuto y versión</td></tr>
-      <tr><td>Con el tiempo</td><td class="antes">Se queda viejo</td><td class="idoneo">Perfil vivo con microentrevistas</td></tr>
-      <tr><td>Uso de la IA</td><td class="antes">—</td><td class="idoneo">La IA propone, el código decide, la entidad valida</td></tr>
-      <tr><td>Para los agentes</td><td class="antes">Un PDF</td><td class="idoneo">Límites listos por MCP para GPTadvisor</td></tr>
+    <h2>No es un test más bonito: es un perfil en el que la entidad y sus agentes pueden confiar</h2>
+    <table class="vd">
+      <tr><th></th><th>Test de casillas</th><th>idóneo</th></tr>
+      <tr><td>Conocimiento</td><td>Declarado</td><td>Demostrado; las diferencias se señalan al asesor</td></tr>
+      <tr><td>Trazabilidad</td><td>Casilla sin contexto</td><td>Frase literal, minuto y versión de cada dato</td></tr>
+      <tr><td>Actualización</td><td>Una vez, y caduca</td><td>Perfil vivo con microentrevistas y versiones</td></tr>
+      <tr><td>Agentes de IA</td><td>PDF o formulario</td><td>Límites estructurados por MCP, listos para usar</td></tr>
+      <tr><td>Uso de la IA</td><td>No aplica</td><td>La IA propone, el código decide, la entidad valida</td></tr>
     </table>
-    <div class="valor">
-      <div class="tarjeta"><b>Para la entidad</b>Recomendaciones que encajan, menos reclamaciones y lo que MiFID exige, documentado.</div>
-      <div class="tarjeta"><b>Para el asesor</b>El perfil llega hecho y comprobado: solo revisa las dudas.</div>
-      <div class="tarjeta"><b>Para el cliente</b>Habla en vez de rellenar casillas, y lo que le ofrecen encaja con lo que sabe y puede asumir.</div>
-    </div>
-    <p class="medido"><b>Ya funciona, medido con Claude real:</b> 165 de 166 datos correctos en 20 entrevistas · 31/31 en 7 casos difíciles · 0 recomendaciones · perfil listo en ~43 s. <span>Clientes simulados; no es una validación independiente. idóneo no recomienda productos ni sustituye al asesor.</span></p>
+    <p style="margin-top:2mm"><b>Para la entidad:</b> recomendaciones que encajan, menos riesgo de reclamaciones y cumplimiento MiFID documentado. <b>Para el asesor:</b> menos revisión manual, solo los casos dudosos. <b>Para el cliente:</b> un alta sencilla y productos acordes a lo que sabe y puede asumir.</p>
+    <p class="nota"><b>Medido con Claude real:</b> 165 de 166 datos correctos en 20 entrevistas, 31/31 en 7 casos difíciles, 0 recomendaciones de producto y perfil listo en ~43 s. Con clientes simulados: no es una validación independiente.</p>
   </section>
 </main>
 
