@@ -1,5 +1,5 @@
 import { CLIENTE_DEMO, registrarSesion, tokenCliente, tokenSesion } from "./credenciales";
-import type { AltaSesion, BootstrapVoz, ContextoVoz, ExpedienteAsesor, MemoriaPersonal, ModoAsesor, Perfil, Restricciones, Sesion, Turno, VersionResumen } from "./tipos";
+import type { AltaSesion, BootstrapVoz, Comparacion, ContextoVoz, ExpedienteAsesor, MemoriaPersonal, ModoAsesor, MotivoRevision, Perfil, Restricciones, Revision, Sesion, Turno, VersionResumen } from "./tipos";
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -107,6 +107,23 @@ export const api = {
     }
     return pedir<VersionResumen[]>(`/api/clients/${id(client_id)}/versions`, { headers: cliente(client_id) });
   },
+
+  /** «Ha cambiado algo»: catálogo de motivos, previsualizar, abrir y seguir la microentrevista. */
+  motivosRevision: () => pedir<MotivoRevision[]>("/api/review-reasons"),
+  revision: (client_id: string) => client_id === CLIENTE_DEMO && !tokenCliente(client_id)
+    ? Promise.resolve<Revision>({ open: false })
+    : pedir<Revision>(`/api/clients/${id(client_id)}/review`, { headers: cliente(client_id) }),
+  previsualizarRevision: (client_id: string, reasons: string[]) =>
+    pedir<Revision>(`/api/clients/${id(client_id)}/review/preview`, {
+      method: "POST", headers: cliente(client_id), body: JSON.stringify({ reasons }),
+    }),
+  abrirRevision: (client_id: string, reasons: string[]) =>
+    pedir<Revision>(`/api/clients/${id(client_id)}/review`, {
+      method: "POST", headers: cliente(client_id), body: JSON.stringify({ reasons }),
+    }),
+  cambios: (client_id: string) => client_id === CLIENTE_DEMO && !tokenCliente(client_id)
+    ? Promise.resolve<Comparacion | null>(null)
+    : pedir<Comparacion | null>(`/api/clients/${id(client_id)}/changes`, { headers: cliente(client_id) }),
 
   /** El servidor añade el token de entidad; la posesión del cliente viaja solo en cabecera. */
   validar: (client_id: string, advisor_id: string) =>

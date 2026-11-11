@@ -60,6 +60,58 @@ export interface Perfil {
   review: { validated_by?: string | null; validated_at?: string | null; next_review?: string | null; open_flags: number };
 }
 
+/** Datos cambiados en una versión posterior aún sin validar (se sigue sirviendo el último validado). */
+export interface RevisionPendiente {
+  since_version: number;
+  latest_version: number;
+  latest_status: EstadoPerfil;
+  paths: string[];
+  opened_at: string;
+}
+
+export interface MotivoRevision {
+  code: string;
+  titulo: string;
+  detalle: string;
+  icono: string;
+}
+
+export type TipoPregunta = "confirmar" | "repreguntar" | "comprobar";
+
+export interface PreguntaRevision {
+  path: string;
+  tipo: TipoPregunta;
+  valor_vigente: unknown;
+  respondida: boolean;
+}
+
+/** Microentrevista «Ha cambiado algo»: motivos, preguntas y cuáles ya se han contestado. */
+export type Revision =
+  | { open: false }
+  | {
+      open: true;
+      reasons: MotivoRevision[];
+      opened_at: string;
+      since_version: number;
+      questions: PreguntaRevision[];
+      remaining: number;
+      deferred: string[];
+      full_reassessment: boolean;
+      full_reassessment_reasons: string[];
+    };
+
+/** Último perfil validado frente al último guardado. */
+export interface Comparacion {
+  desde_version: number;
+  hasta_version: number;
+  cambios: { path: string; antes: unknown; ahora: unknown; fuente: string | null; cita: string | null }[];
+  efectos: string[];
+  perfil_antes: string | null;
+  perfil_ahora: string | null;
+  sri_antes: number | null;
+  sri_ahora: number | null;
+}
+
 export interface Restricciones {
   client_id: string;
   profile_version: number;
@@ -70,6 +122,7 @@ export interface Restricciones {
   post_filters: { field: string; op: string; value: unknown; why: string }[];
   appropriateness: Record<string, Conveniencia>;
   blocked_searches?: string[];
+  pending_review?: RevisionPendiente | null;
   evidence_refs: string[];
   rationale: string[];
 }
@@ -134,4 +187,6 @@ export interface ExpedienteAsesor {
   profile: Perfil;
   constraints: Restricciones;
   versions: VersionResumen[];
+  review?: Revision;
+  changes?: Comparacion | null;
 }

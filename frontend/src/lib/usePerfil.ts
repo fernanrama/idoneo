@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "./api";
-import type { Perfil, Restricciones, VersionResumen } from "./tipos";
+import type { Comparacion, Perfil, Restricciones, Revision, VersionResumen } from "./tipos";
 
 /**
  * Carga perfil y restricciones de un cliente; `recargar` tras validar.
@@ -17,8 +17,10 @@ export function usePerfil(clientId: string, sondeoMs?: number, { asesor = false,
     perfil: Perfil | null;
     restricciones: Restricciones | null;
     versiones: VersionResumen[] | null;
+    revision: Revision | null;
+    cambios: Comparacion | null;
     error: string | null;
-  }>({ clientId: null, perfil: null, restricciones: null, versiones: null, error: null });
+  }>({ clientId: null, perfil: null, restricciones: null, versiones: null, revision: null, cambios: null, error: null });
   const revision = useRef(0);
   const enCurso = useRef<string | null>(null);
   const cancelarPeticiones = useCallback(() => {
@@ -34,15 +36,18 @@ export function usePerfil(clientId: string, sondeoMs?: number, { asesor = false,
       if (asesor) {
         const e = await api.expedienteAsesor(clientId);
         if (peticion !== revision.current) return;
-        setVista({ clientId, perfil: e.profile, restricciones: e.constraints, versiones: e.versions, error: null });
+        setVista({ clientId, perfil: e.profile, restricciones: e.constraints, versiones: e.versions,
+          revision: e.review ?? null, cambios: e.changes ?? null, error: null });
         return;
       }
-      const [p, r] = await Promise.all([api.perfil(clientId), api.restricciones(clientId)]);
+      // La revisión y el antes/después son un extra: si fallan (backend antiguo), el perfil se ve igual.
+      const [p, r, rev, cam] = await Promise.all([api.perfil(clientId), api.restricciones(clientId),
+        api.revision(clientId).catch(() => null), api.cambios(clientId).catch(() => null)]);
       if (peticion !== revision.current) return;
-      setVista({ clientId, perfil: p, restricciones: r, versiones: null, error: null });
+      setVista({ clientId, perfil: p, restricciones: r, versiones: null, revision: rev, cambios: cam, error: null });
     } catch (e) {
       if (peticion !== revision.current) return;
-      setVista({ clientId, perfil: null, restricciones: null, versiones: null,
+      setVista({ clientId, perfil: null, restricciones: null, versiones: null, revision: null, cambios: null,
         error: e instanceof Error ? e.message : String(e) });
     } finally {
       if (peticion === revision.current) enCurso.current = null;
@@ -62,5 +67,6 @@ export function usePerfil(clientId: string, sondeoMs?: number, { asesor = false,
   // No mostrar datos del cliente anterior entre el render y la limpieza del efecto.
   const vigente = vista.clientId === clientId;
   return { perfil: vigente ? vista.perfil : null, restricciones: vigente ? vista.restricciones : null,
-    versiones: vigente ? vista.versiones : null, error: vigente ? vista.error : null, recargar };
+    versiones: vigente ? vista.versiones : null, revision: vigente ? vista.revision : null,
+    cambios: vigente ? vista.cambios : null, error: vigente ? vista.error : null, recargar };
 }

@@ -58,6 +58,8 @@ class Motivo(str, Enum):
     job_loss = "job_loss"
     windfall = "windfall"
     planned_expense = "planned_expense"
+    income_change = "income_change"
+    goal_change = "goal_change"
     new_debt = "new_debt"
     dependants = "dependants"
     # alertas de otros agentes
@@ -93,6 +95,11 @@ SEMILLAS: dict[Motivo, tuple[list[str], list[str]]] = {
                       [f"{_F}liquid_savings_eur"]),
     Motivo.windfall: ([f"{_F}liquid_savings_eur", f"{_F}other_assets_eur"], [f"{_O}goal", f"{_O}amount_eur"]),
     Motivo.planned_expense: ([f"{_O}liquidity_need"], [f"{_F}liquid_savings_eur"]),
+    # Subida o bajada de sueldo: cambia lo que entra y quizá lo que gasta o ahorra.
+    Motivo.income_change: ([f"{_F}net_monthly_income_eur", f"{_F}income_stability"],
+                           [f"{_F}fixed_monthly_costs_eur"]),
+    # Ha cambiado de idea: para qué, cuánto y durante cuánto tiempo.
+    Motivo.goal_change: ([f"{_O}goal", f"{_O}amount_eur", f"{_O}horizon_years"], []),
     # Hipoteca o préstamo: la hipoteca de la vivienda va aparte y no resta capacidad, pero su cuota es gasto fijo.
     Motivo.new_debt: ([f"{_F}debts_eur", f"{_F}mortgage_eur", f"{_F}fixed_monthly_costs_eur"], []),
     Motivo.dependants: ([f"{_F}fixed_monthly_costs_eur"], [f"{_O}goal"]),
