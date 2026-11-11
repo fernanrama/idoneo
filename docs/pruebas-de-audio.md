@@ -62,5 +62,6 @@ en la versión desplegada y no gasta créditos.
 - Un audio de más de 30 MB (unos 30 minutos) se rechaza.
 - El audio es un dato personal. Se sirve solo con la credencial de esa sesión y nunca va al modelo. Borrarlo
   también en ElevenLabs depende de la retención configurada en su panel.
-- En el modo asesor de demostración, la vista de la entidad solo puede escuchar el audio de un cliente
-  nuevo desde la pestaña que hizo la entrevista, porque es la que tiene su credencial.
+- En el modo asesor de demostración y en el acceso de administración (`/admin`), la vista de la entidad
+  solo puede escuchar el audio de un cliente nuevo desde la pestaña que hizo la entrevista, porque es la
+  que tiene su credencial. Carmen suena siempre.
