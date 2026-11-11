@@ -23,7 +23,7 @@ Todas están en `.env.example`.
 | `DEMO_ADVISOR_CLIENTS`, `DEMO_ADVISOR_ID` | `carmen-68,carmen-corta`, `asesor-demo` | Clientes ficticios permitidos y autor de la validación en ese modo |
 | `DEMO_ENDPOINTS` | `1` | `0` desactiva `POST /api/demo/reset` (para un despliegue público) |
 | `CORS_ORIGINS` | `http://localhost:3000` | Orígenes del front permitidos, separados por comas |
-| `MCP_ALLOWED_HOSTS` | vacío | Hosts públicos del MCP (túnel o despliegue) |
+| `MCP_ALLOWED_HOSTS` | vacío | Hosts públicos del MCP (túnel u otro despliegue), separados por comas. En Render no hace falta: el nombre del servicio (`RENDER_EXTERNAL_HOSTNAME`) se admite solo |
 | `ELEVENLABS_API_KEY`, `ELEVENLABS_AGENT_ID` | vacío | Voz privada: el backend crea el bootstrap firmado; sin ellas usa el agente público si el front tiene ID |
 | `VOICE_USER_ID_SECRET` | desarrollo local | Seudonimiza el `client_id` enviado como `userId`; debe ser aleatorio en despliegues |
 | `ELEVENLABS_WEBHOOK_SECRET` | vacío | Verifica el post-call webhook; sin él la ruta responde 503 |
