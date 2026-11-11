@@ -133,7 +133,9 @@ export const api = {
   /** Modo asesor de demo: el servidor Next pone su autorización; el navegador no envía ninguna credencial. */
   modoAsesor: () => leerDelFront<ModoAsesor>("/api/entidad/asesor"),
   expedienteAsesor: (client_id: string) => leerDelFront<ExpedienteAsesor>(`/api/entidad/${id(client_id)}/asesor`),
-  validarComoAsesor: (client_id: string) => pedirAlFront<Perfil>(`/api/entidad/${id(client_id)}/validar`, {}),
+  /** `expected_version`: la versión que ve el asesor; si el perfil ha cambiado, el backend responde 409. */
+  validarComoAsesor: (client_id: string, expected_version?: number) =>
+    pedirAlFront<Perfil>(`/api/entidad/${id(client_id)}/validar`, expected_version ? { expected_version } : {}),
   reiniciarComoAsesor: () => pedirAlFront<Perfil>("/api/entidad/reset", {}),
   /** Entrevista corta del pitch (modo asesor): sesión nueva sobre el cliente ficticio casi completo. */
   entrevistaCorta: async (channel: "voice" | "text"): Promise<Sesion> =>

@@ -79,11 +79,24 @@ export function respuestaJson(cuerpo: unknown, status = 200): Response {
 }
 
 /** Llama al backend con el token del servidor. No reenvía cabeceras ni cuerpo del navegador. */
-export async function llamarBackend(conf: ConfigAsesorDemo, ruta: string, method: "GET" | "POST" = "GET"): Promise<Response> {
+/**
+ * Del cuerpo del navegador solo se acepta `expected_version` (entero >= 1): la versión del perfil que ve el
+ * asesor. Si el perfil ha cambiado desde entonces, el backend responde 409 en vez de validar otra versión.
+ * Cualquier otro campo o valor se descarta.
+ */
+export function versionEsperada(cuerpo: unknown): number | undefined {
+  const v = (cuerpo as { expected_version?: unknown } | null)?.expected_version;
+  return typeof v === "number" && Number.isSafeInteger(v) && v >= 1 ? v : undefined;
+}
+
+export async function llamarBackend(
+  conf: ConfigAsesorDemo, ruta: string, method: "GET" | "POST" = "GET", cuerpo?: Record<string, unknown>,
+): Promise<Response> {
   try {
     const r = await fetch(`${conf.api}/api/demo/asesor${ruta}`, {
       method,
-      headers: { [CABECERA_ASESOR]: conf.token },
+      headers: cuerpo ? { [CABECERA_ASESOR]: conf.token, "Content-Type": "application/json" } : { [CABECERA_ASESOR]: conf.token },
+      ...(cuerpo ? { body: JSON.stringify(cuerpo) } : {}),
       cache: "no-store",
       signal: AbortSignal.timeout(8000),
     });
