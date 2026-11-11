@@ -16,7 +16,7 @@ y lo entrega por API y **MCP** a los agentes de la entidad.
 ![ElevenLabs](https://img.shields.io/badge/ElevenLabs-voz-000000)
 ![MCP](https://img.shields.io/badge/MCP-servidor_propio-6E56CF)
 
-[La demo](#la-demo-en-un-minuto) · [Cómo funciona](#cómo-funciona) · [Capturas](#en-el-móvil-del-cliente) · [Probarlo en 10 minutos](#probarlo-en-10-minutos) · [Claude + MyInvestor](#usarlo-desde-claude-con-myinvestor) · [Evaluación](#evaluación) · [Estado](#estado)
+[La demo](#la-demo-en-un-minuto) · [Cómo funciona](#cómo-funciona) · [Capturas](#en-el-móvil-del-cliente) · [Cuando algo cambia](#cuando-algo-cambia) · [Probarlo en 10 minutos](#probarlo-en-10-minutos) · [Claude + MyInvestor](#usarlo-desde-claude-con-myinvestor) · [Evaluación](#evaluación) · [Estado](#estado)
 
 **[Pruébalo online → hack-finance-uc3m-2026.vercel.app](https://hack-finance-uc3m-2026.vercel.app/escenario)**
 
@@ -28,7 +28,7 @@ y lo entrega por API y **MCP** a los agentes de la entidad.
 
 ## La demo en un minuto
 
-A la izquierda, lo que vive el cliente: el aura que le entrevista, una pregunta cada vez. A la derecha, lo que recibe la entidad en directo: cada dato con la frase que lo justifica, el aviso *declarado ≠ demostrado* y, al final, el perfil calculado con reglas fijas. Es la demo guiada de Carmen (`/escenario`), acelerada ×4.
+A la izquierda, lo que vive el cliente: el aura que le entrevista, una pregunta cada vez. A la derecha, lo que recibe la entidad en directo: cada dato con la frase que lo justifica, el aviso *declarado ≠ demostrado* y, al final, el perfil calculado con reglas fijas. Es la demo guiada de Carmen (`/escenario`), acelerada ×4. En el móvil, las dos mitades se ven por pestañas («El cliente» y «La entidad»).
 
 <p align="center"><img src="docs/img/demo-guiada.gif" width="100%" alt="Demo guiada: la entrevista de Carmen a la izquierda y su perfil construyéndose en directo a la derecha"></p>
 
@@ -46,11 +46,12 @@ Antes de ofrecer un producto de inversión, la entidad tiene que evaluar si es *
 | 🔎 **Comprueba** | Plantea escenarios y contrasta lo declarado con lo demostrado. Avisa de las contradicciones. |
 | 🧾 **Deja pruebas** | Cada dato guarda su fuente, su confianza, la cita exacta y el momento de la conversación en que se dijo. Nada se sobrescribe: cada cambio es una versión nueva. |
 | 🧮 **Calcula con código** | Idoneidad, conveniencia y restricciones salen de funciones deterministas, nunca del modelo. |
+| 🔄 **Sigue vivo** | Si algo cambia (un sueldo, un gasto, una herencia, otra idea), el cliente lo cuenta y solo se le pregunta eso, sin repetir la entrevista. Qué preguntar lo decide código determinista, no el modelo. |
 | 🔌 **Se integra** | El perfil se sirve por API y por MCP a GPTadvisor, a Claude con el conector de MyInvestor o al agente de cualquier entidad. |
 
 **Qué no hacemos: no recomendamos productos.** Damos los límites que cualquier propuesta debe respetar (riesgo máximo, familias convenientes, liquidez). Qué productos ofrecer lo decide el agente de la entidad, y un asesor valida el perfil antes de que se pueda usar.
 
-Visión propuesta: [evolución hacia un perfil continuo](docs/diseno/05-perfil-continuo.md), desde la entrevista inicial hasta microentrevistas adaptativas y comprobaciones solicitadas por agentes autorizados. Estas dos últimas fases son hoja de ruta; el documento distingue las piezas implementadas de lo pendiente.
+Visión: [evolución hacia un perfil continuo](docs/diseno/05-perfil-continuo.md). La entrevista inicial y la **microentrevista que pide el cliente cuando algo cambia** están implementadas ([cómo funciona](#cuando-algo-cambia)); las comprobaciones que soliciten agentes autorizados siguen en la hoja de ruta.
 
 ## Cómo funciona
 
@@ -96,6 +97,18 @@ Resultado para Carmen, calculado por el backend:
 <td width="50%"><img src="docs/img/entidad-mcp.png" alt="Restricciones para el agente en el formato del catálogo de MyInvestor"><br><sub><b>Para el agente.</b> Las restricciones que el agente pasa tal cual al catálogo de MyInvestor.</sub></td>
 </tr>
 </table>
+
+## Cuando algo cambia
+
+Un perfil MiFID caduca con la vida del cliente. En Idóneo no hay que repetir la entrevista: desde **Mi perfil**, el cliente pulsa **¿Ha cambiado algo en tu vida?**, elige qué ha pasado y ve al momento qué le vamos a preguntar y cuánto tardará.
+
+<p align="center"><img src="docs/img/cliente-cambio.png" width="100%" alt="Pantalla «¿Ha cambiado algo en tu vida?»: motivos a la izquierda y, a la derecha, las seis preguntas que se harán"></p>
+
+1. **Qué preguntar lo decide el código.** El planificador (`backend/app/perfil/alcance.py`) traduce cada motivo en los datos afectados y en los que dependen de ellos. Cada pregunta es de uno de tres tipos: *confirmar* (le leemos lo que consta), *pregunta nueva* (ha podido cambiar) o *comprobar*. Máximo seis; si el cambio es grande, avisa de que conviene repasar el perfil entero.
+2. **La microentrevista es corta.** El mismo entrevistador, por voz o por escrito, recibe solo esas preguntas. Una barra se enciende con cada respuesta, y lo demás del perfil se queda como estaba.
+3. **La entidad ve el antes y el después.** Mientras nadie valida, el agente sigue recibiendo la última versión validada y sabe qué datos están en revisión (`pending_review`), sin apoyarse en ellos. El asesor ve cada cambio con su frase y qué efecto tiene en los filtros, y valida.
+
+<p align="center"><img src="docs/img/entidad-cambios.png" width="100%" alt="Vista de la entidad: datos en revisión, progreso de la microentrevista y antes y después con la frase de cada cambio"></p>
 
 ## Probarlo en 10 minutos
 
@@ -154,6 +167,8 @@ npm run dev
 | 5 | Bloque **Restricciones para el agente** de esa vista | Las restricciones en el formato del catálogo de MyInvestor, utilizables tras validar. La API (`/api/clients/…`) exige la credencial del cliente; sin ella, http://localhost:8000/api/demo/constraints enseña el formato con la Carmen de muestra, sin validar |
 | 6 | En esa vista, el dato **Fondos de renta variable** | La prueba: *«Eso no puede pasar, el fondo es del banco.»*, segundos 57–61 |
 | 7 | http://localhost:8000/docs | Toda la API, para probarla a mano |
+| 8 | http://localhost:3000/onboarding/entrevista → marca **Entrevista corta del pitch** → **Escribir** | Un perfil completo de `carmen-corta` en dos preguntas (necesita `ANTHROPIC_API_KEY`). Valídalo en `/entidad/carmen-corta` |
+| 9 | **Mi perfil** → **¿Ha cambiado algo en tu vida?** | Elige, por ejemplo, «Me han subido el sueldo»: verás qué se pregunta, contestas solo eso y aparece «Lo que ha cambiado» en tu perfil y «cambios por validar» en la vista de la entidad |
 
 Si algo se queda en un estado raro, **Reiniciar la demo** en esa vista (con el modo asesor de demostración) o `POST /api/demo/reset` con `X-Admin-Token` (desde `/docs`) vuelven a cargar a Carmen como versión nueva.
 
@@ -161,7 +176,7 @@ Si algo se queda en un estado raro, **Reiniciar la demo** en esa vista (con el m
 
 ```bash
 cd backend
-python -m pytest -q        # más de 600 tests en verde, sin claves ni red; los que necesitan Postgres o las dependencias del frontend se omiten si faltan
+python -m pytest -q        # más de 750 tests en verde, sin claves ni red; los que necesitan Postgres o las dependencias del frontend se omiten si faltan
 ```
 
 ## Usarlo desde Claude con MyInvestor
@@ -170,7 +185,7 @@ El backend sirve un **servidor MCP en `/mcp`** con 4 herramientas de solo lectur
 
 | Herramienta | Para qué |
 |---|---|
-| `get_investment_constraints` | Los límites que cualquier propuesta debe cumplir, en el formato del catálogo de MyInvestor |
+| `get_investment_constraints` | Los límites que cualquier propuesta debe cumplir, en el formato del catálogo de MyInvestor, qué búsquedas no hacer y, si hay cambios sin validar, qué datos están en revisión |
 | `get_evidence` | La cita y el momento de la conversación que justifican un dato |
 | `get_client_profile` | El perfil completo, con fuente y confianza de cada dato |
 | `get_client_context` | Un resumen breve del cliente para otro agente |
@@ -207,7 +222,7 @@ Medido con clientes **simulados** y Claude real (`claude-sonnet-5-5`). Detalle, 
 | 20 entrevistas completas con clientes simulados (4 personas × 2 y 12 generados al azar) | **99–100 % de aciertos**, 0 recomendaciones, aviso de IA siempre y alerta *declarado ≠ demostrado* en todos los casos que la esperaban |
 | Verificador: 8 tramos × 3 repeticiones | **0 falsas alarmas** |
 | Latencia y coste | Unos 2 s por llamada · unos 0,3–0,4 $ por entrevista (estimado a partir de los tokens) |
-| Tests automáticos | Más de 600, sin claves ni red |
+| Tests automáticos | Más de 750, sin claves ni red (unos 990 con Postgres local) |
 
 **Límites:** muestras pequeñas, casos escritos por el propio equipo y clientes interpretados por Claude, no por personas. Los umbrales de los cálculos son supuestos del equipo, pendientes de revisión experta.
 
@@ -230,6 +245,7 @@ Idóneo no «cumple MiFID» por sí solo: ayuda a la entidad a recoger y documen
 | Perfil versionado, evidencias, validación de la entidad y persistencia (memoria, SQLite o Postgres) | ✅ Hecho, con tests |
 | Idoneidad, conveniencia y restricciones calculadas con código | ✅ Hecho · los umbrales son **supuestos del equipo**, pendientes de revisión |
 | Servidor MCP y conexión con Claude + MyInvestor | ✅ Hecho · exige credencial; para la demo, Claude Code en local con `MCP_DEMO_TOKEN` ([guía](docs/modo-asesor-demo.md)) · ensayado el 11/11 (E-09) |
+| Perfil vivo: «¿Ha cambiado algo?», microentrevista y antes/después para la entidad | ✅ Hecho, con tests · planificador determinista (`alcance.py`), sin migración de base de datos · tras cambiar el prompt hay que ejecutar `python scripts/sincronizar_voz.py --aplicar` |
 | Frontend móvil: entrevista, demo guiada, perfil del cliente y vista de la entidad | ✅ Hecho · «Validar perfil» con el modo asesor de demostración (PR #25) · entrevista corta del pitch sobre `carmen-corta` |
 | Extractor (de la conversación al perfil, con Claude) y entrevistador en modo texto | ✅ Hecho, con tests (Claude simulado) · prueba con la API real: `python scripts/probar_extractor.py` · arquitectura en [`backend/app/agentes/`](backend/app/agentes/README.md) |
 | Verificador (incoherencias, datos dudosos y casos para el asesor) | ✅ Reglas fijas + revisión con Claude, con tests (Claude simulado) · evaluación con la API real: `python scripts/evaluar_verificador.py` · el resumen para agentes sigue siendo una plantilla fija |
@@ -257,7 +273,7 @@ Todas están en `.env.example`.
 | `LOAD_DEMO_FIXTURE` | `1` | Carga a Carmen (DATOS SIMULADOS) al arrancar, solo si no existe |
 | `ADMIN_TOKEN` | vacío | Credencial de servicio: `POST /validate` (junto con el Bearer del propietario), `POST /api/demo/reset` y consumidores del MCP. Nunca va al frontend |
 | `DEMO_ADVISOR_MODE`, `DEMO_ADVISOR_TOKEN` | `0`, vacío | [Modo asesor de demostración](docs/modo-asesor-demo.md): habilita «Validar perfil» solo en local y para clientes ficticios. El mismo token en `frontend/.env.local` |
-| `DEMO_ADVISOR_CLIENTS`, `DEMO_ADVISOR_ID` | `carmen-68`, `asesor-demo` | Clientes ficticios permitidos y autor de la validación en ese modo |
+| `DEMO_ADVISOR_CLIENTS`, `DEMO_ADVISOR_ID` | `carmen-68,carmen-corta`, `asesor-demo` | Clientes ficticios permitidos y autor de la validación en ese modo |
 | `DEMO_ENDPOINTS` | `1` | `0` desactiva `POST /api/demo/reset` (para un despliegue público) |
 | `CORS_ORIGINS` | `http://localhost:3000` | Orígenes del front permitidos, separados por comas |
 | `MCP_ALLOWED_HOSTS` | vacío | Hosts públicos del MCP (túnel o despliegue) |

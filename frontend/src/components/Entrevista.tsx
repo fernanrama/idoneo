@@ -344,15 +344,28 @@ function Inicio({ e, compacto, permisos, setPermisos, revision }: {
           ? "Hablando o escribiendo, como te resulte más cómodo. Al empezar, el asistente te lo confirmará en voz alta para que quede en tu expediente. Podrás pausar cuando quieras."
           : "Marca las dos casillas para poder empezar."}
       </p>
-      <button className={s.demoBoton} onClick={() => e.iniciarGuion()}>
-        <span className={s.demoPlay} aria-hidden="true">
-          {Icono.play}
-        </span>
-        <span>
-          <strong>Ver la demo guiada</strong>
-          Carmen, 68 años · entrevista simulada de un minuto, con voz
-        </span>
-      </button>
+      {compacto ? (
+        <button className={s.demoBoton} onClick={() => e.iniciarGuion()}>
+          <span className={s.demoPlay} aria-hidden="true">
+            {Icono.play}
+          </span>
+          <span>
+            <strong>Ver la demo guiada</strong>
+            Carmen, 68 años · entrevista simulada de un minuto, con voz
+          </span>
+        </button>
+      ) : (
+        // La demo guiada vive en el escenario, donde se ve a la vez lo que recibe la entidad.
+        <Link href="/escenario" className={s.demoBoton}>
+          <span className={s.demoPlay} aria-hidden="true">
+            {Icono.play}
+          </span>
+          <span>
+            <strong>¿Solo quieres mirar?</strong>
+            Mira la demo de Carmen, 68 años, y lo que recibe la entidad
+          </span>
+        </Link>
+      )}
       {e.error && (
         <p role="alert" className={s.error}>
           {e.error}
