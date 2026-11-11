@@ -32,7 +32,7 @@ from . import migrar, seguridad
 from .db import crear_motor
 from .tablas import metadata
 
-TABLAS = sorted(metadata.tables)                       # las 5 del perfil
+TABLAS = sorted(metadata.tables)                       # las del perfil (5) y el audio de sesión
 TABLAS_RLS = TABLAS + ["schema_migrations"]
 FUNCION = "perfil_bloquear_cambio"
 TRIGGERS = {                                           # nombre -> (tabla, operaciones bloqueadas)
@@ -44,6 +44,8 @@ TRIGGERS = {                                           # nombre -> (tabla, opera
     "turns_sin_truncate": ("turns", {"TRUNCATE"}),
     "personal_versions_sin_update": ("personal_versions", {"UPDATE"}),
     "personal_versions_sin_truncate": ("personal_versions", {"TRUNCATE"}),
+    "session_audio_solo_anadir": ("session_audio", {"UPDATE", "DELETE"}),
+    "session_audio_sin_truncate": ("session_audio", {"TRUNCATE"}),
 }
 ROLES_DATA_API = ("anon", "authenticated")
 VERSION_MINIMA = 140000
@@ -117,6 +119,9 @@ def comprobar_previo(c: Connection, inf: Informe, directorio: Path = migrar.DIR_
         funcion = _uno(c, "select count(*) from pg_proc where proname = :f and pronamespace = 'public'::regnamespace",
                        f=FUNCION)
         inf.comprobar(funcion == 0, "sin función que choque con 0001", "", f"ya existe public.{FUNCION}")
+    if any(m.version == "0002" for m in pendientes):
+        choca = _uno(c, "select to_regclass('public.session_audio') is not null")
+        inf.comprobar(not choca, "sin tablas que choquen con 0002", "", "ya existe public.session_audio")
 
     otras = _lista(c, "select tablename from pg_tables where schemaname = 'public' and tablename <> all(:t) "
                       "order by 1", t=TABLAS + ["schema_migrations"])
@@ -177,7 +182,8 @@ def comprobar_posterior(c: Connection, inf: Informe, directorio: Path = migrar.D
     esperadas = {"profile_versions_status_check", "profile_versions_version_check", "personal_versions_version_check",
                  "sessions_channel_check", "turns_idx_check", "turns_speaker_check", "turns_session_id_idx_key",
                  "profile_versions_client_id_fkey", "personal_versions_client_id_fkey", "sessions_client_id_fkey",
-                 "turns_session_id_fkey", "clients_client_id_check"}
+                 "turns_session_id_fkey", "clients_client_id_check",
+                 "session_audio_size_check", "session_audio_session_id_fkey"}
     faltan = sorted(esperadas - restricciones)
     inf.comprobar(not faltan, "restricciones y claves ajenas", f"{len(esperadas)} presentes", f"faltan {faltan}")
 
@@ -233,6 +239,7 @@ def prueba_escritura(c: Connection, inf: Informe) -> None:
         "TRUNCATE profile_versions": "truncate profile_versions",
         "TRUNCATE turns": "truncate turns",
         "TRUNCATE personal_versions": "truncate personal_versions",
+        "TRUNCATE session_audio": "truncate session_audio",
         "TRUNCATE clients CASCADE": "truncate clients cascade",
     }
     for nombre, sql in intentos.items():

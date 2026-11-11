@@ -43,7 +43,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 from . import alcance, calculos, personal as personal_mod, validacion
 from .almacenes import Almacen, ConflictoVersion, crear_almacen
-from .almacenes.base import TransaccionPersonal
+from .almacenes.base import AudioSesion, TransaccionPersonal
 from .eventos import BusEventos, Evento
 from .modelos import (
     CALCULADOS,
@@ -747,6 +747,37 @@ def finalizar_sesion(session_id: str, conversation_id: str) -> bool:
         return _a().finalizar_sesion(session_id, conversation_id, ahora())
     except ConflictoVersion as e:
         raise Conflicto(str(e)) from e
+
+
+# ---------- audio de las sesiones de voz (pruebas de cada dato) ----------
+
+def audio_disponible() -> bool:
+    """False si la base de datos aún no tiene la tabla del audio (migración 0002 sin aplicar)."""
+    return _a().audio_disponible()
+
+
+def guardar_audio(registro: AudioSesion, datos: bytes) -> bool:
+    """Guarda el audio de una sesión que ya terminó. Nunca lo sustituye: True solo la primera vez."""
+    s = _a().sesion(registro.session_id)
+    if s is None:
+        raise NoEncontrado(registro.session_id)
+    if s.get("conversation_id") not in (None, registro.conversation_id):
+        raise Conflicto(f"La sesión {registro.session_id} pertenece a otra conversación")
+    if not datos:
+        raise DatoInvalido("Audio vacío")
+    return _a().guardar_audio(registro, datos, ahora())
+
+
+def audio(session_id: str) -> tuple[AudioSesion, bytes]:
+    encontrado = _a().audio(session_id)
+    if encontrado is None:
+        raise NoEncontrado(f"audio de {session_id}")
+    return encontrado
+
+
+def info_audio(session_ids: Iterable[str]) -> dict[str, AudioSesion]:
+    """Metadatos y tiempos del audio de varias sesiones (sin los bytes)."""
+    return _a().info_audio(sorted(set(session_ids)))
 
 
 # ---------- fixtures (DATOS SIMULADOS) ----------

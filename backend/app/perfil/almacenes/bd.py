@@ -28,11 +28,12 @@ from ..persistencia.tablas import (
     metadata,
     personal_versions,
     profile_versions,
+    session_audio,
     sessions,
     turns,
 )
 from ..personal import CapaPersonal
-from .base import ConflictoVersion, cliente_del_lote, id_turno
+from .base import AudioSesion, ConflictoVersion, cliente_del_lote, id_turno
 
 
 def _utc(momento: datetime | None) -> datetime | None:
@@ -53,6 +54,7 @@ class AlmacenBD:
         # StaticPool comparte una conexión física SQLite. Todas las operaciones
         # del almacén deben respetar el mismo candado, también sesiones y MiFID.
         self._personal_sqlite = threading.RLock()
+        self._con_audio: bool | None = None  # se comprueba una vez: la tabla es opcional (migración 0002)
 
     @contextmanager
     def _conexion(self):
@@ -280,6 +282,52 @@ class AlmacenBD:
         with self._conexion() as c:
             return [Turno.model_validate(f._asdict()) for f in c.execute(consulta)]
 
+    # ---------- audio de las sesiones ----------
+
+    def audio_disponible(self) -> bool:
+        if self._con_audio is None:
+            self._con_audio = db.tiene_tabla(self.motor, "session_audio")
+        return self._con_audio
+
+    @staticmethod
+    def _registro(fila) -> AudioSesion:
+        return AudioSesion(session_id=fila.session_id, conversation_id=fila.conversation_id,
+                           content_type=fila.content_type, size_bytes=fila.size_bytes, duration_s=fila.duration_s,
+                           timings=dict(fila.timings or {}), transcript=list(fila.transcript or []),
+                           created_at=_utc(fila.created_at))
+
+    def guardar_audio(self, registro: AudioSesion, datos: bytes, momento: datetime) -> bool:
+        if not self.audio_disponible():
+            return False
+        try:
+            with self._transaccion() as c:
+                if c.execute(select(session_audio.c.session_id)
+                             .where(session_audio.c.session_id == registro.session_id)).first() is not None:
+                    return False
+                c.execute(insert(session_audio).values(
+                    session_id=registro.session_id, conversation_id=registro.conversation_id,
+                    content_type=registro.content_type, size_bytes=len(datos), duration_s=registro.duration_s,
+                    timings=registro.timings, transcript=registro.transcript, audio=datos, created_at=momento))
+                return True
+        except IntegrityError:  # otro proceso lo guardó a la vez: el primero gana
+            return False
+
+    def audio(self, session_id: str) -> tuple[AudioSesion, bytes] | None:
+        if not self.audio_disponible():
+            return None
+        with self._conexion() as c:
+            fila = c.execute(select(session_audio).where(session_audio.c.session_id == session_id)).first()
+        return None if fila is None else (self._registro(fila), bytes(fila.audio))
+
+    def info_audio(self, session_ids: list[str]) -> dict[str, AudioSesion]:
+        if not session_ids or not self.audio_disponible():
+            return {}
+        a = session_audio.c
+        consulta = select(a.session_id, a.conversation_id, a.content_type, a.size_bytes, a.duration_s, a.timings,
+                          a.transcript, a.created_at).where(a.session_id.in_(session_ids))
+        with self._conexion() as c:
+            return {f.session_id: self._registro(f) for f in c.execute(consulta)}
+
     # ---------- utilidades ----------
 
     def reiniciar(self) -> None:
@@ -290,11 +338,13 @@ class AlmacenBD:
                 raise RuntimeError("reiniciar() solo se permite en SQLite en memoria o de pruebas")
             metadata.drop_all(self.motor)
             db.preparar(self.motor)
+            self._con_audio = None
             return
         # Local, con 'test' en el nombre y marcada como desechable en el servidor; si no, BaseNoAutorizada.
         seguridad.vaciar_esquema_publico(self.motor)
         migrar.aplicar(self.motor)
         inspect(self.motor).clear_cache()
+        self._con_audio = None
 
     def cerrar(self) -> None:
         self.motor.dispose()

@@ -6,7 +6,7 @@ import pytest
 from sqlalchemy import inspect, text
 
 from app.perfil.almacenes.bd import AlmacenBD
-from app.perfil.persistencia import db, seguridad
+from app.perfil.persistencia import db, migrar, seguridad
 from tests.soporte_bd import POSTGRES_TEST, postgres_recien_migrado
 
 
@@ -89,6 +89,6 @@ def test_postgres_sin_marca_de_desechable_no_se_borra(monkeypatch):
         inspect(motor).clear_cache()
         assert "profile_versions" in inspect(motor).get_table_names()  # nada se ha borrado
         with motor.connect() as c:
-            assert c.execute(text("select count(*) from schema_migrations")).scalar() == 1
+            assert c.execute(text("select count(*) from schema_migrations")).scalar() == len(migrar.listar())
     finally:
         motor.dispose()

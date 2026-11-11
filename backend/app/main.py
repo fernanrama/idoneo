@@ -27,7 +27,7 @@ from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Re
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from pydantic import BaseModel, ConfigDict, Field, field_validator  # noqa: E402
 
-from . import acceso, asesor_demo, demo_operador, limites, voz  # noqa: E402
+from . import acceso, asesor_demo, audio, demo_operador, limites, voz  # noqa: E402
 from .agentes import chat as entrevistador  # noqa: E402
 from .agentes import claude, contexto, extractor, verificador  # noqa: E402
 from .mcp import demo as mcp_demo  # noqa: E402
@@ -62,6 +62,7 @@ app.add_middleware(
     expose_headers=["ETag"],
 )
 app.include_router(voz.router)
+app.include_router(audio.router)  # pruebas de audio de cada dato
 app.include_router(voz.webhook_router)
 app.include_router(asesor_demo.router)  # 404 salvo DEMO_ADVISOR_MODE=1 (docs/modo-asesor-demo.md)
 app.include_router(demo_operador.router)  # ídem; solo local y con X-Admin-Token
@@ -468,7 +469,9 @@ def ver_evidencia(client_id: str, path: str):
     if path not in p.mifid:
         raise HTTPException(404, f"Campo sin datos: {path}")
     f = p.mifid[path]
-    return {"path": path, "value": f.value, "source": f.source, "evidence": f.evidence}
+    clips = audio.fragmentos_del_perfil(p).get(path, [None] * len(f.evidence))
+    return {"path": path, "value": f.value, "source": f.source,
+            "evidence": [{**e.model_dump(mode="json"), "audio": clip} for e, clip in zip(f.evidence, clips)]}
 
 
 @app.get("/api/clients/{client_id}/context", dependencies=[Depends(acceso.exigir_cliente)])

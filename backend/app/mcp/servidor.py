@@ -28,7 +28,7 @@ from mcp.server.fastmcp import FastMCP
 from mcp.server.transport_security import TransportSecuritySettings
 from mcp.types import ToolAnnotations
 
-from .. import acceso
+from .. import acceso, audio
 from ..agentes import contexto
 from ..perfil import store
 from ..perfil.modelos import EstadoPerfil
@@ -154,8 +154,9 @@ def get_investment_constraints(client_id: str) -> dict[str, Any]:
 
 @mcp.tool(annotations=SOLO_LECTURA)
 def get_evidence(client_id: str, field: str) -> dict[str, Any]:
-    """Pruebas que justifican un dato del perfil: cita literal, segundos [inicio, fin] en la grabación y
-    URL del clip de audio si existe. `field` es la ruta del dato, por ejemplo `knowledge.equity_funds`
+    """Pruebas que justifican un dato del perfil: cita literal, segundos [inicio, fin] en la grabación y,
+    si la sesión fue por voz y ya se descargó su audio, `audio` con la ruta del audio de la sesión y el
+    fragmento exacto (`start`, `end`) en que el cliente lo dijo. `field` es la ruta del dato, por ejemplo `knowledge.equity_funds`
     o `risk_tolerance.scenario_score`. Si el dato es calculado, devuelve los datos de los que sale.
     """
     _autorizar(client_id)
@@ -176,7 +177,8 @@ def get_evidence(client_id: str, field: str) -> dict[str, Any]:
         "confidence": f.confidence,
         "flags": [x.value for x in f.flags],
         "inputs": f.inputs,
-        "evidence": [e.model_dump(mode="json") for e in f.evidence],
+        "evidence": [{**e.model_dump(mode="json"), "audio": clip}
+                     for e, clip in zip(f.evidence, audio.fragmentos_del_perfil(p).get(field, [None] * len(f.evidence)))],
     }
 
 

@@ -8,12 +8,14 @@ Garantías que debe cumplir cualquier almacén:
 - `insertar_lote` guarda versiones consecutivas de un cliente: todas o ninguna.
 - `insertar_turno` es idempotente por `turn_id` y asigna `t-001`, `t-002`… si no viene.
 - la capa personal se guarda aparte del perfil y se puede borrar sin tocar las versiones.
+- `guardar_audio` nunca sobrescribe: si la sesión ya tiene audio, devuelve False y no cambia nada.
 """
 
 from __future__ import annotations
 
-from datetime import datetime
 from contextlib import AbstractContextManager
+from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Any, Protocol
 
 from ..modelos import Perfil, Turno
@@ -22,6 +24,20 @@ from ..personal import CapaPersonal
 
 class ConflictoVersion(Exception):
     """Otra escritura ya creó esa versión: hay que releer y reintentar."""
+
+
+@dataclass(frozen=True)
+class AudioSesion:
+    """Audio de una sesión de voz y tiempos reales de cada turno (sin los bytes del audio)."""
+
+    session_id: str
+    conversation_id: str
+    content_type: str
+    size_bytes: int
+    duration_s: float | None
+    timings: dict[str, list[float]] = field(default_factory=dict)  # turn_id -> [inicio, fin] en segundos
+    transcript: list[dict[str, Any]] = field(default_factory=list)  # transcripción oficial de ElevenLabs
+    created_at: datetime | None = None
 
 
 class TransaccionPersonal(Protocol):
@@ -58,6 +74,12 @@ class Almacen(Protocol):
     def finalizar_sesion(self, session_id: str, conversation_id: str, momento: datetime) -> bool: ...
     def insertar_turno(self, session_id: str, turno: Turno, momento: datetime) -> tuple[Turno, bool]: ...
     def turnos(self, session_id: str) -> list[Turno]: ...
+
+    # audio de las sesiones de voz, de solo añadir (una vez por sesión)
+    def audio_disponible(self) -> bool: ...
+    def guardar_audio(self, registro: AudioSesion, datos: bytes, momento: datetime) -> bool: ...
+    def audio(self, session_id: str) -> tuple[AudioSesion, bytes] | None: ...
+    def info_audio(self, session_ids: list[str]) -> dict[str, AudioSesion]: ...
 
     def reiniciar(self) -> None: ...  # solo tests
     def cerrar(self) -> None: ...

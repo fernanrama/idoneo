@@ -9,6 +9,7 @@ from __future__ import annotations
 from sqlalchemy import (
     JSON,
     Boolean,
+    LargeBinary,
     CheckConstraint,
     Column,
     DateTime,
@@ -92,6 +93,25 @@ turns = Table(
     CheckConstraint("speaker in ('agent','client')", name="turns_speaker_check"),
 )
 
+# Audio de cada sesión de voz (prueba de cada dato) y tiempos reales de cada turno según ElevenLabs.
+# Una fila por sesión, de solo añadir como la transcripción: forma parte del expediente. Migración 0002.
+session_audio = Table(
+    "session_audio", metadata,
+    Column("session_id", Text, ForeignKey("sessions.session_id"), primary_key=True),
+    Column("conversation_id", Text, nullable=False),
+    Column("content_type", Text, nullable=False),
+    Column("size_bytes", Integer, nullable=False),
+    Column("duration_s", Float),
+    Column("timings", JSON_, nullable=False),     # {turn_id: [inicio, fin]} en segundos del audio
+    Column("transcript", JSON_, nullable=False),  # transcripción oficial de ElevenLabs (rol, texto, segundo)
+    Column("audio", LargeBinary, nullable=False),
+    Column("created_at", FECHA, nullable=False),
+    CheckConstraint("size_bytes > 0", name="session_audio_size_check"),
+)
+
 # Tablas protegidas contra UPDATE/DELETE (y en personal_versions, solo contra UPDATE).
-SOLO_ANADIR = ("clients", "profile_versions", "turns")
+SOLO_ANADIR = ("clients", "profile_versions", "turns", "session_audio")
 SIN_UPDATE = ("personal_versions",)
+# Tablas que un Postgres ya desplegado puede no tener todavía (migración posterior): si faltan, el backend
+# arranca igual y esa función queda desactivada con un aviso, en vez de no arrancar.
+OPCIONALES = ("session_audio",)

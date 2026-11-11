@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
 
@@ -15,7 +16,7 @@ from sqlalchemy import Engine, create_engine, event, inspect, text
 from sqlalchemy.engine import make_url
 from sqlalchemy.pool import StaticPool
 
-from .tablas import SIN_UPDATE, SOLO_ANADIR, metadata
+from .tablas import OPCIONALES, SIN_UPDATE, SOLO_ANADIR, metadata
 
 DIR_DATOS_POR_DEFECTO = Path(__file__).resolve().parents[3] / "data"
 
@@ -79,9 +80,17 @@ def preparar(motor: Engine) -> None:
                 ))
         return
     existentes = set(inspect(motor).get_table_names())
-    faltan = sorted(set(metadata.tables) - existentes)
+    faltan = sorted(set(metadata.tables) - existentes - set(OPCIONALES))
     if faltan:
         raise RuntimeError(
             f"Faltan tablas en la base de datos: {faltan}. "
             "Aplica las migraciones de backend/migraciones/ (python -m app.perfil.persistencia.migrar --destino host:puerto/base)."
         )
+    for tabla in sorted(set(OPCIONALES) - existentes):
+        logging.getLogger("perfil.db").warning(
+            "Falta la tabla opcional %s: su función queda desactivada hasta aplicar las migraciones pendientes", tabla)
+
+
+def tiene_tabla(motor: Engine, tabla: str) -> bool:
+    """Para las tablas OPCIONALES: si una migración posterior aún no se ha aplicado, su función se apaga."""
+    return tabla in set(inspect(motor).get_table_names())

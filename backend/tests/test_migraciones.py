@@ -32,10 +32,10 @@ def test_cada_tabla_y_columna_esta_en_la_migracion(tabla):
 
 
 def test_la_migracion_protege_el_registro_y_activa_rls():
-    for tabla in ("profile_versions", "turns"):
+    for tabla in ("profile_versions", "turns", "session_audio"):
         assert f"before update or delete on {tabla}" in SQL
     assert "before update on personal_versions" in SQL
-    for tabla in ("profile_versions", "turns", "personal_versions"):
+    for tabla in ("profile_versions", "turns", "personal_versions", "session_audio"):
         assert re.search(rf"before truncate on {tabla}\s+for each statement", SQL)
     for tabla in metadata.tables:
         assert f"alter table {tabla} enable row level security" in SQL
@@ -120,7 +120,7 @@ def test_cli_postgres_con_destino_explicito(monkeypatch, capsys):
     destino = seguridad.describir(url)
     argumentos = ["--destino", destino, "--variable", "URL_ENSAYO"]
     assert migrar.main(argumentos) == 0
-    assert "Pendientes: 0001_esquema_inicial.sql" in capsys.readouterr().out
+    assert "Pendientes: 0001_esquema_inicial.sql, 0002_audio_de_sesion.sql" in capsys.readouterr().out
     assert migrar.main([*argumentos, "--aplicar"]) == 0
     assert migrar.main(argumentos) == 0
     assert "No hay migraciones pendientes" in capsys.readouterr().out
@@ -135,11 +135,30 @@ def postgres_vacio():
     motor.dispose()
 
 
+TODAS = ["0001_esquema_inicial.sql", "0002_audio_de_sesion.sql"]
+
+
 def test_postgres_plan_aplicar_y_repetir(postgres_vacio):
-    assert [m.nombre for m in migrar.pendientes(postgres_vacio)] == ["0001_esquema_inicial.sql"]
+    assert [m.nombre for m in migrar.pendientes(postgres_vacio)] == TODAS
     assert "schema_migrations" not in inspect(postgres_vacio).get_table_names()  # el plan no escribe
-    assert migrar.aplicar(postgres_vacio) == ["0001_esquema_inicial.sql"]
+    assert migrar.aplicar(postgres_vacio) == TODAS
     assert migrar.pendientes(postgres_vacio) == [] and migrar.aplicar(postgres_vacio) == []
+
+
+def test_postgres_con_solo_0001_arranca_sin_audio_y_luego_se_actualiza(postgres_vacio, tmp_path):
+    """El caso de Supabase ya desplegado: el backend nuevo arranca antes de aplicar 0002, sin audio."""
+    from app.perfil.almacenes.bd import AlmacenBD
+
+    primera = migrar.listar()[0]
+    (tmp_path / primera.nombre).write_text(primera.sql, encoding="utf-8")
+    assert migrar.aplicar(postgres_vacio, tmp_path) == ["0001_esquema_inicial.sql"]
+    almacen = AlmacenBD(postgres_vacio)
+    db.preparar(postgres_vacio)  # no falla: session_audio es opcional
+    assert almacen.audio_disponible() is False
+    assert [m.nombre for m in migrar.pendientes(postgres_vacio)] == ["0002_audio_de_sesion.sql"]
+    assert migrar.aplicar(postgres_vacio) == ["0002_audio_de_sesion.sql"]
+    inspect(postgres_vacio).clear_cache()
+    assert AlmacenBD(postgres_vacio).audio_disponible() is True
 
 
 def test_postgres_detecta_migracion_editada(postgres_vacio, tmp_path):
