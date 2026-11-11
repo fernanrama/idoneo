@@ -60,14 +60,20 @@
   animation: v-respira 5s ease-in-out infinite;
   transition: box-shadow 0.6s;
 }
-/* Respaldo en CSS por si no hay WebGL: queda debajo de la esfera 3D. */
+/* Respaldo en CSS por si no hay WebGL: queda debajo de la esfera 3D.
+   Safari en iOS no recorta con border-radius + overflow a un hijo animado con filter y blend: se veía
+   un cuadrado. clip-path sí lo recorta. Cuando la esfera 3D ya pinta (data-listo), se funde y se para. */
 .respaldo {
   position: absolute;
   inset: 0;
   border-radius: 50%;
   overflow: hidden;
+  clip-path: circle(50%);
   background: radial-gradient(circle at 34% 28%, #dfe6ff 0, #8e9bff 22%, #6b4ef0 55%, #1a1560 100%);
+  transition: opacity 0.6s;
 }
+.nucleo:has(> .esfera[data-listo]) .respaldo { opacity: 0; }
+.nucleo:has(> .esfera[data-listo]) .respaldo::before { animation-play-state: paused; }
 .respaldo::before {
   content: "";
   position: absolute;
